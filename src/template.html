@@ -1,0 +1,985 @@
+<title>Sổ tay ĐGNL VinUni AI thực chiến</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Literata:opsz,wght@7..72,600;7..72,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sổ tay giáo trình — mục lục dính bên trái, cột đọc ~70ch, công thức tô bút dạ quang */
+:root{
+  --paper:#f6f8fb; --sheet:#ffffff; --ink:#18263a; --ink-2:#46566c; --rule:#dbe2ec;
+  --accent:#1f5fae; --accent-soft:#e6eefa; --marker:#fff1a8; --marker-ink:#4a3d00;
+  --ok:#0d7a4f; --ok-bg:#e3f4ec; --bad:#b3261e; --bad-bg:#fbe9e7; --code-bg:#eef2f7;
+  --nb:#7aa7e0; --th:#3f7fcc; --vd:#1f5fae; --vdc:#123a6b;
+  --f-display:"Literata",Georgia,"Times New Roman",serif;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0f1520; --sheet:#151d2b; --ink:#e4ebf5; --ink-2:#a3b1c4; --rule:#2a3546;
+  --accent:#7fb0f0; --accent-soft:#1b2a40; --marker:#4d4314; --marker-ink:#fff2b8;
+  --ok:#5fd3a0; --ok-bg:#12302a; --bad:#ff8a80; --bad-bg:#3a1a19; --code-bg:#1b2433;
+  --nb:#3b5d88; --th:#5583bf; --vd:#7fb0f0; --vdc:#b9d4f7; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1520; --sheet:#151d2b; --ink:#e4ebf5; --ink-2:#a3b1c4; --rule:#2a3546;
+  --accent:#7fb0f0; --accent-soft:#1b2a40; --marker:#4d4314; --marker-ink:#fff2b8;
+  --ok:#5fd3a0; --ok-bg:#12302a; --bad:#ff8a80; --bad-bg:#3a1a19; --code-bg:#1b2433;
+  --nb:#3b5d88; --th:#5583bf; --vd:#7fb0f0; --vdc:#b9d4f7; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font:16px/1.65 var(--f-body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:20px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:14px;max-height:calc(100vh - 40px);overflow:auto}
+nav.toc b{display:block;font:600 12px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:0 0 10px}
+nav.toc a{display:block;color:var(--ink-2);text-decoration:none;padding:5px 10px;border-left:2px solid var(--rule)}
+nav.toc a.sub{padding-left:22px;font-size:13px}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent);border-left-color:var(--accent);outline:none}
+@media (max-width:900px){nav.toc{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:6px}nav.toc b{width:100%}nav.toc a{border:1px solid var(--rule);border-radius:999px;padding:4px 12px}nav.toc a.sub{display:none}}
+main{min-width:0}
+header.hero{padding-bottom:20px;border-bottom:1px solid var(--rule);margin-bottom:8px}
+.eyebrow{font:600 12px/1 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(30px,5vw,46px)/1.1 var(--f-display);margin:10px 0 12px;text-wrap:balance;letter-spacing:-.01em}
+h2{font:700 clamp(24px,3.4vw,31px)/1.2 var(--f-display);margin:56px 0 6px;text-wrap:balance;scroll-margin-top:16px}
+h3{font:600 20px/1.3 var(--f-display);margin:34px 0 8px;text-wrap:balance;scroll-margin-top:16px}
+h4{font:600 15px/1.4 var(--f-body);margin:20px 0 6px;color:var(--ink)}
+p,li{max-width:70ch}
+.lead{font-size:18px;color:var(--ink-2);max-width:62ch;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:18px;font-size:14px;color:var(--ink-2)}
+.facts span strong{display:block;font:600 22px/1.2 var(--f-display);color:var(--ink);font-variant-numeric:tabular-nums}
+.part-tag{display:inline-block;font:600 12px/1 var(--f-mono);padding:5px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);margin-right:6px;vertical-align:middle}
+.sec-intro{color:var(--ink-2);margin:4px 0 0}
+mark,.f{background:linear-gradient(transparent 8%,var(--marker) 8%,var(--marker) 92%,transparent 92%);color:var(--marker-ink);padding:0 3px;border-radius:2px}
+.f{font-family:var(--f-mono);font-size:.92em;white-space:nowrap}
+.fl{display:grid;gap:6px;padding:0;list-style:none;margin:10px 0}
+.fl li{padding-left:16px;position:relative;max-width:none}
+.fl li::before{content:"";position:absolute;left:2px;top:.72em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.ex{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:14px 18px;margin:14px 0}
+.ex .lbl{font:600 11px/1 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--ok);margin-bottom:6px}
+.ex p{margin:6px 0}
+.trap{border-left:3px solid var(--bad);background:var(--bad-bg);padding:10px 14px;margin:12px 0;border-radius:0 6px 6px 0}
+.trap .lbl{font:600 11px/1 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--bad);margin-bottom:4px}
+.trap p{margin:4px 0}
+.freq{font:500 12px/1 var(--f-mono);color:var(--ink-2);background:var(--code-bg);padding:4px 7px;border-radius:4px;margin-left:6px;white-space:nowrap;vertical-align:middle}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{font:13.5px/1.55 var(--f-mono);background:var(--code-bg);padding:12px 14px;border-radius:6px;overflow-x:auto;margin:8px 0}
+pre code{background:none;padding:0;font-size:inherit}
+.tbl{overflow-x:auto;margin:12px 0;border:1px solid var(--rule);border-radius:8px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;font-size:13px;color:var(--ink-2);background:var(--paper)}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td pre{margin:0;padding:6px 8px;font-size:12.5px}
+.route{counter-reset:r;list-style:none;padding:0;display:grid;gap:10px;margin:14px 0}
+.route li{counter-increment:r;position:relative;padding:12px 16px 12px 52px;background:var(--sheet);border:1px solid var(--rule);border-radius:8px;max-width:none}
+.route li::before{content:counter(r);position:absolute;left:14px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--sheet);font:600 14px/26px var(--f-body);text-align:center}
+.route li b{display:block}
+.bars{display:grid;gap:10px;margin:14px 0}
+.bar-row{display:grid;grid-template-columns:92px minmax(0,1fr) 54px;gap:10px;align-items:center;font-size:14px}
+.bar{display:flex;height:22px;border-radius:4px;overflow:hidden;background:var(--code-bg)}
+.bar i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:var(--c);vertical-align:-1px}
+.cm{display:grid;grid-template-columns:auto 1fr 1fr;gap:4px;max-width:420px;font-size:14px;margin:12px 0}
+.cm div{padding:10px;border-radius:4px;background:var(--code-bg);text-align:center}
+.cm .h{background:none;color:var(--ink-2);font-size:12px}
+.cm .tp{background:var(--ok-bg);color:var(--ok);font-weight:600}
+.cm .fp,.cm .fn{background:var(--bad-bg);color:var(--bad);font-weight:600}
+/* practice */
+.prac-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+.chip{font:500 14px/1 var(--f-body);padding:8px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--sheet)}
+.chip:focus-visible,.opt:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.score{margin-left:auto;font:500 14px/1 var(--f-mono);color:var(--ink-2)}
+.qcard{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:18px 20px;margin:12px 0}
+.qmeta{font:500 12px/1 var(--f-mono);color:var(--ink-2);margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap}
+.qtext{margin:0 0 12px;max-width:none}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;text-align:left;font:15px/1.5 var(--f-body);padding:10px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);cursor:pointer;width:100%}
+.opt b{font-family:var(--f-mono);color:var(--ink-2)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt[disabled]{cursor:default}
+.explain{margin-top:12px;padding:10px 14px;border-radius:6px;background:var(--accent-soft);font-size:15px}
+.explain ul{margin:6px 0;padding-left:20px}
+.btn{font:500 14px/1 var(--f-body);padding:9px 14px;border-radius:6px;border:1px solid var(--accent);background:none;color:var(--accent);cursor:pointer}
+.nav-q{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:8px}
+.note{font-size:14px;color:var(--ink-2)}
+footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--rule);font-size:13.5px;color:var(--ink-2)}
+footer p{max-width:none}
+a{color:var(--accent)}
+@media (prefers-reduced-motion:no-preference){.opt,.chip{transition:background .15s,border-color .15s}}
+/* top bar + views */
+.topbar{position:sticky;top:0;z-index:20;background:var(--sheet);border-bottom:1px solid var(--rule);padding-top:env(safe-area-inset-top,0px)}
+.topbar-in{max-width:1180px;margin:0 auto;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.brand{font:700 17px/1.2 var(--f-display);margin-right:auto}
+.tabs{display:flex;gap:4px;background:var(--code-bg);padding:4px;border-radius:8px}
+.tab{font:600 14px/1 var(--f-body);padding:9px 16px;border:0;border-radius:6px;background:none;color:var(--ink-2);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--sheet);color:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+nav.toc{top:calc(env(safe-area-inset-top,0px) + 76px)}
+h2,h3{scroll-margin-top:84px}
+.xwrap{max-width:980px;margin:0 auto;padding-block:28px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:14px 0}
+.ecard{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ecard h4{margin:0;font:600 16px/1.35 var(--f-body)}
+.ecard .note{margin:0}
+.ecard .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.btn.solid{background:var(--accent);color:var(--sheet)}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn[disabled]{opacity:.5;cursor:default}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;margin:14px 0}
+.panel textarea,.qcard textarea{width:100%;min-height:120px;font:13.5px/1.5 var(--f-mono);padding:10px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink)}
+.msg{font-size:14px;margin:8px 0 0}
+.msg.err{color:var(--bad)}.msg.ok{color:var(--ok)}
+.runbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 58px);z-index:10;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.timer{font:600 18px/1 var(--f-mono);font-variant-numeric:tabular-nums}
+.timer.low{color:var(--bad)}
+.qnav{display:flex;flex-wrap:wrap;gap:4px;margin:12px 0}
+.qnav button{width:34px;height:30px;font:500 12px/1 var(--f-mono);border:1px solid var(--rule);border-radius:4px;background:var(--sheet);color:var(--ink-2);cursor:pointer}
+.qnav button.done{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.qnav button.r{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.qnav button.w{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.qnav button.s{background:var(--marker);color:var(--marker-ink);border-color:var(--marker)}
+.qcard{scroll-margin-top:130px}
+.status{font:600 12px/1 var(--f-body);padding:4px 8px;border-radius:4px}
+.status.r{background:var(--ok-bg);color:var(--ok)}.status.w{background:var(--bad-bg);color:var(--bad)}.status.s{background:var(--marker);color:var(--marker-ink)}
+label.opt{align-items:flex-start}
+label.opt input{margin-top:4px;accent-color:var(--accent)}
+.opt.mine{border-style:dashed}
+.big{font:700 clamp(34px,6vw,52px)/1 var(--f-display);font-variant-numeric:tabular-nums}
+.rub label{display:flex;gap:8px;align-items:flex-start;margin:4px 0}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-radius:8px;background:var(--marker);color:var(--marker-ink)}
+.disclaimer{font-size:13px;color:var(--ink-2)}
+@media (max-width:600px){.topbar{position:static}.runbar{top:env(safe-area-inset-top,0px)}.qcard{scroll-margin-top:110px}}
+</style>
+
+<header class="topbar"><div class="topbar-in">
+  <div class="brand">Sổ tay ĐGNL VinUni AI thực chiến</div>
+  <div class="tabs" role="tablist" aria-label="Chế độ">
+    <button class="tab" role="tab" id="tab-book" aria-selected="true" data-view="book">Sổ tay</button>
+    <button class="tab" role="tab" id="tab-exam" aria-selected="false" data-view="exam">Luyện đề</button>
+  </div>
+</div></header>
+
+<div class="wrap" id="view-book">
+<nav class="toc" aria-label="Mục lục">
+  <b>Mục lục</b>
+  <a href="#de-thi">Đề thi gồm gì</a>
+  <a href="#lo-trinh">Lộ trình cho người mất gốc</a>
+  <a href="#phan-a">A · Toán</a>
+  <a class="sub" href="#a-tile">Tỉ lệ, tiền, chi phí</a>
+  <a class="sub" href="#a-dstt">Đại số tuyến tính</a>
+  <a class="sub" href="#a-gt">Giải tích, tối ưu</a>
+  <a class="sub" href="#a-xs">Xác suất</a>
+  <a class="sub" href="#a-tk">Thống kê, A/B test</a>
+  <a href="#phan-b">B · Lập trình</a>
+  <a class="sub" href="#b-py">Bẫy Python</a>
+  <a class="sub" href="#b-pd">pandas</a>
+  <a class="sub" href="#b-np">NumPy, Big-O</a>
+  <a class="sub" href="#b-sql">SQL</a>
+  <a class="sub" href="#b-se">Kỹ thuật phần mềm</a>
+  <a href="#phan-c">C · AI &amp; sản phẩm</a>
+  <a class="sub" href="#c-ml">ML cơ bản</a>
+  <a class="sub" href="#c-metric">Chỉ số đánh giá</a>
+  <a class="sub" href="#c-llm">LLM</a>
+  <a class="sub" href="#c-rag">RAG</a>
+  <a class="sub" href="#c-agent">Agent</a>
+  <a class="sub" href="#c-ops">MLOps</a>
+  <a class="sub" href="#c-pm">Tư duy sản phẩm</a>
+  <a href="#phan-d">D · Logic &amp; đạo đức</a>
+  <a class="sub" href="#d-logic">Logic, ngụy biện</a>
+  <a class="sub" href="#d-eth">Dữ liệu, công bằng, luật</a>
+  <a class="sub" href="#d-sec">An toàn LLM</a>
+  <a href="#tu-luan">Tự luận &amp; code viết tay</a>
+  <a href="#luyen-de">Luyện đề có chấm điểm</a>
+  <a href="#nguon">Luyện tiếp ở đâu</a>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="eyebrow">Ôn tập ĐGNL · chương trình AI Thực Chiến</div>
+  <h1>Sổ tay ĐGNL VinUni AI thực chiến</h1>
+  <p class="lead">Tổng hợp từ toàn bộ câu hỏi của hai bộ đề luyện công khai. Mỗi phần nêu dạng bài hay gặp, công thức cần thuộc, một ví dụ giải từng bước và các bẫy thường gặp. Đọc theo lộ trình bên dưới, rồi sang tab <a href="#luyen-de">Luyện đề</a> để làm đề có chấm điểm.</p>
+  <p class="disclaimer">Tài liệu cộng đồng, không chính thức, không liên kết với VinUni và không phải đề thi thật.</p>
+  <div class="facts">
+    <span><strong>1.320</strong>câu đã đọc và phân loại</span>
+    <span><strong>4 phần</strong>Toán · Code · AI · Logic</span>
+    <span><strong>60 câu · 90 phút</strong>mỗi đề tổng hợp</span>
+    <span><strong>100 điểm</strong>thi trên giấy, code viết tay</span>
+  </div>
+</header>
+
+<section id="de-thi">
+<h2>Đề thi gồm gì</h2>
+<p class="sec-intro">Số liệu lấy từ 6 đề tổng hợp ĐGNL-01 đến 06 (360 câu) của bộ đề hieubui2409. Bộ AI-TEST có cùng cấu trúc 4 phần nhưng câu dễ hơn nhiều.</p>
+
+<div class="tbl"><table>
+<thead><tr><th>Phần</th><th>Nội dung</th><th class="num">Điểm TB</th><th class="num">Số câu TB</th></tr></thead>
+<tbody>
+<tr><td><span class="part-tag">A</span></td><td>Toán và tư duy định lượng: tỉ lệ, ma trận, đạo hàm, xác suất, thống kê</td><td class="num">≈19</td><td class="num">≈13</td></tr>
+<tr><td><span class="part-tag">B</span></td><td>Python, pandas, NumPy, SQL, Big-O, code review, code viết tay</td><td class="num">≈27</td><td class="num">≈17</td></tr>
+<tr><td><span class="part-tag">C</span></td><td>Học máy, chỉ số đánh giá, LLM, RAG, agent, MLOps, sản phẩm AI, tự luận</td><td class="num">≈37</td><td class="num">≈22</td></tr>
+<tr><td><span class="part-tag">D</span></td><td>Logic mệnh đề, ngụy biện, dữ liệu cá nhân, công bằng, EU AI Act, an toàn LLM</td><td class="num">≈17</td><td class="num">≈9</td></tr>
+</tbody></table></div>
+
+<h4>Mức độ câu hỏi theo từng phần</h4>
+<div class="legend">
+  <span style="--c:var(--nb)">Nhận biết</span><span style="--c:var(--th)">Thông hiểu</span><span style="--c:var(--vd)">Vận dụng</span><span style="--c:var(--vdc)">Vận dụng cao</span>
+</div>
+<div class="bars" id="levelBars"></div>
+<p>Câu <b>nhận biết</b> chỉ chiếm khoảng 18% đề tổng hợp. Phần lớn là câu <b>vận dụng</b>: một tình huống doanh nghiệp (ngân hàng, bệnh viện, sàn TMĐT) kèm số liệu, và bạn phải chọn cách xử lý đúng. Tuy vậy, câu vận dụng nào cũng dựa trên một công thức hoặc định nghĩa nhận biết. Nắm chắc nền tảng thì câu tình huống chỉ còn là đọc kỹ đề.</p>
+
+<h4>Dạng câu hỏi</h4>
+<div class="tbl"><table>
+<thead><tr><th>Dạng</th><th>Cách làm</th><th class="num">Điểm/đề</th></tr></thead>
+<tbody>
+<tr><td>Trắc nghiệm 4 lựa chọn</td><td>Chọn một đáp án đúng nhất, không trừ điểm. Phương án sai thường là "đúng một nửa" hoặc "nghe hợp lý nhưng sai bối cảnh".</td><td class="num">≈75</td></tr>
+<tr><td>Tự luận tình huống</td><td>Mỗi câu 6–10 điểm, chấm theo rubric từng ý. Không được bỏ trống; sai nhưng có lập luận vẫn có điểm thành phần.</td><td class="num">≈18</td></tr>
+<tr><td>Code viết tay</td><td>Viết hàm Python/pandas/SQL trên giấy. Chấm đúng logic và đúng tên hàm/tham số, không chấm từng dấu.</td><td class="num">≈7</td></tr>
+<tr><td>Điền số, đoán output</td><td>Có trong 12 đề chuyên đề: tính ra một con số, hoặc ghi đúng thứ Python in ra.</td><td class="num">—</td></tr>
+</tbody></table></div>
+<p class="note">Không được dùng máy tính cầm tay. Số liệu trong đề được chọn để tính nhẩm, nên hãy luyện tính tay: phân số, căn bậc hai đơn giản, <span class="f">e⁻¹ ≈ 0,368</span>, <span class="f">ln 2 ≈ 0,69</span>.</p>
+</section>
+
+<section id="lo-trinh">
+<h2>Lộ trình cho người mất gốc</h2>
+<p class="sec-intro">Thứ tự này đi từ chỗ dễ lấy điểm nhất. Mỗi bước có link tới mục tương ứng.</p>
+<ol class="route">
+<li><b>Tính nhẩm phần trăm, tỉ lệ, chi phí token</b>Dạng toán lớp 7 nhưng xuất hiện khắp đề, kể cả Phần C và D. Xem <a href="#a-tile">Tỉ lệ, tiền, chi phí</a>.</li>
+<li><b>Precision, recall và bài Bayes "tỉ lệ nền"</b>Hai khái niệm này có mặt trong khoảng 40 câu. Học xong là làm được một mảng lớn của Phần A và C. Xem <a href="#c-metric">Chỉ số đánh giá</a> và <a href="#a-xs">Xác suất</a>.</li>
+<li><b>Logic "nếu… thì…" và phủ định</b>Ít công thức, chỉ có vài quy tắc cố định, học một buổi là xong. Xem <a href="#d-logic">Logic</a>.</li>
+<li><b>Các bẫy Python và pandas</b>Học thuộc khoảng 20 bẫy trong bảng. Câu "đoạn code in ra gì" gần như chỉ xoay quanh chúng. Xem <a href="#b-py">Bẫy Python</a>.</li>
+<li><b>Ma trận, đạo hàm, gradient descent</b>Câu nhận biết của Phần A chủ yếu là tính định thức, trị riêng, đạo hàm và một bước GD. Xem <a href="#a-dstt">Đại số tuyến tính</a>.</li>
+<li><b>RAG, agent và an toàn LLM</b>Phần C và D hỏi rất nhiều về RAG, agent và prompt injection. Học theo "nguyên tắc xử lý" thay vì công thức. Xem <a href="#c-rag">RAG</a>.</li>
+<li><b>Khung trả lời tự luận</b>Luyện viết 7 ý theo khung có sẵn để không mất điểm oan. Xem <a href="#tu-luan">Tự luận</a>.</li>
+</ol>
+</section>
+
+<!-- ============ PHẦN A ============ -->
+<section id="phan-a">
+<h2><span class="part-tag">A</span>Toán và tư duy định lượng</h2>
+<p class="sec-intro">Phần có nhiều câu nhận biết nhất, nên lấy điểm ở đây trước. Mọi câu đều quy về một công thức.</p>
+
+<h3 id="a-tile">Tỉ lệ, tiền, chi phí <span class="freq">≈40 câu có tính chi phí</span></h3>
+<ul class="fl">
+<li>Phần trăm thay đổi: <span class="f">(mới − cũ) / cũ</span>. Luôn chia cho giá <b>cũ</b>.</li>
+<li>Giảm liên tiếp nhân hệ số, không cộng: giảm 30% rồi 10% → <span class="f">0,7 × 0,9 = 0,63</span>, tức giảm 37%.</li>
+<li>Điểm phần trăm khác phần trăm tương đối: 4% xuống 3% là giảm <b>1 điểm %</b>, tức giảm tương đối 25%.</li>
+<li>Trung bình có trọng số: <span class="f">Σ wᵢxᵢ / Σ wᵢ</span>.</li>
+<li>Chia theo tỉ lệ a : b với tổng T: phần a = <span class="f">T · a / (a + b)</span>.</li>
+<li>ROI: <span class="f">(lợi ích − chi phí) / chi phí</span>. Hoàn vốn: <span class="f">chi phí ban đầu / (lợi ích tháng − vận hành tháng)</span>.</li>
+<li>Hòa vốn: <span class="f">chi phí cố định / (giá − chi phí biến đổi)</span>.</li>
+<li>Chi phí LLM: <span class="f">(token_vào × giá_vào + token_ra × giá_ra) / 10⁶ × số request</span>.</li>
+<li>RICE: <span class="f">Reach × Impact × Confidence / Effort</span>.</li>
+</ul>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>Chatbot nhận 100.000 request/tháng. Mỗi request 1.000 token vào và 200 token ra. Giá 0,5 USD/1 triệu token vào, 2 USD/1 triệu token ra. Chi phí tháng?</p>
+<p>Mỗi request: 1.000 × 0,5/10⁶ + 200 × 2/10⁶ = 0,0005 + 0,0004 = 0,0009 USD. Cả tháng: 0,0009 × 100.000 = <b>90 USD</b>.</p>
+</div>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>Tính năng AI tốn 480 triệu xây một lần, vận hành 20 triệu/tháng, mang lại 60 triệu/tháng. Bao lâu hoàn vốn?</p>
+<p>Lãi ròng mỗi tháng 60 − 20 = 40 triệu. 480 / 40 = <b>12 tháng</b>.</p>
+</div>
+<div class="trap"><div class="lbl">Bẫy</div><p>Chia cho giá mới. Cộng hai mức giảm 30% + 10% = 40%. Quên trừ chi phí vận hành khi tính hoàn vốn. Quên rằng cache "hit" cũng có chi phí riêng (hạ tầng cache, embedding).</p></div>
+
+<h3 id="a-dstt">Đại số tuyến tính <span class="freq">CĐ-01</span></h3>
+<ul class="fl">
+<li>Tích vô hướng <span class="f">u·v = Σ uᵢvᵢ</span>. Chuẩn L2 <span class="f">‖v‖ = √Σvᵢ²</span>, chuẩn L1 <span class="f">Σ|vᵢ|</span>.</li>
+<li>Cosine <span class="f">u·v / (‖u‖‖v‖)</span>. Nhân vector với số dương thì cosine giữ nguyên, tích vô hướng thay đổi. Vector đã chuẩn hóa: <span class="f">‖u − v‖² = 2 − 2cos</span>.</li>
+<li>Nhân ma trận: <span class="f">(m×n)·(n×p) = m×p</span>. Phần tử (i, j) = hàng i của A nhân vô hướng với cột j của B. <span class="f">(AB)ᵀ = BᵀAᵀ</span>.</li>
+<li>Định thức 2×2: <span class="f">ad − bc</span>. Bằng 0 thì ma trận không khả nghịch. <span class="f">det(kA) = kⁿ·det A</span> với A cỡ n×n, <span class="f">det Aᵀ = det A</span>.</li>
+<li>Nghịch đảo 2×2: <span class="f">1/(ad−bc) · [[d, −b], [−c, a]]</span>.</li>
+<li>Trị riêng 2×2: nghiệm của <span class="f">λ² − (vết)·λ + det = 0</span>. Tổng trị riêng = vết, tích = định thức. Ma trận tam giác: trị riêng nằm trên đường chéo.</li>
+<li>Kiểm tra vector riêng: tính Av rồi xem có bằng λv không.</li>
+<li>PCA/SVD: tỉ lệ phương sai giữ lại = <span class="f">Σ σᵢ² (top k) / Σ σᵢ²</span>, hay <span class="f">Σ λᵢ (top k) / Σ λᵢ</span> nếu cho trị riêng hiệp phương sai. Giá trị kỳ dị của X = √(trị riêng của XᵀX). Hạng = số σ khác 0.</li>
+<li><code>nn.Linear(vào, ra)</code>: W có shape <span class="f">ra × vào</span>, batch <span class="f">(B, vào) → (B, ra)</span>. LoRA hạng r cho ma trận d×k thêm <span class="f">r·(d + k)</span> tham số.</li>
+</ul>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>Trị riêng của <code>[[5, 2], [2, 2]]</code>? Vết = 7, det = 10 − 4 = 6. Giải λ² − 7λ + 6 = 0 → <b>λ = 1 và λ = 6</b>.</p>
+<p>Giá trị kỳ dị 4, 3, 2, 1; giữ k = 2 thì giữ bao nhiêu phương sai? (16 + 9) / (16 + 9 + 4 + 1) = 25/30 ≈ <b>83%</b>.</p>
+</div>
+<div class="trap"><div class="lbl">Bẫy</div><p>Dùng trực tiếp σ thay vì σ² khi tính phương sai giữ lại. Nhầm thứ tự AB và BA. Quên rằng det(2A) với A 3×3 là 8·det A, không phải 2·det A.</p></div>
+
+<h3 id="a-gt">Giải tích và tối ưu <span class="freq">CĐ-02</span></h3>
+<ul class="fl">
+<li><span class="f">(xⁿ)' = n·xⁿ⁻¹</span>, <span class="f">(eˣ)' = eˣ</span>, <span class="f">(ln x)' = 1/x</span>. Quy tắc chuỗi: <span class="f">[f(g(x))]' = f'(g(x))·g'(x)</span>.</li>
+<li>Sigmoid: <span class="f">σ'(z) = σ(z)(1 − σ(z))</span>, lớn nhất 0,25. Mạng sâu dùng sigmoid nhân nhiều số ≤ 0,25 nên gradient tiêu biến → dùng ReLU, residual, chuẩn hóa.</li>
+<li>Gradient = vector các đạo hàm riêng, chỉ hướng hàm tăng nhanh nhất. Đạo hàm theo hướng v = <span class="f">∇f · v/‖v‖</span>.</li>
+<li>Gradient descent: <span class="f">w ← w − η·∇L(w)</span>.</li>
+<li>Learning rate quá lớn thì loss tăng vọt rồi ra NaN; quá nhỏ thì giảm rất chậm. Với hàm bậc hai, GD hội tụ khi <span class="f">η &lt; 2/λ_max</span> (λ_max là trị riêng lớn nhất của Hessian).</li>
+<li>Loss zig-zag theo một trục → momentum hoặc Adam. Adam chia bias correction cho <span class="f">1 − βᵗ</span> để bù lệch về 0 ở các bước đầu.</li>
+<li>Softmax: <span class="f">pᵢ = e^zᵢ / Σ e^z</span>. Logits dạng ln thì dễ: (ln 3, 0, ln 2) → (3, 1, 2)/6. Temperature T chia logits cho T: T tăng thì phân phối phẳng hơn.</li>
+<li>Cross-entropy = <span class="f">−ln(p của lớp đúng)</span>. Gradient của softmax + CE theo logits = <span class="f">p − y</span>.</li>
+<li>Điểm dừng có Hessian với trị riêng trái dấu là điểm yên ngựa.</li>
+</ul>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>Mô hình ŷ = w·x, loss L = (wx − y)². Mẫu x = 2, y = 5, w = 1, η = 0,1. Sau một bước GD, w bằng bao nhiêu?</p>
+<p>dL/dw = 2(wx − y)·x = 2(2 − 5)·2 = −12. w mới = 1 − 0,1·(−12) = <b>2,2</b>.</p>
+</div>
+<div class="trap"><div class="lbl">Bẫy</div><p>Quên nhân đạo hàm của hàm bên trong (thiếu hệ số 3 trong (3x−1)²). Cộng gradient thay vì trừ.</p></div>
+
+<h3 id="a-xs">Xác suất <span class="freq">≈10 câu Bayes, CĐ-03</span></h3>
+<ul class="fl">
+<li><span class="f">P(A|B) = P(A∩B) / P(B)</span>. <span class="f">P(A∪B) = P(A) + P(B) − P(A∩B)</span>.</li>
+<li>Độc lập: <span class="f">P(A∩B) = P(A)·P(B)</span>. Hai biến cố xung khắc (có xác suất dương) thì <b>không</b> độc lập.</li>
+<li>Ít nhất một lần xảy ra trong n lần độc lập: <span class="f">1 − (1 − p)ⁿ</span>. Mọi bước đều thành công: <span class="f">pⁿ</span>.</li>
+<li>Kỳ vọng <span class="f">E[X] = Σ x·p(x)</span>, phương sai <span class="f">Var = E[X²] − E[X]²</span>. <span class="f">E[aX+b] = aE[X]+b</span>, <span class="f">Var(aX+b) = a²Var(X)</span>.</li>
+<li>Biến độc lập: phương sai cộng được, độ lệch chuẩn thì không. Độ lệch chuẩn 3, 4, 12 → tổng có độ lệch chuẩn <span class="f">√(9+16+144) = 13</span>.</li>
+<li>Nhị thức: <span class="f">C(n,k)·pᵏ(1−p)ⁿ⁻ᵏ</span>, kỳ vọng np, phương sai np(1−p). Tổ hợp <span class="f">C(n,k) = n! / (k!(n−k)!)</span>.</li>
+<li>Poisson λ: <span class="f">P(k) = e^−λ·λᵏ/k!</span>, kỳ vọng = phương sai = λ. Đổi khung thời gian thì đổi λ theo tỉ lệ: 6 lỗi/giờ = 1 lỗi/10 phút.</li>
+<li>Phân phối chuẩn: quy tắc 68–95–99,7. <span class="f">z = (x − μ)/σ</span>. P95 = <span class="f">μ + 1,645σ</span>.</li>
+</ul>
+<h4>Dạng "tỉ lệ nền" (Bayes): gặp ở cả Phần A, C và D</h4>
+<p>Đề cho: tỉ lệ thật sự dương (tỉ lệ bệnh, gian lận, bot), độ nhạy (bắt được bao nhiêu % ca dương) và tỉ lệ báo nhầm. Hỏi: khi bị báo dương, xác suất là dương thật bao nhiêu? Cách nhanh nhất là <b>tưởng tượng 10.000 người</b> rồi đếm.</p>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>1% giao dịch là gian lận. Mô hình bắt 90% gian lận và báo nhầm 5% giao dịch hợp lệ. Một giao dịch bị cảnh báo, xác suất nó gian lận thật?</p>
+<p>10.000 giao dịch → 100 gian lận, bắt được 90. 9.900 hợp lệ, báo nhầm 5% = 495. Tổng bị cảnh báo 585. Xác suất = 90/585 ≈ <b>15%</b>.</p>
+<p>Ý nghĩa: tỉ lệ nền càng thấp thì precision càng thấp, dù AUC cao. Vì vậy các câu tình huống thường chọn đáp án "chưa nên tự động chặn, chuyển người duyệt".</p>
+</div>
+<div class="trap"><div class="lbl">Bẫy</div><p>Lấy luôn độ nhạy 90% làm đáp án. Coi "xung khắc" là "độc lập". Cộng độ lệch chuẩn thay vì cộng phương sai.</p></div>
+
+<h3 id="a-tk">Thống kê và A/B test <span class="freq">≈34 câu, CĐ-04</span></h3>
+<ul class="fl">
+<li>Trung vị bền với ngoại lai, trung bình bị kéo lệch. Dữ liệu lệch (độ trễ, tiền bồi thường) thì báo trung vị và phân vị.</li>
+<li>p95 = 820 ms nghĩa là khoảng 95% request xong trong tối đa 820 ms, 5% còn lại chậm hơn.</li>
+<li>Phương sai mẫu chia cho <span class="f">n − 1</span>. Trong pandas, <code>.var()</code> và <code>.std()</code> mặc định ddof = 1; NumPy <code>np.var</code> mặc định ddof = 0.</li>
+<li>Sai số chuẩn của trung bình <span class="f">s/√n</span>: tăng n gấp 4 thì SE giảm một nửa. SE của tỉ lệ: <span class="f">√(p(1−p)/n)</span>.</li>
+<li>Khoảng tin cậy 95% = <span class="f">ước lượng ± 1,96·SE</span>. Chứa 0 thì chưa kết luận được. CI 99% rộng hơn 2,576/1,96 ≈ 1,31 lần.</li>
+<li>p-value là xác suất thấy kết quả cực đoan như vậy <b>nếu H₀ đúng</b>, không phải xác suất H₀ đúng.</li>
+<li>Sai lầm loại I = dương tính giả (khống chế bởi α). Loại II = âm tính giả. Power = 1 − xác suất loại II.</li>
+<li>Cỡ mẫu tỉ lệ với <span class="f">1/MDE²</span>: muốn phát hiện hiệu ứng nhỏ bằng một nửa thì cần gấp 4 lần mẫu. Công thức nhanh cho α = 5%, power 80%: <span class="f">n/nhóm ≈ 16·p(1−p)/δ²</span>.</li>
+<li>Kiểm định 20 chỉ số, mỗi chỉ số ở mức 0,05: xác suất ít nhất một dương tính giả = <span class="f">1 − 0,95²⁰ ≈ 64%</span>. Hiệu chỉnh Bonferroni dùng α/k, Holm thì dùng α/k, α/(k−1)… lần lượt.</li>
+<li>Xem p-value mỗi ngày rồi dừng khi p &lt; 0,05 (peeking) làm tăng dương tính giả. Phải chốt cỡ mẫu trước.</li>
+<li>SRM: chia 50/50 mà ra lệch (ví dụ 50.600 / 49.400) thì kiểm định chi-bình phương. Lệch có ý nghĩa thì không tin kết quả.</li>
+<li>Kiểm định z hai tỉ lệ: <span class="f">z = (p_B − p_A) / SE</span>, |z| &gt; 1,96 thì có ý nghĩa ở mức 5%.</li>
+<li>Còn hay hỏi: nghịch lý Simpson (gộp nhóm đảo chiều kết quả), biến gây nhiễu (người tự bật tính năng vốn đã khác), guardrail metric (độ trễ, lỗi, khiếu nại), novelty effect (hiệu ứng giảm dần theo tuần).</li>
+</ul>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>A: 400/8.000 = 5,0%. B: 480/8.000 = 6,0%. Có ý nghĩa không?</p>
+<p>Tỉ lệ gộp p = 880/16.000 = 5,5%. SE = √(0,055 × 0,945 × (1/8.000 + 1/8.000)) ≈ 0,0036. z = 0,01/0,0036 ≈ <b>2,8 &gt; 1,96</b> → có ý nghĩa.</p>
+</div>
+<div class="trap"><div class="lbl">Bẫy</div><p>"p = 0,03 nghĩa là 97% B tốt hơn": sai. "Không có ý nghĩa thống kê nghĩa là không có tác động": sai, có thể do thiếu mẫu. Thấy một phân khúc trong 14 phân khúc có p &lt; 0,05 rồi kết luận: đó là p-hacking.</p></div>
+</section>
+
+<!-- ============ PHẦN B ============ -->
+<section id="phan-b">
+<h2><span class="part-tag">B</span>Lập trình và xử lý dữ liệu</h2>
+<p class="sec-intro">Dạng chính: "đoạn code in ra gì", "chọn biểu thức đúng", "độ phức tạp là gì" và code viết tay. Các câu đoán output gần như luôn xoay quanh những bẫy dưới đây.</p>
+
+<h3 id="b-py">Bẫy Python <span class="freq">CĐ-05</span></h3>
+<div class="tbl"><table>
+<thead><tr><th>Code</th><th>Kết quả</th><th>Vì sao</th></tr></thead>
+<tbody>
+<tr><td><pre>a = [1,2,3,4,5,6]
+a[1:5:2]</pre></td><td><code>[2, 4]</code></td><td>[đầu:cuối:bước], không lấy phần tử ở vị trí "cuối". <code>a[::-1]</code> đảo ngược.</td></tr>
+<tr><td><pre>def f(x, ds=[]):
+    ds.append(x); return ds
+f(1); f(2)</pre></td><td><code>[1, 2]</code></td><td>Giá trị mặc định tạo một lần khi định nghĩa hàm. Sửa: <code>ds=None</code> rồi tạo list mới bên trong.</td></tr>
+<tr><td><pre>g = [[0]*2]*3
+g[0][0] = 9</pre></td><td><code>[[9,0],[9,0],[9,0]]</code></td><td>Ba hàng là cùng một list. Sửa: <code>[[0]*2 for _ in range(3)]</code>.</td></tr>
+<tr><td><pre>b = a; b.append(7)
+c = a[:]; c.append(8)</pre></td><td>a có 7, không có 8</td><td><code>b = a</code> chỉ là tên khác. <code>a[:]</code> và <code>.copy()</code> là bản sao nông: list lồng bên trong vẫn dùng chung, cần <code>copy.deepcopy</code>.</td></tr>
+<tr><td><pre>7 // 2, -7 // 2, -7 % 3</pre></td><td><code>3 -4 2</code></td><td><code>//</code> làm tròn xuống (về âm vô cùng), không phải cắt bỏ phần lẻ.</td></tr>
+<tr><td><pre>" a  b ".split()
+" a  b ".split(" ")
+"a,,b".split(",")</pre></td><td><code>['a','b']</code><br><code>['','a','','b','']</code><br><code>['a','','b']</code></td><td>Không tham số thì gộp mọi khoảng trắng và bỏ chuỗi rỗng. Có tham số thì tách đúng từng ký tự.</td></tr>
+<tr><td><pre>d = {"a": 1}
+d.get("b"), d.get("b", 0)
+d["b"]</pre></td><td><code>None 0</code><br><code>KeyError</code></td><td><code>get</code> không ném lỗi, mặc định trả None.</td></tr>
+<tr><td><pre>g = (x for x in [1,2,3])
+sum(g), sum(g)</pre></td><td><code>6 0</code></td><td>Generator chỉ duyệt được một lần.</td></tr>
+<tr><td><pre>fs = [lambda: i for i in range(3)]
+[f() for f in fs]</pre></td><td><code>[2, 2, 2]</code></td><td>Lambda đọc i lúc được gọi. Sửa: <code>lambda i=i: i</code>.</td></tr>
+<tr><td><pre>t = 5
+def f(x=t): return x
+t = 30; f()</pre></td><td><code>5</code></td><td>Giá trị mặc định chốt tại lúc <code>def</code>.</td></tr>
+<tr><td><pre>d = dict.fromkeys(["x","y"], [])
+d["x"].append(1)</pre></td><td><code>{'x':[1],'y':[1]}</code></td><td>Mọi khóa dùng chung một list.</td></tr>
+<tr><td><pre>class C: items = []
+a, b = C(), C()
+a.items.append(1)</pre></td><td><code>b.items == [1]</code></td><td>Thuộc tính lớp dùng chung giữa các instance. Tạo list trong <code>__init__</code>.</td></tr>
+<tr><td><pre>@dataclass
+class J: tags: list = []</pre></td><td><code>ValueError</code></td><td>Dataclass cấm mặc định là đối tượng thay đổi được. Dùng <code>field(default_factory=list)</code>.</td></tr>
+<tr><td><pre>t = ([1], 2)
+t[0] += [3]</pre></td><td><code>TypeError</code>, nhưng t thành <code>([1,3], 2)</code></td><td><code>+=</code> sửa list trước, rồi mới gán lại vào tuple và báo lỗi.</td></tr>
+<tr><td><pre>def f():
+    try: return "a"
+    finally: print("b")</pre></td><td>in <code>b</code> trước, rồi trả <code>"a"</code></td><td><code>finally</code> luôn chạy trước khi hàm thực sự trả về.</td></tr>
+<tr><td><pre>f"{1234567:,} {0.0456:.1%}"</pre></td><td><code>1,234,567 4.6%</code></td><td><code>,</code> chèn dấu phân cách nghìn, <code>.1%</code> nhân 100 và giữ 1 chữ số thập phân.</td></tr>
+<tr><td><pre>sorted(["cam","Tao","bo"])</pre></td><td><code>['Tao','bo','cam']</code></td><td>Chữ hoa đứng trước chữ thường (theo mã ASCII). Sắp xếp ổn định: các phần tử bằng nhau giữ thứ tự cũ.</td></tr>
+<tr><td><pre>{**a, **b}   # hoặc a | b</pre></td><td>khóa trùng lấy giá trị của b</td><td>Bên phải ghi đè bên trái.</td></tr>
+<tr><td><pre>re.match(r"\d+", "id=42")
+re.search(r"\d+", "id=42")</pre></td><td><code>None</code>, khớp <code>42</code></td><td><code>match</code> chỉ khớp từ đầu chuỗi. <code>.*</code> tham lam, lấy dài nhất có thể. <code>?</code> là ký tự đặc biệt, muốn khớp chữ ? phải viết <code>\?</code>. <code>findall</code> có nhóm thì trả về list tuple.</td></tr>
+</tbody></table></div>
+<p>Kiểu bất biến (dùng được làm khóa dict): <code>int, float, str, tuple, frozenset, bool</code>. Kiểu thay đổi được: <code>list, dict, set</code>.</p>
+
+<h3 id="b-pd">pandas <span class="freq">≈35 câu groupby/merge, CĐ-06</span></h3>
+<ul class="fl">
+<li>Lọc nhiều điều kiện: <code>df[(df.gia &gt; 1000) &amp; (df.tinh == "HN")]</code>. Dùng <code>&amp; | ~</code> và phải có ngoặc; <code>and</code>/<code>or</code> sẽ báo lỗi. Lọc theo danh sách: <code>isin([404, 500])</code>. Dùng biến trong query: <code>df.query("tp == @ks")</code>.</li>
+<li><code>loc</code> theo <b>nhãn</b> và lấy cả điểm cuối; <code>iloc</code> theo <b>vị trí</b> và không lấy điểm cuối. Index không bắt đầu từ 0 là bẫy kinh điển.</li>
+<li><code>groupby(...).size()</code> đếm cả dòng có NaN; <code>.count()</code> bỏ NaN. <code>.transform("sum")</code> trả về Series dài bằng bảng gốc; <code>.agg</code> thu gọn còn mỗi nhóm một dòng. groupby mặc định bỏ các dòng có khóa NaN.</li>
+<li>NaN: <code>s == np.nan</code> luôn False, phải dùng <code>isna()</code>. <code>mean()</code> tự bỏ NaN. <code>fillna(0)</code> làm trung bình thấp sai. <code>value_counts()</code> mặc định bỏ NaN. Cột có NaN không ép được sang <code>int</code>, dùng <code>"Int64"</code>.</li>
+<li>merge: <code>how="left"</code> giữ đủ dòng bảng trái. Khóa bên phải bị trùng → số dòng bị nhân lên; phòng bằng <code>validate="m:1"</code>. Cột trùng tên → thêm hậu tố <code>_x</code>, <code>_y</code>. Khóa khác kiểu (int và str) → báo lỗi. Dùng inner join khi tính tỉ lệ chuyển đổi sẽ làm mất mẫu số.</li>
+<li><code>concat</code> giữ index cũ (0,1,2,0,1); cần <code>ignore_index=True</code>.</li>
+<li>Sắp xếp chuỗi số: <code>"100" &lt; "9"</code>. Ép kiểu số hoặc dùng <code>to_datetime(format=...)</code> trước khi sắp.</li>
+<li>Giữ bản ghi mới nhất: <code>sort_values("ts").drop_duplicates("id", keep="last")</code>.</li>
+<li>Vector hóa: <code>df.a * df.b</code> thay cho <code>apply(lambda r: ...)</code>. Câu hỏi về hiệu năng luôn chọn đáp án vector hóa.</li>
+<li><code>pivot</code> báo lỗi nếu một cặp khóa xuất hiện hai lần; <code>pivot_table</code> thì gộp lại được.</li>
+</ul>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<pre><code>s = pd.Series([10, None, 30, None])
+s.mean(), s.fillna(0).mean(), s.isna().sum()</code></pre>
+<p>Kết quả <b>20.0, 10.0, 2</b>. Trung bình bỏ NaN (40/2); điền 0 rồi tính thì thành 40/4.</p>
+</div>
+
+<h3 id="b-np">NumPy và độ phức tạp <span class="freq">CĐ-07</span></h3>
+<ul class="fl">
+<li><code>shape</code>, <code>ndim</code> (số chiều), <code>size</code> (tổng số phần tử). <code>a.sum(axis=0)</code> gộp theo hàng, kết quả còn một giá trị cho mỗi cột. Mẹo: axis nào được ghi thì chiều đó biến mất.</li>
+<li>Broadcasting: so shape từ phải sang trái, mỗi cặp chiều phải bằng nhau hoặc một bên bằng 1. <span class="f">(3,1) + (4,) → (3,4)</span>. <span class="f">(2,3) − (2,)</span> báo lỗi, sửa bằng <code>keepdims=True</code> hoặc <code>[:, None]</code>.</li>
+<li>Slice là <b>view</b>: sửa slice thì mảng gốc đổi theo. Fancy indexing (<code>a[[0,2]]</code>) và mask tạo <b>bản sao</b>.</li>
+<li>Chuẩn hóa từng hàng: <code>E / np.linalg.norm(E, axis=1, keepdims=True)</code>. Dùng axis=0 là sai.</li>
+<li>Đếm và tỉ lệ: <code>(x &gt; 0.8).sum()</code>, <code>(x &gt;= 400).mean()</code>. <code>np.vectorize</code> không nhanh hơn vòng lặp.</li>
+<li>Bộ nhớ = số phần tử × byte: float32 4 byte, float64 8 byte. 500.000 × 768 × 4 ≈ 1,54 GB.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Đoạn code / thao tác</th><th>Độ phức tạp</th></tr></thead>
+<tbody>
+<tr><td>Hai vòng lồng nhau n × n, kể cả <code>for j in range(i)</code></td><td>O(n²)</td></tr>
+<tr><td>Vòng lặp chia đôi (<code>i //= 2</code>), tìm kiếm nhị phân</td><td>O(log n). log₂(10⁶) ≈ 20</td></tr>
+<tr><td>Vòng chia đôi bọc vòng n; hoặc <code>for j in range(0, n, i)</code></td><td>O(n log n)</td></tr>
+<tr><td><code>x in list</code>, <code>list.pop(0)</code>, <code>insert(0, x)</code></td><td>O(n). Dùng set/dict (O(1) trung bình) hoặc deque</td></tr>
+<tr><td>Đệ quy <code>f(n-1) + f(n-1)</code></td><td>O(2ⁿ)</td></tr>
+<tr><td>Đệ quy mỗi lần cắt <code>a[1:]</code></td><td>O(n²), vì mỗi lần cắt tốn O(n)</td></tr>
+<tr><td><code>heapq.nlargest(k, xs)</code> / sắp xếp</td><td>O(n log k) / O(n log n)</td></tr>
+<tr><td>T(n) = 4n log n + 0,5n^1,5 + 200</td><td>Giữ hạng tử lớn nhất: O(n^1,5)</td></tr>
+<tr><td>Mảng động gấp đôi dung lượng khi đầy</td><td>Append O(1) trung bình (khấu hao)</td></tr>
+</tbody></table></div>
+
+<h3 id="b-sql">SQL <span class="freq">≈18 câu về NULL, CĐ-08</span></h3>
+<ul class="fl">
+<li>Thứ tự xử lý logic: <span class="f">FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT</span>. Vì vậy điều kiện trên hàm gộp (<code>SUM(amount) &gt; 250</code>) phải đặt trong HAVING.</li>
+<li>NULL: <code>= NULL</code> không bao giờ đúng, dùng <code>IS NULL</code>. <code>status &lt;&gt; 'closed'</code> loại luôn các dòng NULL. <code>COUNT(*)</code> đếm mọi dòng, <code>COUNT(col)</code> bỏ NULL. SUM trên 0 dòng trả NULL (dùng COALESCE). <code>NOT IN</code> với danh sách có NULL trả 0 dòng, nên dùng <code>NOT EXISTS</code>.</li>
+<li>LEFT JOIN mà đặt điều kiện của bảng phải trong WHERE thì thành INNER JOIN. Muốn giữ đủ bảng trái thì đưa điều kiện vào ON.</li>
+<li>CROSS JOIN 3 dòng × 4 dòng = 12 dòng. Join khóa trùng thì nhân dòng, tổng tiền bị đếm hai lần.</li>
+<li>Window function giữ nguyên số dòng. Với điểm 90, 85, 85, 80: <code>ROW_NUMBER</code> 1,2,3,4; <code>RANK</code> 1,2,2,4; <code>DENSE_RANK</code> 1,2,2,3. Tổng lũy kế bị trùng giá trị khi ORDER BY có giá trị hòa, thêm cột phụ để phá hòa.</li>
+<li>Chia hai số nguyên: <code>1/7 = 0</code>. Nhân 1.0 trước.</li>
+<li>PostgreSQL bắt mọi cột trong SELECT phải nằm trong GROUP BY hoặc hàm gộp (SQLite thì không bắt).</li>
+<li>Index ghép (a, b) phát huy tốt nhất khi điều kiện lọc có cột đầu a. <code>EXPLAIN ANALYZE</code> chạy thật câu lệnh, <code>EXPLAIN</code> chỉ in kế hoạch.</li>
+</ul>
+
+<h3 id="b-se">Kỹ thuật phần mềm <span class="freq">code review, test, hệ thống</span></h3>
+<ul class="fl">
+<li>Code review: phải chặn lỗi đúng sai và bảo mật (SQL ghép chuỗi, thiếu test). Góp ý tên biến ghi là "Nit:" và vẫn approve. PR quá lớn thì đề nghị tách đổi tên, refactor và tính năng mới.</li>
+<li>Test chập chờn (flaky): hàm gọi <code>datetime.now()</code> → truyền thời điểm vào làm tham số. Dùng <code>sleep(2)</code> → thay bằng chờ có điều kiện. Kim tự tháp test: nhiều unit test, ít E2E. Câu SQL ghi vào DB thật cần integration test. Hai team dùng chung API cần contract test. Viết test tại giá trị biên.</li>
+<li>Idempotency: thanh toán, hoàn tiền, chuyển tiền phải kèm khóa idempotency; job chạy lại dùng upsert theo khóa.</li>
+<li>Retry: exponential backoff + jitter, giới hạn số lần, chỉ retry lỗi tạm thời; kèm circuit breaker và fallback.</li>
+<li>Cache-aside: đọc cache → miss thì đọc DB → ghi vào cache. Chống stampede bằng single-flight. Khóa cache phải gồm phiên bản prompt, model, chỉ mục và nhóm quyền.</li>
+<li>Rate limit dùng token bucket. Đỉnh tải dùng hàng đợi. Bước khách chờ (thanh toán) chạy đồng bộ; email, cộng điểm đẩy vào hàng đợi. Read replica có độ trễ, đọc ngay sau khi ghi phải về DB chính.</li>
+<li><code>hash()</code> của chuỗi trong Python đổi giữa các tiến trình, nên chia nhóm A/B phải dùng <code>hashlib</code>.</li>
+</ul>
+</section>
+
+<!-- ============ PHẦN C ============ -->
+<section id="phan-c">
+<h2><span class="part-tag">C</span>Kiến thức AI và tư duy sản phẩm</h2>
+<p class="sec-intro">Phần nhiều điểm nhất (≈37). Phần lớn là tình huống: đề mô tả sự cố, bạn chọn chẩn đoán và cách sửa. Đáp án đúng thường là đáp án <b>đo trước rồi mới sửa đúng chỗ</b>, không phải "đổi model to hơn".</p>
+
+<h3 id="c-ml">Học máy cơ bản <span class="freq">≈11 câu rò rỉ dữ liệu, CĐ-09</span></h3>
+<ul class="fl">
+<li>Có nhãn → <b>có giám sát</b>: nhãn rời rạc là phân loại, số thực là hồi quy. Không nhãn, gom nhóm → <b>phân cụm</b>. Học qua phần thưởng → <b>học tăng cường</b>.</li>
+<li>Train để học, validation để chọn siêu tham số và mô hình, test để đánh giá lần cuối và chỉ dùng một lần.</li>
+<li>Chẩn đoán: train tốt, validation kém → <b>overfitting</b> (variance cao) → regularization, thêm dữ liệu, giảm độ phức tạp, early stopping. Cả train lẫn validation kém so với người → <b>underfitting</b> (bias cao) → dùng mô hình mạnh hơn.</li>
+<li>L1 (Lasso) đẩy nhiều trọng số về đúng 0, nên dùng để chọn đặc trưng. L2 (Ridge) co trọng số nhỏ lại và ổn định khi các biến tương quan mạnh.</li>
+<li>k-fold: huấn luyện k lần, mỗi lần trên (k−1)/k dữ liệu. Lớp mất cân bằng dùng stratified k-fold. Dữ liệu theo thời gian thì chia theo thời gian.</li>
+<li><b>Rò rỉ dữ liệu</b>: fit scaler, chọn đặc trưng hay oversample <i>trước</i> khi chia; trộn ngẫu nhiên dữ liệu thời gian; dùng đặc trưng chỉ biết sau thời điểm dự đoán (ngày cập nhật trạng thái hủy); cùng một sản phẩm hay khách hàng nằm ở cả train và test (dùng GroupKFold); target encoding không làm out-of-fold. Dấu hiệu chung: điểm offline cao bất thường, chạy thật thì tụt.</li>
+<li>kNN cần chuẩn hóa thang đo. Biến danh mục không thứ tự thì one-hot, không mã hóa 0/1/2.</li>
+<li>Random forest giảm variance của cây sâu. Hệ số β trong logistic: odds nhân với <span class="f">e^β</span> (β = −0,69 → odds giảm một nửa).</li>
+</ul>
+
+<h3 id="c-metric">Chỉ số đánh giá <span class="freq">≈30 câu precision/recall</span></h3>
+<div class="cm" aria-label="Ma trận nhầm lẫn">
+  <div class="h"></div><div class="h">Dự đoán dương</div><div class="h">Dự đoán âm</div>
+  <div class="h">Thật dương</div><div class="tp">TP</div><div class="fn">FN (bỏ sót)</div>
+  <div class="h">Thật âm</div><div class="fp">FP (báo nhầm)</div><div>TN</div>
+</div>
+<ul class="fl">
+<li>Precision <span class="f">TP/(TP+FP)</span>: trong số bị gắn cờ, bao nhiêu là đúng.</li>
+<li>Recall <span class="f">TP/(TP+FN)</span>: trong số thật sự dương, bắt được bao nhiêu.</li>
+<li>F1 <span class="f">2PR/(P+R)</span>. Accuracy đánh lừa khi lớp mất cân bằng: luôn đoán "không vỡ nợ" với 2% vỡ nợ cho accuracy 98% nhưng recall 0%.</li>
+<li>Chọn chỉ số theo cái giá của lỗi: bỏ sót nguy hiểm (ung thư, gian lận lớn) → ưu tiên <b>recall</b>; báo nhầm tốn kém (tự khóa tài khoản, lọc spam mất email tốt) → ưu tiên <b>precision</b>.</li>
+<li>Hạ ngưỡng quyết định thì recall tăng, precision giảm, số cảnh báo tăng.</li>
+<li>Ngưỡng theo chi phí: tổng = <span class="f">FP × c_FP + FN × c_FN</span>. Ngưỡng lý thuyết trên xác suất đã hiệu chỉnh: <span class="f">p* = c_FP/(c_FP + c_FN)</span>.</li>
+<li>ROC-AUC là xác suất mô hình chấm một mẫu dương ngẫu nhiên cao hơn một mẫu âm ngẫu nhiên. AUC cao vẫn có thể cho precision thấp khi tỉ lệ nền nhỏ (xem dạng Bayes).</li>
+<li>Hồi quy: MAE = trung bình |sai số|, RMSE = √(trung bình sai số²), luôn RMSE ≥ MAE vì phạt nặng lỗi lớn.</li>
+<li><code>class_weight="balanced"</code>: trọng số lớp = <span class="f">n_mẫu / (số_lớp × n_lớp_đó)</span>.</li>
+</ul>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>1.000 học viên, 50 người thật sự bỏ học. Hệ thống gắn cờ 80 người, đúng 40.</p>
+<p>Precision = 40/80 = <b>50%</b>. Recall = 40/50 = <b>80%</b>. F1 = 2 × 0,5 × 0,8 / 1,3 ≈ <b>0,62</b>.</p>
+</div>
+
+<h3 id="c-llm">LLM <span class="freq">CĐ-10, ≈32 câu độ trễ</span></h3>
+<ul class="fl">
+<li>Token và tokenizer BPE (gộp dần các cặp ký tự hay gặp). Context window là lượng token mô hình xử lý trong một lượt. Hallucination là câu trả lời nghe hợp lý nhưng sai; xử lý bằng RAG có trích dẫn và cho phép từ chối khi thiếu căn cứ.</li>
+<li>Temperature thấp (0–0,2) cho trích xuất và JSON; cao (0,7–1) cho viết sáng tạo.</li>
+<li><code>max_tokens</code> quá nhỏ thì phản hồi bị cắt (<code>finish_reason = "length"</code>) và JSON hỏng. Đầu ra có cấu trúc: dùng JSON Schema, validate, sai thì retry kèm thông báo lỗi.</li>
+<li>Self-attention: <span class="f">softmax(QKᵀ/√d_k)·V</span>. Chia √d_k để softmax không bão hòa. Chi phí tăng theo n²: ngữ cảnh dài gấp 4 thì tốn gấp 16. Bỏ positional encoding thì mô hình không phân biệt được thứ tự từ.</li>
+<li>TTFT (thời gian tới token đầu) tăng theo độ dài prompt. Tổng thời gian ≈ <span class="f">TTFT + số_token_ra / tốc_độ_sinh</span>. Streaming chỉ làm người dùng thấy chữ sớm hơn, không làm xong nhanh hơn.</li>
+<li>Bộ nhớ trọng số = <span class="f">số tham số × byte/tham số</span>: FP16 2 byte, INT8 1 byte, INT4 0,5 byte. Model 7B ở INT4 ≈ 3,5 GB, chưa tính KV cache.</li>
+<li>Lượng tử hóa làm model nhẹ và nhanh hơn nhưng có thể giảm chất lượng, nhất là ở lớp hiếm, nên phải đo lại trên golden set.</li>
+<li>Cache: exact-match an toàn nhưng ít trúng; semantic cache có thể "trúng sai" khi hai câu gần chữ mà ý ngược nhau; prompt caching đặt phần cố định ở đầu prompt.</li>
+<li>Ghim phiên bản model (không dùng alias "latest"). Định tuyến câu dễ sang model nhỏ, câu khó sang model lớn.</li>
+<li>Kiến thức hay thay đổi, cần trích dẫn → <b>RAG</b>. Muốn model học phong cách hay định dạng lặp lại → <b>fine-tune</b>.</li>
+</ul>
+
+<h3 id="c-rag">RAG <span class="freq">≈42 câu</span></h3>
+<p><b>Pipeline:</b> làm sạch → cắt chunk theo cấu trúc (điều, khoản, mục), overlap 10–20% → embedding → chỉ mục (HNSW là chỉ mục tìm láng giềng gần đúng dạng đồ thị) → truy xuất hybrid BM25 + vector, có lọc metadata (năm, quyền, tenant) → rerank bằng cross-encoder → sinh câu trả lời có trích dẫn → đánh giá.</p>
+<ul class="fl">
+<li>BM25 khớp chính xác mã và từ hiếm ("lỗi E-4021"); vector bắt được câu cùng nghĩa khác chữ. Gộp hai bộ bằng RRF: <span class="f">điểm = Σ 1/(k + hạng)</span>, không cộng điểm thô khác thang.</li>
+<li>Reranker chỉ sắp lại các ứng viên đã có, không cứu được đoạn nằm ngoài top-N ban đầu.</li>
+<li>Đổi embedding model thì phải index lại toàn bộ. Cập nhật tài liệu thì xóa vector của phiên bản cũ.</li>
+<li>Chỉ số truy xuất: <span class="f">recall@k = số đoạn liên quan trong top-k / tổng số đoạn liên quan</span>; <span class="f">precision@k = số liên quan trong top-k / k</span>; MRR là trung bình 1/(hạng của đoạn đúng đầu tiên); nDCG có tính mức độ liên quan và vị trí.</li>
+<li>Chỉ số sinh: <b>faithfulness</b> = số nhận định suy ra được từ ngữ cảnh / tổng số nhận định; <b>answer relevance</b> = trả lời có đúng câu hỏi không; context precision và context recall.</li>
+<li>Chẩn đoán: context recall thấp → sửa truy xuất (chunk, hybrid, mở rộng truy vấn). Context tốt mà faithfulness thấp → sửa tầng sinh (bắt trích dẫn, cho phép nói "không có thông tin").</li>
+</ul>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>Kho có 5 đoạn liên quan. Top-5 trả về: ✓ ✗ ✓ ✓ ✗.</p>
+<p>Recall@5 = 3/5 = <b>0,6</b>. Precision@5 = 3/5 = <b>0,6</b>. Đoạn đúng đầu tiên ở hạng 1 nên reciprocal rank = <b>1</b>.</p>
+</div>
+
+<h3 id="c-agent">Agent <span class="freq">≈37 câu</span></h3>
+<ul class="fl">
+<li>ReAct: Thought → Action → Observation, lặp lại. Tool calling: model chỉ sinh tên hàm và tham số JSON; <b>code của ứng dụng</b> mới là thứ chạy hàm. Vòng lặp kết thúc khi model trả lời mà không gọi tool nữa.</li>
+<li>Đặt giới hạn số bước, token và thời gian; phát hiện lặp bằng cách băm tên tool + tham số.</li>
+<li>Validate tham số phía server bằng schema và luật nghiệp vụ (số tiền hoàn ≤ giá trị đơn), không tin con số model điền.</li>
+<li>Con người duyệt trước hành động không đảo ngược được hoặc liên quan tiền (hoàn tiền, xóa hồ sơ). Màn hình duyệt phải do code hiển thị tham số thật, không hiển thị câu do LLM viết.</li>
+<li>Quyền tối thiểu: tool hẹp, chỉ đọc, đúng khách hàng; tách quyền giữa các luồng.</li>
+<li>Nhiều agent nhỏ thì ít chọn nhầm tool hơn, đổi lại thêm bước định tuyến. Các nhánh chạy song song: thời gian = phân tích + nhánh lâu nhất + tổng hợp.</li>
+<li>Xác suất cả chuỗi thành công = tích xác suất từng bước (0,95¹⁰ ≈ 0,60). Ngữ cảnh dài thêm mỗi bước thì tổng token là cấp số cộng.</li>
+</ul>
+
+<h3 id="c-ops">MLOps và vận hành <span class="freq">CĐ-11</span></h3>
+<ul class="fl">
+<li>Theo dõi p50, p95, p99 theo SLO. Batch lớn hơn tăng throughput và giảm chi phí mỗi request: <span class="f">chi phí/request = giá giờ / số request mỗi giờ</span>.</li>
+<li>Định luật Little: <span class="f">số request đồng thời = tốc độ đến × thời gian xử lý</span>. 12 req/s × 2,5 s = 30 đồng thời; mỗi replica chịu 8 → cần 4 replica.</li>
+<li>Triển khai: shadow (model mới chỉ ghi log, người dùng vẫn nhận kết quả cũ) → canary (một phần nhỏ lưu lượng) → A/B. Luôn có rollback nhanh bằng artifact bất biến.</li>
+<li>Canary 0 lỗi trên n request: cận trên 95% của tỉ lệ lỗi ≈ <span class="f">3/n</span> (quy tắc số 3). 0 lỗi trên 150 request chưa chứng minh tốt hơn 0,4%.</li>
+<li>Data drift (covariate shift): P(X) đổi, P(Y|X) giữ nguyên. Concept drift: P(Y|X) đổi, nghĩa là quy luật thay đổi. PSI = <span class="f">Σ (a − e)·ln(a/e)</span>: dưới 0,1 ổn, 0,1–0,25 vừa, trên 0,25 lớn.</li>
+<li>Training-serving skew: đặc trưng lúc huấn luyện và lúc chạy thật tính khác nhau → dùng chung code hoặc feature store.</li>
+<li>Tái lập được: DVC (Git chỉ lưu file hash), snapshot dữ liệu, ghim Docker image bằng digest, đặt seed và bật chế độ tất định, version hóa định nghĩa đặc trưng. Dockerfile: copy <code>requirements.txt</code> và cài trước rồi mới <code>COPY . .</code>.</li>
+<li>Golden set dùng đi dùng lại để chọn prompt sẽ bị overfit → cần tập holdout. Đặt ngưỡng không được tụt riêng cho các nhóm quan trọng. Chênh vài câu trên golden set nhỏ có thể chỉ là nhiễu.</li>
+<li>LLM-as-judge có thiên vị vị trí, thiên vị câu dài và tự khen mình. Hiệu chuẩn với nhãn người bằng Cohen's kappa <span class="f">κ = (p_o − p_e)/(1 − p_e)</span>.</li>
+</ul>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>100 mẫu: người và judge cùng "đạt" 70, cùng "không đạt" 10, lệch nhau 20 (mỗi chiều 10). Kappa?</p>
+<p>p_o = 80/100 = 0,8. Cả hai đều cho 80% "đạt" → p_e = 0,8·0,8 + 0,2·0,2 = 0,68. κ = (0,8 − 0,68)/(1 − 0,68) ≈ <b>0,375</b>. Đồng thuận 80% nghe cao nhưng kappa chỉ ở mức thấp.</p>
+</div>
+
+<h3 id="c-pm">Tư duy sản phẩm AI</h3>
+<ul class="fl">
+<li>Chọn công cụ: mẫu cố định (mã bưu chính, 5 điều kiện hoàn tiền) → regex hoặc rule engine; dự đoán xác suất từ dữ liệu bảng → gradient boosting hoặc logistic; văn bản tự do → LLM.</li>
+<li>Đo tác động thật bằng A/B hoặc triển khai so le, không dựa vào AUC offline hay "85% nhân viên có dùng".</li>
+<li>Hệ gợi ý: món mới chưa có tương tác (cold start) → dựa trên nội dung; khách chưa đăng nhập → dùng tín hiệu trong phiên; popularity bias tạo vòng phản hồi → thêm khám phá có kiểm soát; click chỉ là tín hiệu ngầm.</li>
+<li>Duyệt tay theo ngưỡng tin cậy: số hồ sơ duyệt tay = N × tỉ lệ dưới ngưỡng; số lỗi lọt = N × tỉ lệ tự động × (1 − độ chính xác).</li>
+<li>Luôn có baseline không dùng AI để so sánh. Mức sử dụng thấp thường do cả kỹ thuật lẫn con người (độ trễ, độ chính xác, sợ bị chấm điểm).</li>
+</ul>
+</section>
+
+<!-- ============ PHẦN D ============ -->
+<section id="phan-d">
+<h2><span class="part-tag">D</span>Logic, đạo đức và hành vi</h2>
+<p class="sec-intro">Ít câu nhưng nhiều câu vận dụng cao. Đáp án đúng gần như luôn là phương án <b>cân bằng</b>: không cấm hẳn, không làm liều, mà đo lường, giảm thiểu, minh bạch và có người chịu trách nhiệm.</p>
+
+<h3 id="d-logic">Logic và ngụy biện <span class="freq">CĐ-12</span></h3>
+<ul class="fl">
+<li><span class="f">p → q</span> tương đương <span class="f">¬q → ¬p</span> (phản đảo). Không suy ra được <span class="f">q → p</span> hay <span class="f">¬p → ¬q</span>.</li>
+<li>"Nếu đạt test thì được phỏng vấn" và biết "X được phỏng vấn" → <b>không kết luận được</b> X có đạt test hay không.</li>
+<li>Phủ định: <span class="f">¬(mọi x đều P) = có ít nhất một x không P</span>; <span class="f">¬(có x thỏa P) = mọi x đều không P</span>. De Morgan: <span class="f">¬(A ∨ B) = ¬A ∧ ¬B</span>, <span class="f">¬(A ∧ B) = ¬A ∨ ¬B</span>.</li>
+<li>Kiểm tra quy tắc "nếu P thì Q" (bài 4 thẻ của Wason): chỉ cần lật thẻ <b>P</b> và thẻ <b>không Q</b>.</li>
+<li>Bài lời khai "chỉ một người nói thật": giả sử lần lượt từng người nói thật rồi kiểm tra mâu thuẫn. Đếm số trường hợp thỏa: lập bảng chân trị 2ⁿ dòng.</li>
+<li>Ngụy biện hay gặp: <b>post hoc</b> (xảy ra sau nên do cái trước gây ra), <b>tương quan ≠ nhân quả</b> (biến gây nhiễu), <b>ad hominem</b> (công kích người nói), <b>strawman</b> (bóp méo ý đối phương), <b>survivorship bias</b> (chỉ khảo sát người ở lại), <b>p-hacking</b> (soi nhiều phân khúc rồi chọn cái đẹp), nghịch lý Simpson.</li>
+</ul>
+
+<h3 id="d-eth">Dữ liệu cá nhân, công bằng, luật <span class="freq">≈31 câu quyền riêng tư</span></h3>
+<ul class="fl">
+<li>Tối thiểu hóa dữ liệu: chỉ thu cái cần cho mục đích đã nêu. Giới hạn mục đích: muốn dùng cho mục đích mới (quảng cáo) thì xin đồng ý riêng. Đồng ý tách theo từng mục đích, mặc định tắt. Người dùng rút đồng ý thì dừng xử lý từ thời điểm đó.</li>
+<li><b>Giả danh hóa ≠ ẩn danh hóa.</b> Băm SĐT hay IP bằng SHA-256 không salt vẫn dò ngược được vì số giá trị có hạn. Giữ bảng ánh xạ thì vẫn định danh lại được. k-anonymity: nhóm nhỏ nhất theo các thuộc tính định danh gián tiếp phải có ít nhất k bản ghi.</li>
+<li>Dữ liệu nhạy cảm: sinh trắc học (vân tay, khuôn mặt), sức khỏe, số định danh. Đề nhắc Luật Bảo vệ dữ liệu cá nhân 2025 (91/2025/QH15). Không dán hồ sơ bệnh án vào chatbot công cộng.</li>
+<li>GDPR: rò rỉ dữ liệu phải báo cơ quan giám sát trong 72 giờ.</li>
+<li>Công bằng: <b>demographic parity</b> là tỉ lệ được chọn bằng nhau giữa các nhóm; <b>quy tắc 4/5</b>: tỉ lệ nhóm thấp / nhóm cao &lt; 0,8 là dấu hiệu tác động bất lợi; <b>equal opportunity</b> là TPR bằng nhau; <b>equalized odds</b> là cả TPR và FPR bằng nhau. Mã bưu chính có thể là biến proxy. Đánh giá tách theo nhóm, không chỉ nhìn AUC chung.</li>
+<li>Con người trong vòng lặp: ca rủi ro cao hoặc tin cậy thấp thì chuyển người duyệt. Người duyệt đồng ý 99,7% là thiên lệch tự động hóa → đo tỉ lệ bác bỏ, kiểm tra ngẫu nhiên.</li>
+<li>Minh bạch: báo người dùng đang nói chuyện với AI; khi chặn thì nêu lý do, mã tham chiếu và cách khiếu nại; tài liệu model card; giải thích phản thực ("thay đổi nhỏ nhất để được chấp nhận"); giải thích theo người nhận (bác sĩ, bệnh nhân, kiểm toán cần thông tin khác nhau).</li>
+<li>Thấy sai sót thì ghi bằng chứng và báo ngay người có thẩm quyền, kể cả sát ngày ra mắt. Không dùng dark pattern như "Chỉ còn 2 phòng!" giả.</li>
+<li><b>EU AI Act:</b> <i>cấm</i> (suy luận cảm xúc nhân viên tại nơi làm việc, chấm điểm xã hội); <i>rủi ro cao</i> (chấm điểm tín dụng, lọc CV, giáo dục; cần quản lý rủi ro, quản trị dữ liệu, nhật ký, con người giám sát); <i>rủi ro hạn chế</i> (chatbot: phải minh bạch); <i>rủi ro tối thiểu</i> (lọc spam). Bên triển khai mua hệ thống rủi ro cao vẫn phải giám sát và lưu nhật ký.</li>
+</ul>
+<div class="ex"><div class="lbl">Ví dụ</div>
+<p>Lọc CV: nữ 30/100 qua vòng, nam 60/150 qua vòng. Tỉ lệ 30% và 40%. Tỉ lệ tác động = 30/40 = <b>0,75 &lt; 0,8</b> → có dấu hiệu tác động bất lợi, cần điều tra.</p>
+</div>
+
+<h3 id="d-sec">An toàn LLM (OWASP LLM Top 10) <span class="freq">≈13 câu prompt injection</span></h3>
+<div class="tbl"><table>
+<thead><tr><th>Mã</th><th>Rủi ro</th><th>Tình huống trong đề</th></tr></thead>
+<tbody>
+<tr><td>LLM01</td><td>Prompt Injection</td><td>Chữ trắng trên nền trắng trong CV, email, trang web ra lệnh cho trợ lý</td></tr>
+<tr><td>LLM02</td><td>Sensitive Information Disclosure</td><td>Model fine-tune trên biên bản có CCCD rồi đọc lại CCCD</td></tr>
+<tr><td>LLM03</td><td>Supply Chain</td><td>Tải model định dạng pickle không chữ ký từ kho cộng đồng</td></tr>
+<tr><td>LLM04</td><td>Data and Model Poisoning</td><td>Đối thủ đăng hàng nghìn review giả vào dữ liệu huấn luyện</td></tr>
+<tr><td>LLM05</td><td>Improper Output Handling</td><td>Gắn đầu ra LLM thẳng vào <code>innerHTML</code>, chạy SQL do LLM sinh</td></tr>
+<tr><td>LLM06</td><td>Excessive Agency</td><td>Trợ lý tóm tắt thư nhưng có cả quyền gửi và xóa thư</td></tr>
+<tr><td>LLM07</td><td>System Prompt Leakage</td><td>Đặt quy tắc nội bộ hay bí mật trong system prompt</td></tr>
+<tr><td>LLM08</td><td>Vector and Embedding Weaknesses</td><td>Vector DB dùng chung nhiều công ty, không lọc theo tenant</td></tr>
+<tr><td>LLM09</td><td>Misinformation</td><td>Trả lời sai một cách tự tin</td></tr>
+<tr><td>LLM10</td><td>Unbounded Consumption</td><td>Agent công khai không giới hạn bước, token, request</td></tr>
+</tbody></table></div>
+<ul class="fl">
+<li>Nội dung từ ngoài (email, CV, web, kết quả tool) là <b>dữ liệu không tin cậy</b>. Chỉ thêm câu "đừng làm theo chỉ dẫn trong email" vào prompt là không đủ, vì chỉ dẫn và dữ liệu nằm chung một chuỗi token. Chặn tất định ở tầng công cụ: quyền tối thiểu, hạn mức, người duyệt.</li>
+<li>"Bộ ba nguy hiểm": truy cập dữ liệu riêng tư + tiếp xúc nội dung không tin cậy + có kênh gửi dữ liệu ra ngoài. Cấu hình agent có đủ cả ba là rủi ro nhất; bỏ một trong ba.</li>
+<li>Đầu ra Markdown có ảnh trỏ ra domain lạ có thể làm lộ dữ liệu → chỉ render ảnh và link trong allowlist.</li>
+</ul>
+</section>
+
+<section id="tu-luan">
+<h2>Tự luận và code viết tay</h2>
+<p class="sec-intro">Khoảng 25 điểm mỗi đề. Rubric chấm theo từng ý, nên viết đủ ý quan trọng hơn viết hay. Đề thường có 2–3 câu tự luận và 1–2 câu code.</p>
+<h4>Khung 7 ý cho câu tự luận tình huống</h4>
+<ol class="route">
+<li><b>Mục tiêu và đầu ra</b>Hệ thống trả ra cái gì, phục vụ quyết định nào, lỗi loại nào đắt hơn.</li>
+<li><b>Dữ liệu và nhãn</b>Lấy từ đâu, nhãn có sau bao lâu, chia train/test theo thời gian, cột nào gây rò rỉ.</li>
+<li><b>Giải pháp và baseline</b>Pipeline cụ thể, so với cách làm hiện tại hoặc rule đơn giản.</li>
+<li><b>Đánh giá offline có ngưỡng số</b>Chỉ số chính theo chi phí lỗi, golden set do người gán, tách theo nhóm, ngưỡng chấp nhận ghi bằng con số.</li>
+<li><b>Rủi ro và guardrail</b>Công bằng, dữ liệu cá nhân, prompt injection, con người duyệt ca tin cậy thấp, minh bạch và kênh khiếu nại.</li>
+<li><b>Triển khai theo giai đoạn</b>Shadow → pilot hoặc canary → A/B đo tác động thật trên chỉ số kinh doanh.</li>
+<li><b>Giám sát và điều kiện dừng</b>Theo dõi drift, tỉ lệ khiếu nại, chi phí; nêu rõ ngưỡng nào thì rollback và kế hoạch quay về làm tay.</li>
+</ol>
+<p>Câu có số liệu: <b>ghi từng bước tính</b>. Chỉ ghi kết quả thì bị điểm thấp, sai số nhưng đúng cách vẫn có điểm. Thiếu dữ kiện thì ghi rõ giả định rồi làm tiếp.</p>
+<h4>Checklist code viết tay</h4>
+<ul class="fl">
+<li>Đúng tên hàm và tham số đề yêu cầu, trả đúng kiểu (dict, list, DataFrame có đúng các cột).</li>
+<li>Xử lý trường hợp biên: list rỗng, NaN, chia cho 0, k lớn hơn số phần tử, khóa không tồn tại.</li>
+<li>Không sửa dữ liệu đầu vào (dùng <code>.copy()</code> hoặc <code>assign</code>). Trong pandas dùng phép vector hóa, không lặp từng dòng.</li>
+<li>Sắp xếp có tiêu chí hòa khi đề yêu cầu: <code>sort_values(["doanh_thu","ten"], ascending=[False, True])</code>.</li>
+<li>Tự chạy tay ví dụ trong đề trước khi nộp.</li>
+</ul>
+<div class="ex"><div class="lbl">Mẫu</div>
+<pre><code>def top_k_doanh_thu(df, k):
+    out = (df.assign(doanh_thu=df["so_luong"] * df["don_gia"])
+             .groupby("danh_muc", as_index=False)["doanh_thu"].sum()
+             .sort_values(["doanh_thu", "danh_muc"], ascending=[False, True])
+             .head(k)
+             .reset_index(drop=True))
+    return out</code></pre>
+<p>Đủ các ý rubric hay chấm: nhân vector hóa, groupby đúng, sắp xếp có tiêu chí hòa, không sửa df gốc, trả về đúng hai cột.</p>
+</div>
+</section>
+
+<section id="nguon">
+<h2>Luyện tiếp ở đâu</h2>
+<ul class="fl">
+<li>Tab <a href="#luyen-de">Luyện đề</a> trên trang này: 10 đề AI-TEST có chấm điểm, và bạn tự thêm đề của mình được.</li>
+<li><a href="https://hieubui2409.github.io/ai20k-exam-prep/" target="_blank" rel="noopener">hieubui2409.github.io/ai20k-exam-prep</a>: 6 đề tổng hợp và 12 chuyên đề, sát cấu trúc đề nhất. Chọn chế độ <b>Luyện kiến thức</b> để thấy đúng/sai ngay kèm giải thích. Mỗi mục trong sổ tay có ghi mã chuyên đề tương ứng (CĐ-01 … CĐ-12). Bộ đề này không có giấy phép tái sử dụng nên không được chép vào đây.</li>
+<li><a href="https://hungbil.github.io/AI-TEST/" target="_blank" rel="noopener">hungbil.github.io/AI-TEST</a>: trang gốc của 10 đề AI-TEST, có thêm cheat sheet. Bộ "Crown" cần mật khẩu của nhóm nên không có ở đây.</li>
+<li>Thứ tự gợi ý: đọc một mục trong sổ tay → làm chuyên đề tương ứng → mỗi tuần làm một đề có hẹn giờ.</li>
+</ul>
+</section>
+
+<footer>
+<p>Tài liệu cộng đồng, không chính thức, không liên kết với VinUni. Số liệu thống kê lấy từ 720 câu của <a href="https://github.com/hieubui2409/ai20k-exam-prep" target="_blank" rel="noopener">hieubui2409/ai20k-exam-prep</a> và 600 câu của <a href="https://github.com/hungbil/AI-TEST" target="_blank" rel="noopener">hungbil/AI-TEST</a>. Ví dụ trong sổ tay được soạn mới, không chép từ đề gốc. Phần luyện đề dùng nguyên văn 10 đề AI-TEST theo giấy phép MIT, © 2026 Henry Don.</p>
+</footer>
+</main>
+</div>
+
+<div id="view-exam" hidden>
+<div class="xwrap" id="luyen-de">
+  <div id="xhome">
+    <div class="eyebrow">Luyện đề</div>
+    <h1>Thi thử có chấm điểm</h1>
+    <p class="lead">Chọn một đề và làm như thi thật. Nộp bài xong, trắc nghiệm được chấm ngay; câu code và tự luận bạn tự chấm theo rubric. Mỗi câu có cách giải và link tới mục cần ôn trong sổ tay.</p>
+    <div id="resume"></div>
+    <h3>Đề có sẵn</h3>
+    <div class="grid" id="builtinList"></div>
+    <h3>Đề bạn đã thêm</h3>
+    <div class="grid" id="customList"></div>
+    <div class="panel" id="importPanel">
+      <h4 style="margin-top:0">Thêm đề</h4>
+      <p class="note">Chọn file .json hoặc dán nội dung JSON theo định dạng bên dưới. Đề thêm vào chỉ lưu trong trình duyệt này. Muốn cả nhóm cùng dùng thì thêm file vào thư mục <code>exams/</code> của repo.</p>
+      <p><input type="file" id="importFile" accept=".json,application/json"></p>
+      <textarea id="importText" aria-label="Nội dung JSON của đề" placeholder='{"title": "...", "questions": [ ... ]}'></textarea>
+      <div class="row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn solid" id="importBtn">Thêm đề</button><button class="btn" id="tplBtn">Dán đề mẫu</button></div>
+      <p class="msg" id="importMsg" aria-live="polite"></p>
+      <details><summary>Định dạng JSON</summary>
+<pre><code id="tplCode"></code></pre>
+<ul class="fl">
+<li><code>module</code>: A (Toán), B (Code), C (AI), D (Logic).</li>
+<li><code>type</code>: <code>mcq</code> (cần <code>options</code> và <code>answer</code>), <code>code</code> hoặc <code>essay</code> (nên có <code>modelAnswer</code> và <code>rubric</code> để tự chấm).</li>
+<li><code>explanation</code>: cách giải hiện sau khi nộp. <code>section</code>: mã mục sổ tay để gắn link ôn tập. Không ghi thì link về đầu phần theo <code>module</code>.</li>
+<li>Mã mục hợp lệ: <span id="secIds"></span></li>
+</ul>
+      </details>
+    </div>
+  </div>
+  <div id="xrun" hidden></div>
+</div>
+</div>
+
+<script>
+const LEVELS={"A":[11,20,30,15],"B":[17,30,37,15],"C":[26,42,39,24],"D":[9,16,19,10]};
+const EXAMS=/*EXAMS*/;
+const NAMES={A:'Toán',B:'Code',C:'AI',D:'Logic'}, TYPES={mcq:'Trắc nghiệm',code:'Code viết tay',essay:'Tự luận'};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function rich(s){
+  return String(s==null?'':s).split(/```(?:\w+)?\n?/).map((p,i)=>i%2?'<pre><code>'+esc(p.replace(/\n$/,''))+'</code></pre>':
+    esc(p).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>')).join('');
+}
+const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
+const fmt=n=>(Math.round(n*100)/100).toLocaleString('vi-VN');
+
+/* ---------- views & links ---------- */
+function show(view){
+  ['book','exam'].forEach(v=>{$('view-'+v).hidden=v!==view;$('tab-'+v).setAttribute('aria-selected',String(v===view));});
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{show(t.dataset.view);window.scrollTo(0,0);});
+function go(id,smooth){
+  const el=$(id); if(!el) return false;
+  const view=el.closest('#view-exam')?'exam':'book', same=!$('view-'+view).hidden; show(view);
+  if(id==='luyen-de') window.scrollTo(0,0); else el.scrollIntoView({behavior:smooth&&same?'smooth':'auto'});
+  return true;
+}
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[href^="#"]'); if(!a) return;
+  const id=decodeURIComponent(a.getAttribute('href').slice(1));
+  if(go(id,true)){e.preventDefault();try{history.replaceState(null,'','#'+id);}catch(_){}}
+});
+
+/* ---------- level bars (sổ tay) ---------- */
+(function(){
+  const box=$('levelBars'), cols=['var(--nb)','var(--th)','var(--vd)','var(--vdc)'];
+  Object.keys(LEVELS).forEach(m=>{
+    const v=LEVELS[m], t=v.reduce((a,b)=>a+b,0), row=document.createElement('div'); row.className='bar-row';
+    row.innerHTML='<span>'+m+' · '+NAMES[m]+'</span><div class="bar" role="img" aria-label="Phần '+m+': nhận biết '+v[0]+', thông hiểu '+v[1]+', vận dụng '+v[2]+', vận dụng cao '+v[3]+' câu">'+
+      v.map((n,i)=>'<i style="width:'+(n/t*100)+'%;background:'+cols[i]+'" title="'+n+' câu"></i>').join('')+'</div><span class="note">'+t+' câu</span>';
+    box.appendChild(row);
+  });
+})();
+
+/* ---------- sections of the handbook ---------- */
+const PART_SEC={A:'phan-a',B:'phan-b',C:'phan-c',D:'phan-d'};
+function secTitle(id){
+  let el=$(id); if(!el||!el.closest('#view-book')) return null;
+  if(el.tagName==='SECTION') el=el.querySelector('h2')||el;
+  const c=el.cloneNode(true); c.querySelectorAll('.freq,.part-tag').forEach(x=>x.remove());
+  return c.textContent.trim();
+}
+const secOf=q=>(q.section&&secTitle(q.section))?q.section:PART_SEC[q.module];
+const SEC_IDS=[...document.querySelectorAll('#view-book h3[id], #view-book section[id]')].map(e=>e.id);
+$('secIds').innerHTML=SEC_IDS.map(i=>'<code>'+i+'</code>').join(' ');
+
+/* ---------- exams: built-in + custom ---------- */
+let customs=load('st-custom',[]);
+const allExams=()=>EXAMS.concat(customs);
+const findExam=id=>allExams().find(e=>e.id===id);
+function validate(o){
+  if(!o||typeof o!=='object') throw new Error('Nội dung không phải một đối tượng JSON.');
+  if(!Array.isArray(o.questions)||!o.questions.length) throw new Error('Thiếu mảng "questions" hoặc mảng rỗng.');
+  const qs=o.questions.map((q,i)=>{
+    const n='Câu '+(i+1)+': ';
+    if(!'ABCD'.includes(q.module)||!q.module) throw new Error(n+'"module" phải là A, B, C hoặc D.');
+    if(!['mcq','code','essay'].includes(q.type)) throw new Error(n+'"type" phải là mcq, code hoặc essay.');
+    if(!q.prompt||typeof q.prompt!=='string') throw new Error(n+'thiếu "prompt".');
+    const pts=q.points==null?1:Number(q.points); if(!(pts>0)) throw new Error(n+'"points" phải là số dương.');
+    const out={module:q.module,type:q.type,points:pts,prompt:q.prompt,explanation:q.explanation||'',section:q.section||''};
+    if(q.type==='mcq'){
+      if(!Array.isArray(q.options)||q.options.length<2||q.options.some(x=>!x||x.key==null||x.text==null)) throw new Error(n+'"options" cần ít nhất 2 mục dạng {"key","text"}.');
+      if(!q.options.some(x=>String(x.key)===String(q.answer))) throw new Error(n+'"answer" phải trùng một "key" trong options.');
+      out.options=q.options.map(x=>({key:String(x.key),text:String(x.text)})); out.answer=String(q.answer);
+    } else { out.modelAnswer=q.modelAnswer||''; out.rubric=Array.isArray(q.rubric)?q.rubric.map(r=>typeof r==='string'?r:(r.criterion||JSON.stringify(r))):[]; }
+    return out;
+  });
+  return {title:String(o.title||'Đề tự thêm'),description:String(o.description||''),durationMinutes:Number(o.durationMinutes)>0?Number(o.durationMinutes):90,source:'Đề tự thêm',questions:qs};
+}
+const TEMPLATE={title:"Đề tự soạn 01",durationMinutes:20,questions:[
+  {module:"A",type:"mcq",points:1,prompt:"Giá tăng từ 80 lên 92. Tỉ lệ tăng là bao nhiêu %?",options:[{key:"A",text:"12"},{key:"B",text:"15"},{key:"C",text:"13"},{key:"D",text:"11,5"}],answer:"B",explanation:"Tăng 12, chia cho giá cũ 80 được 15%.",section:"a-tile"},
+  {module:"D",type:"mcq",points:1,prompt:"Phủ định của 'Mọi mô hình đều được kiểm thử' là:",options:[{key:"A",text:"Không mô hình nào được kiểm thử"},{key:"B",text:"Có ít nhất một mô hình không được kiểm thử"},{key:"C",text:"Mọi mô hình đều không được kiểm thử"},{key:"D",text:"Có ít nhất một mô hình được kiểm thử"}],answer:"B",explanation:"¬(∀x P) = ∃x ¬P.",section:"d-logic"},
+  {module:"B",type:"code",points:2,prompt:"Viết hàm `safe_mean(xs)` trả về trung bình của list số; list rỗng thì trả 0.",modelAnswer:"def safe_mean(xs):\n    return sum(xs) / len(xs) if xs else 0",rubric:["Xử lý list rỗng","Tính đúng tổng chia số phần tử","Đúng tên hàm và tham số"],section:"tu-luan"}
+]};
+$('tplCode').textContent=JSON.stringify(TEMPLATE,null,2);
+$('tplBtn').onclick=()=>{$('importText').value=JSON.stringify(TEMPLATE,null,2);};
+$('importFile').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{$('importText').value=r.result;}; r.readAsText(f);};
+$('importBtn').onclick=()=>{
+  const m=$('importMsg'); m.className='msg';
+  try{
+    let o; try{o=JSON.parse($('importText').value);}catch(e){throw new Error('JSON không hợp lệ: '+e.message);}
+    const ex=validate(o); ex.id='custom-'+Date.now(); customs.push(ex); save('st-custom',customs);
+    m.className='msg ok'; m.textContent='Đã thêm "'+ex.title+'" ('+ex.questions.length+' câu).'; $('importText').value=''; $('importFile').value=''; renderHome();
+  }catch(e){m.className='msg err'; m.textContent=e.message;}
+};
+
+/* ---------- attempt state ---------- */
+let att=load('st-attempt',null), timerId=null, filter='all';
+let hist=load('st-history',{});
+const saveAtt=()=>save('st-attempt',att);
+function shuffled(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function start(id,timed){
+  const ex=findExam(id); if(!ex) return;
+  const opt={}; ex.questions.forEach((q,i)=>{if(q.type==='mcq') opt[i]=shuffled(q.options.map(o=>o.key));});
+  att={examId:id,timed,start:Date.now(),deadline:timed?Date.now()+ex.durationMinutes*60000:null,opt,ans:{},self:{},submitted:false};
+  saveAtt(); filter='all'; renderRun(); window.scrollTo(0,0);
+}
+function grade(ex,a){
+  const r={auto:0,autoMax:0,self:0,selfMax:0,per:{},weak:{},right:0,wrong:0,blank:0};
+  ex.questions.forEach((q,i)=>{
+    const p=r.per[q.module]||(r.per[q.module]=[0,0]); p[1]+=q.points;
+    if(q.type==='mcq'){
+      r.autoMax+=q.points; const v=a.ans[i];
+      if(v===q.answer){r.auto+=q.points;p[0]+=q.points;r.right++;}
+      else{ v==null?r.blank++:r.wrong++; const s=secOf(q); r.weak[s]=(r.weak[s]||0)+1; }
+    } else {
+      r.selfMax+=q.points; const n=(q.rubric||[]).length, ticks=(a.self[i]||[]).filter(Boolean).length;
+      const got=n?q.points*ticks/n:0; r.self+=got; p[0]+=got;
+    }
+  });
+  r.total=r.auto+r.self; r.max=r.autoMax+r.selfMax; return r;
+}
+function recordHist(ex){
+  const g=grade(ex,att), list=hist[att.examId]||(hist[att.examId]=[]);
+  const row={id:att.start,score:Math.round(g.total*100)/100,max:g.max,at:att.end||Date.now()};
+  const k=list.findIndex(x=>x.id===att.start); if(k<0) list.push(row); else list[k]=row;
+  save('st-history',hist);
+}
+
+/* ---------- home ---------- */
+function card(ex,custom){
+  const h=hist[ex.id]||[], best=h.length?Math.max(...h.map(x=>x.score)):null, n=ex.questions.length;
+  const max=ex.questions.reduce((s,q)=>s+q.points,0);
+  return '<div class="ecard"><h4>'+esc(ex.title)+'</h4><p class="note">'+n+' câu · '+ex.durationMinutes+' phút · '+fmt(max)+' điểm</p>'+
+    '<p class="note">'+(best==null?'Chưa làm':'Đã làm '+h.length+' lần · cao nhất '+fmt(best)+'/'+fmt(max))+'</p>'+
+    '<p class="note">'+esc(ex.source||'')+'</p>'+
+    '<div class="row"><button class="btn solid" data-start="'+ex.id+'" data-timed="1">Thi thử '+ex.durationMinutes+' phút</button><button class="btn" data-start="'+ex.id+'" data-timed="0">Luyện không giờ</button>'+
+    (custom?'<button class="btn danger" data-del="'+ex.id+'">Xóa</button>':'')+'</div></div>';
+}
+function renderHome(){
+  clearInterval(timerId); $('xhome').hidden=false; $('xrun').hidden=true;
+  $('builtinList').innerHTML=EXAMS.map(e=>card(e,false)).join('');
+  $('customList').innerHTML=customs.length?customs.map(e=>card(e,true)).join(''):'<p class="note">Chưa có. Dùng ô "Thêm đề" bên dưới.</p>';
+  const ex=att&&findExam(att.examId);
+  $('resume').innerHTML=ex?'<div class="panel"><b>'+(att.submitted?'Kết quả gần nhất: ':'Bạn đang làm dở: ')+esc(ex.title)+'</b><div class="row" style="display:flex;gap:8px;margin-top:8px"><button class="btn solid" id="resumeBtn">'+(att.submitted?'Xem lại kết quả':'Làm tiếp')+'</button></div></div>':'';
+  if(ex) $('resumeBtn').onclick=()=>{renderRun();window.scrollTo(0,0);};
+  document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>start(b.dataset.start,b.dataset.timed==='1'));
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.armed){customs=customs.filter(e=>e.id!==b.dataset.del);save('st-custom',customs);if(att&&att.examId===b.dataset.del){att=null;saveAtt();}renderHome();}
+    else{b.dataset.armed='1';b.textContent='Bấm lần nữa để xóa';}
+  });
+}
+
+/* ---------- run & result ---------- */
+function optsFor(q,i){const ord=att.opt[i]||q.options.map(o=>o.key);return ord.map(k=>q.options.find(o=>o.key===k)).filter(Boolean);}
+const letter=(i,key)=>'ABCDEFGH'[(att.opt[i]||[]).indexOf(key)]||key;
+function statusOf(q,i){
+  if(q.type!=='mcq') return 's';
+  const v=att.ans[i]; return v==null?'b':(v===q.answer?'r':'w');
+}
+function renderRun(){
+  const ex=findExam(att.examId); if(!ex){att=null;saveAtt();return renderHome();}
+  show('exam'); $('xhome').hidden=true; $('xrun').hidden=false; clearInterval(timerId);
+  const done=att.submitted, qs=ex.questions;
+  let h='<div class="runbar"><b style="margin-right:auto">'+esc(ex.title)+(done?' · Kết quả':'')+'</b>';
+  if(!done) h+='<span class="timer" id="timer"></span><span class="note" id="prog"></span>';
+  h+='<button class="btn" id="homeBtn">Về danh sách đề</button>'+(done?'<button class="btn solid" id="againBtn">Làm lại đề này</button>':'<button class="btn solid" id="submitBtn">Nộp bài</button>')+'</div><div id="confirmBox"></div>';
+  if(done) h+='<div class="panel" id="scorePanel"></div><div class="prac-bar" role="group" aria-label="Lọc câu">'+
+    [['all','Tất cả'],['w','Sai'],['b','Bỏ trống'],['r','Đúng'],['s','Code & tự luận']].map(([k,t])=>'<button class="chip" data-f="'+k+'" aria-pressed="'+(filter===k)+'">'+t+'</button>').join('')+'</div>';
+  h+='<div class="qnav" id="qnav"></div><div id="qlist"></div>';
+  $('xrun').innerHTML=h;
+  $('homeBtn').onclick=()=>{renderHome();window.scrollTo(0,0);};
+  if(done){
+    $('againBtn').onclick=()=>start(att.examId,att.timed);
+    document.querySelectorAll('[data-f]').forEach(c=>c.onclick=()=>{filter=c.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.setAttribute('aria-pressed',String(x===c)));renderList(ex);});
+    renderScore(ex);
+  } else {
+    $('submitBtn').onclick=()=>askSubmit(ex);
+    if(att.deadline){tick(ex);timerId=setInterval(()=>tick(ex),1000);} else $('timer').textContent='Không hẹn giờ';
+  }
+  renderList(ex);
+}
+function tick(ex){
+  const left=att.deadline-Date.now(), t=$('timer'); if(!t) return;
+  if(left<=0){clearInterval(timerId);return submit(ex);}
+  const s=Math.ceil(left/1000); t.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  t.classList.toggle('low',s<300);
+}
+function progress(ex){
+  const n=ex.questions.filter((q,i)=>att.ans[i]!=null&&att.ans[i]!=='').length;
+  if($('prog')) $('prog').textContent='Đã làm '+n+'/'+ex.questions.length;
+  return ex.questions.length-n;
+}
+function askSubmit(ex){
+  const left=progress(ex);
+  if(!left) return submit(ex);
+  $('confirmBox').innerHTML='<div class="confirm">Còn '+left+' câu chưa làm. Nộp luôn?<button class="btn solid" id="yesSub">Nộp bài</button><button class="btn" id="noSub">Làm tiếp</button></div>';
+  $('yesSub').onclick=()=>submit(ex); $('noSub').onclick=()=>{$('confirmBox').innerHTML='';};
+}
+function submit(ex){
+  clearInterval(timerId); att.submitted=true; att.end=Date.now(); saveAtt(); recordHist(ex); filter='all'; renderRun(); window.scrollTo(0,0);
+}
+function renderScore(ex){
+  const g=grade(ex,att), mins=Math.round((att.end-att.start)/60000);
+  const parts=Object.keys(g.per).sort().map(m=>{const [a,b]=g.per[m];return '<div class="bar-row"><span>'+m+' · '+NAMES[m]+'</span><div class="bar"><i style="width:'+(b?a/b*100:0)+'%;background:var(--accent)"></i></div><span class="note">'+fmt(a)+'/'+fmt(b)+'</span></div>';}).join('');
+  const weak=Object.entries(g.weak).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  $('scorePanel').innerHTML='<div class="big">'+fmt(g.total)+' / '+fmt(g.max)+'</div>'+
+    '<p class="note">Trắc nghiệm '+fmt(g.auto)+'/'+fmt(g.autoMax)+' ('+g.right+' đúng, '+g.wrong+' sai, '+g.blank+' bỏ trống) · Code và tự luận tự chấm '+fmt(g.self)+'/'+fmt(g.selfMax)+' · Làm trong '+mins+' phút</p>'+
+    (g.selfMax?'<p class="note">Điểm code và tự luận tính khi bạn tick rubric ở từng câu bên dưới.</p>':'')+
+    '<div class="bars">'+parts+'</div>'+
+    (weak.length?'<h4>Nên ôn lại</h4><ul class="fl">'+weak.map(([s,n])=>'<li><a href="#'+s+'">'+esc(secTitle(s))+'</a> · '+n+' câu sai hoặc bỏ trống</li>').join('')+'</ul>':'<p>Không sai câu trắc nghiệm nào.</p>');
+}
+function renderList(ex){
+  const done=att.submitted, nav=[], cards=[]; let cur='';
+  ex.questions.forEach((q,i)=>{
+    const st=statusOf(q,i), answered=att.ans[i]!=null&&att.ans[i]!=='';
+    nav.push('<button data-go="'+i+'" class="'+(done?(st==='b'?'w':st):(answered?'done':''))+'" aria-label="Câu '+(i+1)+'">'+(i+1)+'</button>');
+    if(done&&filter!=='all'&&filter!==st) return;
+    if(q.module!==cur){cur=q.module;cards.push('<h3>Phần '+q.module+' · '+NAMES[q.module]+'</h3>');}
+    cards.push(qcard(q,i,st));
+  });
+  $('qnav').innerHTML=nav.join(''); $('qlist').innerHTML=cards.join('')||'<p class="note">Không có câu nào trong bộ lọc này.</p>';
+  $('qnav').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const c=$('q-'+b.dataset.go);if(c)c.scrollIntoView({behavior:'smooth'});else{filter='all';renderRun();setTimeout(()=>{const d=$('q-'+b.dataset.go);d&&d.scrollIntoView();},0);}});
+  if(!done){
+    $('qlist').querySelectorAll('input[type=radio]').forEach(r=>r.onchange=()=>{att.ans[r.dataset.i]=r.value;saveAtt();progress(ex);const b=$('qnav').querySelector('[data-go="'+r.dataset.i+'"]');b&&b.classList.add('done');});
+    $('qlist').querySelectorAll('textarea').forEach(t=>t.oninput=()=>{att.ans[t.dataset.i]=t.value;saveAtt();progress(ex);const b=$('qnav').querySelector('[data-go="'+t.dataset.i+'"]');b&&b.classList.toggle('done',!!t.value);});
+    progress(ex);
+  } else {
+    $('qlist').querySelectorAll('input[type=checkbox]').forEach(c=>c.onchange=()=>{const i=c.dataset.i,arr=att.self[i]||(att.self[i]=[]);arr[c.dataset.k]=c.checked;saveAtt();recordHist(ex);renderScore(ex);
+      const q=ex.questions[i],n=(q.rubric||[]).length,got=n?q.points*arr.filter(Boolean).length/n:0;$('self-'+i).textContent=fmt(got)+'/'+fmt(q.points)+' điểm';});
+  }
+}
+function qcard(q,i,st){
+  const done=att.submitted, v=att.ans[i];
+  const pill=done?(q.type==='mcq'?(st==='r'?'<span class="status r">Đúng</span>':st==='w'?'<span class="status w">Sai</span>':'<span class="status w">Bỏ trống</span>'):'<span class="status s">Tự chấm</span>'):'';
+  let h='<div class="qcard" id="q-'+i+'"><div class="qmeta"><span>Câu '+(i+1)+'</span><span>Phần '+q.module+' · '+NAMES[q.module]+'</span><span>'+TYPES[q.type]+'</span><span>'+fmt(q.points)+' điểm</span>'+pill+'</div><div class="qtext">'+rich(q.prompt)+'</div>';
+  const sec=secOf(q), review='<p><b>Ôn lại:</b> <a href="#'+sec+'">'+esc(secTitle(sec))+'</a></p>';
+  if(q.type==='mcq'){
+    h+='<div class="opts" role="radiogroup" aria-label="Câu '+(i+1)+'">'+optsFor(q,i).map((o,k)=>{
+      const L='ABCDEFGH'[k];
+      if(!done) return '<label class="opt"><input type="radio" name="r-'+i+'" data-i="'+i+'" value="'+esc(o.key)+'"'+(v===o.key?' checked':'')+'><b>'+L+'</b><span>'+rich(o.text)+'</span></label>';
+      const c='opt'+(o.key===q.answer?' right':(o.key===v?' wrong':''));
+      return '<div class="'+c+'"><b>'+L+'</b><span>'+rich(o.text)+(o.key===v?' <em>(bạn chọn)</em>':'')+'</span></div>';
+    }).join('')+'</div>';
+    if(done) h+='<div class="explain"><p><b>Đáp án đúng: '+letter(i,q.answer)+'.</b> '+(v==null?'Bạn bỏ trống câu này.':(v===q.answer?'Bạn chọn đúng.':'Bạn chọn '+letter(i,v)+'.'))+'</p>'+
+      (q.explanation?'<p><b>Cách giải:</b> '+rich(q.explanation)+'</p>':'')+review+'</div>';
+  } else {
+    if(!done) h+='<textarea data-i="'+i+'" aria-label="Bài làm câu '+(i+1)+'" placeholder="Viết bài làm như trên giấy. Nộp xong bạn tự chấm theo rubric.">'+esc(v||'')+'</textarea>';
+    else{
+      const n=(q.rubric||[]).length, ticks=att.self[i]||[], got=n?q.points*ticks.filter(Boolean).length/n:0;
+      h+='<h4>Bài làm của bạn</h4>'+(v?'<pre><code>'+esc(v)+'</code></pre>':'<p class="note">(bỏ trống)</p>')+
+        '<div class="explain">'+(q.modelAnswer?'<p><b>Đáp án mẫu</b></p>'+(q.type==='code'?'<pre><code>'+esc(q.modelAnswer)+'</code></pre>':'<p>'+rich(q.modelAnswer)+'</p>'):'')+
+        (n?'<p><b>Tự chấm theo rubric</b> · <span id="self-'+i+'">'+fmt(got)+'/'+fmt(q.points)+' điểm</span></p><div class="rub">'+q.rubric.map((r,k)=>'<label><input type="checkbox" data-i="'+i+'" data-k="'+k+'"'+(ticks[k]?' checked':'')+'><span>'+rich(r)+'</span></label>').join('')+'</div>':'<p class="note">Câu này không có rubric để tự chấm.</p>')+
+        (q.explanation?'<p><b>Cách giải:</b> '+rich(q.explanation)+'</p>':'')+review+'</div>';
+    }
+  }
+  return h+'</div>';
+}
+
+/* ---------- boot ---------- */
+renderHome();
+if(location.hash&&location.hash.length>1){ if(!go(decodeURIComponent(location.hash.slice(1)),false)) show('book'); }
+</script>
