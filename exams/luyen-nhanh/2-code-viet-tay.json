@@ -1,0 +1,153 @@
+{
+ "title": "Luyện nhanh · Code viết tay (10 bài)",
+ "description": "10 mẫu code hay ra nhất: dict đếm, khử trùng, top-k, hai con trỏ, pandas groupby/transform, SQL LEFT JOIN và window. Viết ra giấy trước rồi mới gõ.",
+ "durationMinutes": 60,
+ "questions": [
+  {
+   "module": "B",
+   "type": "code",
+   "level": "nhan-biet",
+   "section": "b-py",
+   "points": 2,
+   "prompt": "Viết `dem_tu(text)` trả dict đếm số lần xuất hiện của từng từ (tách theo khoảng trắng, không phân biệt hoa thường). Ví dụ `'Loi ok loi'` → `{'loi': 2, 'ok': 1}`.",
+   "modelAnswer": "def dem_tu(text):\n    dem = {}\n    for w in text.lower().split():\n        dem[w] = dem.get(w, 0) + 1\n    return dem",
+   "rubric": [
+    "Dùng `split()` không tham số để tách mọi khoảng trắng",
+    "Đưa về chữ thường trước khi đếm",
+    "Cập nhật bằng `get(w, 0) + 1`",
+    "Chuỗi rỗng trả `{}`"
+   ]
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "nhan-biet",
+   "section": "b-py",
+   "points": 2,
+   "prompt": "Viết `trung_binh_an_toan(xs)` trả trung bình list số; list rỗng trả 0.",
+   "modelAnswer": "def trung_binh_an_toan(xs):\n    return sum(xs) / len(xs) if xs else 0",
+   "rubric": [
+    "Kiểm tra list rỗng trước khi chia",
+    "Tính tổng chia số phần tử",
+    "Đúng tên hàm, trả về số"
+   ]
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 2,
+   "prompt": "Viết `bo_trung(xs)` trả list mới bỏ phần tử trùng, **giữ thứ tự xuất hiện đầu tiên**, O(n). Ví dụ `[3, 1, 3, 2, 1]` → `[3, 1, 2]`.",
+   "modelAnswer": "def bo_trung(xs):\n    da_gap = set()\n    kq = []\n    for x in xs:\n        if x not in da_gap:\n            da_gap.add(x)\n            kq.append(x)\n    return kq",
+   "rubric": [
+    "Dùng set để kiểm tra đã gặp (O(1)), không dùng `x in kq`",
+    "Giữ đúng thứ tự lần đầu",
+    "Không sửa list đầu vào",
+    "List rỗng trả []"
+   ]
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 2,
+   "prompt": "Viết `top_k(diem, k)` nhận dict `{ten: diem}`, trả list k tên điểm cao nhất; hoà điểm thì xếp tên tăng dần.",
+   "modelAnswer": "def top_k(diem, k):\n    xep = sorted(diem.items(), key=lambda x: (-x[1], x[0]))\n    return [ten for ten, _ in xep[:k]]",
+   "rubric": [
+    "Sắp xếp với key `(-diem, ten)`",
+    "Cắt k phần tử đầu",
+    "Trả list tên, không phải tuple",
+    "k lớn hơn số phần tử vẫn chạy"
+   ]
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "thong-hieu",
+   "section": "b-np",
+   "points": 2,
+   "prompt": "Viết `co_cap_tong(nums, k)` trả True nếu có **hai phần tử ở hai vị trí khác nhau** có tổng bằng k. Yêu cầu O(n).",
+   "modelAnswer": "def co_cap_tong(nums, k):\n    da_gap = set()\n    for x in nums:\n        if k - x in da_gap:\n            return True\n        da_gap.add(x)\n    return False",
+   "rubric": [
+    "Dùng set lưu các số đã gặp",
+    "Kiểm tra `k - x` trước rồi mới thêm x (tránh dùng một phần tử hai lần)",
+    "Đạt O(n), không dùng hai vòng lồng nhau",
+    "Trả bool đúng cho list rỗng"
+   ]
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 2,
+   "prompt": "Viết `tong_theo_user(records)` nhận list dict `{\"user\": str, \"amount\": số}`, trả dict tổng amount theo user. Bản ghi thiếu `amount` hoặc amount là None thì bỏ qua.",
+   "modelAnswer": "def tong_theo_user(records):\n    tong = {}\n    for r in records:\n        a = r.get(\"amount\")\n        if a is None:\n            continue\n        tong[r[\"user\"]] = tong.get(r[\"user\"], 0) + a\n    return tong",
+   "rubric": [
+    "Dùng `r.get(\"amount\")` để không lỗi khi thiếu khoá",
+    "Bỏ qua None",
+    "Cộng dồn theo user bằng dict",
+    "Đúng tên hàm, trả dict"
+   ]
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "b-pd",
+   "points": 2,
+   "prompt": "DataFrame `df` có cột `danh_muc`, `so_luong`, `don_gia`. Viết `doanh_thu_top(df, k)` trả DataFrame 2 cột `danh_muc`, `doanh_thu` gồm k danh mục doanh thu cao nhất (giảm dần, hoà theo tên tăng dần), index từ 0. Không sửa df, không lặp từng dòng.",
+   "modelAnswer": "def doanh_thu_top(df, k):\n    return (df.assign(doanh_thu=df[\"so_luong\"] * df[\"don_gia\"])\n              .groupby(\"danh_muc\", as_index=False)[\"doanh_thu\"].sum()\n              .sort_values([\"doanh_thu\", \"danh_muc\"], ascending=[False, True])\n              .head(k)\n              .reset_index(drop=True))",
+   "rubric": [
+    "Nhân vector hoá `so_luong * don_gia` qua `assign` (không sửa df)",
+    "groupby danh_muc rồi sum",
+    "Sắp hai tiêu chí với ascending=[False, True]",
+    "head(k) và reset_index(drop=True)"
+   ]
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "b-pd",
+   "points": 2,
+   "prompt": "Bảng `bk` có cột `loai` và `gia` (một số giá NaN). Viết `dien_gia(bk)` trả bảng mới, điền giá thiếu bằng **giá trung bình của cùng loại**.",
+   "modelAnswer": "def dien_gia(bk):\n    tb = bk.groupby(\"loai\")[\"gia\"].transform(\"mean\")\n    return bk.assign(gia=bk[\"gia\"].fillna(tb))",
+   "rubric": [
+    "Dùng `groupby(...).transform(\"mean\")` để có Series cùng độ dài",
+    "`fillna` bằng Series trung bình theo nhóm",
+    "Trả bảng mới, không sửa bảng gốc"
+   ]
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "thong-hieu",
+   "section": "b-sql",
+   "points": 2,
+   "prompt": "Viết câu SQL lấy **tên** các khách chưa từng đặt đơn nào. Bảng `customers(id, name)`, `orders(id, customer_id)`.",
+   "modelAnswer": "SELECT c.name\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL;",
+   "rubric": [
+    "LEFT JOIN từ customers sang orders",
+    "Lọc `o.id IS NULL` (không dùng `= NULL`)",
+    "Hoặc dùng NOT EXISTS đúng cách; tránh NOT IN khi cột có thể NULL"
+   ]
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "b-sql",
+   "points": 2,
+   "prompt": "Viết câu SQL lấy **đơn có amount lớn nhất của từng khách** (mỗi khách một dòng: customer_id, id, amount) từ `orders(id, customer_id, amount)`; hoà thì lấy id nhỏ hơn.",
+   "modelAnswer": "SELECT customer_id, id, amount\nFROM (\n  SELECT customer_id, id, amount,\n         ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC, id) AS rn\n  FROM orders\n) t\nWHERE rn = 1;",
+   "rubric": [
+    "Dùng `ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC ...)`",
+    "Có tiêu chí phá hoà (id)",
+    "Lọc `rn = 1` ở truy vấn ngoài (không lọc window trong WHERE cùng cấp)"
+   ]
+  }
+ ]
+}

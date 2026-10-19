@@ -1,0 +1,1006 @@
+{
+ "title": "CĐ-08 · SQL cho phân tích dữ liệu",
+ "description": "SELECT, WHERE, ORDER BY, NULL — 15% · Các loại JOIN — 25% · GROUP BY, HAVING, hàm gộp — 25% · Window function (ROW_NUMBER, LAG, SUM OVER) — 20% · CTE, truy vấn con, index — 15%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T08-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bảng `customers`:\n\n| id | name | city |\n|---|---|---|\n| 1 | An | HN |\n| 2 | Binh | HCM |\n| 3 | Chi | HN |\n| 4 | Dung | DN |\n| 5 | Ha | NULL |\n\nKhách `Ha` chưa khai báo thành phố nên `city` là NULL. Điều kiện `WHERE` nào lọc ra **đúng những khách chưa có thành phố**?",
+   "explanation": "Mọi phép so sánh `=`, `<>` với NULL cho kết quả UNKNOWN, mà `WHERE` chỉ giữ dòng có điều kiện TRUE. Muốn kiểm tra thiếu giá trị phải dùng vị từ `IS NULL` (ngược lại là `IS NOT NULL`).",
+   "section": "b-sql",
+   "long": "#### Ý chính\nTrong SQL, NULL nghĩa là **\"không biết giá trị\"**, không phải số 0 hay chuỗi rỗng. Vì vậy SQL dùng **logic ba trị**: mỗi điều kiện cho TRUE, FALSE hoặc UNKNOWN. Mọi phép so sánh `=`, `<>`, `<`, `>`... mà một vế là NULL đều cho UNKNOWN, và `WHERE` chỉ giữ dòng có điều kiện **TRUE**. Muốn hỏi \"có thiếu giá trị không\" phải dùng vị từ riêng `IS NULL` / `IS NOT NULL`, vốn chỉ trả TRUE hoặc FALSE.\n\n#### Từng bước\nĐánh giá từng điều kiện trên 5 khách:\n\n| name | city | `city = NULL` | `city IS NULL` | `city = ''` | `city IN (NULL)` |\n|---|---|---|---|---|---|\n| An | HN | UNKNOWN | FALSE | FALSE | UNKNOWN |\n| Binh | HCM | UNKNOWN | FALSE | FALSE | UNKNOWN |\n| Chi | HN | UNKNOWN | FALSE | FALSE | UNKNOWN |\n| Dung | DN | UNKNOWN | FALSE | FALSE | UNKNOWN |\n| Ha | NULL | UNKNOWN | **TRUE** | UNKNOWN | UNKNOWN |\n| **Số dòng giữ lại** | | 0 | **1** | 0 | 0 |\n\nChạy lại bằng Python:\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"CREATE TABLE customers(id INTEGER, name TEXT, city TEXT);\nINSERT INTO customers VALUES (1,'An','HN'),(2,'Binh','HCM'),(3,'Chi','HN'),(4,'Dung','DN'),(5,'Ha',NULL);\"\"\")\nfor cond in [\"city = NULL\", \"city IS NULL\", \"city = ''\", \"city IN (NULL)\"]:\n    print(cond, con.execute(f\"SELECT COUNT(*) FROM customers WHERE {cond}\").fetchone()[0])\n```\n\n#### Bẫy thường gặp\n- Viết `= NULL` hoặc `<> NULL`: không báo lỗi, chỉ lặng lẽ trả 0 dòng, nên rất khó phát hiện.\n- Coi chuỗi rỗng là NULL: PostgreSQL và SQLite phân biệt hai thứ này (riêng Oracle coi `''` là NULL). Dữ liệu thực tế thường có cả hai, khi làm sạch hay gộp bằng `NULLIF(city, '') IS NULL`.\n- Nhớ rằng `COUNT(city)` cũng bỏ qua NULL, nên `COUNT(*) - COUNT(city)` là một cách khác để đếm số khách thiếu thành phố.\n\n#### Đọc thêm\n- [PostgreSQL: Comparison Functions and Operators](https://www.postgresql.org/docs/current/functions-comparison.html)\n- [SQLite: NULL Handling](https://sqlite.org/nulls.html)\n- [Null (SQL), Wikipedia](https://en.wikipedia.org/wiki/Null_%28SQL%29)\n",
+   "distractors": {
+    "A": "`city = NULL` cho UNKNOWN với mọi dòng (kể cả dòng của Ha), nên truy vấn trả về 0 khách chứ không phải 1. Đây là lỗi kinh điển của người mới học SQL.",
+    "C": "Chuỗi rỗng `''` là một giá trị cụ thể, khác NULL (cả PostgreSQL lẫn SQLite đều phân biệt); điều kiện này chỉ bắt được khách nhập chuỗi rỗng, ở đây ra 0 khách.",
+    "D": "`city IN (NULL)` tương đương `city = NULL`, vẫn cho UNKNOWN với mọi dòng nên ra 0 khách."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`WHERE city = NULL`"
+    },
+    {
+     "key": "B",
+     "text": "`WHERE city IS NULL`"
+    },
+    {
+     "key": "C",
+     "text": "`WHERE city = ''`"
+    },
+    {
+     "key": "D",
+     "text": "`WHERE city IN (NULL)`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T08-A02",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Một câu truy vấn có đủ các mệnh đề `SELECT`, `FROM`, `WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`. Theo **thứ tự xử lý logic** (thứ tự định nghĩa kết quả, không phải thứ tự viết), dãy nào đúng?",
+   "explanation": "Bảng nguồn được dựng ở FROM/JOIN, WHERE lọc từng dòng, GROUP BY gộp nhóm, HAVING lọc nhóm, SELECT tính cột, cuối cùng ORDER BY (rồi LIMIT). Vì vậy alias đặt ở SELECT dùng được trong ORDER BY nhưng PostgreSQL không cho dùng trong WHERE.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nThứ tự **viết** một câu truy vấn (SELECT trước) khác thứ tự **xử lý logic**. Về mặt ý nghĩa, kết quả được định nghĩa như sau: dựng bảng nguồn ở FROM/JOIN, lọc dòng bằng WHERE, gộp nhóm bằng GROUP BY, lọc nhóm bằng HAVING, tính các cột ở SELECT (kể cả window function và DISTINCT), rồi ORDER BY và LIMIT. Bộ tối ưu có thể thực thi khác đi, nhưng kết quả phải giống như khi làm theo thứ tự này.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  F[\"1. FROM / JOIN\"] --> W[\"2. WHERE: lọc dòng\"]\n  W --> G[\"3. GROUP BY: gộp nhóm\"]\n  G --> H[\"4. HAVING: lọc nhóm\"]\n  H --> S[\"5. SELECT: tính cột, window, DISTINCT\"]\n  S --> O[\"6. ORDER BY\"]\n  O --> L[\"7. LIMIT / OFFSET\"]\n```\n\n#### Từng bước: hệ quả thực tế\n| Câu hỏi | Trả lời nhờ thứ tự logic |\n|---|---|\n| Vì sao không đặt `SUM(...) > 100` trong WHERE? | Ở bước 2 nhóm chưa tồn tại |\n| Vì sao alias của SELECT dùng được trong ORDER BY? | Bước 6 đứng sau bước 5 |\n| Vì sao PostgreSQL không cho dùng alias trong WHERE? | Bước 2 đứng trước bước 5 |\n| Vì sao không lọc trực tiếp theo `ROW_NUMBER()`? | Window được tính ở bước 5, sau WHERE và HAVING |\n\nThử trên PostgreSQL:\n\n```sql\nSELECT amount * 2 AS gap_doi FROM orders WHERE gap_doi > 100;\n-- ERROR: column \"gap_doi\" does not exist\nSELECT amount * 2 AS gap_doi FROM orders ORDER BY gap_doi;  -- chạy được\n```\n\n#### Bẫy thường gặp\n- SQLite \"dễ tính\" hơn: nó cho dùng alias của SELECT trong WHERE. Code chạy trên SQLite có thể hỏng khi chuyển sang PostgreSQL, nên hãy luyện theo chuẩn chặt hơn.\n- Nhớ thứ tự logic giúp đọc truy vấn của người khác: bắt đầu từ FROM để biết dữ liệu gốc là gì, đừng bắt đầu từ SELECT.\n\n#### Đọc thêm\n- [PostgreSQL: SELECT (mục Description)](https://www.postgresql.org/docs/current/sql-select.html)\n- [Select (SQL), Wikipedia](https://en.wikipedia.org/wiki/Select_%28SQL%29)\n",
+   "distractors": {
+    "B": "Đây là thứ tự **viết**. Nếu SELECT thật sự chạy trước thì alias của SELECT đã dùng được trong WHERE, nhưng PostgreSQL báo lỗi `column ... does not exist` khi làm vậy.",
+    "C": "WHERE lọc từng dòng nên phải chạy trước GROUP BY; một điều kiện đặt sau khi gộp nhóm chính là vai trò của HAVING.",
+    "D": "SELECT cần các nhóm đã được tạo và lọc xong (để tính hàm gộp như `SUM`), nên đứng sau cả GROUP BY lẫn HAVING."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY"
+    },
+    {
+     "key": "B",
+     "text": "SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY"
+    },
+    {
+     "key": "C",
+     "text": "FROM → GROUP BY → WHERE → HAVING → SELECT → ORDER BY"
+    },
+    {
+     "key": "D",
+     "text": "FROM → WHERE → SELECT → GROUP BY → HAVING → ORDER BY"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T08-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bảng `customers` có 5 khách (id 1 đến 5); bảng `orders` chỉ có đơn của khách 1, 2, 3. Bạn muốn kết quả **giữ đủ 5 khách**, khách chưa có đơn thì các cột lấy từ `orders` là NULL. Điền phép nối vào chỗ trống:\n\n```sql\nSELECT c.name, o.id\nFROM customers c ____ orders o ON o.customer_id = c.id;\n```",
+   "explanation": "`A LEFT JOIN B` giữ mọi dòng của bảng bên trái A; dòng không khớp được ghép với các cột NULL của B. Ở đây bảng bên trái là `customers` nên khách 4 và 5 vẫn xuất hiện với `o.id` là NULL.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nBốn phép nối cơ bản khác nhau ở chỗ **giữ dòng không khớp của bảng nào**:\n\n- `INNER JOIN`: chỉ giữ cặp khớp.\n- `LEFT JOIN`: giữ mọi dòng bảng **trái**, thiếu bên phải thì điền NULL.\n- `RIGHT JOIN`: giữ mọi dòng bảng **phải**.\n- `FULL JOIN`: giữ cả hai phía.\n\nBảng trái là bảng đứng trước từ khoá JOIN. Ở đây bảng trái là `customers`, cần giữ đủ khách nên dùng `LEFT JOIN`.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 520 210\" width=\"100%\" style=\"max-width:560px\">\n<circle cx=\"200\" cy=\"100\" r=\"80\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<circle cx=\"310\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<path d=\"M255,42 A80,80 0 0,1 255,158 A80,80 0 0,1 255,42 Z\" fill=\"#3b82f6\" fill-opacity=\"0.35\"/>\n<text x=\"160\" y=\"105\" font-size=\"14\" text-anchor=\"middle\" fill=\"currentColor\">customers</text>\n<text x=\"355\" y=\"105\" font-size=\"14\" text-anchor=\"middle\" fill=\"currentColor\">orders</text>\n<text x=\"175\" y=\"125\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">khách 4, 5</text>\n<text x=\"175\" y=\"140\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">o.* = NULL</text>\n<text x=\"255\" y=\"105\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">khớp</text>\n<text x=\"260\" y=\"200\" font-size=\"14\" text-anchor=\"middle\" fill=\"currentColor\">LEFT JOIN: phần tô màu được giữ lại</text>\n</svg>\n\n#### Từng bước\nKết quả `customers c LEFT JOIN orders o ON o.customer_id = c.id` (rút gọn):\n\n| c.name | o.id |\n|---|---|\n| An | 101, 102, 106 (3 dòng) |\n| Binh | 103, 105 (2 dòng) |\n| Chi | 104, 107 (2 dòng) |\n| Dung | NULL |\n| Ha | NULL |\n\nTổng $3 + 2 + 2 + 1 + 1 = 9$ dòng; INNER JOIN chỉ cho 7 dòng (mất Dung và Ha).\n\n#### Bẫy thường gặp\n- Nhầm chiều: `orders o LEFT JOIN customers c` giữ mọi **đơn**, không phải mọi khách. Đổi chỗ hai bảng tương đương đổi LEFT thành RIGHT.\n- Thêm điều kiện lên bảng bên phải vào WHERE sẽ biến LEFT JOIN thành INNER JOIN (xem câu B03).\n- Sơ đồ Venn chỉ là hình ảnh gần đúng: một khách có nhiều đơn sẽ xuất hiện nhiều dòng.\n\n#### Đọc thêm\n- [PostgreSQL: Joined Tables](https://www.postgresql.org/docs/current/queries-table-expressions.html)\n- [Join (SQL), Wikipedia](https://en.wikipedia.org/wiki/Join_%28SQL%29)\n",
+   "distractors": {
+    "A": "INNER JOIN chỉ giữ cặp dòng khớp điều kiện ON, nên khách 4 và 5 (chưa có đơn) bị loại.",
+    "B": "RIGHT JOIN giữ mọi dòng của bảng bên **phải** (`orders`); nhầm chiều trái/phải là lỗi rất hay gặp. Với dữ liệu này kết quả giống INNER JOIN, vẫn mất khách 4 và 5.",
+    "D": "CROSS JOIN là tích Descartes, ghép mọi khách với mọi đơn và không dùng mệnh đề ON: PostgreSQL báo lỗi cú pháp; SQLite lại chấp nhận và xử lý như INNER JOIN, vẫn mất khách 4 và 5."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`INNER JOIN`"
+    },
+    {
+     "key": "B",
+     "text": "`RIGHT JOIN`"
+    },
+    {
+     "key": "C",
+     "text": "`LEFT JOIN`"
+    },
+    {
+     "key": "D",
+     "text": "`CROSS JOIN`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T08-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Shop thời trang muốn sinh mọi biến thể sản phẩm. Bảng `sizes` có 3 dòng (S, M, L), bảng `colors` có 4 dòng (do, xanh, den, trang). Truy vấn sau trả về số nào?\n\n```sql\nSELECT COUNT(*) FROM sizes CROSS JOIN colors;\n```",
+   "explanation": "CROSS JOIN là tích Descartes: mỗi dòng bảng trái ghép với mọi dòng bảng phải, nên số dòng là $3 \\times 4 = 12$.",
+   "section": "b-sql",
+   "long": "#### Ý chính\n`CROSS JOIN` tạo **tích Descartes**: mỗi dòng của bảng trái ghép với **mọi** dòng của bảng phải, không cần điều kiện khớp. Số dòng kết quả bằng tích số dòng: $|A \\times B| = |A| \\cdot |B|$.\n\n#### Từng bước\n- `sizes` có 3 dòng, `colors` có 4 dòng.\n- Số biến thể $= 3 \\times 4 = 12$.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 460 220\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"40\" y=\"30\" font-size=\"13\" fill=\"currentColor\">size \\ màu</text>\n<text x=\"150\" y=\"30\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">do</text>\n<text x=\"225\" y=\"30\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">xanh</text>\n<text x=\"300\" y=\"30\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">den</text>\n<text x=\"375\" y=\"30\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">trang</text>\n<text x=\"70\" y=\"75\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">S</text>\n<text x=\"70\" y=\"125\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">M</text>\n<text x=\"70\" y=\"175\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">L</text>\n<g fill=\"#10b981\" fill-opacity=\"0.35\" stroke=\"currentColor\">\n<rect x=\"120\" y=\"50\" width=\"60\" height=\"40\"/><rect x=\"195\" y=\"50\" width=\"60\" height=\"40\"/><rect x=\"270\" y=\"50\" width=\"60\" height=\"40\"/><rect x=\"345\" y=\"50\" width=\"60\" height=\"40\"/>\n<rect x=\"120\" y=\"100\" width=\"60\" height=\"40\"/><rect x=\"195\" y=\"100\" width=\"60\" height=\"40\"/><rect x=\"270\" y=\"100\" width=\"60\" height=\"40\"/><rect x=\"345\" y=\"100\" width=\"60\" height=\"40\"/>\n<rect x=\"120\" y=\"150\" width=\"60\" height=\"40\"/><rect x=\"195\" y=\"150\" width=\"60\" height=\"40\"/><rect x=\"270\" y=\"150\" width=\"60\" height=\"40\"/><rect x=\"345\" y=\"150\" width=\"60\" height=\"40\"/>\n</g>\n<text x=\"230\" y=\"212\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">3 × 4 = 12 ô, mỗi ô là một dòng kết quả</text>\n</svg>\n\nChạy lại bằng Python:\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"CREATE TABLE sizes(s TEXT); INSERT INTO sizes VALUES ('S'),('M'),('L');\nCREATE TABLE colors(c TEXT); INSERT INTO colors VALUES ('do'),('xanh'),('den'),('trang');\"\"\")\nprint(con.execute(\"SELECT COUNT(*) FROM sizes CROSS JOIN colors\").fetchone()[0])  # 12\n```\n\n#### Bẫy thường gặp\n- Quên điều kiện nối (ví dụ viết `FROM a, b` mà thiếu WHERE) cũng tạo tích Descartes ngoài ý muốn: hai bảng 100 nghìn dòng cho $10^{10}$ dòng.\n- Nhầm với `UNION ALL` (cộng số dòng: 7) hay ghép theo vị trí kiểu `zip` (3 dòng). SQL không có khái niệm \"dòng thứ i\" nếu không có ORDER BY.\n- CROSS JOIN hữu ích có chủ đích: sinh lưới biến thể sản phẩm, lưới (ngày × cửa hàng) để LEFT JOIN doanh thu và lộ ra các ô bằng 0.\n\n#### Đọc thêm\n- [PostgreSQL: Joined Tables (CROSS JOIN)](https://www.postgresql.org/docs/current/queries-table-expressions.html)\n- [Cartesian product, Wikipedia](https://en.wikipedia.org/wiki/Cartesian_product)\n",
+   "distractors": {
+    "A": "Cộng số dòng $3 + 4 = 7$ là kết quả của `UNION ALL` hai bảng, không phải phép nối.",
+    "C": "Nghĩ kết quả giữ số dòng của bảng lớn hơn như một phép nối một-một; CROSS JOIN không có điều kiện khớp nên nhân số dòng.",
+    "D": "Nhầm CROSS JOIN với ghép theo vị trí (kiểu `zip` trong Python) nên chỉ ra $\\min(3, 4) = 3$; SQL không ghép dòng theo vị trí."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "7"
+    },
+    {
+     "key": "B",
+     "text": "12"
+    },
+    {
+     "key": "C",
+     "text": "4"
+    },
+    {
+     "key": "D",
+     "text": "3"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T08-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Cột `amount` của bảng `orders` có 7 dòng với các giá trị: 200, 150, 300, 120, 80, NULL, 150. Biểu thức nào trả về **số đơn có ghi số tiền** (tức là 6)?",
+   "explanation": "`COUNT(*)` đếm mọi dòng; `COUNT(biểu thức)` chỉ đếm các dòng mà biểu thức khác NULL. Có 7 dòng, 1 dòng NULL nên `COUNT(amount)` $= 7 - 1 = 6$.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nBa dạng của COUNT hay bị nhầm:\n\n| Dạng | Đếm gì | Kết quả với 200, 150, 300, 120, 80, NULL, 150 |\n|---|---|---|\n| `COUNT(*)` | mọi dòng | 7 |\n| `COUNT(amount)` | dòng có amount khác NULL | 6 |\n| `COUNT(DISTINCT amount)` | số giá trị khác nhau, bỏ NULL | 5 |\n| `COUNT(amount IS NOT NULL)` | dòng mà biểu thức khác NULL | 7 |\n\n#### Từng bước\n1. Có 7 dòng nên `COUNT(*)` = 7.\n2. Bỏ một dòng NULL: `COUNT(amount)` $= 7 - 1 = 6$.\n3. Các giá trị khác nhau: {200, 150, 300, 120, 80} gồm 5 giá trị (150 lặp lại).\n4. `amount IS NOT NULL` cho TRUE hoặc FALSE ở **mọi** dòng (PostgreSQL trả boolean, SQLite trả 1/0), không có NULL nào, nên COUNT đếm đủ 7.\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE orders(amount INTEGER)\")\ncon.executemany(\"INSERT INTO orders VALUES (?)\", [(200,), (150,), (300,), (120,), (80,), (None,), (150,)])\nprint(con.execute(\"\"\"SELECT COUNT(*), COUNT(amount), COUNT(DISTINCT amount),\n                            COUNT(amount IS NOT NULL) FROM orders\"\"\").fetchone())  # (7, 6, 5, 7)\n```\n\n#### Bẫy thường gặp\n- Muốn đếm có điều kiện, đừng viết điều kiện thẳng vào COUNT. Dùng `COUNT(CASE WHEN điều_kiện THEN 1 END)`: CASE không có ELSE trả NULL nên dòng không thoả bị bỏ. Hoặc dùng `SUM(CASE WHEN ... THEN 1 ELSE 0 END)`. PostgreSQL còn có cú pháp `COUNT(*) FILTER (WHERE ...)`.\n- `AVG(amount)` cũng bỏ NULL: $\\dfrac{1000}{6} \\approx 166{,}7$ chứ không phải $\\dfrac{1000}{7}$.\n\n#### Đọc thêm\n- [PostgreSQL: Aggregate Functions](https://www.postgresql.org/docs/current/functions-aggregate.html)\n- [SQLite: Built-in Aggregate Functions](https://sqlite.org/lang_aggfunc.html)\n",
+   "distractors": {
+    "A": "`COUNT(*)` đếm cả dòng có amount NULL nên ra 7.",
+    "B": "Biểu thức `amount IS NOT NULL` luôn cho TRUE hoặc FALSE (không bao giờ NULL), mà COUNT đếm mọi giá trị khác NULL, nên vẫn ra 7. Muốn đếm có điều kiện phải dùng `COUNT(CASE WHEN ... THEN 1 END)`.",
+    "C": "DISTINCT gộp hai giá trị 150 thành một, nên ra 5 (số giá trị khác nhau), không phải số đơn."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`COUNT(*)`"
+    },
+    {
+     "key": "B",
+     "text": "`COUNT(amount IS NOT NULL)`"
+    },
+    {
+     "key": "C",
+     "text": "`COUNT(DISTINCT amount)`"
+    },
+    {
+     "key": "D",
+     "text": "`COUNT(amount)`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T08-A06",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Từ bảng `orders(id, customer_id, amount, ...)`, bạn cần danh sách các khách có **tổng** `amount` lớn hơn 250. Điều kiện `SUM(amount) > 250` phải đặt ở đâu?",
+   "explanation": "WHERE lọc **từng dòng** trước khi gộp nên không chứa được hàm gộp; HAVING lọc **từng nhóm** sau GROUP BY: `GROUP BY customer_id HAVING SUM(amount) > 250`.",
+   "section": "b-sql",
+   "long": "#### Ý chính\n**WHERE lọc dòng, HAVING lọc nhóm.** WHERE chạy trước GROUP BY nên chỉ nhìn thấy giá trị của từng dòng; HAVING chạy sau GROUP BY nên dùng được hàm gộp như `SUM`, `COUNT`, `AVG`.\n\n```sql\nSELECT customer_id, SUM(amount) AS tong\nFROM orders\nGROUP BY customer_id\nHAVING SUM(amount) > 250;\n```\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  A[\"orders: 7 dòng\"] --> W[\"WHERE: điều kiện trên từng dòng\"]\n  W --> G[\"GROUP BY customer_id: 3 nhóm\"]\n  G --> H[\"HAVING SUM(amount) > 250\"]\n  H --> R[\"Nhóm thoả: khách 1 (350), khách 2 (380), khách 3 (270)\"]\n```\n\n#### Từng bước với dữ liệu mẫu\n| customer_id | các amount | SUM | `> 250`? |\n|---|---|---|---|\n| 1 | 200, 150, NULL | 350 | có |\n| 2 | 300, 80 | 380 | có |\n| 3 | 120, 150 | 270 | có |\n\nNếu chỉ tính đơn `paid` (thêm `WHERE status = 'paid'`, lọc dòng trước khi gộp) thì khách 2 còn 80 và bị loại. Đây là ví dụ dùng **cả hai**: WHERE cho điều kiện dòng, HAVING cho điều kiện nhóm.\n\n#### Bẫy thường gặp\n- Đặt điều kiện dòng (ví dụ `status = 'paid'`) vào HAVING: PostgreSQL báo lỗi vì `status` không nằm trong GROUP BY; SQLite lại chạy và lấy status của một dòng bất kỳ, cho kết quả sai mà không báo.\n- Dùng ORDER BY + LIMIT thay cho ngưỡng: \"top 2\" khác \"tổng trên 250\".\n\n#### Đọc thêm\n- [PostgreSQL tutorial: Aggregate Functions](https://www.postgresql.org/docs/current/tutorial-agg.html)\n- [Having (SQL), Wikipedia](https://en.wikipedia.org/wiki/Having_%28SQL%29)\n",
+   "distractors": {
+    "A": "Hàm gộp chưa có giá trị ở bước WHERE (nhóm chưa được tạo): PostgreSQL báo `aggregate functions are not allowed in WHERE`, SQLite báo `misuse of aggregate`.",
+    "C": "Alias của SELECT được định nghĩa sau WHERE theo thứ tự logic nên PostgreSQL báo không tìm thấy cột `tong`; SQLite cho dùng alias trong WHERE nhưng `tong` là hàm gộp nên vẫn báo `misuse of aggregate`.",
+    "D": "ORDER BY chỉ sắp xếp; LIMIT cắt theo số dòng cố định chứ không theo ngưỡng 250, nên có thể lấy thừa hoặc thiếu khách."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Trong `WHERE`, vì `WHERE` là nơi đặt mọi điều kiện lọc"
+    },
+    {
+     "key": "B",
+     "text": "Trong `HAVING` sau `GROUP BY customer_id`"
+    },
+    {
+     "key": "C",
+     "text": "Đặt `SUM(amount) AS tong` ở SELECT rồi viết `WHERE tong > 250`"
+    },
+    {
+     "key": "D",
+     "text": "Trong `ORDER BY`, rồi dùng `LIMIT` để lấy các khách đứng đầu"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T08-A07",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bảng `orders` có 7 dòng thuộc 3 khách (`customer_id` 1, 2, 3); một dòng có `amount` là NULL. Truy vấn sau trả về bao nhiêu dòng?\n\n```sql\nSELECT id, customer_id,\n       SUM(amount) OVER (PARTITION BY customer_id) AS tong_khach\nFROM orders;\n```",
+   "explanation": "Window function tính trên một \"cửa sổ\" các dòng liên quan nhưng **không gộp dòng**: mỗi dòng đầu vào vẫn cho một dòng kết quả, chỉ thêm cột `tong_khach`. Không có WHERE nên ra đủ 7 dòng.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nHàm gộp có `OVER (...)` là **window function**: nó tính trên một tập dòng liên quan (cửa sổ) nhưng **giữ nguyên từng dòng**. `GROUP BY` thì gộp mỗi nhóm thành một dòng. Vì vậy truy vấn có 7 dòng đầu vào và không có WHERE thì trả 7 dòng.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 230\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"120\" y=\"20\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">GROUP BY: 7 dòng → 3 dòng</text>\n<text x=\"400\" y=\"20\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">OVER (PARTITION BY): 7 → 7</text>\n<g stroke=\"currentColor\" fill-opacity=\"0.35\">\n<rect x=\"30\" y=\"35\" width=\"70\" height=\"22\" fill=\"#3b82f6\"/><rect x=\"30\" y=\"60\" width=\"70\" height=\"22\" fill=\"#3b82f6\"/><rect x=\"30\" y=\"85\" width=\"70\" height=\"22\" fill=\"#3b82f6\"/>\n<rect x=\"30\" y=\"115\" width=\"70\" height=\"22\" fill=\"#10b981\"/><rect x=\"30\" y=\"140\" width=\"70\" height=\"22\" fill=\"#10b981\"/>\n<rect x=\"30\" y=\"170\" width=\"70\" height=\"22\" fill=\"#f59e0b\"/><rect x=\"30\" y=\"195\" width=\"70\" height=\"22\" fill=\"#f59e0b\"/>\n<rect x=\"150\" y=\"60\" width=\"70\" height=\"22\" fill=\"#3b82f6\"/><rect x=\"150\" y=\"127\" width=\"70\" height=\"22\" fill=\"#10b981\"/><rect x=\"150\" y=\"182\" width=\"70\" height=\"22\" fill=\"#f59e0b\"/>\n<rect x=\"320\" y=\"35\" width=\"70\" height=\"22\" fill=\"#3b82f6\"/><rect x=\"320\" y=\"60\" width=\"70\" height=\"22\" fill=\"#3b82f6\"/><rect x=\"320\" y=\"85\" width=\"70\" height=\"22\" fill=\"#3b82f6\"/>\n<rect x=\"320\" y=\"115\" width=\"70\" height=\"22\" fill=\"#10b981\"/><rect x=\"320\" y=\"140\" width=\"70\" height=\"22\" fill=\"#10b981\"/>\n<rect x=\"320\" y=\"170\" width=\"70\" height=\"22\" fill=\"#f59e0b\"/><rect x=\"320\" y=\"195\" width=\"70\" height=\"22\" fill=\"#f59e0b\"/>\n</g>\n<g stroke=\"currentColor\" stroke-width=\"1.5\">\n<line x1=\"100\" y1=\"71\" x2=\"150\" y2=\"71\"/><line x1=\"100\" y1=\"138\" x2=\"150\" y2=\"138\"/><line x1=\"100\" y1=\"193\" x2=\"150\" y2=\"193\"/>\n</g>\n<g font-size=\"12\" fill=\"currentColor\">\n<text x=\"400\" y=\"51\">tong_khach = 350</text><text x=\"400\" y=\"76\">tong_khach = 350</text><text x=\"400\" y=\"101\">tong_khach = 350</text>\n<text x=\"400\" y=\"131\">tong_khach = 380</text><text x=\"400\" y=\"156\">tong_khach = 380</text>\n<text x=\"400\" y=\"186\">tong_khach = 270</text><text x=\"400\" y=\"211\">tong_khach = 270</text>\n<text x=\"160\" y=\"77\">khách 1</text><text x=\"160\" y=\"143\">khách 2</text><text x=\"160\" y=\"198\">khách 3</text>\n</g>\n</svg>\n\n#### Từng bước\n| id | customer_id | amount | tong_khach |\n|---|---|---|---|\n| 101 | 1 | 200 | 350 |\n| 102 | 1 | 150 | 350 |\n| 106 | 1 | NULL | 350 |\n| 103 | 2 | 300 | 380 |\n| 105 | 2 | 80 | 380 |\n| 104 | 3 | 120 | 270 |\n| 107 | 3 | 150 | 270 |\n\nDòng 106 vẫn có mặt; SUM chỉ bỏ qua NULL khi cộng. Nhờ giữ dòng, ta tính được ngay tỉ trọng mỗi đơn: `amount * 1.0 / SUM(amount) OVER (PARTITION BY customer_id)`.\n\n#### Bẫy thường gặp\n- Nghĩ window function lọc hay gộp dòng. Muốn lọc theo kết quả của nó phải bọc thêm một tầng truy vấn (CTE hoặc truy vấn con).\n- `PARTITION BY` không bắt buộc: `SUM(amount) OVER ()` là tổng toàn bảng gắn lên mọi dòng.\n\n#### Đọc thêm\n- [PostgreSQL tutorial: Window Functions](https://www.postgresql.org/docs/current/tutorial-window.html)\n- [Window function (SQL), Wikipedia](https://en.wikipedia.org/wiki/Window_function_%28SQL%29)\n",
+   "distractors": {
+    "B": "Nhầm `PARTITION BY` với `GROUP BY`: GROUP BY mới gộp mỗi khách thành một dòng (3 dòng).",
+    "C": "Nghĩ `SUM` luôn gộp toàn bảng thành một dòng; điều đó chỉ đúng với hàm gộp thường không có OVER và không có GROUP BY.",
+    "D": "Nghĩ dòng có amount NULL bị bỏ. SUM bỏ qua NULL khi **cộng**, nhưng dòng đó vẫn có mặt trong kết quả."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "7"
+    },
+    {
+     "key": "B",
+     "text": "3"
+    },
+    {
+     "key": "C",
+     "text": "1"
+    },
+    {
+     "key": "D",
+     "text": "6"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T08-A08",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Trong PostgreSQL, đặt `EXPLAIN` và `EXPLAIN ANALYZE` trước cùng một câu lệnh thì khác nhau chủ yếu ở điểm nào?",
+   "explanation": "`EXPLAIN` chỉ lập và in kế hoạch với chi phí, số dòng **ước tính**; `EXPLAIN ANALYZE` **thực thi** câu lệnh rồi in thêm thời gian và số dòng **thực tế** của từng nút. Với `UPDATE`/`DELETE` nên bọc trong `BEGIN; ... ROLLBACK;`.",
+   "section": "b-sql",
+   "long": "#### Ý chính\n`EXPLAIN` cho biết **kế hoạch** mà planner định dùng (quét tuần tự hay dùng index, thứ tự JOIN...) cùng chi phí và số dòng **ước tính**; câu lệnh không chạy. `EXPLAIN ANALYZE` **thực thi thật** câu lệnh rồi in thêm số liệu **thực tế** cho từng nút: `actual time`, `rows`, `loops`. So sánh số dòng ước tính với thực tế giúp phát hiện thống kê lỗi thời.\n\n#### Hình minh hoạ\n```mermaid\nflowchart TD\n  Q[\"Câu lệnh SQL\"] --> P[\"Planner chọn kế hoạch\"]\n  P --> E[\"EXPLAIN: in kế hoạch và ước tính, dừng ở đây\"]\n  P --> X[\"EXPLAIN ANALYZE: thực thi thật\"]\n  X --> M[\"In thêm actual time, rows, loops\"]\n  X --> D[\"Nếu là DELETE hoặc UPDATE: dữ liệu bị thay đổi thật\"]\n```\n\n#### Từng bước: dùng an toàn\n```sql\nEXPLAIN SELECT * FROM orders WHERE customer_id = 42;\n--  Index Scan using idx_cust_date on orders  (cost=0.43..12.50 rows=25 width=40)\n\nBEGIN;\nEXPLAIN ANALYZE DELETE FROM orders WHERE order_date < '2020-01-01';\nROLLBACK;   -- huỷ thay đổi sau khi đã đo\n```\n(Các con số chi phí ở trên chỉ minh hoạ dạng hiển thị.)\n\n| | EXPLAIN | EXPLAIN ANALYZE |\n|---|---|---|\n| Chạy câu lệnh? | Không | Có |\n| Số dòng | ước tính | ước tính và thực tế |\n| Thời gian | không có | có |\n| An toàn với DELETE/UPDATE? | Có | Chỉ khi bọc BEGIN ... ROLLBACK |\n\n#### Bẫy thường gặp\n- Nhầm với lệnh `ANALYZE tên_bảng`, lệnh này thu thập thống kê cho planner, không in kế hoạch.\n- Chạy `EXPLAIN ANALYZE` trên truy vấn rất nặng ở production: nó chạy hết câu lệnh nên tốn đúng bằng thời gian thật.\n- SQLite có lệnh tương tự là `EXPLAIN QUERY PLAN` (chỉ in kế hoạch, không có phần ANALYZE).\n\n#### Đọc thêm\n- [PostgreSQL: Using EXPLAIN](https://www.postgresql.org/docs/current/using-explain.html)\n- [PostgreSQL: EXPLAIN](https://www.postgresql.org/docs/current/sql-explain.html)\n- [SQLite: EXPLAIN QUERY PLAN](https://sqlite.org/eqp.html)\n",
+   "distractors": {
+    "A": "ANALYZE không chỉ in chi tiết hơn: nó chạy câu lệnh và đo số liệu thật (actual time, rows, loops), đây là khác biệt cốt lõi.",
+    "B": "Nhầm với lệnh độc lập `ANALYZE tên_bảng` (thu thập thống kê cho planner). Tuỳ chọn ANALYZE của EXPLAIN là chạy câu lệnh để đo.",
+    "D": "Sai và nguy hiểm: `EXPLAIN ANALYZE DELETE ...` xoá dữ liệu thật; tài liệu PostgreSQL khuyên bọc trong transaction rồi ROLLBACK."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Hai lệnh như nhau, `ANALYZE` chỉ in thêm chi phí ước tính chi tiết hơn"
+    },
+    {
+     "key": "B",
+     "text": "`EXPLAIN ANALYZE` cập nhật thống kê bảng như lệnh `ANALYZE`, không chạy câu lệnh"
+    },
+    {
+     "key": "C",
+     "text": "`EXPLAIN ANALYZE` chạy thật câu lệnh, in thêm thời gian và số dòng thực tế"
+    },
+    {
+     "key": "D",
+     "text": "`EXPLAIN ANALYZE` chạy câu lệnh ở chế độ chỉ đọc nên an toàn với `DELETE`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T08-B01",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Bảng `orders` (`order_date` lưu dạng chuỗi `'YYYY-MM-DD'`):\n\n| id | customer_id | order_date | amount | status |\n|---|---|---|---|---|\n| 101 | 1 | 2026-01-05 | 200 | paid |\n| 102 | 1 | 2026-01-20 | 150 | paid |\n| 103 | 2 | 2026-01-11 | 300 | cancelled |\n| 104 | 3 | 2026-02-02 | 120 | paid |\n| 105 | 2 | 2026-02-15 | 80 | paid |\n| 106 | 1 | 2026-02-28 | NULL | pending |\n| 107 | 3 | 2026-03-03 | 150 | paid |\n\nTruy vấn sau trả về gì? **Ghi mỗi dòng một bản ghi theo đúng thứ tự trả về, các cột cách nhau bằng dấu `|` (không thêm khoảng trắng), không ghi tên cột.**\n\n```sql\nSELECT id\nFROM orders\nWHERE status = 'pending' OR status = 'paid' AND amount >= 150\nORDER BY id;\n```",
+   "explanation": "`AND` ưu tiên hơn `OR`, nên điều kiện là `pending OR (paid AND amount >= 150)`. Đơn 106 pending thoả vế trái nên `TRUE OR UNKNOWN = TRUE`; các đơn paid có amount $\\ge 150$ là 101, 102, 107.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nHai điểm cần nắm cùng lúc:\n\n1. **`AND` ưu tiên hơn `OR`** (giống nhân trước cộng), nên `p OR q AND r` được hiểu là `p OR (q AND r)`.\n2. **Logic ba trị**: `TRUE OR UNKNOWN = TRUE`, còn `FALSE OR UNKNOWN = UNKNOWN`.\n\nĐiều kiện thực sự là `status = 'pending' OR (status = 'paid' AND amount >= 150)`.\n\n#### Từng bước\n| id | status | amount | `pending` | `paid AND amount >= 150` | Kết quả |\n|---|---|---|---|---|---|\n| 101 | paid | 200 | FALSE | TRUE | **giữ** |\n| 102 | paid | 150 | FALSE | TRUE (150 ≥ 150) | **giữ** |\n| 103 | cancelled | 300 | FALSE | FALSE | loại |\n| 104 | paid | 120 | FALSE | FALSE | loại |\n| 105 | paid | 80 | FALSE | FALSE | loại |\n| 106 | pending | NULL | TRUE | FALSE (vì `paid` sai) | **giữ** |\n| 107 | paid | 150 | FALSE | TRUE | **giữ** |\n\nKết quả theo `ORDER BY id`:\n\n```text\n101\n102\n106\n107\n```\n\nNếu viết `(status = 'pending' OR status = 'paid') AND amount >= 150` thì đơn 106 có `amount >= 150` là UNKNOWN, `TRUE AND UNKNOWN = UNKNOWN` nên bị loại, chỉ còn 101, 102, 107.\n\nChạy lại:\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"CREATE TABLE orders (id INTEGER PRIMARY KEY, customer_id INTEGER,\n  order_date TEXT, amount INTEGER, status TEXT);\nINSERT INTO orders VALUES\n  (101, 1, '2026-01-05', 200, 'paid'), (102, 1, '2026-01-20', 150, 'paid'),\n  (103, 2, '2026-01-11', 300, 'cancelled'), (104, 3, '2026-02-02', 120, 'paid'),\n  (105, 2, '2026-02-15', 80, 'paid'), (106, 1, '2026-02-28', NULL, 'pending'),\n  (107, 3, '2026-03-03', 150, 'paid');\"\"\")\nq = \"SELECT id FROM orders WHERE status = 'pending' OR status = 'paid' AND amount >= 150 ORDER BY id\"\nprint([r[0] for r in con.execute(q)])   # [101, 102, 106, 107]\n```\n\n#### Bẫy thường gặp\n- Đừng dựa vào trí nhớ về độ ưu tiên khi viết truy vấn thật: **luôn đặt ngoặc** khi trộn AND với OR, vừa đúng vừa dễ đọc.\n- Một cách viết gọn và an toàn hơn: `status IN ('pending', 'paid')` khi muốn \"một trong hai trạng thái\".\n\n#### Đọc thêm\n- [PostgreSQL: Operator Precedence](https://www.postgresql.org/docs/current/sql-syntax-lexical.html)\n- [Three-valued logic, Wikipedia](https://en.wikipedia.org/wiki/Three-valued_logic)\n",
+   "mistakes": [
+    {
+     "value": "101\n102\n107",
+     "why": "Đọc điều kiện thành `(pending OR paid) AND amount >= 150`. Thực ra `AND` ưu tiên hơn `OR`, nên đơn 106 (pending) được giữ dù amount là NULL: `TRUE OR UNKNOWN = TRUE`."
+    },
+    {
+     "value": "101\n106",
+     "why": "Coi `>=` như `>` nên loại hai đơn 150 (102 và 107)."
+    },
+    {
+     "value": "101\n102\n104\n105\n106\n107",
+     "why": "Bỏ quên điều kiện `amount >= 150`, lấy mọi đơn paid hoặc pending."
+    }
+   ],
+   "answer": "101\n102\n106\n107",
+   "accept": [
+    "101\n102\n106\n107"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T08-B02",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Bảng `tickets` của bộ phận chăm sóc khách hàng có cột `status` gồm 6 dòng: `'open'`, `'closed'`, `'closed'`, NULL, `'open'`, NULL (NULL là vé mới tạo, chưa phân loại). Trưởng nhóm muốn đếm mọi vé **chưa đóng**, kể cả vé chưa phân loại, nên đáp số đúng là 4. Với `SELECT COUNT(*) FROM tickets WHERE ...`, điều kiện nào cho đúng 4?",
+   "explanation": "Với dòng NULL, `status <> 'closed'` cho UNKNOWN nên bị WHERE loại; phải thêm `OR status IS NULL` để đếm $2 + 2 = 4$ vé. Cách viết tương đương: `status IS DISTINCT FROM 'closed'` (PostgreSQL, SQLite từ 3.39).",
+   "section": "b-sql",
+   "long": "#### Ý chính\nVới dòng có `status` NULL, mọi so sánh đều cho UNKNOWN, kể cả khi đã đảo dấu bằng NOT. WHERE chỉ giữ TRUE, nên vé chưa phân loại \"biến mất\" khỏi phép đếm. Muốn giữ chúng phải nói rõ bằng `IS NULL`.\n\n#### Bảng chân trị\n| status | `<> 'closed'` | `NOT (= 'closed')` | `<> 'closed' OR IS NULL` |\n|---|---|---|---|\n| open | TRUE | TRUE | TRUE |\n| closed | FALSE | FALSE | FALSE |\n| closed | FALSE | FALSE | FALSE |\n| NULL | UNKNOWN | UNKNOWN | **TRUE** |\n| open | TRUE | TRUE | TRUE |\n| NULL | UNKNOWN | UNKNOWN | **TRUE** |\n| **COUNT** | 2 | 2 | **4** |\n\nLogic ba trị của NOT: `NOT TRUE = FALSE`, `NOT FALSE = TRUE`, `NOT UNKNOWN = UNKNOWN`. Còn OR: `UNKNOWN OR TRUE = TRUE`.\n\n#### Từng bước\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE tickets(id INTEGER, status TEXT)\")\ncon.executemany(\"INSERT INTO tickets VALUES (?, ?)\",\n                [(1, \"open\"), (2, \"closed\"), (3, \"closed\"), (4, None), (5, \"open\"), (6, None)])\nfor cond in [\"status <> 'closed'\", \"NOT (status = 'closed')\",\n             \"status <> 'closed' AND status IS NOT NULL\", \"status <> 'closed' OR status IS NULL\",\n             \"status IS DISTINCT FROM 'closed'\"]:\n    print(cond, con.execute(f\"SELECT COUNT(*) FROM tickets WHERE {cond}\").fetchone()[0])\n```\n(`IS DISTINCT FROM` cần SQLite từ 3.39; trong SQLite còn viết được `status IS NOT 'closed'`.)\n\n#### Bẫy thường gặp\n- Báo cáo \"vé chưa đóng\" thiếu 2 vé mà không ai để ý, vì truy vấn không báo lỗi. Khi cột có thể NULL, hãy tự hỏi: dòng NULL nên được tính hay không?\n- `COALESCE(status, 'new') <> 'closed'` cũng đúng nhưng làm mất khả năng dùng index trên `status` (biểu thức bọc cột).\n\n#### Đọc thêm\n- [PostgreSQL: Comparison Functions and Operators (IS DISTINCT FROM)](https://www.postgresql.org/docs/current/functions-comparison.html)\n- [Three-valued logic, Wikipedia](https://en.wikipedia.org/wiki/Three-valued_logic)\n",
+   "distractors": {
+    "A": "NULL so với 'closed' cho UNKNOWN, hai vé chưa phân loại bị loại nên chỉ ra 2.",
+    "B": "`NOT(UNKNOWN)` vẫn là UNKNOWN (logic ba trị), nên vẫn ra 2; đảo dấu không cứu được NULL.",
+    "C": "Điều kiện này loại hẳn NULL một cách tường minh, kết quả 2; ngược với yêu cầu tính cả vé chưa phân loại."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`status <> 'closed'`"
+    },
+    {
+     "key": "B",
+     "text": "`NOT (status = 'closed')`"
+    },
+    {
+     "key": "C",
+     "text": "`status <> 'closed' AND status IS NOT NULL`"
+    },
+    {
+     "key": "D",
+     "text": "`status <> 'closed' OR status IS NULL`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T08-B03",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Analyst muốn liệt kê **cả 5 khách** kèm số đơn `paid` của từng người (khách chưa có đơn paid thì 0).\n\nBảng `customers`:\n\n| id | name | city |\n|---|---|---|\n| 1 | An | HN |\n| 2 | Binh | HCM |\n| 3 | Chi | HN |\n| 4 | Dung | DN |\n| 5 | Ha | NULL |\n\nBảng `orders` (`order_date` lưu dạng chuỗi `'YYYY-MM-DD'`):\n\n| id | customer_id | order_date | amount | status |\n|---|---|---|---|---|\n| 101 | 1 | 2026-01-05 | 200 | paid |\n| 102 | 1 | 2026-01-20 | 150 | paid |\n| 103 | 2 | 2026-01-11 | 300 | cancelled |\n| 104 | 3 | 2026-02-02 | 120 | paid |\n| 105 | 2 | 2026-02-15 | 80 | paid |\n| 106 | 1 | 2026-02-28 | NULL | pending |\n| 107 | 3 | 2026-03-03 | 150 | paid |\n\nCâu truy vấn đã viết:\n\n```sql\nSELECT c.name, COUNT(o.id) AS so_don\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.status = 'paid'\nGROUP BY c.id, c.name\nORDER BY c.id;\n```\n\nKết quả có mấy dòng, và sửa thế nào cho đúng yêu cầu?",
+   "explanation": "Dòng của Dung và Ha sau LEFT JOIN có `o.status` NULL, nên `WHERE o.status = 'paid'` cho UNKNOWN và loại chúng: LEFT JOIN bị biến thành INNER JOIN, còn 3 dòng (An, Binh, Chi). Đặt điều kiện vào ON thì nó chỉ quyết định dòng nào của `orders` được ghép, mọi khách vẫn được giữ.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nĐiều kiện lên bảng **bên phải** của LEFT JOIN đặt ở đâu là cả một khác biệt:\n\n- Trong **ON**: chỉ quyết định dòng nào của `orders` được ghép; mọi khách vẫn được giữ.\n- Trong **WHERE**: chạy **sau** phép nối, loại cả những dòng mà phía phải là NULL. LEFT JOIN thành INNER JOIN.\n\n#### Từng bước\nSau `customers LEFT JOIN orders` (chưa lọc), dòng của Dung và Ha có `o.status` NULL:\n\n| c.name | o.id | o.status | `o.status = 'paid'` |\n|---|---|---|---|\n| An | 101 / 102 / 106 | paid / paid / pending | TRUE / TRUE / FALSE |\n| Binh | 103 / 105 | cancelled / paid | FALSE / TRUE |\n| Chi | 104 / 107 | paid / paid | TRUE / TRUE |\n| Dung | NULL | NULL | UNKNOWN, bị loại |\n| Ha | NULL | NULL | UNKNOWN, bị loại |\n\nWHERE còn 5 dòng của 3 khách nên kết quả có 3 dòng: An 2, Binh 1, Chi 2.\n\nBản sửa:\n\n```sql\nSELECT c.name, COUNT(o.id) AS so_don\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id AND o.status = 'paid'\nGROUP BY c.id, c.name\nORDER BY c.id;\n-- An 2, Binh 1, Chi 2, Dung 0, Ha 0\n```\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  A[\"customers: 5 khách\"] --> J[\"LEFT JOIN orders\"]\n  J --> W[\"WHERE o.status = 'paid'\"]\n  W --> R1[\"3 khách: mất Dung, Ha\"]\n  A --> J2[\"LEFT JOIN orders ON ... AND o.status = 'paid'\"]\n  J2 --> R2[\"5 khách: Dung 0, Ha 0\"]\n```\n\n#### Bẫy thường gặp\n- `COUNT(*)` thay cho `COUNT(o.id)` trong bản sửa sẽ cho Dung và Ha số 1 (đếm dòng NULL do LEFT JOIN sinh ra). Luôn đếm một cột của bảng bên phải.\n- Với INNER JOIN, đặt điều kiện ở ON hay WHERE cho cùng kết quả; khác biệt chỉ xuất hiện ở OUTER JOIN.\n\n#### Đọc thêm\n- [PostgreSQL: Joined Tables (ghi chú về ON và WHERE)](https://www.postgresql.org/docs/current/queries-table-expressions.html)\n- [Join (SQL), Wikipedia](https://en.wikipedia.org/wiki/Join_%28SQL%29)\n",
+   "distractors": {
+    "A": "Bỏ qua tác dụng của WHERE sau LEFT JOIN: WHERE chạy sau phép nối và loại mọi dòng có `o.status` NULL.",
+    "C": "WHERE đã loại Dung và Ha trước khi đếm; đổi hàm đếm không đưa dòng trở lại. Hơn nữa `COUNT(*)` sẽ đếm 1 cho khách không có đơn.",
+    "D": "RIGHT JOIN giữ mọi dòng của `orders` (bảng bên phải), không giữ khách chưa mua; và WHERE vẫn lọc như cũ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "5 dòng, Dung và Ha có `so_don` = 0; truy vấn đã đúng"
+    },
+    {
+     "key": "B",
+     "text": "3 dòng; chuyển `o.status = 'paid'` từ WHERE vào điều kiện ON"
+    },
+    {
+     "key": "C",
+     "text": "3 dòng; chỉ cần đổi `COUNT(o.id)` thành `COUNT(*)`"
+    },
+    {
+     "key": "D",
+     "text": "3 dòng; đổi `LEFT JOIN` thành `RIGHT JOIN` để giữ khách chưa mua"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T08-B04",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Đội CRM cần danh sách khách **chưa từng đặt đơn** để gửi mã chào mừng.\n\nBảng `customers`:\n\n| id | name | city |\n|---|---|---|\n| 1 | An | HN |\n| 2 | Binh | HCM |\n| 3 | Chi | HN |\n| 4 | Dung | DN |\n| 5 | Ha | NULL |\n\nBảng `orders` có 7 đơn (cột khoá `id` không bao giờ NULL) với `customer_id` lần lượt là 1, 1, 2, 3, 2, 1, 3. Truy vấn sau trả về gì? **Ghi mỗi dòng một bản ghi theo đúng thứ tự trả về, các cột cách nhau bằng dấu `|` (không thêm khoảng trắng), không ghi tên cột.**\n\n```sql\nSELECT c.name\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL\nORDER BY c.id;\n```",
+   "explanation": "Đây là mẫu **anti-join**: LEFT JOIN giữ mọi khách, khách không có đơn nhận `o.id` là NULL, rồi `WHERE o.id IS NULL` chỉ giữ các khách đó: Dung (id 4) và Ha (id 5).",
+   "section": "b-sql",
+   "long": "#### Ý chính\nTìm \"dòng của A **không có** dòng tương ứng ở B\" gọi là **anti-join**. Mẫu quen thuộc: `A LEFT JOIN B ... WHERE B.khoá IS NULL`. LEFT JOIN gắn NULL cho phía B của những dòng A không khớp, WHERE giữ đúng những dòng đó.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 520 210\" width=\"100%\" style=\"max-width:560px\">\n<path d=\"M255,42 A80,80 0 1,0 255,158 A80,80 0 0,1 255,42 Z\" fill=\"#ef4444\" fill-opacity=\"0.4\"/>\n<circle cx=\"200\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<path d=\"M255,42 A80,80 0 0,1 255,158 A80,80 0 0,1 255,42 Z\" fill=\"none\" stroke=\"currentColor\" stroke-dasharray=\"4 3\"/>\n<circle cx=\"310\" cy=\"100\" r=\"80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<text x=\"165\" y=\"95\" font-size=\"14\" text-anchor=\"middle\" fill=\"currentColor\">customers</text>\n<text x=\"165\" y=\"115\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">Dung, Ha</text>\n<text x=\"355\" y=\"105\" font-size=\"14\" text-anchor=\"middle\" fill=\"currentColor\">orders</text>\n<text x=\"255\" y=\"105\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">bỏ</text>\n<text x=\"260\" y=\"200\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">Anti-join: phần đỏ, khách không ghép được đơn nào</text>\n</svg>\n\n#### Từng bước\n1. LEFT JOIN cho 9 dòng: An 3, Binh 2, Chi 2, Dung 1 (o.id NULL), Ha 1 (o.id NULL).\n2. `WHERE o.id IS NULL` giữ 2 dòng: Dung, Ha.\n3. `ORDER BY c.id`: Dung (4) trước Ha (5).\n\n```text\nDung\nHa\n```\n\nBa cách viết tương đương, cùng kết quả:\n\n| Cách | Truy vấn |\n|---|---|\n| LEFT JOIN + IS NULL | `... LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL` |\n| NOT EXISTS | `WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id)` |\n| NOT IN | `WHERE c.id NOT IN (SELECT customer_id FROM orders)`, **nguy hiểm** nếu có NULL (câu B10) |\n\n#### Bẫy thường gặp\n- Kiểm tra IS NULL trên một cột **có thể NULL tự nhiên** của bảng phải (ví dụ `o.amount`) sẽ kéo cả khách có đơn mà đơn đó thiếu amount. Hãy dùng khoá chính hoặc cột nối (`o.id`, `o.customer_id`).\n- Ha có `city` NULL nhưng điều đó không liên quan: điều kiện lọc nằm trên `o.id`.\n\n#### Đọc thêm\n- [PostgreSQL tutorial: Joins Between Tables](https://www.postgresql.org/docs/current/tutorial-join.html)\n- [PostgreSQL: Subquery Expressions (EXISTS)](https://www.postgresql.org/docs/current/functions-subquery.html)\n",
+   "mistakes": [
+    {
+     "value": "Dung",
+     "why": "Nghĩ Ha bị loại vì `city` là NULL. Điều kiện lọc là `o.id IS NULL` (cột của orders sau phép nối), không liên quan tới `city`."
+    },
+    {
+     "value": "An\nBinh\nChi",
+     "why": "Đảo nghĩa: `o.id IS NULL` giữ các khách **không** ghép được đơn nào, không phải khách có đơn."
+    },
+    {
+     "value": "Ha",
+     "why": "Nhầm cột lọc thành `c.city IS NULL`."
+    }
+   ],
+   "answer": "Dung\nHa",
+   "accept": [
+    "Dung\nHa"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T08-B05",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Dashboard doanh thu chạy truy vấn sau cho tháng 4/2026 (`order_date` lưu dạng chuỗi `'YYYY-MM-DD'`). Bảng `orders` hiện **chưa có đơn nào** trong tháng 4.\n\n```sql\nSELECT COUNT(*) AS so_don, SUM(amount) AS doanh_thu\nFROM orders\nWHERE order_date >= '2026-04-01' AND order_date < '2026-05-01';\n```\n\nKết quả là gì (trên cả PostgreSQL và SQLite)?",
+   "explanation": "Hàm gộp không kèm GROUP BY luôn trả **đúng một dòng**. Trên tập rỗng, `COUNT` trả 0 còn `SUM`, `AVG`, `MAX`... trả NULL; dashboard muốn hiện 0 thì viết `COALESCE(SUM(amount), 0)`.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nTruy vấn có hàm gộp mà **không có GROUP BY** coi cả tập dòng (sau WHERE) là **một nhóm duy nhất**, nên luôn trả đúng một dòng, kể cả khi tập đó rỗng. Trên tập rỗng: `COUNT` trả 0; `SUM`, `AVG`, `MIN`, `MAX` trả **NULL** (chuẩn SQL).\n\n#### Từng bước\n1. WHERE `order_date >= '2026-04-01' AND order_date < '2026-05-01'`: không dòng nào thoả (so sánh chuỗi `'YYYY-MM-DD'` đúng thứ tự thời gian).\n2. Một nhóm rỗng duy nhất:\n\n| Hàm | Trên tập rỗng |\n|---|---|\n| `COUNT(*)` | 0 |\n| `SUM(amount)` | NULL |\n| `AVG(amount)` | NULL |\n| `MAX(amount)` | NULL |\n| `COALESCE(SUM(amount), 0)` | 0 |\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"CREATE TABLE orders (id INTEGER PRIMARY KEY, customer_id INTEGER,\n  order_date TEXT, amount INTEGER, status TEXT);\nINSERT INTO orders VALUES\n  (101, 1, '2026-01-05', 200, 'paid'), (102, 1, '2026-01-20', 150, 'paid'),\n  (103, 2, '2026-01-11', 300, 'cancelled'), (104, 3, '2026-02-02', 120, 'paid'),\n  (105, 2, '2026-02-15', 80, 'paid'), (106, 1, '2026-02-28', NULL, 'pending'),\n  (107, 3, '2026-03-03', 150, 'paid');\"\"\")\nprint(con.execute(\"\"\"SELECT COUNT(*), SUM(amount), COALESCE(SUM(amount), 0) FROM orders\n                     WHERE order_date >= '2026-04-01' AND order_date < '2026-05-01'\"\"\").fetchall())\n# [(0, None, 0)]\n```\n\nSo sánh: thêm `GROUP BY customer_id` thì không có nhóm nào, kết quả **0 dòng**.\n\n#### Bẫy thường gặp\n- Dashboard hiển thị ô trống hoặc \"NULL\" thay vì 0 làm người xem tưởng lỗi dữ liệu. Dùng `COALESCE(SUM(...), 0)` khi 0 là đúng nghĩa nghiệp vụ.\n- Ngược lại, đừng COALESCE bừa với `AVG`: \"trung bình của 0 đơn\" không phải 0, NULL mới trung thực.\n- Lọc khoảng thời gian bằng `>=` đầu và `<` đầu kỳ sau (nửa mở) tránh sót dữ liệu có giờ phút ở ngày cuối tháng.\n\n#### Đọc thêm\n- [PostgreSQL: Aggregate Functions (ghi chú về tập rỗng)](https://www.postgresql.org/docs/current/functions-aggregate.html)\n- [SQLite: Built-in Aggregate Functions](https://sqlite.org/lang_aggfunc.html)\n",
+   "distractors": {
+    "B": "Theo chuẩn SQL, SUM của tập rỗng là NULL chứ không phải 0; phải tự thêm `COALESCE` nếu muốn 0.",
+    "C": "Tập rỗng chỉ xảy ra khi có GROUP BY (không có nhóm nào). Không có GROUP BY thì toàn bảng được coi là một nhóm và luôn có một dòng.",
+    "D": "COUNT là ngoại lệ: không bao giờ trả NULL, tập rỗng cho 0."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Một dòng: `so_don` = 0, `doanh_thu` = NULL"
+    },
+    {
+     "key": "B",
+     "text": "Một dòng: `so_don` = 0, `doanh_thu` = 0"
+    },
+    {
+     "key": "C",
+     "text": "Không có dòng nào (tập kết quả rỗng)"
+    },
+    {
+     "key": "D",
+     "text": "Một dòng: `so_don` = NULL, `doanh_thu` = NULL"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T08-B06",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Bảng `orders` (`order_date` lưu dạng chuỗi `'YYYY-MM-DD'`):\n\n| id | customer_id | order_date | amount | status |\n|---|---|---|---|---|\n| 101 | 1 | 2026-01-05 | 200 | paid |\n| 102 | 1 | 2026-01-20 | 150 | paid |\n| 103 | 2 | 2026-01-11 | 300 | cancelled |\n| 104 | 3 | 2026-02-02 | 120 | paid |\n| 105 | 2 | 2026-02-15 | 80 | paid |\n| 106 | 1 | 2026-02-28 | NULL | pending |\n| 107 | 3 | 2026-03-03 | 150 | paid |\n\nTruy vấn sau trả về gì? **Ghi mỗi dòng một bản ghi theo đúng thứ tự trả về, các cột cách nhau bằng dấu `|` (không thêm khoảng trắng), không ghi tên cột.**\n\n```sql\nSELECT customer_id, COUNT(*), COUNT(amount), SUM(amount)\nFROM orders\nGROUP BY customer_id\nORDER BY customer_id;\n```",
+   "explanation": "Khách 1 có 3 đơn (200, 150, NULL): `COUNT(*)` = 3, `COUNT(amount)` = 2, `SUM` $= 200 + 150 = 350$. Khách 2: 300 + 80 = 380; khách 3: 120 + 150 = 270. Không có điều kiện status nên đơn cancelled vẫn được cộng.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nTrong cùng một nhóm, `COUNT(*)` đếm mọi dòng, `COUNT(amount)` đếm dòng có amount khác NULL, `SUM(amount)` cộng các giá trị khác NULL (bỏ qua NULL chứ không làm cả tổng thành NULL). Truy vấn không lọc status nên đơn cancelled và pending đều được tính.\n\n#### Từng bước\n| customer_id | các amount | COUNT(*) | COUNT(amount) | SUM(amount) |\n|---|---|---|---|---|\n| 1 | 200, 150, NULL | 3 | 2 | 350 |\n| 2 | 300, 80 | 2 | 2 | 380 |\n| 3 | 120, 150 | 2 | 2 | 270 |\n\nKết quả cần nhập:\n\n```text\n1|3|2|350\n2|2|2|380\n3|2|2|270\n```\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"CREATE TABLE orders (id INTEGER PRIMARY KEY, customer_id INTEGER,\n  order_date TEXT, amount INTEGER, status TEXT);\nINSERT INTO orders VALUES\n  (101, 1, '2026-01-05', 200, 'paid'), (102, 1, '2026-01-20', 150, 'paid'),\n  (103, 2, '2026-01-11', 300, 'cancelled'), (104, 3, '2026-02-02', 120, 'paid'),\n  (105, 2, '2026-02-15', 80, 'paid'), (106, 1, '2026-02-28', NULL, 'pending'),\n  (107, 3, '2026-03-03', 150, 'paid');\"\"\")\nfor r in con.execute(\"\"\"SELECT customer_id, COUNT(*), COUNT(amount), SUM(amount)\n                        FROM orders GROUP BY customer_id ORDER BY customer_id\"\"\"):\n    print(\"|\".join(map(str, r)))\n```\n\n#### Hai loại NULL khác nhau\n| Biểu thức | Kết quả | Lý do |\n|---|---|---|\n| `200 + NULL` (phép cộng từng dòng) | NULL | toán tử trên NULL cho NULL |\n| `SUM` của {200, 150, NULL} | 350 | hàm gộp bỏ qua NULL |\n| `AVG` của {200, 150, NULL} | 175 | $\\dfrac{350}{2}$, không chia cho 3 |\n\n#### Bẫy thường gặp\n- Dùng `COUNT(*) - COUNT(amount)` để đo **số giá trị thiếu** theo nhóm: đây là một kiểm tra chất lượng dữ liệu rất hay dùng.\n- Muốn coi NULL là 0 khi tính trung bình thì phải nói rõ: `AVG(COALESCE(amount, 0))`, và cân nhắc xem điều đó có đúng nghiệp vụ không.\n\n#### Đọc thêm\n- [PostgreSQL: Aggregate Functions](https://www.postgresql.org/docs/current/functions-aggregate.html)\n- [Aggregate function, Wikipedia](https://en.wikipedia.org/wiki/Aggregate_function)\n",
+   "mistakes": [
+    {
+     "value": "1|3|3|350\n2|2|2|380\n3|2|2|270",
+     "why": "Nghĩ `COUNT(amount)` đếm cả dòng NULL; thực ra COUNT(cột) bỏ qua NULL."
+    },
+    {
+     "value": "1|2|2|350\n2|2|2|380\n3|2|2|270",
+     "why": "Nghĩ `COUNT(*)` cũng bỏ dòng NULL; COUNT(*) đếm mọi dòng của nhóm."
+    },
+    {
+     "value": "1|3|2|NULL\n2|2|2|380\n3|2|2|270",
+     "why": "Nghĩ chỉ cần một giá trị NULL là SUM ra NULL (như phép cộng `200 + NULL`). Hàm gộp SUM bỏ qua NULL."
+    }
+   ],
+   "answer": "1|3|2|350\n2|2|2|380\n3|2|2|270",
+   "accept": [
+    "1|3|2|350\n2|2|2|380\n3|2|2|270"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T08-B07",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Bảng `customers(id, name, city)` và `orders(id, customer_id, ...)`; thành phố HN có hai khách đã mua (An, Chi). Câu truy vấn sau chạy trên PostgreSQL và trên SQLite thì thế nào?\n\n```sql\nSELECT c.city, c.name, COUNT(*) AS so_don\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nGROUP BY c.city;\n```",
+   "explanation": "Trong PostgreSQL, mỗi cột ở SELECT phải nằm trong GROUP BY, nằm trong hàm gộp, hoặc phụ thuộc hàm vào khoá chính đã GROUP BY; nên báo lỗi `column \"c.name\" must appear in the GROUP BY clause...`. SQLite cho phép \"bare column\" và lấy `name` của một dòng bất kỳ trong nhóm.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nSau GROUP BY, mỗi nhóm thành **một dòng**. Một cột không nằm trong GROUP BY và không nằm trong hàm gộp có thể có nhiều giá trị trong nhóm, vậy dòng kết quả nên lấy giá trị nào? Hai hệ trả lời khác nhau:\n\n| | PostgreSQL | SQLite |\n|---|---|---|\n| Cột lẻ trong SELECT | Báo lỗi `column \"c.name\" must appear in the GROUP BY clause or be used in an aggregate function` | Cho phép (\"bare column\"), lấy giá trị từ một dòng **bất kỳ** của nhóm |\n| Ngoại lệ | Cho phép nếu cột phụ thuộc hàm vào khoá chính đã GROUP BY (ví dụ `GROUP BY c.id` thì dùng được `c.name`) | Với `MIN()`/`MAX()` đơn lẻ, bare column lấy từ dòng đạt min/max |\n\n#### Từng bước\nNhóm HN gồm các dòng ghép của An (3 đơn) và Chi (2 đơn): `c.name` có hai giá trị An và Chi, không xác định được. PostgreSQL từ chối chạy; SQLite trả 2 dòng (HN, HCM) với `name` của dòng nào đó trong nhóm.\n\nCách viết đúng ý, chạy trên cả hai hệ:\n\n```sql\n-- Mỗi thành phố một dòng, tên khách ghép lại hoặc lấy đại diện có quy tắc\nSELECT c.city, MIN(c.name) AS khach_dau_tien, COUNT(*) AS so_don\nFROM customers c JOIN orders o ON o.customer_id = c.id\nGROUP BY c.city;\n\n-- Hoặc mỗi (thành phố, khách) một dòng\nSELECT c.city, c.name, COUNT(*) AS so_don\nFROM customers c JOIN orders o ON o.customer_id = c.id\nGROUP BY c.city, c.name;\n```\n\n#### Bẫy thường gặp\n- Truy vấn \"chạy được trên SQLite\" chưa chắc đúng: bare column cho kết quả tuỳ ý mà không cảnh báo. Viết theo chuẩn của PostgreSQL để an toàn khi chuyển hệ.\n- MySQL cũ (trước 5.7) cũng cho phép như SQLite; MySQL mới bật `ONLY_FULL_GROUP_BY` nên báo lỗi giống PostgreSQL.\n\n#### Đọc thêm\n- [PostgreSQL: The GROUP BY and HAVING Clauses](https://www.postgresql.org/docs/current/queries-table-expressions.html)\n- [SQLite: SELECT (bare columns in aggregate queries)](https://sqlite.org/lang_select.html)\n- [SQLite: Quirks](https://sqlite.org/quirks.html)\n",
+   "distractors": {
+    "A": "Không hệ nào tự thêm cột vào GROUP BY. SQLite trả **một dòng mỗi city** với name lấy tuỳ ý, chứ không tách theo name.",
+    "B": "PostgreSQL không tự chọn giá trị; muốn lấy tên nhỏ nhất phải viết rõ `MIN(c.name)`.",
+    "D": "COUNT(*) dùng sau JOIN là hoàn toàn hợp lệ; lỗi (ở PostgreSQL) nằm ở cột `c.name` không được gộp."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Cả hai trả mỗi cặp (city, name) một dòng vì GROUP BY tự thêm cột thiếu"
+    },
+    {
+     "key": "B",
+     "text": "PostgreSQL chạy được và lấy name nhỏ nhất theo chữ cái trong mỗi nhóm"
+    },
+    {
+     "key": "C",
+     "text": "PostgreSQL báo lỗi vì `c.name` không có trong GROUP BY hay hàm gộp; SQLite vẫn chạy"
+    },
+    {
+     "key": "D",
+     "text": "Cả hai đều báo lỗi vì không được dùng `COUNT(*)` sau khi JOIN hai bảng"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T08-B08",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Bảng `scores(name, score)` có 4 dòng: (Lan, 90), (Minh, 85), (Nga, 85), (Oanh, 80). Với dòng của **Oanh**, ba cột `rn`, `rk`, `drk` nhận giá trị nào?\n\n```sql\nSELECT name,\n       ROW_NUMBER() OVER (ORDER BY score DESC) AS rn,\n       RANK()       OVER (ORDER BY score DESC) AS rk,\n       DENSE_RANK() OVER (ORDER BY score DESC) AS drk\nFROM scores;\n```",
+   "explanation": "ROW_NUMBER đánh số liên tục 1, 2, 3, 4 (bất kể hoà); RANK cho dòng hoà cùng hạng rồi **nhảy cóc**: 1, 2, 2, 4; DENSE_RANK không nhảy: 1, 2, 2, 3. Oanh đứng thứ tư nên (4, 4, 3).",
+   "section": "b-sql",
+   "long": "#### Ý chính\nBa hàm đánh số khác nhau ở cách xử lý **giá trị hoà**:\n\n| Hàm | Dòng hoà | Sau dòng hoà |\n|---|---|---|\n| `ROW_NUMBER()` | số khác nhau (thứ tự giữa các dòng hoà không xác định) | liên tục |\n| `RANK()` | cùng hạng | **nhảy cóc** (bỏ qua số) |\n| `DENSE_RANK()` | cùng hạng | liên tục, không lỗ hổng |\n\n#### Từng bước\n| name | score | rn | rk | drk |\n|---|---|---|---|---|\n| Lan | 90 | 1 | 1 | 1 |\n| Minh | 85 | 2 hoặc 3 | 2 | 2 |\n| Nga | 85 | 3 hoặc 2 | 2 | 2 |\n| **Oanh** | 80 | **4** | **4** | **3** |\n\nCông thức: `RANK` = 1 + số dòng có điểm cao hơn hẳn $= 1 + 3 = 4$; `DENSE_RANK` = 1 + số **mức điểm** cao hơn hẳn (90 và 85) $= 1 + 2 = 3$.\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE scores(name TEXT, score INTEGER)\")\ncon.executemany(\"INSERT INTO scores VALUES (?, ?)\", [(\"Lan\", 90), (\"Minh\", 85), (\"Nga\", 85), (\"Oanh\", 80)])\nfor r in con.execute(\"\"\"SELECT name, ROW_NUMBER() OVER w, RANK() OVER w, DENSE_RANK() OVER w\n                        FROM scores WINDOW w AS (ORDER BY score DESC)\"\"\"):\n    print(r)\n```\n\n#### Khi nào dùng hàm nào\n- \"Lấy đúng 1 dòng mỗi nhóm\" (bỏ trùng, đơn mới nhất): `ROW_NUMBER`, kèm cột phá hoà để kết quả ổn định.\n- \"Top 3 kể cả đồng hạng\": `RANK <= 3` hoặc `DENSE_RANK <= 3` tuỳ cách hiểu \"top 3\".\n- Bảng xếp hạng thi đấu kiểu \"đồng hạng nhì, không có hạng ba\": `RANK`.\n\n#### Bẫy thường gặp\n- Dùng ROW_NUMBER khi có hoà mà không có cột phá hoà: Minh và Nga có thể đổi số giữa hai lần chạy.\n\n#### Đọc thêm\n- [PostgreSQL: Window Functions](https://www.postgresql.org/docs/current/functions-window.html)\n- [SQLite: Window Functions](https://sqlite.org/windowfunctions.html)\n",
+   "distractors": {
+    "A": "Nhầm RANK với DENSE_RANK: RANK bỏ qua hạng 3 sau hai dòng hoà hạng 2, nên Oanh hạng $1 + 3 = 4$.",
+    "B": "Nghĩ DENSE_RANK giống RANK; DENSE_RANK không để lỗ hổng nên Oanh chỉ hạng 3.",
+    "C": "Nghĩ ROW_NUMBER cũng cho hai dòng hoà cùng số; ROW_NUMBER luôn khác nhau từng dòng nên Oanh vẫn là 4."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "rn = 4, rk = 3, drk = 3"
+    },
+    {
+     "key": "B",
+     "text": "rn = 4, rk = 4, drk = 4"
+    },
+    {
+     "key": "C",
+     "text": "rn = 3, rk = 4, drk = 3"
+    },
+    {
+     "key": "D",
+     "text": "rn = 4, rk = 4, drk = 3"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T08-B09",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Bảng `daily_sales` của một cửa hàng (đơn vị: triệu đồng):\n\n| day | revenue |\n|---|---|\n| 2026-03-01 | 100 |\n| 2026-03-02 | 130 |\n| 2026-03-03 | 90 |\n| 2026-03-04 | 90 |\n\nTruy vấn tính chênh lệch so với ngày trước trả về gì? **Ghi mỗi dòng một bản ghi theo đúng thứ tự trả về, các cột cách nhau bằng dấu `|` (không thêm khoảng trắng), không ghi tên cột.**\n\n```sql\nSELECT revenue - LAG(revenue, 1, 0) OVER (ORDER BY day) AS chenh\nFROM daily_sales\nORDER BY day;\n```",
+   "explanation": "`LAG(revenue, 1, 0)` lấy revenue của dòng liền trước theo `ORDER BY day`, dòng đầu dùng mặc định 0: $100 - 0 = 100$, $130 - 100 = 30$, $90 - 130 = -40$, $90 - 90 = 0$.",
+   "section": "b-sql",
+   "long": "#### Ý chính\n`LAG(cột, k, mặc_định)` lấy giá trị của dòng đứng **trước** dòng hiện tại $k$ vị trí theo thứ tự trong `OVER (ORDER BY ...)`; nếu không có dòng đó thì trả `mặc_định` (bỏ trống thì là NULL). `LEAD` làm điều ngược lại, nhìn về **sau**.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 200\" width=\"100%\" style=\"max-width:560px\">\n<g stroke=\"currentColor\" stroke-width=\"1.5\" fill=\"#3b82f6\" fill-opacity=\"0.25\">\n<rect x=\"40\" y=\"60\" width=\"90\" height=\"40\"/><rect x=\"160\" y=\"60\" width=\"90\" height=\"40\"/><rect x=\"280\" y=\"60\" width=\"90\" height=\"40\"/><rect x=\"400\" y=\"60\" width=\"90\" height=\"40\"/>\n</g>\n<g font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">\n<text x=\"85\" y=\"50\">03-01</text><text x=\"205\" y=\"50\">03-02</text><text x=\"325\" y=\"50\">03-03</text><text x=\"445\" y=\"50\">03-04</text>\n<text x=\"85\" y=\"85\">100</text><text x=\"205\" y=\"85\">130</text><text x=\"325\" y=\"85\">90</text><text x=\"445\" y=\"85\">90</text>\n<text x=\"85\" y=\"160\">100 − 0</text><text x=\"205\" y=\"160\">130 − 100</text><text x=\"325\" y=\"160\">90 − 130</text><text x=\"445\" y=\"160\">90 − 90</text>\n<text x=\"85\" y=\"182\">= 100</text><text x=\"205\" y=\"182\">= 30</text><text x=\"325\" y=\"182\">= −40</text><text x=\"445\" y=\"182\">= 0</text>\n</g>\n<g stroke=\"#f59e0b\" stroke-width=\"2\" fill=\"none\">\n<path d=\"M90,105 Q145,135 200,105\"/><path d=\"M210,105 Q265,135 320,105\"/><path d=\"M330,105 Q385,135 440,105\"/>\n</g>\n<text x=\"270\" y=\"20\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">Mũi tên cam: LAG mang revenue của ngày trước sang ngày sau</text>\n</svg>\n\n#### Từng bước\n| day | revenue | `LAG(revenue, 1, 0)` | chenh |\n|---|---|---|---|\n| 2026-03-01 | 100 | 0 (mặc định) | 100 |\n| 2026-03-02 | 130 | 100 | 30 |\n| 2026-03-03 | 90 | 130 | −40 |\n| 2026-03-04 | 90 | 90 | 0 |\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE daily_sales(day TEXT, revenue INTEGER)\")\ncon.executemany(\"INSERT INTO daily_sales VALUES (?, ?)\",\n                [(\"2026-03-01\", 100), (\"2026-03-02\", 130), (\"2026-03-03\", 90), (\"2026-03-04\", 90)])\nprint([r[0] for r in con.execute(\"\"\"SELECT revenue - LAG(revenue, 1, 0) OVER (ORDER BY day)\n                                    FROM daily_sales ORDER BY day\"\"\")])   # [100, 30, -40, 0]\n```\n\n#### Bẫy thường gặp\n- Mặc định 0 làm dòng đầu thành \"tăng 100\", về nghiệp vụ có thể gây hiểu nhầm. Báo cáo tăng trưởng thường để NULL (bỏ tham số thứ ba) rồi ghi chú \"không có kỳ trước\".\n- LAG theo **dòng**, không theo **ngày lịch**: nếu thiếu ngày 03-03 thì 03-04 sẽ so với 03-02. Muốn đúng ngày lịch phải dựng đủ lịch rồi LEFT JOIN.\n- Luôn có `ORDER BY` trong OVER; thiếu nó thì \"dòng trước\" không xác định.\n\n#### Đọc thêm\n- [PostgreSQL: Window Functions (LAG, LEAD)](https://www.postgresql.org/docs/current/functions-window.html)\n- [SQLite: Window Functions](https://sqlite.org/windowfunctions.html)\n",
+   "mistakes": [
+    {
+     "value": "NULL\n30\n-40\n0",
+     "why": "Quên tham số thứ ba: `LAG(revenue, 1, 0)` trả giá trị mặc định 0 khi không có dòng trước, nên dòng đầu là $100 - 0 = 100$."
+    },
+    {
+     "value": "30\n-40\n0",
+     "why": "Nghĩ dòng đầu bị bỏ vì không có ngày trước; window function không loại dòng nào."
+    },
+    {
+     "value": "-30\n40\n0\n90",
+     "why": "Nhầm LAG (dòng **trước**) với LEAD (dòng **sau**)."
+    }
+   ],
+   "answer": "100\n30\n-40\n0",
+   "accept": [
+    "100\n30\n-40\n0"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T08-B10",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Đội marketing loại khách trong danh sách đen trước khi gửi khuyến mãi. Bảng `customers` có id 1, 2, 3, 4, 5. Bảng `blacklist(customer_id)` có 2 dòng: 4 và NULL (dòng NULL do import file lỗi). Truy vấn sau trả về số nào?\n\n```sql\nSELECT COUNT(*)\nFROM customers\nWHERE id NOT IN (SELECT customer_id FROM blacklist);\n```",
+   "explanation": "`id NOT IN (4, NULL)` nghĩa là `id <> 4 AND id <> NULL`; vế `id <> NULL` luôn UNKNOWN nên cả biểu thức không bao giờ TRUE, kết quả 0. Dùng `NOT EXISTS (SELECT 1 FROM blacklist b WHERE b.customer_id = c.id)` thì được 4.",
+   "section": "b-sql",
+   "long": "#### Ý chính\n`x NOT IN (a, b, c)` được hiểu là `x <> a AND x <> b AND x <> c`. Chỉ cần một phần tử là NULL thì vế tương ứng là UNKNOWN; khi đó biểu thức AND chỉ có thể là FALSE hoặc UNKNOWN, **không bao giờ TRUE**, nên WHERE loại mọi dòng.\n\n#### Từng bước\nDanh sách con: `(4, NULL)`.\n\n| id | `id <> 4` | `id <> NULL` | AND | Giữ? |\n|---|---|---|---|---|\n| 1 | TRUE | UNKNOWN | UNKNOWN | không |\n| 2 | TRUE | UNKNOWN | UNKNOWN | không |\n| 3 | TRUE | UNKNOWN | UNKNOWN | không |\n| 4 | FALSE | UNKNOWN | FALSE | không |\n| 5 | TRUE | UNKNOWN | UNKNOWN | không |\n\n`COUNT(*)` = 0.\n\nHai cách sửa cho kết quả 4:\n\n```sql\n-- 1) NOT EXISTS: không bị ảnh hưởng bởi NULL\nSELECT COUNT(*) FROM customers c\nWHERE NOT EXISTS (SELECT 1 FROM blacklist b WHERE b.customer_id = c.id);\n\n-- 2) Lọc NULL trong truy vấn con\nSELECT COUNT(*) FROM customers\nWHERE id NOT IN (SELECT customer_id FROM blacklist WHERE customer_id IS NOT NULL);\n```\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"CREATE TABLE customers(id INTEGER); INSERT INTO customers VALUES (1),(2),(3),(4),(5);\nCREATE TABLE blacklist(customer_id INTEGER); INSERT INTO blacklist VALUES (4),(NULL);\"\"\")\nprint(con.execute(\"SELECT COUNT(*) FROM customers WHERE id NOT IN (SELECT customer_id FROM blacklist)\").fetchone())  # (0,)\nprint(con.execute(\"\"\"SELECT COUNT(*) FROM customers c WHERE NOT EXISTS\n                     (SELECT 1 FROM blacklist b WHERE b.customer_id = c.id)\"\"\").fetchone())  # (4,)\n```\n\n#### Bẫy thường gặp\n- Chiến dịch gửi cho 0 khách mà truy vấn không báo lỗi: chỉ một dòng NULL lọt vào bảng phụ là đủ. Ưu tiên `NOT EXISTS` cho anti-join.\n- `IN` (không có NOT) ít nguy hiểm hơn: `id IN (4, NULL)` vẫn TRUE với id 4, các id khác là UNKNOWN và bị loại như mong muốn.\n- Đặt ràng buộc `NOT NULL` cho cột khoá ngoại trong bảng danh sách đen để chặn từ gốc.\n\n#### Đọc thêm\n- [PostgreSQL: Subquery Expressions (NOT IN, EXISTS)](https://www.postgresql.org/docs/current/functions-subquery.html)\n- [Null (SQL), Wikipedia](https://en.wikipedia.org/wiki/Null_%28SQL%29)\n",
+   "distractors": {
+    "B": "Đây là kết quả mong muốn nhưng sai với truy vấn này: NOT IN không bỏ qua NULL trong danh sách. Ra 4 nếu dùng NOT EXISTS hoặc lọc `WHERE customer_id IS NOT NULL` trong truy vấn con.",
+    "C": "Nghĩ có NULL thì điều kiện bị bỏ qua và giữ mọi dòng; thực tế UNKNOWN làm WHERE loại mọi dòng.",
+    "D": "Nhầm NOT IN với IN: `id IN (4, NULL)` mới cho 1 dòng (khách 4)."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "0"
+    },
+    {
+     "key": "B",
+     "text": "4"
+    },
+    {
+     "key": "C",
+     "text": "5"
+    },
+    {
+     "key": "D",
+     "text": "1"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T08-C01",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Kế toán đối soát doanh thu và tiền đã thu. Đơn 101 (amount 200) được khách trả **hai lần**, đơn 102 (amount 150) trả một lần:\n\n| orders.id | amount |\n|---|---|\n| 101 | 200 |\n| 102 | 150 |\n\n| payments.order_id | paid |\n|---|---|\n| 101 | 120 |\n| 101 | 80 |\n| 102 | 150 |\n\n```sql\nSELECT SUM(o.amount) AS doanh_thu, SUM(p.paid) AS da_thu\nFROM orders o\nJOIN payments p ON p.order_id = o.id\nWHERE o.id IN (101, 102);\n```\n\nHai cột `doanh_thu` và `da_thu` lần lượt bằng bao nhiêu?",
+   "explanation": "Phép nối nhân bản dòng (fan-out): đơn 101 khớp 2 payment nên xuất hiện 2 lần và amount 200 bị cộng hai lần: $200 \\times 2 + 150 = 550$; còn `da_thu` $= 120 + 80 + 150 = 350$. Cách sửa: gộp payments theo `order_id` trong truy vấn con hoặc CTE rồi mới JOIN.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nJOIN quan hệ **một-nhiều** (một đơn, nhiều lần thanh toán) nhân bản dòng phía \"một\": đơn 101 khớp 2 payment nên xuất hiện 2 lần. Cộng một cột của phía \"một\" sau phép nối sẽ bị **đếm lặp** (fan-out). Cột của phía \"nhiều\" thì không bị lặp.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 210\" width=\"100%\" style=\"max-width:560px\">\n<g font-size=\"13\" fill=\"currentColor\">\n<text x=\"70\" y=\"22\" text-anchor=\"middle\">orders</text><text x=\"270\" y=\"22\" text-anchor=\"middle\">payments</text><text x=\"455\" y=\"22\" text-anchor=\"middle\">sau JOIN</text>\n</g>\n<g stroke=\"currentColor\" stroke-width=\"1.5\" fill-opacity=\"0.3\">\n<rect x=\"20\" y=\"45\" width=\"100\" height=\"34\" fill=\"#ef4444\"/><rect x=\"20\" y=\"130\" width=\"100\" height=\"34\" fill=\"#3b82f6\"/>\n<rect x=\"220\" y=\"35\" width=\"100\" height=\"30\" fill=\"#10b981\"/><rect x=\"220\" y=\"75\" width=\"100\" height=\"30\" fill=\"#10b981\"/><rect x=\"220\" y=\"135\" width=\"100\" height=\"30\" fill=\"#10b981\"/>\n<rect x=\"390\" y=\"35\" width=\"135\" height=\"30\" fill=\"#ef4444\"/><rect x=\"390\" y=\"75\" width=\"135\" height=\"30\" fill=\"#ef4444\"/><rect x=\"390\" y=\"135\" width=\"135\" height=\"30\" fill=\"#3b82f6\"/>\n</g>\n<g font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">\n<text x=\"70\" y=\"67\">101 · 200</text><text x=\"70\" y=\"152\">102 · 150</text>\n<text x=\"270\" y=\"55\">101 · 120</text><text x=\"270\" y=\"95\">101 · 80</text><text x=\"270\" y=\"155\">102 · 150</text>\n<text x=\"457\" y=\"55\">200 · 120</text><text x=\"457\" y=\"95\">200 · 80</text><text x=\"457\" y=\"155\">150 · 150</text>\n</g>\n<g stroke=\"currentColor\" stroke-width=\"1.2\"><line x1=\"120\" y1=\"62\" x2=\"220\" y2=\"50\"/><line x1=\"120\" y1=\"62\" x2=\"220\" y2=\"90\"/><line x1=\"120\" y1=\"147\" x2=\"220\" y2=\"150\"/></g>\n<text x=\"270\" y=\"200\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">amount 200 xuất hiện 2 lần: SUM(o.amount) = 200 + 200 + 150 = 550</text>\n</svg>\n\n#### Từng bước\n| o.id | o.amount | p.paid |\n|---|---|---|\n| 101 | 200 | 120 |\n| 101 | 200 | 80 |\n| 102 | 150 | 150 |\n| **SUM** | **550** | **350** |\n\nCách sửa: **gộp phía nhiều trước rồi mới nối**, để quan hệ còn một-một.\n\n```sql\nWITH tt AS (\n  SELECT order_id, SUM(paid) AS da_thu\n  FROM payments GROUP BY order_id\n)\nSELECT SUM(o.amount) AS doanh_thu, SUM(tt.da_thu) AS da_thu\nFROM orders o JOIN tt ON tt.order_id = o.id\nWHERE o.id IN (101, 102);     -- 350 | 350\n```\n\n#### Bẫy thường gặp\n- Dấu hiệu nhận biết fan-out: số dòng sau JOIN lớn hơn số dòng của bảng mà bạn nghĩ là \"bảng chính\". Luôn kiểm tra `COUNT(*)` trước và sau khi nối.\n- `SUM(DISTINCT o.amount)` không phải cách sửa: hai đơn khác nhau có cùng amount sẽ bị gộp làm một.\n- Excel VLOOKUP chỉ lấy dòng khớp đầu tiên; SQL JOIN lấy **mọi** dòng khớp.\n\n#### Đọc thêm\n- [PostgreSQL: Joined Tables](https://www.postgresql.org/docs/current/queries-table-expressions.html)\n- [PostgreSQL: WITH Queries](https://www.postgresql.org/docs/current/queries-with.html)\n",
+   "distractors": {
+    "A": "Quên rằng JOIN một-nhiều nhân bản dòng phía \"một\"; đó là con số đúng về nghiệp vụ nhưng không phải kết quả của truy vấn này.",
+    "C": "Nghĩ cả hai cột đều bị nhân đôi; mỗi dòng payment chỉ xuất hiện một lần nên `SUM(p.paid)` vẫn đúng 350.",
+    "D": "Thói quen VLOOKUP trong Excel: tưởng JOIN chỉ lấy dòng khớp đầu tiên ($120 + 150 = 270$). SQL giữ **mọi** cặp dòng khớp."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "350 và 350"
+    },
+    {
+     "key": "B",
+     "text": "550 và 350"
+    },
+    {
+     "key": "C",
+     "text": "550 và 550"
+    },
+    {
+     "key": "D",
+     "text": "350 và 270"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T08-C02",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Phòng nhân sự cần bảng \"nhân viên, quản lý trực tiếp\" từ bảng `employees`:\n\n| id | name | manager_id |\n|---|---|---|\n| 1 | Lan | NULL |\n| 2 | Minh | 1 |\n| 3 | Nga | 1 |\n| 4 | Oanh | 2 |\n\nTruy vấn sau trả về gì? **Ghi mỗi dòng một bản ghi theo đúng thứ tự trả về, các cột cách nhau bằng dấu `|` (không thêm khoảng trắng), không ghi tên cột.**\n\n```sql\nSELECT e.name, COALESCE(m.name, '-') AS manager\nFROM employees e\nLEFT JOIN employees m ON e.manager_id = m.id\nORDER BY e.id;\n```",
+   "explanation": "Self-join: dùng hai alias `e` (nhân viên) và `m` (quản lý) cho cùng một bảng, ghép `e.manager_id = m.id`. LEFT JOIN giữ Lan (manager_id NULL), `COALESCE(NULL, '-') = '-'`.",
+   "section": "b-sql",
+   "long": "#### Ý chính\n**Self-join** là nối một bảng với chính nó, dùng hai alias như hai bản sao: `e` đóng vai nhân viên, `m` đóng vai quản lý. Điều kiện `e.manager_id = m.id` nghĩa là \"quản lý của e là m\". LEFT JOIN giữ cả người không có quản lý (giám đốc), và `COALESCE` thay NULL bằng `'-'`.\n\n#### Hình minh hoạ\n```mermaid\nflowchart TD\n  Lan[\"Lan (id 1)\"] --> Minh[\"Minh (id 2)\"]\n  Lan --> Nga[\"Nga (id 3)\"]\n  Minh --> Oanh[\"Oanh (id 4)\"]\n```\n\n#### Từng bước\n| e.id | e.name | e.manager_id | m.name | `COALESCE(m.name, '-')` |\n|---|---|---|---|---|\n| 1 | Lan | NULL | NULL (không khớp) | - |\n| 2 | Minh | 1 | Lan | Lan |\n| 3 | Nga | 1 | Lan | Lan |\n| 4 | Oanh | 2 | Minh | Minh |\n\nKết quả theo `ORDER BY e.id`:\n\n```text\nLan|-\nMinh|Lan\nNga|Lan\nOanh|Minh\n```\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"CREATE TABLE employees(id INTEGER PRIMARY KEY, name TEXT, manager_id INTEGER);\nINSERT INTO employees VALUES (1,'Lan',NULL),(2,'Minh',1),(3,'Nga',1),(4,'Oanh',2);\"\"\")\nfor r in con.execute(\"\"\"SELECT e.name, COALESCE(m.name, '-') FROM employees e\n                        LEFT JOIN employees m ON e.manager_id = m.id ORDER BY e.id\"\"\"):\n    print(\"|\".join(r))\n```\n\n#### Bẫy thường gặp\n- Viết ngược `e.id = m.manager_id` sẽ ghép mỗi người với **cấp dưới** của họ (Lan xuất hiện 2 lần, người không có cấp dưới nhận '-').\n- Dùng INNER JOIN làm mất người đứng đầu cây tổ chức.\n- Self-join chỉ đi được **một cấp**. Muốn lấy toàn bộ chuỗi quản lý (Oanh → Minh → Lan) cần CTE đệ quy `WITH RECURSIVE`.\n\n#### Đọc thêm\n- [PostgreSQL tutorial: Joins Between Tables (self join)](https://www.postgresql.org/docs/current/tutorial-join.html)\n- [Hierarchical and recursive queries in SQL, Wikipedia](https://en.wikipedia.org/wiki/Hierarchical_and_recursive_queries_in_SQL)\n",
+   "mistakes": [
+    {
+     "value": "Minh|Lan\nNga|Lan\nOanh|Minh",
+     "why": "Coi như INNER JOIN nên bỏ Lan (không có quản lý). LEFT JOIN giữ Lan, `m.name` NULL được COALESCE đổi thành '-'."
+    },
+    {
+     "value": "Lan|Minh\nLan|Nga\nMinh|Oanh\nNga|-\nOanh|-",
+     "why": "Đọc ngược điều kiện thành `e.id = m.manager_id`, tức là ghép mỗi người với **cấp dưới** của họ."
+    },
+    {
+     "value": "Lan|NULL\nMinh|Lan\nNga|Lan\nOanh|Minh",
+     "why": "Quên COALESCE: giá trị NULL được thay bằng chuỗi '-'."
+    }
+   ],
+   "answer": "Lan|-\nMinh|Lan\nNga|Lan\nOanh|Minh",
+   "accept": [
+    "Lan|-\nMinh|Lan\nNga|Lan\nOanh|Minh"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T08-C03",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Shop phân hạng đơn theo giá trị bằng bảng `tiers`:\n\n| tier | lo | hi |\n|---|---|---|\n| Dong | 0 | 99 |\n| Bac | 100 | 200 |\n| Vang | 200 | 1000 |\n\nBảng `orders` có 7 đơn với `amount` lần lượt là 200, 150, 300, 120, 80, NULL, 150. Truy vấn sau cho kết quả nào?\n\n```sql\nSELECT t.tier, COUNT(o.id) AS so_don\nFROM tiers t\nLEFT JOIN orders o ON o.amount BETWEEN t.lo AND t.hi\nGROUP BY t.tier, t.lo\nORDER BY t.lo;\n```",
+   "explanation": "`BETWEEN lo AND hi` lấy **cả hai đầu mút**, nên đơn 200 khớp cả Bac ($100 \\le 200 \\le 200$) lẫn Vang ($200 \\le 200 \\le 1000$): Dong {80} = 1, Bac {200, 150, 120, 150} = 4, Vang {200, 300} = 2. Tổng $1 + 4 + 2 = 7$ nhưng chỉ có 6 đơn có amount, dấu hiệu khoảng chồng nhau.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nPhép nối không nhất thiết dùng dấu `=`. **Non-equi join** dùng điều kiện khoảng như `BETWEEN`, `<`, `>=`, rất hay gặp khi gắn hạng, khung giá, bảng thuế. Nhưng `BETWEEN lo AND hi` nghĩa là $lo \\le x \\le hi$, **lấy cả hai đầu mút**, nên hai khoảng chung một mốc (Bac kết thúc ở 200, Vang bắt đầu ở 200) làm giá trị đúng mốc đó khớp **cả hai** hạng.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 170\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"30\" y1=\"90\" x2=\"540\" y2=\"90\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<rect x=\"30\" y=\"55\" width=\"99\" height=\"20\" fill=\"#f59e0b\" fill-opacity=\"0.45\"/>\n<rect x=\"130\" y=\"55\" width=\"100\" height=\"20\" fill=\"#3b82f6\" fill-opacity=\"0.45\"/>\n<rect x=\"230\" y=\"30\" width=\"310\" height=\"20\" fill=\"#10b981\" fill-opacity=\"0.45\"/>\n<g font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">\n<text x=\"80\" y=\"69\">Dong 0..99</text><text x=\"180\" y=\"69\">Bac 100..200</text><text x=\"385\" y=\"44\">Vang 200..1000</text>\n<text x=\"30\" y=\"108\">0</text><text x=\"130\" y=\"108\">100</text><text x=\"230\" y=\"108\">200</text><text x=\"330\" y=\"108\">300</text>\n</g>\n<g fill=\"currentColor\">\n<circle cx=\"110\" cy=\"90\" r=\"5\"/><circle cx=\"150\" cy=\"90\" r=\"5\"/><circle cx=\"180\" cy=\"90\" r=\"5\"/><circle cx=\"330\" cy=\"90\" r=\"5\"/>\n</g>\n<circle cx=\"230\" cy=\"90\" r=\"7\" fill=\"#ef4444\"/>\n<g font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">\n<text x=\"110\" y=\"126\">80</text><text x=\"146\" y=\"126\" text-anchor=\"end\">120</text><text x=\"184\" y=\"126\" text-anchor=\"start\">150 (×2)</text>\n</g>\n<text x=\"230\" y=\"150\" font-size=\"12\" text-anchor=\"middle\" fill=\"#ef4444\">200: thuộc cả Bac lẫn Vang</text>\n</svg>\n\n(Trục chỉ vẽ tới 300 cho gọn; hạng Vang kéo dài tới 1000.)\n\n#### Từng bước\n| amount | Dong (0..99) | Bac (100..200) | Vang (200..1000) |\n|---|---|---|---|\n| 200 | | ✓ | ✓ |\n| 150 | | ✓ | |\n| 300 | | | ✓ |\n| 120 | | ✓ | |\n| 80 | ✓ | | |\n| NULL | (UNKNOWN) | (UNKNOWN) | (UNKNOWN) |\n| 150 | | ✓ | |\n| **Đếm** | **1** | **4** | **2** |\n\nTổng $1 + 4 + 2 = 7$ lớn hơn 6 đơn có amount: dấu hiệu khoảng bị chồng.\n\n#### Cách thiết kế khoảng an toàn\nDùng khoảng **nửa mở** $lo \\le x < hi$:\n\n```sql\nLEFT JOIN orders o ON o.amount >= t.lo AND o.amount < t.hi\n-- với tiers: Dong [0, 100), Bac [100, 200), Vang [200, 1000)\n```\n\n#### Bẫy thường gặp\n- Đơn amount NULL không khớp hạng nào; vì bảng giữ lại là `tiers` nên đơn này biến mất, không có dòng \"tier NULL\".\n- `COUNT(o.id)` cho 0 với hạng không có đơn; `COUNT(*)` sẽ cho 1 (đếm dòng NULL do LEFT JOIN).\n\n#### Đọc thêm\n- [PostgreSQL: Comparison Functions and Operators (BETWEEN)](https://www.postgresql.org/docs/current/functions-comparison.html)\n- [Join (SQL), Wikipedia](https://en.wikipedia.org/wiki/Join_%28SQL%29)\n",
+   "distractors": {
+    "A": "Nghĩ mỗi đơn chỉ thuộc một hạng hoặc BETWEEN loại đầu mút trên. Non-equi join ghép **mọi** dòng thoả điều kiện, nên khoảng chồng tại 200 làm đơn 200 được đếm hai lần.",
+    "B": "Coi amount NULL như 0 nên rơi vào Dong. `NULL BETWEEN 0 AND 99` là UNKNOWN, đơn 106 không khớp hạng nào.",
+    "D": "Bảng giữ nguyên mọi dòng là `tiers` (bên trái); đơn không khớp (đơn NULL) không được thêm vào. Muốn vậy phải dùng FULL JOIN hoặc đảo chiều."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Dong 1, Bac 3, Vang 2"
+    },
+    {
+     "key": "B",
+     "text": "Dong 2, Bac 4, Vang 2"
+    },
+    {
+     "key": "C",
+     "text": "Dong 1, Bac 4, Vang 2"
+    },
+    {
+     "key": "D",
+     "text": "Dong 1, Bac 4, Vang 2, thêm một dòng tier NULL cho đơn amount NULL"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T08-C04",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Bảng `orders` có 7 đơn, trong đó đúng 1 đơn có `status = 'cancelled'` (cột `amount` có một giá trị NULL ở đơn khác). Analyst tính tỉ lệ huỷ:\n\n```sql\nSELECT SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) / COUNT(*) AS ti_le_huy\nFROM orders;\n```\n\nKết quả `ti_le_huy` trên cả PostgreSQL và SQLite là gì?",
+   "explanation": "Tử số là số nguyên 1, mẫu số `COUNT(*)` là số nguyên 7; phép chia hai số nguyên trong PostgreSQL và SQLite cắt phần thập phân: $1 / 7 = 0$. Sửa: `SUM(...) * 1.0 / COUNT(*)` hoặc `AVG(CASE WHEN status = 'cancelled' THEN 1.0 ELSE 0 END)`.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nTrong PostgreSQL và SQLite, **số nguyên chia số nguyên cho số nguyên** và cắt bỏ phần thập phân (về phía 0). Biểu thức `SUM(CASE ... THEN 1 ELSE 0 END)` là số nguyên, `COUNT(*)` cũng là số nguyên, nên $1 / 7 = 0$.\n\n#### Từng bước\n1. `CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END` cho 1 ở đơn 103, 0 ở 6 đơn còn lại; SUM = 1.\n2. `COUNT(*)` = 7 (đếm mọi dòng, không liên quan amount NULL).\n3. $1 / 7 \\to 0$ (chia nguyên).\n\n| Cách viết | PostgreSQL | SQLite |\n|---|---|---|\n| `1 / 7` | 0 | 0 |\n| `1 * 1.0 / 7` | 0.14285714285714285714 | 0.14285714285714285 |\n| `AVG(CASE ... THEN 1.0 ELSE 0 END)` | 0.14285714285714285714 | 0.14285714285714285 |\n| `ROUND(100.0 * 1 / 7, 1)` | 14.3 | 14.3 |\n\n(PostgreSQL trả kiểu `numeric` nên in 20 chữ số thập phân; SQLite trả số thực dấu phẩy động, cột SQLite ghi theo cách Python in ra.)\n\nTruy vấn đã sửa:\n\n```sql\nSELECT ROUND(100.0 * SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) / COUNT(*), 1)\n       AS ti_le_huy_pct\nFROM orders;      -- 14.3\n```\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\nprint(con.execute(\"SELECT 1 / 7, 1 * 1.0 / 7, ROUND(100.0 * 1 / 7, 1)\").fetchone())  # (0, 0.142857..., 14.3)\n```\n\n#### Bẫy thường gặp\n- Vị trí của `* 1.0` quan trọng: `SUM(...) / COUNT(*) * 1.0` vẫn ra 0 vì phép chia nguyên đã xảy ra trước.\n- MySQL lại trả 0.1429 cho `1 / 7` (toán tử `/` luôn chia thực), nên code chuyển từ MySQL sang PostgreSQL hay dính lỗi này.\n- `CAST(x AS REAL)` chạy được trên SQLite nhưng trong PostgreSQL `REAL` là số thực 4 byte; nhân `1.0` là cách gọn và chạy giống nhau trên cả hai hệ.\n\n#### Đọc thêm\n- [PostgreSQL: Mathematical Functions and Operators](https://www.postgresql.org/docs/current/functions-math.html)\n- [SQLite: SQL Language Expressions](https://sqlite.org/lang_expr.html)\n",
+   "distractors": {
+    "A": "Đúng về toán và đúng nếu nhân với `1.0` trước khi chia, nhưng truy vấn chia hai số nguyên nên cho 0.",
+    "B": "Truy vấn không dùng cột amount; NULL ở cột khác không ảnh hưởng tới CASE trên status hay COUNT(*).",
+    "C": "Nhầm tử số với cả biểu thức: SUM cho 1 rồi còn chia cho COUNT(*) = 7."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Khoảng 0,1429 (tức là 1/7)"
+    },
+    {
+     "key": "B",
+     "text": "NULL, vì cột amount có một giá trị NULL"
+    },
+    {
+     "key": "C",
+     "text": "1, vì SUM đếm được đúng 1 đơn bị huỷ"
+    },
+    {
+     "key": "D",
+     "text": "0, vì hai vế là số nguyên nên phép chia bỏ phần lẻ"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T08-C05",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Đội bán hàng tìm khách **trung thành**: có từ 2 đơn `paid` trở lên, xếp theo tổng tiền giảm dần.\n\nBảng `orders` (`order_date` lưu dạng chuỗi `'YYYY-MM-DD'`):\n\n| id | customer_id | order_date | amount | status |\n|---|---|---|---|---|\n| 101 | 1 | 2026-01-05 | 200 | paid |\n| 102 | 1 | 2026-01-20 | 150 | paid |\n| 103 | 2 | 2026-01-11 | 300 | cancelled |\n| 104 | 3 | 2026-02-02 | 120 | paid |\n| 105 | 2 | 2026-02-15 | 80 | paid |\n| 106 | 1 | 2026-02-28 | NULL | pending |\n| 107 | 3 | 2026-03-03 | 150 | paid |\n\nTruy vấn sau trả về gì? **Ghi mỗi dòng một bản ghi theo đúng thứ tự trả về, các cột cách nhau bằng dấu `|` (không thêm khoảng trắng), không ghi tên cột.**\n\n```sql\nSELECT customer_id, COUNT(*) AS so_don, SUM(amount) AS tong\nFROM orders\nWHERE status = 'paid'\nGROUP BY customer_id\nHAVING COUNT(*) >= 2\nORDER BY tong DESC;\n```",
+   "explanation": "WHERE giữ 5 đơn paid; nhóm theo khách: khách 1 có 2 đơn (200 + 150 = 350), khách 2 có 1 đơn (80), khách 3 có 2 đơn (120 + 150 = 270). HAVING `COUNT(*) >= 2` loại khách 2, rồi sắp tổng giảm dần.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nTruy vấn kết hợp đủ các bước theo đúng thứ tự logic: **WHERE** lọc dòng (chỉ đơn paid) → **GROUP BY** gộp theo khách → **HAVING** lọc nhóm (ít nhất 2 đơn) → **SELECT** tính cột → **ORDER BY** theo alias `tong` giảm dần.\n\n#### Từng bước\n1. WHERE `status = 'paid'` loại đơn 103 (cancelled) và 106 (pending), còn 5 đơn.\n2. GROUP BY customer_id:\n\n| customer_id | đơn paid | COUNT(*) | SUM(amount) | HAVING `COUNT(*) >= 2` |\n|---|---|---|---|---|\n| 1 | 101 (200), 102 (150) | 2 | 350 | giữ |\n| 2 | 105 (80) | 1 | 80 | loại |\n| 3 | 104 (120), 107 (150) | 2 | 270 | giữ |\n\n3. ORDER BY tong DESC: 350 trước 270.\n\n```text\n1|2|350\n3|2|270\n```\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE orders(id INTEGER, customer_id INTEGER, amount INTEGER, status TEXT)\")\ncon.executemany(\"INSERT INTO orders VALUES (?,?,?,?)\", [(101,1,200,\"paid\"),(102,1,150,\"paid\"),\n    (103,2,300,\"cancelled\"),(104,3,120,\"paid\"),(105,2,80,\"paid\"),(106,1,None,\"pending\"),(107,3,150,\"paid\")])\nfor r in con.execute(\"\"\"SELECT customer_id, COUNT(*) AS so_don, SUM(amount) AS tong FROM orders\n                        WHERE status = 'paid' GROUP BY customer_id HAVING COUNT(*) >= 2 ORDER BY tong DESC\"\"\"):\n    print(\"|\".join(map(str, r)))\n```\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  A[\"7 đơn\"] -->|\"WHERE paid\"| B[\"5 đơn\"]\n  B -->|\"GROUP BY khách\"| C[\"3 nhóm\"]\n  C -->|\"HAVING COUNT >= 2\"| D[\"2 nhóm: khách 1, khách 3\"]\n  D -->|\"ORDER BY tong DESC\"| E[\"350, 270\"]\n```\n\n#### Bẫy thường gặp\n- Nếu bỏ WHERE, khách 2 có 2 đơn (300 cancelled + 80) với tổng 380 và lên đầu bảng: \"khách trung thành\" nhờ một đơn đã huỷ.\n- Trong HAVING của PostgreSQL phải viết lại biểu thức `COUNT(*)`, không dùng alias `so_don` (SQLite thì cho phép).\n\n#### Đọc thêm\n- [PostgreSQL: The GROUP BY and HAVING Clauses](https://www.postgresql.org/docs/current/queries-table-expressions.html)\n- [Group by (SQL), Wikipedia](https://en.wikipedia.org/wiki/Group_by_%28SQL%29)\n",
+   "mistakes": [
+    {
+     "value": "2|2|380\n1|3|350\n3|2|270",
+     "why": "Bỏ quên `WHERE status = 'paid'`: khi đó đơn cancelled 103 và đơn pending 106 cũng được tính."
+    },
+    {
+     "value": "3|2|270\n1|2|350",
+     "why": "Đọc `ORDER BY tong DESC` thành tăng dần."
+    },
+    {
+     "value": "1|2|350\n2|1|80\n3|2|270",
+     "why": "Quên HAVING lọc nhóm: khách 2 chỉ có 1 đơn paid nên bị loại."
+    }
+   ],
+   "answer": "1|2|350\n3|2|270",
+   "accept": [
+    "1|2|350\n3|2|270"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T08-C06",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Bạn cần lấy **đơn có amount lớn nhất của từng khách** (mỗi khách một dòng, gồm id đơn và amount) từ bảng `orders(id, customer_id, amount, ...)`; cột amount có thể NULL. Truy vấn phải chạy được trên cả PostgreSQL và SQLite. Cách nào đúng?",
+   "explanation": "Window function được tính ở bước SELECT, **sau** WHERE và HAVING, nên muốn lọc theo nó phải bọc trong CTE hoặc truy vấn con rồi lọc ở tầng ngoài. Lọc `amount IS NOT NULL` vì PostgreSQL xếp NULL **đầu tiên** khi `DESC` (SQLite xếp cuối), nếu không đơn NULL có thể thành rn = 1 trên PostgreSQL.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nBài toán \"**dòng đứng đầu mỗi nhóm**\" (top-1 per group) giải chuẩn bằng `ROW_NUMBER() OVER (PARTITION BY nhóm ORDER BY tiêu chí)` rồi lọc `rn = 1`. Vì window function được tính ở bước SELECT, **sau** WHERE và HAVING, bạn không lọc được nó ở cùng tầng; phải bọc trong CTE hoặc truy vấn con.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  O[\"orders\"] -->|\"WHERE amount IS NOT NULL\"| X[\"CTE xep: thêm cột rn\"]\n  X -->|\"truy vấn ngoài: WHERE rn = 1\"| R[\"1 dòng mỗi khách\"]\n```\n\n#### Từng bước\n```sql\nWITH xep AS (\n  SELECT id, customer_id, amount,\n         ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC) AS rn\n  FROM orders\n  WHERE amount IS NOT NULL\n)\nSELECT customer_id, id, amount FROM xep WHERE rn = 1 ORDER BY customer_id;\n```\n\n| customer_id | id | amount | rn |\n|---|---|---|---|\n| 1 | 101 | 200 | **1** |\n| 1 | 102 | 150 | 2 |\n| 2 | 103 | 300 | **1** |\n| 2 | 105 | 80 | 2 |\n| 3 | 107 | 150 | **1** |\n| 3 | 104 | 120 | 2 |\n\nKết quả: (1, 101, 200), (2, 103, 300), (3, 107, 150).\n\n#### Vì sao phải lọc NULL\n| Hệ | Vị trí NULL mặc định khi `ORDER BY amount DESC` |\n|---|---|\n| PostgreSQL | **đầu** (NULL được coi là lớn hơn mọi giá trị) |\n| SQLite | cuối (NULL được coi là nhỏ hơn mọi giá trị) |\n\nKhông lọc thì trên PostgreSQL đơn 106 (amount NULL) thành `rn = 1` của khách 1. Cách khác: `ORDER BY amount DESC NULLS LAST` (PostgreSQL và SQLite từ 3.30 đều hỗ trợ).\n\n#### Bẫy thường gặp\n- `QUALIFY` tiện nhưng chỉ có ở Snowflake, BigQuery, DuckDB...; không chạy trên PostgreSQL và SQLite.\n- Có hoà (hai đơn cùng amount lớn nhất) thì ROW_NUMBER chọn một cách tuỳ ý; thêm cột phá hoà `ORDER BY amount DESC, id` hoặc dùng `RANK` nếu muốn giữ cả hai.\n\n#### Đọc thêm\n- [PostgreSQL tutorial: Window Functions](https://www.postgresql.org/docs/current/tutorial-window.html)\n- [PostgreSQL: Sorting Rows (NULLS FIRST/LAST)](https://www.postgresql.org/docs/current/queries-order.html)\n",
+   "distractors": {
+    "B": "Window function không được phép trong WHERE (cả hai hệ đều báo lỗi), vì WHERE chạy trước khi cửa sổ được tính.",
+    "C": "`QUALIFY` có trong Snowflake, BigQuery, DuckDB nhưng **không** có trong PostgreSQL và SQLite; người chuyển từ các hệ đó hay mắc.",
+    "D": "Sau GROUP BY, `amount` (chưa gộp) không xác định trong HAVING: PostgreSQL báo lỗi, SQLite chạy nhưng lấy amount của một dòng tuỳ ý trong nhóm, không đáng tin."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Tính `ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC) AS rn` trong một CTE (lọc `amount IS NOT NULL`), rồi ở truy vấn ngoài lọc `WHERE rn = 1`"
+    },
+    {
+     "key": "B",
+     "text": "Đặt window function thẳng vào điều kiện lọc: `WHERE ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC) = 1`"
+    },
+    {
+     "key": "C",
+     "text": "Tính `rn` bằng ROW_NUMBER trong SELECT rồi lọc ngay ở cùng tầng truy vấn bằng mệnh đề `QUALIFY rn = 1`"
+    },
+    {
+     "key": "D",
+     "text": "Viết `GROUP BY customer_id` kèm `HAVING amount = MAX(amount)` để chỉ giữ dòng có amount lớn nhất của mỗi khách"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T08-C07",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Chuỗi hai cửa hàng theo dõi doanh thu lũy kế (đơn vị: triệu đồng). Bảng `daily_sales`:\n\n| store | day | revenue |\n|---|---|---|\n| A | 2026-03-01 | 100 |\n| A | 2026-03-02 | 130 |\n| A | 2026-03-03 | 90 |\n| B | 2026-03-01 | 200 |\n| B | 2026-03-02 | 150 |\n\nTruy vấn sau trả về gì? **Ghi mỗi dòng một bản ghi theo đúng thứ tự trả về, các cột cách nhau bằng dấu `|` (không thêm khoảng trắng), không ghi tên cột.**\n\n```sql\nSELECT store,\n       SUM(revenue) OVER (PARTITION BY store ORDER BY day) AS luy_ke\nFROM daily_sales\nORDER BY store, day;\n```",
+   "explanation": "`PARTITION BY store` tách hai cửa hàng, `ORDER BY day` làm SUM cộng dồn từ đầu phân vùng tới dòng hiện tại: A: 100, $100 + 130 = 230$, $230 + 90 = 320$; B: 200, $200 + 150 = 350$.",
+   "section": "b-sql",
+   "long": "#### Ý chính\n`SUM(x) OVER (PARTITION BY p ORDER BY t)` là **tổng lũy kế** trong từng phân vùng: khi OVER có ORDER BY, khung mặc định chạy từ dòng đầu phân vùng tới dòng hiện tại (cùng các dòng ngang hàng với nó). PARTITION BY làm tổng **bắt đầu lại** ở mỗi cửa hàng.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 240\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"40\" y1=\"200\" x2=\"520\" y2=\"200\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<g fill=\"#3b82f6\" fill-opacity=\"0.55\">\n<rect x=\"60\" y=\"150\" width=\"50\" height=\"50\"/><rect x=\"130\" y=\"85\" width=\"50\" height=\"115\"/><rect x=\"200\" y=\"40\" width=\"50\" height=\"160\"/>\n</g>\n<g fill=\"#10b981\" fill-opacity=\"0.55\">\n<rect x=\"320\" y=\"100\" width=\"50\" height=\"100\"/><rect x=\"390\" y=\"25\" width=\"50\" height=\"175\"/>\n</g>\n<g font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">\n<text x=\"85\" y=\"144\">100</text><text x=\"155\" y=\"79\">230</text><text x=\"225\" y=\"34\">320</text>\n<text x=\"345\" y=\"94\">200</text><text x=\"415\" y=\"19\">350</text>\n<text x=\"85\" y=\"216\">A 03-01</text><text x=\"155\" y=\"216\">A 03-02</text><text x=\"225\" y=\"216\">A 03-03</text>\n<text x=\"345\" y=\"216\">B 03-01</text><text x=\"415\" y=\"216\">B 03-02</text>\n<text x=\"290\" y=\"236\">Lũy kế khởi động lại khi sang cửa hàng B</text>\n</g>\n<line x1=\"285\" y1=\"20\" x2=\"285\" y2=\"200\" stroke=\"#ef4444\" stroke-dasharray=\"5 4\" stroke-width=\"1.5\"/>\n</svg>\n\n#### Từng bước\n| store | day | revenue | luy_ke |\n|---|---|---|---|\n| A | 03-01 | 100 | 100 |\n| A | 03-02 | 130 | $100 + 130 = 230$ |\n| A | 03-03 | 90 | $230 + 90 = 320$ |\n| B | 03-01 | 200 | 200 |\n| B | 03-02 | 150 | $200 + 150 = 350$ |\n\n```text\nA|100\nA|230\nA|320\nB|200\nB|350\n```\n\n#### Ba biến thể dễ nhầm\n| Viết trong OVER | Kết quả cột (theo thứ tự trên) |\n|---|---|\n| `PARTITION BY store ORDER BY day` | 100, 230, 320, 200, 350 |\n| `PARTITION BY store` (không ORDER BY) | 320, 320, 320, 350, 350 |\n| `ORDER BY day` (không PARTITION) | 300, 580, 670, 300, 580 |\n\nDòng thứ ba cho thấy thêm một hiệu ứng: hai dòng cùng ngày 03-01 của A và B là **ngang hàng** nên cùng nhận 300 (xem câu D01).\n\n#### Bẫy thường gặp\n- ORDER BY cuối truy vấn chỉ sắp xếp kết quả hiển thị; thứ tự cộng dồn do ORDER BY **bên trong OVER** quyết định.\n\n#### Đọc thêm\n- [PostgreSQL tutorial: Window Functions](https://www.postgresql.org/docs/current/tutorial-window.html)\n- [SQLite: Window Functions](https://sqlite.org/windowfunctions.html)\n",
+   "mistakes": [
+    {
+     "value": "A|320\nA|320\nA|320\nB|350\nB|350",
+     "why": "Nghĩ ORDER BY trong OVER không ảnh hưởng: có ORDER BY thì khung mặc định chỉ chạy từ đầu phân vùng tới dòng hiện tại, nên ra tổng lũy kế; không có ORDER BY mới ra tổng cả phân vùng."
+    },
+    {
+     "value": "A|100\nA|230\nA|320\nB|520\nB|670",
+     "why": "Quên PARTITION BY khởi động lại tổng ở mỗi cửa hàng; B bắt đầu lại từ 200."
+    },
+    {
+     "value": "A|100\nA|130\nA|90\nB|200\nB|150",
+     "why": "Nhầm với giá trị revenue của chính dòng, không cộng dồn."
+    }
+   ],
+   "answer": "A|100\nA|230\nA|320\nB|200\nB|350",
+   "accept": [
+    "A|100\nA|230\nA|320\nB|200\nB|350"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T08-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Trong PostgreSQL, bảng `orders` có 5 triệu dòng của khoảng 200 nghìn khách khác nhau, và chỉ có một index B-tree:\n\n```sql\nCREATE INDEX idx_cust_date ON orders (customer_id, order_date);\n```\n\nVới `SELECT * FROM orders ...`, điều kiện nào **khó tận dụng index này nhất** (EXPLAIN nhiều khả năng cho `Seq Scan`), biết rằng khoảng một phần ba số đơn có `order_date` từ 2026 trở đi?",
+   "explanation": "Index nhiều cột được sắp theo `(customer_id, order_date)` như danh bạ sắp theo (họ, tên): hiệu quả khi có điều kiện trên **cột dẫn đầu**. Chỉ lọc `order_date` thì các dòng thoả nằm rải khắp index, lại chiếm khoảng $1/3$ bảng, nên planner chọn quét tuần tự.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nIndex B-tree nhiều cột lưu các khoá đã **sắp theo cột thứ nhất, rồi trong cùng giá trị cột thứ nhất mới sắp theo cột thứ hai**, như danh bạ sắp theo (họ, tên). Tra theo họ rất nhanh; tra \"mọi người tên Lan\" thì phải lật cả cuốn. Tài liệu PostgreSQL ghi: index nhiều cột hiệu quả nhất khi có điều kiện trên các **cột dẫn đầu** (leftmost).\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 220\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"270\" y=\"18\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">Index (customer_id, order_date): các khoá đã sắp xếp</text>\n<g stroke=\"currentColor\" stroke-width=\"1\" fill=\"none\">\n<rect x=\"20\" y=\"30\" width=\"500\" height=\"34\"/>\n</g>\n<g font-size=\"11\" fill=\"currentColor\" text-anchor=\"middle\">\n<text x=\"65\" y=\"52\">(41, 2025-12)</text><text x=\"150\" y=\"52\">(42, 2025-03)</text><text x=\"235\" y=\"52\">(42, 2026-01)</text><text x=\"320\" y=\"52\">(42, 2026-02)</text><text x=\"405\" y=\"52\">(43, 2025-07)</text><text x=\"485\" y=\"52\">(43, 2026-04)</text>\n</g>\n<rect x=\"195\" y=\"70\" width=\"170\" height=\"10\" fill=\"#10b981\"/>\n<text x=\"280\" y=\"98\" font-size=\"12\" text-anchor=\"middle\" fill=\"#10b981\">customer_id = 42 AND order_date ≥ 2026: một đoạn liền</text>\n<rect x=\"195\" y=\"120\" width=\"80\" height=\"10\" fill=\"#ef4444\"/><rect x=\"280\" y=\"120\" width=\"80\" height=\"10\" fill=\"#ef4444\"/><rect x=\"445\" y=\"120\" width=\"75\" height=\"10\" fill=\"#ef4444\"/>\n<text x=\"270\" y=\"150\" font-size=\"12\" text-anchor=\"middle\" fill=\"#ef4444\">chỉ order_date ≥ 2026: rải rác khắp index</text>\n<text x=\"270\" y=\"185\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">200 nghìn khách → 200 nghìn đoạn nhỏ, lại chiếm khoảng 1/3 bảng</text>\n<text x=\"270\" y=\"205\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">→ planner chọn Seq Scan</text>\n</svg>\n\n#### Từng bước\n| Điều kiện | Dùng index thế nào | Kế hoạch dự kiến |\n|---|---|---|\n| `customer_id = 42 AND order_date >= ...` | đoạn liền trong index | Index Scan |\n| `customer_id = 42 ORDER BY order_date DESC LIMIT 5` | đi ngược đoạn của khách 42, dừng sau 5 dòng | Index Scan Backward |\n| `customer_id IN (42, 77)` | hai đoạn nhỏ | Index Scan hoặc Bitmap |\n| `order_date >= '2026-01-01'` | không thu hẹp được theo cột dẫn đầu | **Seq Scan** |\n\nKiểm tra bằng `EXPLAIN SELECT * FROM orders WHERE order_date >= '2026-01-01';`. Nếu truy vấn theo ngày là phổ biến, tạo thêm index riêng `CREATE INDEX ON orders (order_date);`.\n\n#### Bẫy thường gặp\n- PostgreSQL 18 có thêm **skip scan** cho B-tree, giúp dùng index khi cột dẫn đầu thiếu điều kiện nhưng có **ít** giá trị khác nhau. Ở đây có 200 nghìn khách nên skip scan không có lợi.\n- Ngay cả khi có index đúng, lọc ra một phần lớn bảng (ở đây khoảng 1/3) thì Seq Scan thường rẻ hơn đọc ngẫu nhiên qua index.\n- Bọc cột trong hàm (`WHERE SUBSTR(order_date, 1, 4) = '2026'`) cũng làm index thường không dùng được; cần index biểu thức.\n\n#### Đọc thêm\n- [PostgreSQL: Multicolumn Indexes](https://www.postgresql.org/docs/current/indexes-multicolumn.html)\n- [PostgreSQL: Using EXPLAIN](https://www.postgresql.org/docs/current/using-explain.html)\n- [Database index, Wikipedia](https://en.wikipedia.org/wiki/Database_index)\n",
+   "distractors": {
+    "A": "Cột dẫn đầu bằng một giá trị, cột thứ hai là khoảng: đây là trường hợp lý tưởng, index thu hẹp đúng đoạn cần đọc.",
+    "B": "Cố định `customer_id = 42` thì các dòng đã được sắp theo `order_date` trong index; PostgreSQL quét ngược index (Index Scan Backward) và dừng sau 5 dòng, không cần sắp xếp.",
+    "D": "IN trên cột dẫn đầu vẫn dùng được index (hai lần tra hoặc `= ANY`), mỗi khách chỉ có vài chục đơn trong 5 triệu dòng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`WHERE customer_id = 42 AND order_date >= '2026-01-01'`"
+    },
+    {
+     "key": "B",
+     "text": "`WHERE customer_id = 42 ORDER BY order_date DESC LIMIT 5`"
+    },
+    {
+     "key": "C",
+     "text": "`WHERE order_date >= '2026-01-01'`"
+    },
+    {
+     "key": "D",
+     "text": "`WHERE customer_id IN (42, 77)`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T08-C09",
+   "module": "C",
+   "type": "code",
+   "points": 6,
+   "level": "van-dung",
+   "prompt": "Ban giám đốc cần **báo cáo theo thành phố** từ hai bảng sau.\n\nBảng `customers`:\n\n| id | name | city |\n|---|---|---|\n| 1 | An | HN |\n| 2 | Binh | HCM |\n| 3 | Chi | HN |\n| 4 | Dung | DN |\n| 5 | Ha | NULL |\n\nBảng `orders` (`order_date` lưu dạng chuỗi `'YYYY-MM-DD'`):\n\n| id | customer_id | order_date | amount | status |\n|---|---|---|---|---|\n| 101 | 1 | 2026-01-05 | 200 | paid |\n| 102 | 1 | 2026-01-20 | 150 | paid |\n| 103 | 2 | 2026-01-11 | 300 | cancelled |\n| 104 | 3 | 2026-02-02 | 120 | paid |\n| 105 | 2 | 2026-02-15 | 80 | paid |\n| 106 | 1 | 2026-02-28 | NULL | pending |\n| 107 | 3 | 2026-03-03 | 150 | paid |\n\n**Viết một truy vấn SQL** (chạy được trên cả PostgreSQL và SQLite) trả về 4 cột:\n\n- `thanh_pho`: thành phố của khách; khách có `city` NULL ghi là `'Chua ro'`.\n- `so_khach`: số khách thuộc thành phố đó (kể cả khách chưa mua).\n- `so_khach_mua`: số khách có **ít nhất một** đơn `paid`.\n- `doanh_thu`: tổng `amount` của các đơn `paid`; thành phố không có đơn paid ghi **0** (không để NULL).\n\nMọi thành phố đều phải xuất hiện. Sắp xếp theo `doanh_thu` giảm dần, hoà thì theo `thanh_pho` tăng dần. Với dữ liệu trên, kết quả đúng là:\n\n| thanh_pho | so_khach | so_khach_mua | doanh_thu |\n|---|---|---|---|\n| HN | 2 | 2 | 620 |\n| HCM | 1 | 1 | 80 |\n| Chua ro | 1 | 0 | 0 |\n| DN | 1 | 0 | 0 |\n\nTruy vấn phải đúng cả khi dữ liệu thay đổi (không viết cứng tên thành phố hay con số).",
+   "explanation": "Định hướng chấm: LEFT JOIN từ `customers` với điều kiện `status = 'paid'` đặt trong ON (nếu đặt ở WHERE sẽ mất DN và 'Chua ro'); vì một khách có nhiều đơn nên phải đếm `COUNT(DISTINCT ...)`; `COALESCE` cho cả city NULL lẫn SUM rỗng.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nBáo cáo \"theo nhóm, **kể cả nhóm không có dữ liệu**\" luôn bắt đầu từ bảng chứa **đủ các nhóm** (`customers`) rồi LEFT JOIN sang bảng sự kiện (`orders`). Ba điểm dễ sai: (1) điều kiện lên bảng phải đặt ở ON; (2) JOIN một-nhiều nhân bản khách nên phải `COUNT(DISTINCT ...)`; (3) NULL ở cả khoá nhóm (city) và tổng rỗng (SUM).\n\n#### Từng bước\nKết quả trung gian sau `customers LEFT JOIN orders ON ... AND o.status = 'paid'`:\n\n| thanh_pho | c.id | o.id | o.amount |\n|---|---|---|---|\n| HN | 1 (An) | 101 | 200 |\n| HN | 1 (An) | 102 | 150 |\n| HCM | 2 (Binh) | 105 | 80 |\n| HN | 3 (Chi) | 104 | 120 |\n| HN | 3 (Chi) | 107 | 150 |\n| DN | 4 (Dung) | NULL | NULL |\n| Chua ro | 5 (Ha) | NULL | NULL |\n\nGộp theo thành phố:\n\n| thanh_pho | `COUNT(c.id)` (sai) | `COUNT(DISTINCT c.id)` | `COUNT(DISTINCT o.customer_id)` | `COALESCE(SUM, 0)` |\n|---|---|---|---|---|\n| HN | 4 | 2 | 2 | $200 + 150 + 120 + 150 = 620$ |\n| HCM | 1 | 1 | 1 | 80 |\n| Chua ro | 1 | 1 | 0 | 0 |\n| DN | 1 | 1 | 0 | 0 |\n\nSắp `doanh_thu DESC, thanh_pho ASC`: HN, HCM, rồi 'Chua ro' trước 'DN' (C < D).\n\n```sql\nSELECT COALESCE(c.city, 'Chua ro')    AS thanh_pho,\n       COUNT(DISTINCT c.id)          AS so_khach,\n       COUNT(DISTINCT o.customer_id) AS so_khach_mua,\n       COALESCE(SUM(o.amount), 0)    AS doanh_thu\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id AND o.status = 'paid'\nGROUP BY COALESCE(c.city, 'Chua ro')\nORDER BY doanh_thu DESC, thanh_pho;\n```\n\n#### Bẫy thường gặp\n- Đặt `o.status = 'paid'` ở WHERE: mất DN và 'Chua ro' (xem câu B03).\n- `COUNT(c.id)` không DISTINCT cho HN = 4 vì An và Chi mỗi người có 2 đơn paid.\n- Không COALESCE city thì nhóm NULL vẫn xuất hiện (GROUP BY gom các NULL chung một nhóm) nhưng hiển thị trống, và vị trí của nó khi ORDER BY khác nhau giữa PostgreSQL và SQLite.\n- Cách khác cũng đúng: gộp `orders` theo khách trong một CTE trước, rồi LEFT JOIN vào `customers` (quan hệ một-một, không cần DISTINCT).\n\n#### Đọc thêm\n- [PostgreSQL: Conditional Expressions (COALESCE)](https://www.postgresql.org/docs/current/functions-conditional.html)\n- [PostgreSQL: Joined Tables](https://www.postgresql.org/docs/current/queries-table-expressions.html)\n",
+   "modelAnswer": "```sql\nSELECT COALESCE(c.city, 'Chua ro')       AS thanh_pho,\n       COUNT(DISTINCT c.id)             AS so_khach,\n       COUNT(DISTINCT o.customer_id)    AS so_khach_mua,\n       COALESCE(SUM(o.amount), 0)       AS doanh_thu\nFROM customers c\nLEFT JOIN orders o\n       ON o.customer_id = c.id\n      AND o.status = 'paid'\nGROUP BY COALESCE(c.city, 'Chua ro')\nORDER BY doanh_thu DESC, thanh_pho;\n```\n\n- Điều kiện `o.status = 'paid'` nằm trong `ON` nên khách không có đơn paid vẫn được giữ với các cột `o.*` là NULL.\n- An có 2 đơn paid nên xuất hiện 2 lần sau JOIN: `COUNT(c.id)` sẽ ra 3 cho HN, vì vậy phải `COUNT(DISTINCT c.id)`.\n- `COUNT(DISTINCT o.customer_id)` bỏ qua NULL nên khách chưa mua không được tính.\n- `SUM` của nhóm toàn NULL là NULL, `COALESCE(..., 0)` đổi thành 0.",
+   "rubric": [
+    {
+     "criterion": "LEFT JOIN từ customers sang orders, điều kiện `status = 'paid'` đặt trong ON (hoặc lọc trong truy vấn con) nên giữ đủ 4 thành phố",
+     "points": 2
+    },
+    {
+     "criterion": "Đếm đúng: `COUNT(DISTINCT c.id)` cho so_khach và `COUNT(DISTINCT o.customer_id)` cho so_khach_mua (không bị nhân bản bởi nhiều đơn)",
+     "points": 2
+    },
+    {
+     "criterion": "Dùng COALESCE cho city NULL ('Chua ro') và doanh_thu rỗng (0); GROUP BY khớp biểu thức; ORDER BY doanh_thu DESC, thanh_pho; cú pháp chạy trên cả hai hệ",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "T08-D01",
+   "module": "D",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung-cao",
+   "prompt": "Ví điện tử vẽ biểu đồ tiền nạp lũy kế **theo từng giao dịch**. Bảng `payments_log`:\n\n| id | day | amount |\n|---|---|---|\n| 1 | 2026-03-01 | 100 |\n| 2 | 2026-03-02 | 50 |\n| 3 | 2026-03-02 | 70 |\n| 4 | 2026-03-03 | 30 |\n\n```sql\nSELECT id, day, amount,\n       SUM(amount) OVER (ORDER BY day) AS luy_ke\nFROM payments_log\nORDER BY id;\n```\n\nCột `luy_ke` (theo thứ tự id 1, 2, 3, 4) là gì, và sửa thế nào để mỗi giao dịch có một giá trị lũy kế riêng?",
+   "explanation": "Khi có ORDER BY mà không ghi khung, khung mặc định là `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`: các dòng **ngang hàng** (cùng `day`) được tính chung, nên id 2 và 3 cùng nhận $100 + 50 + 70 = 220$. Thêm `id` làm khoá phá hoà (`ORDER BY day, id`) thì mỗi dòng là một mức riêng: 100, 150, 220, 250.",
+   "section": "b-sql",
+   "long": "#### Ý chính\nKhi `OVER` có `ORDER BY` mà không ghi khung, chuẩn SQL (và cả PostgreSQL lẫn SQLite) dùng khung mặc định\n\n`RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`\n\nVới `RANGE`, \"dòng hiện tại\" bao gồm mọi **dòng ngang hàng** (peer), tức các dòng có cùng giá trị ORDER BY. Hai giao dịch cùng ngày 03-02 là peer nên cùng nhận tổng tới hết ngày 03-02. Muốn mỗi giao dịch một mức riêng, hãy làm thứ tự **duy nhất** bằng cột phá hoà (`ORDER BY day, id`), hoặc ghi rõ khung `ROWS` kèm thứ tự duy nhất.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 230\" width=\"100%\" style=\"max-width:560px\">\n<g font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">\n<text x=\"90\" y=\"22\">id 1 · 03-01</text><text x=\"210\" y=\"22\">id 2 · 03-02</text><text x=\"330\" y=\"22\">id 3 · 03-02</text><text x=\"450\" y=\"22\">id 4 · 03-03</text>\n<text x=\"90\" y=\"52\">100</text><text x=\"210\" y=\"52\">50</text><text x=\"330\" y=\"52\">70</text><text x=\"450\" y=\"52\">30</text>\n</g>\n<g stroke=\"currentColor\" fill=\"none\"><rect x=\"40\" y=\"32\" width=\"100\" height=\"30\"/><rect x=\"160\" y=\"32\" width=\"100\" height=\"30\"/><rect x=\"280\" y=\"32\" width=\"100\" height=\"30\"/><rect x=\"400\" y=\"32\" width=\"100\" height=\"30\"/></g>\n<text x=\"40\" y=\"76\" font-size=\"12\" fill=\"currentColor\">RANGE (mặc định)</text>\n<rect x=\"40\" y=\"80\" width=\"340\" height=\"22\" fill=\"#f59e0b\" fill-opacity=\"0.4\"/>\n<text x=\"210\" y=\"96\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">khung của id 2 = khung của id 3 → 220</text>\n<text x=\"40\" y=\"126\" font-size=\"12\" fill=\"currentColor\">ROWS, hoặc ORDER BY day, id</text>\n<rect x=\"40\" y=\"130\" width=\"220\" height=\"22\" fill=\"#10b981\" fill-opacity=\"0.4\"/>\n<text x=\"150\" y=\"146\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">khung của id 2 → 150</text>\n<rect x=\"40\" y=\"160\" width=\"340\" height=\"22\" fill=\"#10b981\" fill-opacity=\"0.4\"/>\n<text x=\"210\" y=\"176\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">khung của id 3 → 220</text>\n<text x=\"270\" y=\"215\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">ORDER BY day: hai dòng 03-02 là peer; ORDER BY day, id: không còn peer</text>\n</svg>\n\n#### Từng bước\n| id | day | amount | `ORDER BY day` (RANGE mặc định) | `ORDER BY day, id` |\n|---|---|---|---|---|\n| 1 | 03-01 | 100 | 100 | 100 |\n| 2 | 03-02 | 50 | $100 + 50 + 70 = 220$ | $100 + 50 = 150$ |\n| 3 | 03-02 | 70 | 220 | $150 + 70 = 220$ |\n| 4 | 03-03 | 30 | 250 | 250 |\n\n```python\nimport sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE payments_log(id INTEGER PRIMARY KEY, day TEXT, amount INTEGER)\")\ncon.executemany(\"INSERT INTO payments_log VALUES (?,?,?)\",\n                [(1, \"2026-03-01\", 100), (2, \"2026-03-02\", 50), (3, \"2026-03-02\", 70), (4, \"2026-03-03\", 30)])\nfor order in [\"day\", \"day, id\"]:\n    q = f\"SELECT SUM(amount) OVER (ORDER BY {order}) FROM payments_log ORDER BY id\"\n    print(order, [r[0] for r in con.execute(q)])\n# day [100, 220, 220, 250]   |   day, id [100, 150, 220, 250]\n```\n\n#### Bẫy thường gặp\n- Chỉ đổi sang `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` mà vẫn `ORDER BY day` thì thứ tự giữa hai dòng 03-02 không xác định: có lúc 150, 220, có lúc 170, 220. Thứ tự duy nhất mới cho kết quả ổn định.\n- `PARTITION BY day` không sửa được: nó cắt thành tổng theo từng ngày.\n- Hiện tượng peer chỉ lộ ra khi dữ liệu có trùng giá trị; trên dữ liệu thử \"sạch\" truy vấn trông vẫn đúng.\n\n#### Đọc thêm\n- [PostgreSQL: Window Function Calls (frame clause)](https://www.postgresql.org/docs/current/sql-expressions.html)\n- [SQLite: Window Functions (frame specifications)](https://sqlite.org/windowfunctions.html)\n",
+   "distractors": {
+    "A": "Đó là kết quả của khung `ROWS`; với khung mặc định `RANGE`, hai giao dịch cùng ngày là peer nên cùng một giá trị 220.",
+    "B": "Tổng toàn bảng 250 chỉ xuất hiện khi OVER không có ORDER BY. Thêm `PARTITION BY day` lại làm tổng khởi động lại mỗi ngày (100, 120, 120, 30), không còn là lũy kế.",
+    "C": "Nhận đúng hiện tượng nhưng sửa sai: `PARTITION BY day` cho tổng theo từng ngày (100, 120, 120, 30) thay vì lũy kế từ đầu."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "100, 150, 220, 250; truy vấn đã cộng dồn từng dòng, không cần sửa"
+    },
+    {
+     "key": "B",
+     "text": "250, 250, 250, 250; cần thêm `PARTITION BY day` vào OVER"
+    },
+    {
+     "key": "C",
+     "text": "100, 220, 220, 250; sửa bằng cách thêm `PARTITION BY day` vào OVER"
+    },
+    {
+     "key": "D",
+     "text": "100, 220, 220, 250; thêm `id` vào sau `day` trong ORDER BY của OVER"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T08-D02",
+   "module": "D",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung-cao",
+   "prompt": "Bộ phận chống gian lận tìm các đơn **lớn hơn mức trung bình của chính khách đó**.\n\nBảng `orders` (`order_date` lưu dạng chuỗi `'YYYY-MM-DD'`):\n\n| id | customer_id | order_date | amount | status |\n|---|---|---|---|---|\n| 101 | 1 | 2026-01-05 | 200 | paid |\n| 102 | 1 | 2026-01-20 | 150 | paid |\n| 103 | 2 | 2026-01-11 | 300 | cancelled |\n| 104 | 3 | 2026-02-02 | 120 | paid |\n| 105 | 2 | 2026-02-15 | 80 | paid |\n| 106 | 1 | 2026-02-28 | NULL | pending |\n| 107 | 3 | 2026-03-03 | 150 | paid |\n\nTruy vấn sau trả về gì? **Ghi mỗi dòng một bản ghi theo đúng thứ tự trả về, các cột cách nhau bằng dấu `|` (không thêm khoảng trắng), không ghi tên cột.**\n\n```sql\nSELECT o.id, o.amount\nFROM orders o\nWHERE o.amount > (\n  SELECT AVG(o2.amount)\n  FROM orders o2\n  WHERE o2.customer_id = o.customer_id\n)\nORDER BY o.id;\n```",
+   "explanation": "Truy vấn con **tương quan** được tính lại cho từng dòng ngoài với trung bình của đúng khách đó: khách 1 $= (200 + 150)/2 = 175$ (bỏ NULL), khách 2 $= (300 + 80)/2 = 190$, khách 3 $= (120 + 150)/2 = 135$. Các đơn vượt: 101, 103, 107.",
+   "section": "b-sql",
+   "long": "#### Ý chính\n**Truy vấn con tương quan** (correlated subquery) tham chiếu tới cột của truy vấn ngoài (`o.customer_id`), nên về mặt logic nó được tính lại **cho từng dòng ngoài**. Ở đây mỗi đơn được so với trung bình amount của **chính khách đó**; `AVG` bỏ qua NULL, và một đơn có amount NULL thì phép so sánh cho UNKNOWN nên bị loại.\n\n#### Từng bước\n1. Trung bình theo khách (bỏ NULL):\n\n| customer_id | amount | AVG |\n|---|---|---|\n| 1 | 200, 150, NULL | $\\dfrac{200 + 150}{2} = 175$ |\n| 2 | 300, 80 | $\\dfrac{300 + 80}{2} = 190$ |\n| 3 | 120, 150 | $\\dfrac{120 + 150}{2} = 135$ |\n\n2. So từng đơn:\n\n| id | khách | amount | AVG của khách | `amount > AVG` |\n|---|---|---|---|---|\n| 101 | 1 | 200 | 175 | TRUE |\n| 102 | 1 | 150 | 175 | FALSE |\n| 103 | 2 | 300 | 190 | TRUE |\n| 104 | 3 | 120 | 135 | FALSE |\n| 105 | 2 | 80 | 190 | FALSE |\n| 106 | 1 | NULL | 175 | UNKNOWN |\n| 107 | 3 | 150 | 135 | TRUE |\n\n```text\n101|200\n103|300\n107|150\n```\n\nCùng ý bằng window function, không cần truy vấn con tương quan:\n\n```sql\nWITH t AS (\n  SELECT id, amount, AVG(amount) OVER (PARTITION BY customer_id) AS tb_khach\n  FROM orders\n)\nSELECT id, amount FROM t WHERE amount > tb_khach ORDER BY id;\n```\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  O[\"Mỗi dòng o của orders\"] --> S[\"Truy vấn con: AVG amount của khách o.customer_id\"]\n  S --> C{\"o.amount > AVG ?\"}\n  C -->|\"TRUE\"| K[\"Giữ\"]\n  C -->|\"FALSE hoặc UNKNOWN\"| B[\"Loại\"]\n```\n\n#### Bẫy thường gặp\n- Quên điều kiện tương quan thì truy vấn con thành trung bình toàn bảng $\\dfrac{1000}{6} \\approx 166{,}7$, chỉ còn 101 và 103.\n- Coi NULL là 0 làm trung bình khách 1 tụt xuống $\\dfrac{350}{3} \\approx 116{,}7$ và kéo cả đơn 102 vào.\n- Truy vấn con tương quan trên bảng lớn có thể chậm nếu planner không viết lại được; phiên bản window function hoặc JOIN với bảng trung bình đã gộp thường dễ tối ưu hơn.\n\n#### Đọc thêm\n- [PostgreSQL: Subquery Expressions](https://www.postgresql.org/docs/current/functions-subquery.html)\n- [Correlated subquery, Wikipedia](https://en.wikipedia.org/wiki/Correlated_subquery)\n",
+   "mistakes": [
+    {
+     "value": "101|200\n102|150\n103|300\n107|150",
+     "why": "Coi amount NULL của đơn 106 là 0, nên trung bình của khách 1 thành $350 / 3 \\approx 116{,}7$ và đơn 102 lọt vào. AVG bỏ qua NULL: $350 / 2 = 175$."
+    },
+    {
+     "value": "101|200\n103|300",
+     "why": "Dùng trung bình toàn bảng $1000 / 6 \\approx 166{,}7$ (quên điều kiện tương quan `o2.customer_id = o.customer_id`)."
+    },
+    {
+     "value": "101|200\n103|300\n106|NULL\n107|150",
+     "why": "Nghĩ đơn 106 được giữ; `NULL > 175` là UNKNOWN nên WHERE loại."
+    }
+   ],
+   "answer": "101|200\n103|300\n107|150",
+   "accept": [
+    "101|200\n103|300\n107|150"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T08-D03",
+   "module": "D",
+   "type": "code",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Bạn làm báo cáo tháng cho shop online.\n\nBảng `orders` (`order_date` lưu dạng chuỗi `'YYYY-MM-DD'`):\n\n| id | customer_id | order_date | amount | status |\n|---|---|---|---|---|\n| 101 | 1 | 2026-01-05 | 200 | paid |\n| 102 | 1 | 2026-01-20 | 150 | paid |\n| 103 | 2 | 2026-01-11 | 300 | cancelled |\n| 104 | 3 | 2026-02-02 | 120 | paid |\n| 105 | 2 | 2026-02-15 | 80 | paid |\n| 106 | 1 | 2026-02-28 | NULL | pending |\n| 107 | 3 | 2026-03-03 | 150 | paid |\n\n**Viết một truy vấn SQL** dùng CTE (`WITH`) và window function, chạy được trên cả PostgreSQL và SQLite, trả về mỗi tháng một dòng gồm:\n\n- `thang`: chuỗi `'YYYY-MM'`, lấy bằng `SUBSTR(order_date, 1, 7)`.\n- `doanh_thu`: tổng `amount` của các đơn `paid` trong tháng.\n- `tang_truong_pct`: phần trăm thay đổi so với tháng liền trước, $100 \\cdot \\dfrac{\\text{doanh thu} - \\text{doanh thu tháng trước}}{\\text{doanh thu tháng trước}}$, làm tròn 1 chữ số thập phân; tháng đầu tiên là NULL; nếu tháng trước bằng 0 thì cũng trả NULL thay vì báo lỗi.\n- `luy_ke`: doanh thu cộng dồn từ tháng đầu tiên tới tháng đó.\n\nSắp xếp theo `thang` tăng dần. Không dùng self-join. Với dữ liệu trên, kết quả đúng là:\n\n| thang | doanh_thu | tang_truong_pct | luy_ke |\n|---|---|---|---|\n| 2026-01 | 350 | NULL | 350 |\n| 2026-02 | 200 | -42.9 | 550 |\n| 2026-03 | 150 | -25.0 | 700 |",
+   "explanation": "Định hướng chấm: CTE thứ nhất gộp doanh thu tháng (lọc paid trước khi gộp); CTE thứ hai dùng `LAG` lấy tháng trước và `SUM() OVER (ORDER BY thang)` cho lũy kế; nhân `100.0` để tránh chia nguyên và `NULLIF(..., 0)` để tránh chia cho 0.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nBáo cáo tăng trưởng theo tháng gồm hai tầng tính toán khác nhau, nên tách thành hai CTE: tầng 1 **gộp** từng đơn thành doanh thu tháng (GROUP BY); tầng 2 chạy **window function** trên dữ liệu đã gộp: `LAG` lấy tháng trước, `SUM() OVER (ORDER BY thang)` tính lũy kế. Cuối cùng tính phần trăm với `100.0` (tránh chia nguyên) và `NULLIF` (tránh chia cho 0).\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  O[\"orders: 7 đơn\"] -->|\"WHERE paid, GROUP BY tháng\"| T[\"CTE thang_dt: 3 dòng\"]\n  T -->|\"LAG, SUM OVER ORDER BY thang\"| L2[\"CTE co_lag: thêm dt_truoc, luy_ke\"]\n  L2 -->|\"ROUND 100.0 x chênh / NULLIF(dt_truoc, 0)\"| R[\"Kết quả: 3 tháng\"]\n```\n\n#### Từng bước\n1. Đơn paid theo tháng: 01: 101 (200) + 102 (150) = 350; 02: 104 (120) + 105 (80) = 200; 03: 107 (150) = 150. Đơn 103 (cancelled) và 106 (pending) bị loại.\n2. Tầng window:\n\n| thang | doanh_thu | dt_truoc | tang_truong_pct | luy_ke |\n|---|---|---|---|---|\n| 2026-01 | 350 | NULL | NULL | 350 |\n| 2026-02 | 200 | 350 | $100 \\cdot \\dfrac{200 - 350}{350} \\approx -42{,}857 \\to -42{,}9$ | 550 |\n| 2026-03 | 150 | 200 | $100 \\cdot \\dfrac{150 - 200}{200} = -25{,}0$ | 700 |\n\n```sql\nWITH thang_dt AS (\n  SELECT SUBSTR(order_date, 1, 7) AS thang, SUM(amount) AS doanh_thu\n  FROM orders WHERE status = 'paid'\n  GROUP BY SUBSTR(order_date, 1, 7)\n),\nco_lag AS (\n  SELECT thang, doanh_thu,\n         LAG(doanh_thu) OVER (ORDER BY thang) AS dt_truoc,\n         SUM(doanh_thu) OVER (ORDER BY thang) AS luy_ke\n  FROM thang_dt\n)\nSELECT thang, doanh_thu,\n       ROUND(100.0 * (doanh_thu - dt_truoc) / NULLIF(dt_truoc, 0), 1) AS tang_truong_pct,\n       luy_ke\nFROM co_lag ORDER BY thang;\n```\n\nĐã chạy thử trên SQLite và PostgreSQL 17, cả hai cho cùng kết quả như bảng trên.\n\n#### Bẫy thường gặp\n- Đặt window function trên bảng `orders` gốc (`SUM(amount) OVER (ORDER BY order_date)`) cho lũy kế theo **đơn**, không theo tháng.\n- Viết `(doanh_thu - dt_truoc) / dt_truoc * 100` với hai số nguyên: phép chia nguyên cho $-150 / 350 = 0$ trên cả PostgreSQL và SQLite, nên mọi mức giảm dưới 100% đều hiện thành 0. Luôn nhân `100.0` **trước** khi chia.\n- Thiếu `NULLIF`: tháng trước bằng 0 thì PostgreSQL báo `division by zero`, còn SQLite lặng lẽ trả NULL; kết quả hai hệ khác nhau.\n- Tháng không có đơn paid sẽ **không có dòng**, nên LAG so với tháng có dữ liệu gần nhất. Báo cáo thật cần bảng lịch các tháng rồi LEFT JOIN.\n- `SUBSTR` chạy được vì `order_date` là chuỗi; nếu cột kiểu DATE trong PostgreSQL thì dùng `to_char(order_date, 'YYYY-MM')` hoặc `date_trunc` (hàm riêng của PostgreSQL).\n\n#### Đọc thêm\n- [PostgreSQL: WITH Queries (Common Table Expressions)](https://www.postgresql.org/docs/current/queries-with.html)\n- [PostgreSQL: Window Functions](https://www.postgresql.org/docs/current/functions-window.html)\n- [SQLite: The WITH Clause](https://sqlite.org/lang_with.html)\n",
+   "modelAnswer": "```sql\nWITH thang_dt AS (\n  SELECT SUBSTR(order_date, 1, 7) AS thang,\n         SUM(amount)              AS doanh_thu\n  FROM orders\n  WHERE status = 'paid'\n  GROUP BY SUBSTR(order_date, 1, 7)\n),\nco_lag AS (\n  SELECT thang, doanh_thu,\n         LAG(doanh_thu) OVER (ORDER BY thang) AS dt_truoc,\n         SUM(doanh_thu) OVER (ORDER BY thang) AS luy_ke\n  FROM thang_dt\n)\nSELECT thang, doanh_thu,\n       ROUND(100.0 * (doanh_thu - dt_truoc) / NULLIF(dt_truoc, 0), 1) AS tang_truong_pct,\n       luy_ke\nFROM co_lag\nORDER BY thang;\n```\n\n- Window function phải chạy **sau** khi đã gộp theo tháng, nên tách hai tầng: `thang_dt` (gộp) rồi `co_lag` (cửa sổ). Viết `SUM(amount) OVER (ORDER BY order_date)` trên từng đơn sẽ ra lũy kế theo đơn, không theo tháng.\n- `100.0 * (...)` buộc phép chia là số thực trên cả PostgreSQL (numeric) và SQLite (REAL); tháng 2: $100 \\cdot (200 - 350)/350 \\approx -42{,}857 \\to -42{,}9$.\n- Tháng đầu `dt_truoc` là NULL nên biểu thức ra NULL; `NULLIF(dt_truoc, 0)` biến mẫu 0 thành NULL (PostgreSQL sẽ báo lỗi `division by zero` nếu không có).\n- Mỗi tháng là một giá trị `thang` duy nhất nên khung mặc định của `SUM() OVER (ORDER BY thang)` cho đúng lũy kế.",
+   "rubric": [
+    {
+     "criterion": "CTE gộp đúng doanh thu theo tháng: `SUBSTR(order_date, 1, 7)`, chỉ đơn paid, GROUP BY đúng biểu thức tháng",
+     "points": 2
+    },
+    {
+     "criterion": "`LAG(doanh_thu) OVER (ORDER BY thang)` và công thức tăng trưởng đúng: nhân 100.0 (tránh chia nguyên), ROUND 1 chữ số, NULLIF tránh chia 0, tháng đầu ra NULL",
+     "points": 2
+    },
+    {
+     "criterion": "Lũy kế bằng `SUM(doanh_thu) OVER (ORDER BY thang)` trên dữ liệu đã gộp theo tháng (không phải trên từng đơn); ORDER BY thang ở truy vấn ngoài; chạy trên cả hai hệ",
+     "points": 2
+    }
+   ]
+  }
+ ]
+}

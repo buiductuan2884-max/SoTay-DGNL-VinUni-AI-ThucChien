@@ -6,7 +6,14 @@ import json, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCES = {"ai-test": "AI-TEST · MIT © 2026 Henry Don"}
+# Thứ tự hiển thị các bộ đề: (thư mục, tên nhóm, ghi chú nguồn)
+GROUPS = [
+    ("sat-that", "Đề sát thật", "Đề tự soạn theo đúng cấu trúc 4 phần và thang điểm của đề ĐGNL."),
+    ("luyen-nhanh", "Luyện nhanh Toán và Code tay", "Bài luyện tự soạn cho hai phần dễ mất điểm nhất."),
+    ("hieubui", "Bộ đề anh Hiếu (hieubui2409)", "6 đề tổng hợp và 12 chuyên đề, dùng lại với sự cho phép của tác giả."),
+    ("ai-test", "Bộ AI-TEST (cơ bản)", "10 đề mức nhận biết · giấy phép MIT © 2026 Henry Don."),
+]
+ORDER = {g[0]: i for i, g in enumerate(GROUPS)}
 
 # Câu nào không ghi "section" thì đoán mục sổ tay từ nội dung câu + đáp án đúng.
 RULES = {
@@ -26,7 +33,7 @@ DEFAULT = {"A": "a-tile", "B": "b-py", "C": "c-ml", "D": "d-eth"}
 def guess_section(q):
     if q["type"] in ("code", "essay"):
         return "tu-luan"
-    right = next((o["text"] for o in q["options"] if o["key"] == q["answer"]), "")
+    right = next((o["text"] for o in q.get("options", []) if o["key"] == q["answer"]), "")
     text = " ".join([q["prompt"], right, " ".join(q.get("tags", []))])
     return next((s for pat, s in RULES[q["module"]] if re.search(pat, text)), DEFAULT[q["module"]])
 
@@ -36,15 +43,27 @@ def load_exam(path):
     qs = []
     for i, q in enumerate(d["questions"], 1):
         where = f"{path.name} câu {i}"
-        assert q["module"] in "ABCD" and q["type"] in ("mcq", "code", "essay"), where
+        assert q["module"] in "ABCD" and q["type"] in ("mcq", "numeric", "output", "code", "essay"), where
         assert q.get("prompt") and float(q.get("points", 1)) > 0, where
-        out = {k: q[k] for k in ("module", "type", "points", "prompt", "explanation", "modelAnswer") if k in q}
-        if q["type"] == "mcq":
+        out = {k: q[k] for k in ("id", "module", "type", "points", "prompt", "explanation", "modelAnswer", "level", "long", "mistakes") if k in q}
+        if q["type"] == "numeric":
+            assert isinstance(q["answer"], (int, float)), f"{where}: numeric cần answer là số"
+            out["answer"] = q["answer"]
+            for k in ("tol", "unit"):
+                if k in q:
+                    out[k] = q[k]
+        elif q["type"] == "output":
+            out["answer"] = str(q["answer"])
+            out["accept"] = q.get("accept") or [out["answer"]]
+            out["ignoreCase"] = bool(q.get("ignoreCase"))
+        elif q["type"] == "mcq":
             keys = [o["key"] for o in q["options"]]
             assert q["answer"] in keys, f"{where}: answer không nằm trong options"
             out["options"], out["answer"] = q["options"], q["answer"]
+            if q.get("distractors"):
+                out["distractors"] = q["distractors"]
         else:
-            out["rubric"] = [r if isinstance(r, str) else r.get("criterion", "") for r in q.get("rubric", [])]
+            out["rubric"] = q.get("rubric", [])
         out["section"] = q.get("section") or guess_section(q)
         qs.append(out)
     return {
@@ -52,13 +71,16 @@ def load_exam(path):
         "title": d.get("title", path.stem),
         "description": d.get("description", ""),
         "durationMinutes": d.get("durationMinutes", 90),
-        "source": d.get("source") or SOURCES.get(path.parent.name, path.parent.name),
+        "group": dict((g[0], g[1]) for g in GROUPS).get(path.parent.name, path.parent.name),
+        "source": dict((g[0], g[2]) for g in GROUPS).get(path.parent.name, d.get("source", "")),
+        **({"parts": d["parts"]} if d.get("parts") else {}),
         "questions": qs,
     }
 
 
 def main():
-    exams = [load_exam(p) for p in sorted((ROOT / "exams").glob("*/*.json"))]
+    paths = sorted((ROOT / "exams").glob("*/*.json"), key=lambda p: (ORDER.get(p.parent.name, 99), p.name))
+    exams = [load_exam(p) for p in paths]
     tpl = (ROOT / "src" / "template.html").read_text(encoding="utf-8")
     known = set(re.findall(r'<(?:h3|section) id="([^"]+)"', tpl))
     bad = {q["section"] for e in exams for q in e["questions"]} - known

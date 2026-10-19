@@ -1,0 +1,991 @@
+{
+ "title": "CĐ-09 · Học máy và đánh giá mô hình",
+ "description": "Chia dữ liệu, rò rỉ dữ liệu — 20% · Hồi quy, logistic, cây, ensemble, kNN, k-means — 25% · Overfitting, bias–variance, regularization, cross-validation — 20% · Precision/recall/F1, ROC/PR-AUC, RMSE, ngưỡng — 25% · Mất cân bằng lớp, đặc trưng — 10%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T09-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Một nhóm chia dữ liệu có nhãn thành ba phần: train, validation và test. Vai trò đúng của tập **validation** là gì?",
+   "explanation": "Train dùng để học tham số, validation để chọn siêu tham số/mô hình (và dừng sớm), test chỉ dùng **một lần** ở cuối để ước lượng hiệu năng không chệch. Dùng test để chọn cấu hình là một dạng rò rỉ thông tin.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nBa tập có ba việc khác nhau: **train** để học tham số, **validation** để ra quyết định (chọn siêu tham số, chọn mô hình, dừng sớm, chọn ngưỡng), **test** để đo một lần cuối. Tập nào đã được dùng để ra quyết định thì điểm trên tập đó không còn là ước lượng khách quan.\n\n#### Từng bước\n1. Chia dữ liệu một lần (ví dụ 70/15/15, hoặc theo thời gian nếu dữ liệu có thứ tự thời gian), cất tập test đi.\n2. Huấn luyện nhiều mô hình ứng viên trên train.\n3. So sánh chúng trên validation, chọn cấu hình tốt nhất. Có thể thay bước 2–3 bằng cross-validation trên phần train + validation.\n4. Huấn luyện lại cấu hình đã chọn (thường trên train + validation), đo **một lần** trên test và báo cáo con số đó.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  D[\"Dữ liệu có nhãn\"] --> TR[\"Train: học tham số\"]\n  D --> VA[\"Validation: chọn cấu hình\"]\n  D --> TE[\"Test: khoá lại\"]\n  TR --> M[\"Các mô hình ứng viên\"]\n  M --> VA\n  VA --> S[\"Mô hình được chọn\"]\n  S --> TE\n  TE --> R[\"Báo cáo hiệu năng\"]\n```\n\n| Tập | Được dùng để | Không được dùng để |\n|---|---|---|\n| Train | Tính gradient, cập nhật trọng số | Báo cáo hiệu năng |\n| Validation | Chọn siêu tham số, dừng sớm, chọn ngưỡng | Báo cáo con số cuối |\n| Test | Đo một lần cuối | Bất kỳ quyết định nào về mô hình |\n\n#### Bẫy thường gặp\n- \"Mô hình chưa học validation nên điểm validation là khách quan\": sai, vì ta đã **chọn** theo nó.\n- Nhìn điểm test, chỉnh mô hình, rồi nhìn lại test: lúc này test đã thành validation thứ hai.\n\n#### Đọc thêm\n- [Dividing the original dataset (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets)\n- [Training, validation, and test data sets (Wikipedia)](https://en.wikipedia.org/wiki/Training,_validation,_and_test_data_sets)",
+   "distractors": {
+    "A": "Nhầm validation với train: trọng số chỉ được học trên tập train; validation chỉ được dùng để đo, không tính gradient trên nó.",
+    "C": "Validation đã được dùng để ra quyết định (chọn cấu hình, dừng sớm) nên điểm của nó thiên lạc quan; con số báo cáo cuối phải lấy từ test.",
+    "D": "Chọn cấu hình trên test biến test thành validation; điểm báo cáo bị chệch lạc quan vì đã được tối ưu trên chính nó."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Cập nhật trọng số của mô hình qua từng epoch, giống tập train nhưng với ít mẫu hơn"
+    },
+    {
+     "key": "B",
+     "text": "Chọn siêu tham số và so sánh các mô hình ứng viên; tập test để dành cho lần đánh giá cuối"
+    },
+    {
+     "key": "C",
+     "text": "Báo cáo hiệu năng cuối cùng, vì đây là phần dữ liệu mô hình chưa từng được huấn luyện"
+    },
+    {
+     "key": "D",
+     "text": "Không cần thiết: có thể chọn cấu hình trực tiếp trên tập test rồi báo cáo luôn điểm test đó"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T09-A02",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Mô hình hồi quy logistic dự đoán $P(y = 1 \\mid \\mathbf{x}) = \\sigma(\\mathbf{w}^\\top \\mathbf{x} + b)$ và gán lớp 1 khi xác suất $\\ge 0{,}5$. Ranh giới quyết định của mô hình là tập điểm nào?",
+   "explanation": "$\\sigma(z) \\ge 0{,}5 \\iff z \\ge 0$, nên ranh giới là $\\mathbf{w}^\\top \\mathbf{x} + b = 0$: một siêu phẳng (đường thẳng khi có 2 đặc trưng). Hồi quy logistic là bộ phân loại tuyến tính.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nSigmoid $\\sigma(z) = \\frac{1}{1 + e^{-z}}$ đơn điệu tăng và $\\sigma(0) = 0{,}5$. Vì vậy điều kiện \"xác suất $\\ge 0{,}5$\" tương đương \"$z \\ge 0$\", và ranh giới là siêu phẳng $\\mathbf{w}^\\top \\mathbf{x} + b = 0$.\n\n#### Từng bước\n1. $\\sigma(z) \\ge 0{,}5 \\iff \\frac{1}{1 + e^{-z}} \\ge \\frac{1}{2} \\iff e^{-z} \\le 1 \\iff z \\ge 0$.\n2. Với $z = \\mathbf{w}^\\top \\mathbf{x} + b$, ranh giới là $\\mathbf{w}^\\top \\mathbf{x} + b = 0$: tuyến tính theo $\\mathbf{x}$.\n3. Ví dụ hai đặc trưng, $\\mathbf{w} = (2, -1)$, $b = -1$: ranh giới là đường thẳng $2x_1 - x_2 - 1 = 0$, tức $x_2 = 2x_1 - 1$.\n\n| $z$ | $-2$ | $0$ | $2$ |\n|---|---|---|---|\n| $\\sigma(z)$ | $0{,}119$ | $0{,}5$ | $0{,}881$ |\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 240\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"50.0\" y1=\"210.0\" x2=\"520.0\" y2=\"210.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"285.0\" y1=\"215.0\" x2=\"285.0\" y2=\"20.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"520.0\" y=\"202.0\" font-size=\"13\" text-anchor=\"end\" fill=\"currentColor\">z = wᵀx + b</text>\n<text x=\"293.0\" y=\"18.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">σ(z)</text>\n<line x1=\"50.0\" y1=\"210.0\" x2=\"50.0\" y2=\"215.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"50.0\" y=\"228.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−6</text>\n<line x1=\"128.3\" y1=\"210.0\" x2=\"128.3\" y2=\"215.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"128.3\" y=\"228.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−4</text>\n<line x1=\"206.7\" y1=\"210.0\" x2=\"206.7\" y2=\"215.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"206.7\" y=\"228.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−2</text>\n<line x1=\"363.3\" y1=\"210.0\" x2=\"363.3\" y2=\"215.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"363.3\" y=\"228.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<line x1=\"441.7\" y1=\"210.0\" x2=\"441.7\" y2=\"215.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"441.7\" y=\"228.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<line x1=\"50.0\" y1=\"120.0\" x2=\"520.0\" y2=\"120.0\" stroke=\"#f59e0b\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\"/>\n<text x=\"52.0\" y=\"114.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#f59e0b\">ngưỡng 0,5</text>\n<line x1=\"285.0\" y1=\"210.0\" x2=\"285.0\" y2=\"30.0\" stroke=\"#ef4444\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\"/>\n<text x=\"291.0\" y=\"202.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\">ranh giới: z = 0</text>\n<text x=\"279.0\" y=\"34.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">1</text>\n<text x=\"279.0\" y=\"206.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">0</text>\n<polyline points=\"50.0,209.6 53.9,209.5 57.8,209.5 61.7,209.4 65.7,209.3 69.6,209.3 73.5,209.2 77.4,209.1 81.3,209.0 85.3,208.9 89.2,208.8 93.1,208.7 97.0,208.5 100.9,208.4 104.8,208.2 108.8,208.0 112.7,207.8 116.6,207.6 120.5,207.3 124.4,207.1 128.3,206.8 132.2,206.4 136.2,206.1 140.1,205.7 144.0,205.2 147.9,204.7 151.8,204.2 155.8,203.6 159.7,203.0 163.6,202.2 167.5,201.5 171.4,200.6 175.3,199.7 179.2,198.7 183.2,197.6 187.1,196.3 191.0,195.0 194.9,193.6 198.8,192.0 202.8,190.4 206.7,188.5 210.6,186.6 214.5,184.5 218.4,182.2 222.3,179.8 226.2,177.2 230.2,174.4 234.1,171.5 238.0,168.3 241.9,165.0 245.8,161.6 249.8,158.0 253.7,154.2 257.6,150.3 261.5,146.2 265.4,142.0 269.3,137.8 273.2,133.4 277.2,129.0 281.1,124.5 285.0,120.0 288.9,115.5 292.8,111.0 296.8,106.6 300.7,102.2 304.6,98.0 308.5,93.8 312.4,89.7 316.3,85.8 320.3,82.0 324.2,78.4 328.1,75.0 332.0,71.7 335.9,68.5 339.8,65.6 343.8,62.8 347.7,60.2 351.6,57.8 355.5,55.5 359.4,53.4 363.3,51.5 367.2,49.6 371.2,48.0 375.1,46.4 379.0,45.0 382.9,43.7 386.8,42.4 390.8,41.3 394.7,40.3 398.6,39.4 402.5,38.5 406.4,37.8 410.3,37.0 414.2,36.4 418.2,35.8 422.1,35.3 426.0,34.8 429.9,34.3 433.8,33.9 437.8,33.6 441.7,33.2 445.6,32.9 449.5,32.7 453.4,32.4 457.3,32.2 461.2,32.0 465.2,31.8 469.1,31.6 473.0,31.5 476.9,31.3 480.8,31.2 484.7,31.1 488.7,31.0 492.6,30.9 496.5,30.8 500.4,30.7 504.3,30.7 508.2,30.6 512.2,30.5 516.1,30.5 520.0,30.4\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"285.0\" cy=\"120.0\" r=\"5\" fill=\"#f59e0b\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"128.3\" y=\"165.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">dự đoán lớp 0</text>\n<text x=\"441.7\" y=\"75.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">dự đoán lớp 1</text>\n</svg>\n\nĐường chữ S là đồ thị **xác suất theo z**; còn trong không gian đặc trưng, ranh giới là một mặt phẳng phẳng.\n\n#### Bẫy thường gặp\n- Đặt $z = 0{,}5$: lẫn ngưỡng của xác suất với ngưỡng của $z$.\n- Nghĩ logistic là mô hình phân loại phi tuyến. Muốn ranh giới cong phải thêm đặc trưng phi tuyến (ví dụ $x_1^2$, $x_1 x_2$).\n- Nếu đổi ngưỡng thành $t$ thì ranh giới là $z = \\ln\\frac{t}{1 - t}$, vẫn là siêu phẳng (song song với cũ).\n\n#### Đọc thêm\n- [Logistic regression (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/logistic-regression)\n- [Decision boundary (Wikipedia)](https://en.wikipedia.org/wiki/Decision_boundary)",
+   "distractors": {
+    "B": "Đặt ngưỡng 0,5 cho **xác suất**, không phải cho $z = \\mathbf{w}^\\top \\mathbf{x} + b$. Vì $\\sigma(0) = 0{,}5$ nên ranh giới là $z = 0$.",
+    "C": "$\\sigma(z) \\in (0, 1)$ không bao giờ bằng 0, nên tập này rỗng; ranh giới ứng với $\\sigma(z) = 0{,}5$.",
+    "D": "Sigmoid đơn điệu tăng nên $\\sigma(z) \\ge 0{,}5 \\iff z \\ge 0$; ranh giới vẫn tuyến tính theo $\\mathbf{x}$. Đường chữ S là đồ thị xác suất theo $z$, không phải ranh giới."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\{\\mathbf{x} : \\mathbf{w}^\\top \\mathbf{x} + b = 0\\}$, một siêu phẳng"
+    },
+    {
+     "key": "B",
+     "text": "$\\{\\mathbf{x} : \\mathbf{w}^\\top \\mathbf{x} + b = 0{,}5\\}$, một siêu phẳng"
+    },
+    {
+     "key": "C",
+     "text": "$\\{\\mathbf{x} : \\sigma(\\mathbf{w}^\\top \\mathbf{x} + b) = 0\\}$, một siêu phẳng"
+    },
+    {
+     "key": "D",
+     "text": "Một mặt cong hình chữ S, vì hàm sigmoid là hàm phi tuyến"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T09-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Phát biểu nào **đúng** về thuật toán k láng giềng gần nhất (kNN) dùng khoảng cách Euclid?",
+   "explanation": "Khoảng cách $d(\\mathbf{x}, \\mathbf{z}) = \\sqrt{\\sum_j (x_j - z_j)^2}$ cộng trực tiếp chênh lệch từng đặc trưng, nên đặc trưng đo bằng đơn vị lớn (ví dụ thu nhập theo đồng) sẽ áp đảo đặc trưng nhỏ (tuổi). Chuẩn hoá (standardize/min-max) đưa các đặc trưng về cùng thang.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nkNN dự đoán bằng cách tìm $k$ điểm huấn luyện gần nhất. \"Gần\" được đo bằng khoảng cách, nên mọi thứ phụ thuộc vào thang đo của đặc trưng.\n\n#### Từng bước: ví dụ thang đo lấn át\nTruy vấn $q$ = (thu nhập 20.000 nghìn đồng, tuổi 25). Hai điểm huấn luyện: A = (21.000; 60), B = (30.000; 26).\n\n| | Khoảng cách tới A | Khoảng cách tới B | Láng giềng gần nhất |\n|---|---|---|---|\n| Chưa chuẩn hoá | $\\sqrt{1000^2 + 35^2} \\approx 1.000{,}6$ | $\\sqrt{10000^2 + 1^2} \\approx 10.000$ | A |\n| Chia cho độ lệch chuẩn (5.000; 10) | $\\sqrt{0{,}2^2 + 3{,}5^2} \\approx 3{,}51$ | $\\sqrt{2^2 + 0{,}1^2} \\approx 2{,}00$ | B |\n\nChưa chuẩn hoá, tuổi gần như không ảnh hưởng: A (hơn 35 tuổi) lại thành \"gần nhất\".\n\n#### Các tính chất khác của kNN\n| Tính chất | Đúng |\n|---|---|\n| Huấn luyện | Chỉ lưu dữ liệu (lazy learning), không có trọng số |\n| k nhỏ | Ranh giới gồ ghề, variance cao, dễ overfit |\n| k lớn | Ranh giới mượt, bias cao, có thể underfit |\n| Chi phí dự đoán | Bản thô $O(nd)$ cho mỗi truy vấn; KD-tree/Ball-tree giảm bớt ở số chiều thấp |\n\n#### Bẫy thường gặp\n- Tính trung bình, độ lệch chuẩn để chuẩn hoá trên **toàn bộ** dữ liệu trước khi chia: rò rỉ; hãy fit scaler trên train (đặt trong Pipeline).\n- Quên rằng số chiều cao làm khoảng cách mất ý nghĩa (curse of dimensionality).\n\n#### Đọc thêm\n- [Nearest Neighbors (scikit-learn)](https://scikit-learn.org/stable/modules/neighbors.html)\n- [k-nearest neighbors algorithm (Wikipedia)](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm)",
+   "distractors": {
+    "A": "Ngược lại: k = 1 bám theo từng điểm (kể cả nhiễu) nên variance cao, dễ overfit; k lớn mới làm ranh giới mượt.",
+    "B": "kNN là học lười (lazy): bước 'huấn luyện' chỉ lưu dữ liệu, không có tham số nào được tối ưu.",
+    "D": "Bản cài đặt thô phải tính khoảng cách tới mọi điểm huấn luyện, chi phí $O(nd)$ mỗi truy vấn; cấu trúc KD-tree/Ball-tree chỉ giảm bớt, không xoá phụ thuộc này."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Chọn k nhỏ (ví dụ k = 1) làm ranh giới mượt hơn và mô hình ít overfit hơn"
+    },
+    {
+     "key": "B",
+     "text": "Huấn luyện kNN là tối ưu một vector trọng số bằng gradient descent"
+    },
+    {
+     "key": "C",
+     "text": "Đặc trưng có thang đo lớn sẽ lấn át khoảng cách nên thường cần chuẩn hoá"
+    },
+    {
+     "key": "D",
+     "text": "Thời gian dự đoán không phụ thuộc vào số mẫu trong tập huấn luyện"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T09-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Mô hình phân loại ảnh sản phẩm (20 loại) có tỉ lệ lỗi trên tập train là 27% và trên tập validation là 29%. Người gán nhãn chỉ sai khoảng 3% trên cùng loại ảnh. Chẩn đoán và hướng xử lý hợp lý nhất là gì?",
+   "explanation": "So lỗi train (27%) với mức tham chiếu (lỗi người 3%): khoảng cách 24 điểm là bias tránh được. Khoảng cách train–validation chỉ 2 điểm là variance. Bias chiếm ưu thế nên cần mô hình đủ mạnh hơn, không phải regularize thêm.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nĐọc hai khoảng cách: (1) lỗi train so với mức tham chiếu (lỗi người, hoặc lỗi Bayes ước lượng) cho biết **bias tránh được**; (2) lỗi validation so với lỗi train cho biết **variance**. Khoảng cách nào lớn hơn thì xử lý cái đó trước.\n\n#### Từng bước\n- Bias tránh được $\\approx 27\\% - 3\\% = 24$ điểm phần trăm.\n- Variance $\\approx 29\\% - 27\\% = 2$ điểm phần trăm.\n- Bias áp đảo → mô hình **underfitting**: cần mô hình lớn hơn (nhiều tham số, kiến trúc tốt hơn, ví dụ dùng backbone pretrained), huấn luyện lâu hơn, giảm regularization, thêm đặc trưng.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 600 240\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"60.0\" y1=\"210.0\" x2=\"520.0\" y2=\"210.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<rect x=\"70.0\" y=\"193.5\" width=\"80.0\" height=\"16.5\" fill=\"#10b981\" fill-opacity=\"0.85\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"110.0\" y=\"187.5\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">3%</text>\n<text x=\"110.0\" y=\"228.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">Người gán nhãn</text>\n<rect x=\"200.0\" y=\"61.5\" width=\"80.0\" height=\"148.5\" fill=\"#f59e0b\" fill-opacity=\"0.85\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"240.0\" y=\"55.5\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">27%</text>\n<text x=\"240.0\" y=\"228.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">Train</text>\n<rect x=\"330.0\" y=\"50.5\" width=\"80.0\" height=\"159.5\" fill=\"#ef4444\" fill-opacity=\"0.85\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"370.0\" y=\"44.5\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">29%</text>\n<text x=\"370.0\" y=\"228.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">Validation</text>\n<line x1=\"470.0\" y1=\"193.5\" x2=\"470.0\" y2=\"61.5\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<line x1=\"462.0\" y1=\"193.5\" x2=\"478.0\" y2=\"193.5\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<line x1=\"462.0\" y1=\"61.5\" x2=\"478.0\" y2=\"61.5\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<text x=\"484.0\" y=\"127.5\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">bias</text>\n<text x=\"484.0\" y=\"142.5\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">≈ 24 điểm</text>\n<line x1=\"500.0\" y1=\"61.5\" x2=\"500.0\" y2=\"50.5\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<text x=\"506.0\" y=\"46.5\" font-size=\"11\" text-anchor=\"start\" fill=\"#ef4444\">variance ≈ 2</text>\n</svg>\n\n| Lỗi train | Lỗi validation | Chẩn đoán | Hướng xử lý |\n|---|---|---|---|\n| Cao (xa mức người) | Cao, gần lỗi train | Bias cao | Mô hình mạnh hơn, train lâu hơn |\n| Thấp | Cao hơn nhiều | Variance cao | Thêm dữ liệu, regularization, augmentation |\n| Cao | Cao hơn nhiều | Cả hai | Xử lý bias trước, rồi variance |\n| Thấp | Thấp, gần nhau | Tốt | Kiểm tra trên test |\n\n#### Bẫy thường gặp\n- Thấy train và validation sát nhau là kết luận \"ổn\": phải so với mức đạt được (lỗi người 3%).\n- Thêm dữ liệu khi bias cao: đường học (learning curve) đã phẳng, thêm dữ liệu hầu như không giúp.\n\n#### Đọc thêm\n- [Generalization (d2l.ai)](https://d2l.ai/chapter_linear-regression/generalization.html)\n- [Overfitting (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/overfitting)\n- [Learning curve (scikit-learn)](https://scikit-learn.org/stable/modules/learning_curve.html)",
+   "distractors": {
+    "A": "Overfitting có dấu hiệu lỗi train thấp mà lỗi validation cao hơn nhiều; ở đây hai lỗi gần nhau và đều cao, tăng regularization còn làm bias tăng thêm.",
+    "B": "Khoảng cách train–validation nhỏ chỉ cho biết variance thấp; so với mức lỗi người 3% thì lỗi train 27% còn quá cao (bias lớn).",
+    "C": "Rò rỉ thường làm điểm validation đẹp bất thường; ở đây cả hai đều tệ, không có dấu hiệu rò rỉ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Variance cao (overfitting): tăng regularization, thêm dropout hoặc thu thập thêm dữ liệu"
+    },
+    {
+     "key": "B",
+     "text": "Mô hình đã ổn vì lỗi train và lỗi validation chênh lệch rất ít"
+    },
+    {
+     "key": "C",
+     "text": "Rò rỉ dữ liệu giữa train và validation, cần chia lại dữ liệu"
+    },
+    {
+     "key": "D",
+     "text": "Bias cao (underfitting): cần mô hình mạnh hơn hoặc huấn luyện lâu hơn"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T09-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Dùng 5-fold cross-validation trên tập 1.000 mẫu, các fold chia đều nhau. Mô hình được huấn luyện bao nhiêu lần và mỗi lần trên bao nhiêu mẫu (không tính lần huấn luyện lại cuối cùng)?",
+   "explanation": "k-fold: chia thành $k = 5$ phần $\\approx 200$ mẫu; lần $i$ học trên $k - 1 = 4$ phần ($800$ mẫu) và đánh giá trên phần thứ $i$. Tổng cộng 5 lần huấn luyện, mỗi mẫu được dùng đánh giá đúng một lần.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nk-fold CV chia dữ liệu thành $k$ phần bằng nhau. Mỗi lần, một phần làm tập đánh giá, $k - 1$ phần còn lại làm tập học. Có đúng $k$ lần huấn luyện.\n\n#### Từng bước\n- Kích thước một fold: $1.000 / 5 = 200$ mẫu.\n- Mỗi lần học trên $4 \\times 200 = 800$ mẫu, đánh giá trên 200 mẫu.\n- Số lần huấn luyện: 5. Điểm CV là trung bình (và độ lệch chuẩn) của 5 điểm.\n- Sau khi chọn xong cấu hình, thường huấn luyện lại **một lần** trên toàn bộ 1.000 mẫu (đề bài không tính lần này).\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 600 210\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"60.0\" y=\"38.0\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">Lần 1</text>\n<rect x=\"70.0\" y=\"20.0\" width=\"78.0\" height=\"26.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"109.0\" y=\"37.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">đánh giá</text>\n<rect x=\"152.0\" y=\"20.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"191.0\" y=\"37.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"234.0\" y=\"20.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"273.0\" y=\"37.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"316.0\" y=\"20.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"355.0\" y=\"37.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"398.0\" y=\"20.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"437.0\" y=\"37.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<text x=\"490.0\" y=\"38.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">800 học / 200 đo</text>\n<text x=\"60.0\" y=\"72.0\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">Lần 2</text>\n<rect x=\"70.0\" y=\"54.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"109.0\" y=\"71.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"152.0\" y=\"54.0\" width=\"78.0\" height=\"26.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"191.0\" y=\"71.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">đánh giá</text>\n<rect x=\"234.0\" y=\"54.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"273.0\" y=\"71.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"316.0\" y=\"54.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"355.0\" y=\"71.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"398.0\" y=\"54.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"437.0\" y=\"71.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<text x=\"490.0\" y=\"72.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">800 học / 200 đo</text>\n<text x=\"60.0\" y=\"106.0\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">Lần 3</text>\n<rect x=\"70.0\" y=\"88.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"109.0\" y=\"105.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"152.0\" y=\"88.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"191.0\" y=\"105.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"234.0\" y=\"88.0\" width=\"78.0\" height=\"26.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"273.0\" y=\"105.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">đánh giá</text>\n<rect x=\"316.0\" y=\"88.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"355.0\" y=\"105.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"398.0\" y=\"88.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"437.0\" y=\"105.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<text x=\"490.0\" y=\"106.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">800 học / 200 đo</text>\n<text x=\"60.0\" y=\"140.0\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">Lần 4</text>\n<rect x=\"70.0\" y=\"122.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"109.0\" y=\"139.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"152.0\" y=\"122.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"191.0\" y=\"139.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"234.0\" y=\"122.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"273.0\" y=\"139.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"316.0\" y=\"122.0\" width=\"78.0\" height=\"26.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"355.0\" y=\"139.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">đánh giá</text>\n<rect x=\"398.0\" y=\"122.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"437.0\" y=\"139.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<text x=\"490.0\" y=\"140.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">800 học / 200 đo</text>\n<text x=\"60.0\" y=\"174.0\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">Lần 5</text>\n<rect x=\"70.0\" y=\"156.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"109.0\" y=\"173.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"152.0\" y=\"156.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"191.0\" y=\"173.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"234.0\" y=\"156.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"273.0\" y=\"173.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"316.0\" y=\"156.0\" width=\"78.0\" height=\"26.0\" fill=\"#3b82f6\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"355.0\" y=\"173.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">học</text>\n<rect x=\"398.0\" y=\"156.0\" width=\"78.0\" height=\"26.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"437.0\" y=\"173.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">đánh giá</text>\n<text x=\"490.0\" y=\"174.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">800 học / 200 đo</text>\n<text x=\"280.0\" y=\"200.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">Mỗi lần: 4 fold học (xanh dương), 1 fold đánh giá (đỏ). Mỗi mẫu được đo đúng 1 lần.</text>\n</svg>\n\n| $k$ | Mẫu học mỗi lần | Số lần huấn luyện | Nhận xét |\n|---|---|---|---|\n| 5 | 800 | 5 | Lựa chọn phổ biến |\n| 10 | 900 | 10 | Ít chệch hơn, tốn gấp đôi |\n| 1.000 (LOOCV) | 999 | 1.000 | Rất tốn, phương sai ước lượng có thể cao |\n\n#### Bẫy thường gặp\n- Nhầm 200 (kích thước fold đánh giá) với số mẫu học.\n- Với dữ liệu mất cân bằng, dùng StratifiedKFold để mỗi fold có tỉ lệ lớp giống nhau; với dữ liệu thời gian hoặc theo nhóm, dùng TimeSeriesSplit / GroupKFold.\n\n#### Đọc thêm\n- [Cross-validation: evaluating estimator performance (scikit-learn)](https://scikit-learn.org/stable/modules/cross_validation.html)",
+   "distractors": {
+    "A": "200 là kích thước **một fold**, tức phần dùng để đánh giá; mô hình học trên 4 fold còn lại.",
+    "C": "Nếu học trên toàn bộ 1.000 mẫu thì fold đánh giá đã nằm trong dữ liệu học; đó không còn là cross-validation.",
+    "D": "Nhầm với hold-out: mỗi fold phải có một mô hình riêng học trên 4 fold kia, nên có 5 lần huấn luyện."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "5 lần, mỗi lần trên 200 mẫu"
+    },
+    {
+     "key": "B",
+     "text": "5 lần, mỗi lần trên 800 mẫu"
+    },
+    {
+     "key": "C",
+     "text": "5 lần, mỗi lần trên 1.000 mẫu"
+    },
+    {
+     "key": "D",
+     "text": "1 lần trên 800 mẫu, rồi chấm điểm trên 5 fold"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T09-A06",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Trong bài toán phát hiện bot trên website (lớp dương = bot), **recall** của mô hình cho biết điều gì?",
+   "explanation": "$\\text{Recall} = \\frac{TP}{TP + FN}$: mẫu số là toàn bộ bot thật (đã bắt được + bị bỏ sót). Recall trả lời câu hỏi 'bot thật có bị lọt nhiều không?'.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nPrecision và recall có **cùng tử số** TP nhưng **khác mẫu số**: precision chia cho số phiên bị gắn cờ, recall chia cho số bot thật.\n\n#### Từng bước với ví dụ\nGiả sử 10.000 phiên, 200 bot. Mô hình gắn cờ 250 phiên, trong đó 160 phiên là bot.\n\n| | Gắn cờ (dự đoán bot) | Không gắn cờ | Tổng |\n|---|---|---|---|\n| Bot thật | TP = 160 | FN = 40 | 200 |\n| Người thật | FP = 90 | TN = 9.710 | 9.800 |\n| Tổng | 250 | 9.750 | 10.000 |\n\n| Chỉ số | Công thức | Giá trị | Trả lời câu hỏi |\n|---|---|---|---|\n| Recall (TPR) | $\\frac{TP}{TP + FN}$ | $160/200 = 0{,}80$ | Bot thật bị bắt bao nhiêu? |\n| Precision | $\\frac{TP}{TP + FP}$ | $160/250 = 0{,}64$ | Cờ đỏ đúng bao nhiêu? |\n| Specificity | $\\frac{TN}{TN + FP}$ | $9.710/9.800 \\approx 0{,}991$ | Người thật được để yên bao nhiêu? |\n| Accuracy | $\\frac{TP + TN}{N}$ | $9.870/10.000 = 0{,}987$ | Đúng tổng cộng bao nhiêu? |\n\nAccuracy 98,7% nghe rất cao, nhưng mô hình \"không bao giờ gắn cờ\" cũng đạt 98%.\n\n#### Bẫy thường gặp\n- Đọc ngược hàng/cột của ma trận nhầm lẫn: luôn xác định trước hàng là thực tế hay dự đoán.\n- Dùng accuracy cho lớp hiếm.\n\n#### Đọc thêm\n- [Accuracy, recall, precision (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)\n- [Precision and recall (Wikipedia)](https://en.wikipedia.org/wiki/Precision_and_recall)",
+   "distractors": {
+    "A": "Đây là precision $= \\frac{TP}{TP + FP}$: mẫu số là số phiên bị gắn cờ, không phải số bot thật.",
+    "B": "Đây là specificity (TNR) $= \\frac{TN}{TN + FP}$, tính trên lớp âm.",
+    "D": "Đây là accuracy; khi bot hiếm, accuracy có thể rất cao dù bắt được rất ít bot."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Trong số các phiên bị gắn cờ, tỉ lệ phiên thực sự là bot"
+    },
+    {
+     "key": "B",
+     "text": "Trong số các phiên của người thật, tỉ lệ phiên không bị mô hình gắn cờ"
+    },
+    {
+     "key": "C",
+     "text": "Trong số các phiên thực sự là bot, tỉ lệ phiên bị mô hình gắn cờ"
+    },
+    {
+     "key": "D",
+     "text": "Tỉ lệ phiên được phân loại đúng trên tổng số phiên đã kiểm tra"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T09-A07",
+   "module": "A",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "nhan-biet",
+   "prompt": "Mô hình dự báo **số đặt phòng bị hủy mỗi ngày** của một khách sạn được kiểm tra trong 5 ngày:\n\n| Ngày | 1 | 2 | 3 | 4 | 5 |\n|---|---|---|---|---|---|\n| Thực tế | 4 | 7 | 3 | 10 | 6 |\n| Dự báo | 5 | 5 | 3 | 7 | 6 |\n\nTính RMSE (đơn vị: số đặt phòng). **Làm tròn 2 chữ số thập phân.**",
+   "explanation": "Sai số $e = (-1, 2, 0, 3, 0)$, $\\sum e^2 = 14$, $\\text{MSE} = 14/5 = 2{,}8$, $\\text{RMSE} = \\sqrt{2{,}8} \\approx 1{,}67$ đặt phòng.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nRMSE = căn bậc hai của trung bình bình phương sai số. Thứ tự là **bình phương → trung bình → căn**. RMSE cùng đơn vị với biến mục tiêu và phạt nặng sai số lớn hơn MAE.\n\n#### Từng bước\n| Ngày | Thực tế $y$ | Dự báo $\\hat{y}$ | $e = \\hat{y} - y$ | $\\lvert e \\rvert$ | $e^2$ |\n|---|---|---|---|---|---|\n| 1 | 4 | 5 | 1 | 1 | 1 |\n| 2 | 7 | 5 | $-2$ | 2 | 4 |\n| 3 | 3 | 3 | 0 | 0 | 0 |\n| 4 | 10 | 7 | $-3$ | 3 | 9 |\n| 5 | 6 | 6 | 0 | 0 | 0 |\n| Tổng | | | | 6 | 14 |\n\n$$\\text{MAE} = \\frac{6}{5} = 1{,}2, \\quad \\text{MSE} = \\frac{14}{5} = 2{,}8, \\quad \\text{RMSE} = \\sqrt{2{,}8} \\approx 1{,}67$$\n\nKiểm lại bằng Python: `np.sqrt(np.mean((y - p)**2))` cho `1.673...`.\n\n#### Vì sao RMSE lớn hơn MAE?\nLuôn có $\\text{RMSE} \\ge \\text{MAE}$; dấu bằng khi mọi sai số có cùng độ lớn. Ở đây ngày 4 sai 3 đặt phòng chiếm $9/14$ tổng bình phương: RMSE nhạy với ngày dự báo hụt lớn, hợp khi hụt lớn gây tốn kém (ví dụ bán vượt sai nhiều phòng).\n\n#### Bẫy thường gặp\n- Quên khai căn (ra MSE 2,8) hoặc quên chia $n$ ($\\sqrt{14} \\approx 3{,}74$).\n- Trung bình các sai số có dấu: $(1 - 2 + 0 - 3 + 0)/5 = -0{,}8$ là **bias** (dự báo thấp hơn thực tế trung bình 0,8), không phải RMSE.\n\n#### Đọc thêm\n- [Linear regression: Loss (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/linear-regression/loss)\n- [Root mean square deviation (Wikipedia)](https://en.wikipedia.org/wiki/Root_mean_square_deviation)",
+   "mistakes": [
+    {
+     "value": 1.2,
+     "why": "Đây là MAE $= \\frac{1 + 2 + 0 + 3 + 0}{5}$: lấy trung bình trị tuyệt đối sai số, chưa bình phương rồi khai căn."
+    },
+    {
+     "value": 2.8,
+     "why": "Đây là MSE: đã bình phương và lấy trung bình nhưng quên khai căn."
+    },
+    {
+     "value": 3.74,
+     "why": "Khai căn tổng bình phương $\\sqrt{14}$ mà quên chia cho $n = 5$."
+    }
+   ],
+   "answer": 1.67,
+   "tol": 0.0051
+  },
+  {
+   "id": "T09-A08",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Đặc trưng `kenh_dat` của mô hình dự đoán hủy đặt phòng có ba giá trị: website, OTA, điện thoại (không có thứ tự tự nhiên). Nhóm mã hoá thành 0, 1, 2 rồi đưa thẳng vào hồi quy logistic. Nhận xét nào đúng?",
+   "explanation": "Mã hoá thứ tự 0/1/2 cho biến định danh tạo ra quan hệ $w \\cdot 0, w \\cdot 1, w \\cdot 2$ giả tạo. One-hot tạo 3 cột nhị phân (hoặc 2 cột nếu bỏ một mức làm tham chiếu), mỗi kênh có hệ số riêng.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nBiến **định danh** (nominal) không có thứ tự. Mã hoá 0/1/2 rồi đưa vào mô hình tuyến tính ép hiệu ứng thành cấp số cộng: $w \\cdot 0$, $w \\cdot 1$, $w \\cdot 2$.\n\n#### Từng bước\nVới một cột `kenh_dat` ∈ {0, 1, 2}, phần đóng góp vào log-odds là $w \\cdot \\text{kenh\\_dat}$:\n\n| Kênh | Mã | Đóng góp vào log-odds |\n|---|---|---|\n| website | 0 | $0$ |\n| OTA | 1 | $w$ |\n| điện thoại | 2 | $2w$ (bị ép bằng gấp đôi OTA) |\n\nNếu thực tế OTA hủy nhiều nhất, điện thoại ít nhất, mô hình không thể biểu diễn được. One-hot:\n\n| Kênh | `kenh_website` | `kenh_ota` | `kenh_dien_thoai` |\n|---|---|---|---|\n| website | 1 | 0 | 0 |\n| OTA | 0 | 1 | 0 |\n| điện thoại | 0 | 0 | 1 |\n\nMỗi kênh có hệ số riêng. Với mô hình có hệ số chặn, có thể bỏ một cột làm mức tham chiếu (dummy coding) để tránh đa cộng tuyến hoàn hảo.\n\n#### Bẫy thường gặp\n- Chuẩn hoá cột 0/1/2: vẫn sai bản chất.\n- Biến có rất nhiều giá trị (mã đại lý hàng nghìn mức): one-hot quá thưa, cân nhắc gộp nhóm hiếm hoặc target encoding (làm đúng cách, xem câu C08).\n- Mã hoá thứ tự **phù hợp** với biến có thứ tự thật (hạng phòng tiêu chuẩn < cao cấp < suite), và cây quyết định thường chịu được mã hoá thứ tự tốt hơn mô hình tuyến tính.\n\n#### Đọc thêm\n- [One-hot encoding (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/categorical-data/one-hot-encoding)\n- [Preprocessing data (scikit-learn)](https://scikit-learn.org/stable/modules/preprocessing.html)",
+   "distractors": {
+    "B": "Với một cột 0/1/2, mô hình chỉ có **một** hệ số $w$: hiệu ứng của điện thoại bị ép bằng đúng 2 lần hiệu ứng của OTA so với website.",
+    "C": "Chuẩn hoá là biến đổi tuyến tính, vẫn giữ thứ tự và khoảng cách đều giả tạo giữa các kênh.",
+    "D": "Biến phân loại dùng tốt sau khi mã hoá one-hot (hoặc dummy); bỏ đi có thể mất một đặc trưng dự báo mạnh."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Mô hình bị ép coi các kênh có thứ tự và cách đều nhau; nên dùng one-hot encoding"
+    },
+    {
+     "key": "B",
+     "text": "Không sao, vì hồi quy logistic tự học được một hệ số riêng cho mỗi kênh"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ cần chuẩn hoá cột 0, 1, 2 về trung bình 0, phương sai 1 là đủ"
+    },
+    {
+     "key": "D",
+     "text": "Nên bỏ đặc trưng này vì mô hình tuyến tính không dùng được biến phân loại dạng chữ"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T09-B01",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Chuỗi khách sạn có dữ liệu đặt phòng từ 01/2023 đến 12/2025 và cần mô hình dự đoán khả năng hủy của các đặt phòng **sắp tới**. Nhóm chia ngẫu nhiên 80/20, đạt ROC-AUC 0,93 trên test; khi chạy thật trong quý I/2026 chỉ còn 0,84. Cách chia dữ liệu để đánh giá sát thực tế nhất là gì?",
+   "explanation": "Khi mô hình được dùng cho tương lai, tập đánh giá phải nằm **sau** tập huấn luyện về thời gian (có thể dùng nhiều mốc cắt nối tiếp kiểu TimeSeriesSplit). Chia ngẫu nhiên cho phép mô hình 'nhìn' các đặt phòng cùng thời kỳ, cùng đợt khuyến mãi với tập test.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nĐánh giá phải mô phỏng đúng cách mô hình được dùng. Mô hình dự đoán **tương lai** thì tập đánh giá phải nằm **sau** tập học về thời gian.\n\n#### Từng bước\n1. Chia ngẫu nhiên: train chứa đặt phòng của cả 2025, test chứa đặt phòng của 2023. Mô hình \"biết trước\" mùa vụ, đợt khuyến mãi, sự kiện của chính giai đoạn test → AUC 0,93 lạc quan.\n2. Chạy thật 2026: xu hướng mới (giá, kênh bán, chính sách cọc) chưa từng thấy → 0,84.\n3. Chia theo thời gian: train 01/2023–03/2025, validation 04–09/2025, test 10–12/2025. Kết quả trên test thường gần với 0,84 hơn, tức là ước lượng trung thực.\n4. Để chọn siêu tham số, dùng CV nối tiếp (TimeSeriesSplit): các fold kiểm tra luôn nằm sau fold học.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 580 240\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"40.0\" y1=\"40.0\" x2=\"540.0\" y2=\"40.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"40.0\" y1=\"34.0\" x2=\"40.0\" y2=\"46.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"123.3\" y=\"28.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">2023</text>\n<line x1=\"206.7\" y1=\"34.0\" x2=\"206.7\" y2=\"46.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"290.0\" y=\"28.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">2024</text>\n<line x1=\"373.3\" y1=\"34.0\" x2=\"373.3\" y2=\"46.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"456.7\" y=\"28.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">2025</text>\n<line x1=\"540.0\" y1=\"34.0\" x2=\"540.0\" y2=\"46.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"40.0\" y=\"70.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">Chia ngẫu nhiên (sai):</text>\n<rect x=\"41.0\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"41.0\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"54.9\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"54.9\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"68.8\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"68.8\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"82.7\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"82.7\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"96.6\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"96.6\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"110.4\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"110.4\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"124.3\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"124.3\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"138.2\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"138.2\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"152.1\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"152.1\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"166.0\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"166.0\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"179.9\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"179.9\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"193.8\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"193.8\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"207.7\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"207.7\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"221.6\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"221.6\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"235.4\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"235.4\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"249.3\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"249.3\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"263.2\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"263.2\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"277.1\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"277.1\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"291.0\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"291.0\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"304.9\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"304.9\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"318.8\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"318.8\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"332.7\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"332.7\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"346.6\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"346.6\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"360.4\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"360.4\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"374.3\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"374.3\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"388.2\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"388.2\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"402.1\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"402.1\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"416.0\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"416.0\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"429.9\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"429.9\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"443.8\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"443.8\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"457.7\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"457.7\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"471.6\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"471.6\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"485.4\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"485.4\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"499.3\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"499.3\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"513.2\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"513.2\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"527.1\" y=\"78.0\" width=\"11.9\" height=\"7.0\" fill=\"#3b82f6\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<rect x=\"527.1\" y=\"87.0\" width=\"11.9\" height=\"7.0\" fill=\"#ef4444\" fill-opacity=\"0.8\" stroke=\"none\" stroke-width=\"0\"/>\n<text x=\"40.0\" y=\"120.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">Chia theo thời gian (đúng):</text>\n<rect x=\"40.0\" y=\"128.0\" width=\"375.0\" height=\"18.0\" fill=\"#3b82f6\" fill-opacity=\"0.6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"227.5\" y=\"141.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">train 01/2023 – 03/2025</text>\n<rect x=\"415.0\" y=\"128.0\" width=\"69.4\" height=\"18.0\" fill=\"#f59e0b\" fill-opacity=\"0.7\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"449.7\" y=\"141.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">valid</text>\n<rect x=\"484.4\" y=\"128.0\" width=\"55.6\" height=\"18.0\" fill=\"#ef4444\" fill-opacity=\"0.7\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"512.2\" y=\"141.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">test</text>\n<text x=\"40.0\" y=\"172.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">CV nối tiếp (TimeSeriesSplit):</text>\n<rect x=\"40.0\" y=\"180.0\" width=\"166.7\" height=\"10.0\" fill=\"#3b82f6\" fill-opacity=\"0.5\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<rect x=\"206.7\" y=\"180.0\" width=\"41.7\" height=\"10.0\" fill=\"#f59e0b\" fill-opacity=\"0.8\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<rect x=\"40.0\" y=\"194.0\" width=\"208.3\" height=\"10.0\" fill=\"#3b82f6\" fill-opacity=\"0.5\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<rect x=\"248.3\" y=\"194.0\" width=\"41.7\" height=\"10.0\" fill=\"#f59e0b\" fill-opacity=\"0.8\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<rect x=\"40.0\" y=\"208.0\" width=\"250.0\" height=\"10.0\" fill=\"#3b82f6\" fill-opacity=\"0.5\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<rect x=\"290.0\" y=\"208.0\" width=\"41.7\" height=\"10.0\" fill=\"#f59e0b\" fill-opacity=\"0.8\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<rect x=\"40.0\" y=\"222.0\" width=\"291.7\" height=\"10.0\" fill=\"#3b82f6\" fill-opacity=\"0.5\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<rect x=\"331.7\" y=\"222.0\" width=\"41.7\" height=\"10.0\" fill=\"#f59e0b\" fill-opacity=\"0.8\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"540.0\" y=\"210.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">xanh = học, vàng = kiểm tra</text>\n</svg>\n\n| Cách chia | Mô phỏng triển khai? | Ước lượng |\n|---|---|---|\n| Ngẫu nhiên 80/20 | Không | Lạc quan |\n| Phân tầng theo nhãn | Không | Lạc quan |\n| Theo thời gian, một mốc cắt | Có | Trung thực, nhưng chỉ 1 điểm đo |\n| Theo thời gian, nhiều mốc nối tiếp | Có | Trung thực, thấy được độ dao động |\n\n#### Bẫy thường gặp\n- Nhãn \"hủy\" của các đặt phòng gần mốc cắt có thể chưa chốt (ngày nhận phòng còn ở tương lai): loại hoặc chờ đủ thời gian.\n- Tạo đặc trưng tổng hợp (ví dụ tỉ lệ hủy theo tháng) bằng dữ liệu của cả giai đoạn test.\n\n#### Đọc thêm\n- [TimeSeriesSplit (scikit-learn)](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html)\n- [Cross-validation (scikit-learn)](https://scikit-learn.org/stable/modules/cross_validation.html)",
+   "distractors": {
+    "A": "Test lớn hơn giảm phương sai của ước lượng nhưng vẫn trộn tương lai vào quá khứ, sai lệch do chia ngẫu nhiên vẫn còn.",
+    "B": "Phân tầng chỉ giữ tỉ lệ lớp; train vẫn chứa đặt phòng của những tháng nằm sau tập test, nên vẫn lạc quan.",
+    "C": "Trung bình nhiều lần chia ngẫu nhiên vẫn là ước lượng cho bài toán 'nội suy', không mô phỏng việc dự đoán tương lai có xu hướng, mùa vụ mới."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng tỉ lệ test lên 40% để ước lượng ổn định hơn"
+    },
+    {
+     "key": "B",
+     "text": "Chia phân tầng (stratified) theo nhãn hủy để giữ tỉ lệ hủy"
+    },
+    {
+     "key": "C",
+     "text": "Lặp lại việc chia ngẫu nhiên với 10 random seed khác nhau rồi lấy trung bình kết quả"
+    },
+    {
+     "key": "D",
+     "text": "Chia theo thời gian: học trên các tháng cũ, kiểm tra trên các tháng mới nhất"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T09-B02",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Bộ 12.000 ảnh được chụp từ 3.000 sản phẩm (mỗi sản phẩm 4 góc). Nhóm chia ngẫu nhiên **theo ảnh** 80/20, accuracy trên test là 97%; khi gặp sản phẩm mới chỉ còn 82%. Nguyên nhân chính và cách chia đúng là gì?",
+   "explanation": "Các ảnh cùng sản phẩm gần như trùng nhau; nếu chúng nằm cả ở train và test thì test đo khả năng 'nhận lại' chứ không đo khả năng tổng quát. Phải chia theo nhóm (GroupKFold / GroupShuffleSplit với nhóm = mã sản phẩm).",
+   "section": "c-ml",
+   "long": "#### Ý chính\nĐơn vị độc lập ở đây là **sản phẩm**, không phải ảnh. Bốn ảnh của cùng một sản phẩm gần như trùng nhau; chia theo ảnh để các ảnh \"anh em\" nằm ở cả hai phía, test trở thành bài kiểm tra trí nhớ.\n\n#### Từng bước\n1. Chia ngẫu nhiên theo ảnh: xác suất một sản phẩm có ít nhất 1 ảnh ở train và ít nhất 1 ảnh ở test là $1 - 0{,}8^4 - 0{,}2^4 \\approx 0{,}59$. Khoảng 59% sản phẩm bị \"chia đôi\".\n2. Mô hình nhận ra sản phẩm đã thấy → accuracy test 97%.\n3. Sản phẩm mới hoàn toàn → 82%, đây mới là con số cần báo cáo.\n4. Sửa: dùng `GroupShuffleSplit`/`GroupKFold` với `groups = ma_san_pham`: mọi ảnh của một sản phẩm nằm cùng một phía.\n\n#### Hình minh hoạ\n```mermaid\nflowchart TB\n  P[\"3.000 sản phẩm x 4 ảnh\"] --> W[\"Chia theo ảnh\"]\n  P --> G[\"Chia theo mã sản phẩm\"]\n  W --> W1[\"Ảnh của cùng sản phẩm ở cả train và test\"]\n  W1 --> W2[\"Test đo trí nhớ: 97 phần trăm\"]\n  G --> G1[\"Sản phẩm ở test chưa từng xuất hiện\"]\n  G1 --> G2[\"Test đo tổng quát: gần mức chạy thật\"]\n```\n\n| Lĩnh vực | \"Nhóm\" cần giữ nguyên khi chia |\n|---|---|\n| Ảnh sản phẩm | Mã sản phẩm |\n| Ảnh y khoa | Mã bệnh nhân |\n| Phát hiện bot | Thiết bị / tài khoản |\n| Churn | Khách hàng (nếu có nhiều dòng mỗi khách) |\n\n#### Bẫy thường gặp\n- Ảnh gần trùng còn đến từ nguồn khác (ảnh chụp lại, ảnh resize): nên khử trùng lặp bằng hash ảnh trước khi chia.\n- Augmentation phải làm sau khi chia, chỉ trên train.\n\n#### Đọc thêm\n- [Cross-validation iterators for grouped data (scikit-learn)](https://scikit-learn.org/stable/modules/cross_validation.html)\n- [GroupKFold (scikit-learn)](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold.html)",
+   "distractors": {
+    "A": "2.400 ảnh test không nhỏ; vấn đề là test chứa sản phẩm mô hình đã thấy, tăng kích thước không xoá được sự trùng lặp này.",
+    "C": "Underfitting không giải thích được accuracy test 97%; mô hình đang ghi nhớ từng sản phẩm, mạng sâu hơn còn ghi nhớ tốt hơn.",
+    "D": "Chuẩn hoá không liên quan đến việc test chứa bản gần trùng của ảnh train; tính thống kê trên toàn bộ bộ ảnh còn là một dạng rò rỉ nhỏ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Tập test quá nhỏ; cần tăng lên 50% số ảnh để có kết quả tin cậy"
+    },
+    {
+     "key": "B",
+     "text": "Ảnh của cùng một sản phẩm rơi vào cả train và test; cần chia theo mã sản phẩm"
+    },
+    {
+     "key": "C",
+     "text": "Mô hình đang underfitting; cần dùng một mạng sâu hơn và huấn luyện thêm nhiều epoch"
+    },
+    {
+     "key": "D",
+     "text": "Chưa chuẩn hoá ảnh; cần chuẩn hoá theo trung bình của toàn bộ bộ ảnh"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T09-B03",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Một cây quyết định sâu (không cắt tỉa) có accuracy train 100% và validation 78%. Chuyển sang random forest 300 cây, accuracy validation tăng lên 86%. Cơ chế chính giúp random forest cải thiện là gì?",
+   "explanation": "Với $B$ cây có phương sai $\\sigma^2$ và tương quan $\\rho$, phương sai của trung bình là $\\rho \\sigma^2 + \\frac{1 - \\rho}{B} \\sigma^2$. Bootstrap và chọn ngẫu nhiên đặc trưng làm giảm $\\rho$, nhiều cây làm số hạng thứ hai nhỏ dần; bias gần như giữ nguyên.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nMột cây sâu có bias thấp nhưng variance rất cao (đổi vài mẫu là cây đổi hẳn). Random forest = **bagging** + chọn ngẫu nhiên tập con đặc trưng ở mỗi nút → các cây khác nhau, lấy trung bình/bỏ phiếu làm variance giảm.\n\n#### Từng bước\nVới $B$ cây, mỗi cây phương sai $\\sigma^2$, tương quan giữa hai cây $\\rho$:\n$$\\operatorname{Var}\\Big(\\frac{1}{B}\\sum_b T_b\\Big) = \\rho\\sigma^2 + \\frac{1 - \\rho}{B}\\sigma^2$$\n\n| $B$ | $\\rho = 0{,}3$, $\\sigma^2 = 1$ | $\\rho = 0{,}9$, $\\sigma^2 = 1$ |\n|---|---|---|\n| 1 | 1,000 | 1,000 |\n| 10 | 0,370 | 0,910 |\n| 300 | 0,302 | 0,900 |\n\nGiảm tương quan (chọn đặc trưng ngẫu nhiên) quan trọng không kém tăng số cây.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  D[\"Dữ liệu train\"] --> S1[\"Mẫu bootstrap 1\"]\n  D --> S2[\"Mẫu bootstrap 2\"]\n  D --> S3[\"Mẫu bootstrap B\"]\n  S1 --> T1[\"Cây 1, mỗi nút xét ngẫu nhiên vài đặc trưng\"]\n  S2 --> T2[\"Cây 2\"]\n  S3 --> T3[\"Cây B\"]\n  T1 --> V[\"Bỏ phiếu hoặc trung bình\"]\n  T2 --> V\n  T3 --> V\n```\n\n| | Random forest (bagging) | Gradient boosting |\n|---|---|---|\n| Cách xây cây | Song song, độc lập | Tuần tự, cây sau sửa phần dư |\n| Cây gốc | Sâu | Nông |\n| Chủ yếu giảm | Variance | Bias |\n\n#### Bẫy thường gặp\n- Lẫn random forest với boosting.\n- Nghĩ thêm cây làm random forest overfit: thêm cây chỉ làm ước lượng ổn định hơn; overfit đến từ độ sâu, số mẫu ở lá.\n\n#### Đọc thêm\n- [Ensembles (scikit-learn)](https://scikit-learn.org/stable/modules/ensemble.html)\n- [Random forests (Google Decision Forests)](https://developers.google.com/machine-learning/decision-forests/random-forests)",
+   "distractors": {
+    "B": "Đó là boosting (ví dụ gradient boosting), các cây được xây tuần tự; random forest xây các cây độc lập rồi lấy trung bình/bỏ phiếu.",
+    "C": "Random forest thường dùng cây sâu (bias thấp, variance cao) và dựa vào việc lấy trung bình để giảm variance; cây độ sâu 1 (stump) là đặc trưng của AdaBoost.",
+    "D": "Nếu mọi cây cùng dữ liệu và cùng đặc trưng thì chúng gần như giống hệt nhau, trung bình không giảm variance; tính ngẫu nhiên mới là chìa khoá."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Trung bình nhiều cây ít tương quan (bootstrap, đặc trưng ngẫu nhiên) nên giảm variance"
+    },
+    {
+     "key": "B",
+     "text": "Mỗi cây sau học phần dư của các cây trước nên bias của cả mô hình giảm dần qua từng vòng"
+    },
+    {
+     "key": "C",
+     "text": "Mỗi cây trong rừng bị giới hạn độ sâu 1 nên không thể overfit"
+    },
+    {
+     "key": "D",
+     "text": "Mỗi cây dùng toàn bộ dữ liệu và mọi đặc trưng nên ổn định hơn một cây"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T09-B04",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Nút gốc của cây quyết định dự đoán hủy đặt phòng có 10 đặt phòng: 4 hủy, 6 không hủy. Tách theo đặc trưng `co_dat_coc`:\n\n| Nhánh | Số đặt phòng | Hủy | Không hủy |\n|---|---|---|---|\n| Không đặt cọc | 5 | 4 | 1 |\n| Có đặt cọc | 5 | 0 | 5 |\n\nTính information gain của phép tách, dùng entropy **cơ số 2**. **Làm tròn 3 chữ số thập phân.**",
+   "explanation": "$H(\\text{cha}) = -0{,}4\\log_2 0{,}4 - 0{,}6\\log_2 0{,}6 \\approx 0{,}971$; $H(\\text{không cọc}) = H(0{,}8) \\approx 0{,}722$, $H(\\text{có cọc}) = 0$. $IG = 0{,}971 - \\left(\\frac{5}{10} \\cdot 0{,}722 + \\frac{5}{10} \\cdot 0\\right) \\approx 0{,}610$.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nInformation gain = entropy nút cha − entropy trung bình có trọng số của các nút con. Cây chọn phép tách có gain lớn nhất (tiêu chí `criterion=\"entropy\"`).\n\n#### Từng bước\n$$H(p) = -p\\log_2 p - (1 - p)\\log_2(1 - p)$$\n\n| Nút | Hủy / tổng | $p$ | $H$ | Trọng số |\n|---|---|---|---|---|\n| Cha | 4/10 | 0,4 | 0,971 | |\n| Không cọc | 4/5 | 0,8 | 0,722 | 5/10 |\n| Có cọc | 0/5 | 0 | 0 | 5/10 |\n\n- Entropy sau tách: $0{,}5 \\cdot 0{,}722 + 0{,}5 \\cdot 0 = 0{,}361$.\n- $IG = 0{,}971 - 0{,}361 = 0{,}610$.\n\nSo sánh với Gini: $G_{\\text{cha}} = 1 - 0{,}4^2 - 0{,}6^2 = 0{,}48$, $G_{\\text{không cọc}} = 1 - 0{,}8^2 - 0{,}2^2 = 0{,}32$, sau tách $0{,}16$, mức giảm $0{,}32$.\n\n#### Hình minh hoạ\n```mermaid\nflowchart TB\n  R[\"Gốc: 4 hủy, 6 không, H = 0,971\"] -->|không cọc| A[\"4 hủy, 1 không, H = 0,722\"]\n  R -->|có cọc| B[\"0 hủy, 5 không, H = 0, nút thuần\"]\n```\n\n#### Bẫy thường gặp\n- Dừng ở 0,361 (đó là entropy còn lại) hoặc 0,971 (entropy cha).\n- Dùng $\\ln$: kết quả 0,423 nat; vẫn chọn cùng phép tách nhưng không khớp đơn vị đề yêu cầu.\n- Quên trọng số khi hai nhánh có số mẫu khác nhau (ở đây bằng nhau nên trùng hợp không sai).\n\n#### Đọc thêm\n- [Decision Trees: mathematical formulation (scikit-learn)](https://scikit-learn.org/stable/modules/tree.html)\n- [Information gain (Wikipedia)](https://en.wikipedia.org/wiki/Information_gain_%28decision_tree%29)",
+   "mistakes": [
+    {
+     "value": 0.361,
+     "why": "Đây là entropy có trọng số của các nút con; information gain là entropy nút cha **trừ** đi giá trị này."
+    },
+    {
+     "value": 0.971,
+     "why": "Đây là entropy của nút cha trước khi tách, chưa trừ phần entropy còn lại sau khi tách."
+    },
+    {
+     "value": 0.423,
+     "why": "Dùng logarit tự nhiên $\\ln$ thay cho $\\log_2$ (kết quả tính theo nat, nhỏ hơn $\\ln 2 \\approx 0{,}693$ lần)."
+    },
+    {
+     "value": 0.32,
+     "why": "Đây là mức giảm Gini impurity (0,48 − 0,16), không phải information gain theo entropy."
+    }
+   ],
+   "answer": 0.61,
+   "tol": 0.0011
+  },
+  {
+   "id": "T09-B05",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Đội CRM của một ứng dụng phân nhóm 6 khách hàng theo hai đặc trưng đã đưa về cùng thang điểm 0–10: $x_1$ = mức sử dụng app, $x_2$ = mức giao dịch. Các điểm: A$(1, 2)$, B$(2, 1)$, C$(2, 3)$, D$(4, 3)$, E$(7, 7)$, F$(8, 6)$. Chạy k-means với $k = 2$, khoảng cách Euclid, tâm khởi tạo $\\mu_1 = (1, 1)$, $\\mu_2 = (5, 5)$. Sau **đúng một vòng** (gán mỗi điểm vào tâm gần nhất, rồi cập nhật tâm), thành phần thứ nhất ($x_1$) của $\\mu_2$ bằng bao nhiêu? **Làm tròn 2 chữ số thập phân.**",
+   "explanation": "Cụm 2 gồm D, E, F (D gần $\\mu_2$ hơn: $\\sqrt{5} < \\sqrt{13}$). Tâm mới $\\mu_2 = \\left(\\frac{4 + 7 + 8}{3}, \\frac{3 + 7 + 6}{3}\\right) = (6{,}33;\\ 5{,}33)$.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nMột vòng k-means gồm hai bước: **gán** mỗi điểm vào tâm gần nhất, rồi **cập nhật** mỗi tâm bằng trung bình các điểm được gán. Tâm cũ không tham gia vào trung bình.\n\n#### Từng bước\nKhoảng cách bình phương tới $\\mu_1 = (1, 1)$ và $\\mu_2 = (5, 5)$:\n\n| Điểm | $d^2$ tới $\\mu_1$ | $d^2$ tới $\\mu_2$ | Cụm |\n|---|---|---|---|\n| A(1, 2) | 1 | 25 | 1 |\n| B(2, 1) | 1 | 25 | 1 |\n| C(2, 3) | 5 | 13 | 1 |\n| D(4, 3) | 13 | 5 | 2 |\n| E(7, 7) | 72 | 8 | 2 |\n| F(8, 6) | 74 | 10 | 2 |\n\n- $\\mu_1^{\\text{mới}} = \\left(\\frac{1 + 2 + 2}{3}, \\frac{2 + 1 + 3}{3}\\right) = (1{,}67;\\ 2)$.\n- $\\mu_2^{\\text{mới}} = \\left(\\frac{4 + 7 + 8}{3}, \\frac{3 + 7 + 6}{3}\\right) = (6{,}33;\\ 5{,}33)$.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"40.0\" y1=\"230.0\" x2=\"490.0\" y2=\"230.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"40.0\" y1=\"230.0\" x2=\"40.0\" y2=\"17.5\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"40.0\" y=\"245.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"140.0\" y=\"245.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"240.0\" y=\"245.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<text x=\"340.0\" y=\"245.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">6</text>\n<text x=\"440.0\" y=\"245.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">8</text>\n<text x=\"32.0\" y=\"234.0\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">0</text>\n<text x=\"32.0\" y=\"184.0\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">2</text>\n<text x=\"32.0\" y=\"134.0\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">4</text>\n<text x=\"32.0\" y=\"84.0\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">6</text>\n<text x=\"32.0\" y=\"34.0\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">8</text>\n<text x=\"490.0\" y=\"245.0\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">x₁</text>\n<text x=\"46.0\" y=\"21.5\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">x₂</text>\n<circle cx=\"90.0\" cy=\"180.0\" r=\"6\" fill=\"#10b981\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"99.0\" y=\"173.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">A</text>\n<circle cx=\"140.0\" cy=\"205.0\" r=\"6\" fill=\"#10b981\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"149.0\" y=\"198.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">B</text>\n<circle cx=\"140.0\" cy=\"155.0\" r=\"6\" fill=\"#10b981\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"149.0\" y=\"148.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">C</text>\n<circle cx=\"240.0\" cy=\"155.0\" r=\"6\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"249.0\" y=\"148.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">D</text>\n<circle cx=\"390.0\" cy=\"55.0\" r=\"6\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"399.0\" y=\"48.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">E</text>\n<circle cx=\"440.0\" cy=\"80.0\" r=\"6\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"449.0\" y=\"73.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">F</text>\n<rect x=\"84.0\" y=\"199.0\" width=\"12.0\" height=\"12.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<text x=\"100.0\" y=\"221.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">μ₁ cũ</text>\n<rect x=\"284.0\" y=\"99.0\" width=\"12.0\" height=\"12.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<text x=\"300.0\" y=\"121.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">μ₂ cũ</text>\n<path d=\"M115.3,180.0 L123.3,172.0 L131.3,180.0 L123.3,188.0 Z\" fill=\"#10b981\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"135.3\" y=\"184.0\" font-size=\"11\" text-anchor=\"start\" fill=\"#10b981\"></text>\n<path d=\"M348.7,96.7 L356.7,88.7 L364.7,96.7 L356.7,104.7 Z\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"368.7\" y=\"100.7\" font-size=\"11\" text-anchor=\"start\" fill=\"#3b82f6\">μ₂ mới (6,33; 5,33)</text>\n<line x1=\"240.0\" y1=\"155.0\" x2=\"90.0\" y2=\"205.0\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 3\"/>\n<line x1=\"240.0\" y1=\"155.0\" x2=\"290.0\" y2=\"105.0\" stroke=\"#3b82f6\" stroke-width=\"1.5\" stroke-dasharray=\"3 3\"/>\n<text x=\"185.0\" y=\"211.0\" font-size=\"10\" text-anchor=\"start\" fill=\"currentColor\">√13 ≈ 3,61</text>\n<text x=\"55.0\" y=\"140.0\" font-size=\"11\" text-anchor=\"start\" fill=\"#10b981\">μ₁ mới (1,67; 2)</text>\n<line x1=\"85.0\" y1=\"147.5\" x2=\"119.3\" y2=\"174.0\" stroke=\"#10b981\" stroke-width=\"1\"/>\n<text x=\"276.0\" y=\"130.0\" font-size=\"10\" text-anchor=\"start\" fill=\"#3b82f6\">√5 ≈ 2,24</text>\n</svg>\n\n#### Bẫy thường gặp\n- Gán D theo cảm giác \"D ở nửa trái nên thuộc cụm trái\": phải tính khoảng cách.\n- Đưa tâm cũ vào trung bình.\n- Quên chuẩn hoá đặc trưng: k-means dùng khoảng cách Euclid nên cũng nhạy thang đo như kNN.\n- k-means phụ thuộc tâm khởi tạo; thực tế dùng k-means++ và chạy nhiều lần (`n_init`).\n\n#### Đọc thêm\n- [Clustering: K-means (scikit-learn)](https://scikit-learn.org/stable/modules/clustering.html)\n- [k-means overview (Google ML)](https://developers.google.com/machine-learning/clustering/kmeans/overview)",
+   "mistakes": [
+    {
+     "value": 7.5,
+     "why": "Gán nhầm D$(4, 3)$ vào cụm 1. Thực tế $d(D, \\mu_1) = \\sqrt{13} \\approx 3{,}61 > d(D, \\mu_2) = \\sqrt{5} \\approx 2{,}24$ nên D thuộc cụm 2."
+    },
+    {
+     "value": 6.0,
+     "why": "Tính trung bình gộp cả tâm cũ $(5 + 4 + 7 + 8)/4$; tâm mới chỉ là trung bình của các **điểm** trong cụm."
+    },
+    {
+     "value": 5.33,
+     "why": "Đây là thành phần thứ hai $x_2 = (3 + 7 + 6)/3$, không phải $x_1$."
+    }
+   ],
+   "answer": 6.33,
+   "tol": 0.0051
+  },
+  {
+   "id": "T09-B06",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Mô hình hồi quy tuyến tính dự đoán giá phòng dùng phạt L2 (ridge): tối thiểu $\\sum_i (y_i - \\mathbf{w}^\\top \\mathbf{x}_i)^2 + \\lambda \\lVert \\mathbf{w} \\rVert_2^2$. Khi tăng $\\lambda$ từ 0,01 lên 100, điều gì thường xảy ra?",
+   "explanation": "Ridge có nghiệm $\\hat{\\mathbf{w}} = (X^\\top X + \\lambda I)^{-1} X^\\top \\mathbf{y}$; $\\lambda$ càng lớn thì $\\hat{\\mathbf{w}}$ càng co về 0. Lỗi validation thường giảm rồi tăng lại theo $\\lambda$ (hình chữ U), nên chọn $\\lambda$ bằng cross-validation.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nPhạt L2 kéo các hệ số về 0. $\\lambda$ càng lớn, mô hình càng \"cứng\": khớp train kém đi (bias tăng) nhưng ít nhạy với nhiễu của mẫu (variance giảm).\n\n#### Từng bước\n- Nghiệm đóng: $\\hat{\\mathbf{w}}_\\lambda = (X^\\top X + \\lambda I)^{-1} X^\\top \\mathbf{y}$.\n- Ví dụ một đặc trưng chuẩn hoá với $\\sum x_i^2 = 100$, $\\sum x_i y_i = 200$: $\\hat{w} = \\frac{200}{100 + \\lambda}$.\n\n| $\\lambda$ | 0,01 | 1 | 10 | 100 |\n|---|---|---|---|---|\n| $\\hat{w}$ | 2,000 | 1,980 | 1,818 | 1,000 |\n\nHệ số nhỏ dần nhưng không bằng 0 đúng. Với L1, phạt $\\lambda\\lvert w \\rvert$ có \"góc\" tại 0 nên nhiều hệ số về đúng 0.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 230\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"60.0\" y1=\"200.0\" x2=\"520.0\" y2=\"200.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"60.0\" y1=\"200.0\" x2=\"60.0\" y2=\"20.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<polyline points=\"60.0,186.4 69.2,186.4 78.4,186.3 87.6,186.2 96.8,186.0 106.0,185.7 115.2,185.4 124.4,185.0 133.6,184.5 142.8,184.0 152.0,183.3 161.2,182.6 170.4,181.8 179.6,181.0 188.8,180.0 198.0,178.9 207.2,177.8 216.4,176.6 225.6,175.3 234.8,173.9 244.0,172.4 253.2,170.8 262.4,169.1 271.6,167.3 280.8,165.4 290.0,163.5 299.2,161.4 308.4,159.2 317.6,157.0 326.8,154.6 336.0,152.1 345.2,149.6 354.4,146.9 363.6,144.1 372.8,141.3 382.0,138.3 391.2,135.2 400.4,132.1 409.6,128.8 418.8,125.4 428.0,121.9 437.2,118.3 446.4,114.6 455.6,110.8 464.8,106.8 474.0,102.8 483.2,98.7 492.4,94.4 501.6,90.1 510.8,85.6 520.0,81.0\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<polyline points=\"60.0,75.9 69.2,79.6 78.4,83.1 87.6,86.6 96.8,89.9 106.0,93.0 115.2,96.0 124.4,98.9 133.6,101.6 142.8,104.1 152.0,106.5 161.2,108.7 170.4,110.8 179.6,112.8 188.8,114.5 198.0,116.1 207.2,117.6 216.4,118.9 225.6,120.0 234.8,120.9 244.0,121.7 253.2,122.3 262.4,122.8 271.6,123.0 280.8,123.1 290.0,123.1 299.2,122.9 308.4,122.4 317.6,121.9 326.8,121.1 336.0,120.2 345.2,119.1 354.4,117.8 363.6,116.3 372.8,114.7 382.0,112.9 391.2,110.9 400.4,108.7 409.6,106.4 418.8,103.9 428.0,101.1 437.2,98.3 446.4,95.2 455.6,91.9 464.8,88.5 474.0,84.9 483.2,81.1 492.4,77.1 501.6,72.9 510.8,68.5 520.0,64.0\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"2.5\"/>\n<text x=\"520.0\" y=\"218.0\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">λ tăng (thang log) →</text>\n<text x=\"54.0\" y=\"16.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">lỗi</text>\n<text x=\"96.8\" y=\"194.9\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">lỗi train</text>\n<text x=\"69.2\" y=\"70.8\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\">lỗi validation</text>\n<line x1=\"281.7\" y1=\"200.0\" x2=\"281.7\" y2=\"123.2\" stroke=\"#10b981\" stroke-width=\"1.5\" stroke-dasharray=\"5 4\"/>\n<text x=\"281.7\" y=\"218.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"#10b981\">λ tốt nhất (chọn bằng CV)</text>\n<text x=\"115.2\" y=\"43.6\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">overfit: variance cao</text>\n<text x=\"464.8\" y=\"43.6\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">underfit: bias cao</text>\n</svg>\n\n| $\\lambda$ | Lỗi train | Lỗi validation | Trạng thái |\n|---|---|---|---|\n| Rất nhỏ | Thấp nhất | Cao | Variance cao |\n| Vừa | Tăng nhẹ | Thấp nhất | Cân bằng |\n| Rất lớn | Cao | Cao | Bias cao |\n\n#### Bẫy thường gặp\n- Nhầm L2 với L1 (tính thưa).\n- Không chuẩn hoá đặc trưng trước ridge: phạt áp lên các hệ số theo thang đo khác nhau, đặc trưng có đơn vị nhỏ bị phạt nặng hơn.\n\n#### Đọc thêm\n- [Ridge regression (scikit-learn)](https://scikit-learn.org/stable/modules/linear_model.html)\n- [Weight decay (d2l.ai)](https://d2l.ai/chapter_linear-regression/weight-decay.html)\n- [Regularization (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/overfitting/regularization)",
+   "distractors": {
+    "A": "Đó là đặc điểm của phạt L1 (lasso). Phạt L2 co hệ số nhỏ dần nhưng hầu như không đưa hệ số nào về đúng 0.",
+    "B": "Thêm phạt là thêm ràng buộc, mô hình được phép khớp dữ liệu train **kém** hơn; lỗi train không giảm khi $\\lambda$ tăng.",
+    "D": "Đảo chiều: $\\lambda$ lớn làm mô hình đơn giản hơn (kém linh hoạt), nên bias tăng và variance giảm."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Nhiều hệ số trở thành đúng bằng 0, mô hình tự loại đặc trưng thừa"
+    },
+    {
+     "key": "B",
+     "text": "Lỗi train giảm vì mô hình bị phạt nên khớp dữ liệu tốt hơn"
+    },
+    {
+     "key": "C",
+     "text": "Các hệ số co dần về 0, lỗi train tăng; bias tăng còn variance giảm"
+    },
+    {
+     "key": "D",
+     "text": "Bias giảm, variance tăng vì mô hình trở nên linh hoạt hơn"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T09-B07",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Nhóm thử 60 cấu hình siêu tham số cho mô hình dự đoán churn bằng 5-fold CV trên toàn bộ dữ liệu, chọn cấu hình có ROC-AUC trung bình cao nhất (0,874) và ghi vào báo cáo: “AUC kỳ vọng khi triển khai là 0,874”. Nhận xét nào đúng nhất?",
+   "explanation": "Khi một điểm số vừa dùng để **chọn** vừa dùng để **báo cáo**, nó chệch lên (giống chọn người thắng trong 60 lần tung xúc xắc). Cách đúng: CV trong để chọn cấu hình, rồi đo trên test giữ riêng, hoặc nested CV (vòng ngoài chỉ để đánh giá).",
+   "section": "c-metric",
+   "long": "#### Ý chính\nChọn cấu hình có điểm **cao nhất** trong nhiều cấu hình rồi báo cáo chính điểm đó là chệch lên, kể cả khi từng điểm riêng lẻ là khách quan. Đây là \"chệch do chọn lọc\" (selection bias / winner's curse).\n\n#### Từng bước: ước lượng độ lạc quan\nGiả sử cả 60 cấu hình thật ra có AUC như nhau là 0,85, và mỗi điểm CV dao động ngẫu nhiên với độ lệch chuẩn 0,01. Kỳ vọng của **giá trị lớn nhất** trong 60 biến chuẩn độc lập là khoảng $2{,}32\\sigma$ (mô phỏng numpy 200.000 lần cho 2,318). Vậy điểm tốt nhất trung bình khoảng $0{,}85 + 0{,}023 = 0{,}873$ dù không cấu hình nào thật sự tốt hơn.\n\n#### Hình minh hoạ: nested CV\n```mermaid\nflowchart TB\n  A[\"Toàn bộ dữ liệu\"] --> O[\"Vòng ngoài: 5 fold\"]\n  O --> TR[\"4 fold ngoài\"]\n  O --> TE[\"1 fold ngoài: chỉ để chấm\"]\n  TR --> I[\"Vòng trong: CV chọn 1 trong 60 cấu hình\"]\n  I --> F[\"Huấn luyện cấu hình được chọn trên 4 fold ngoài\"]\n  F --> TE\n  TE --> S[\"Trung bình 5 điểm ngoài = ước lượng hiệu năng\"]\n```\n\n| Cách làm | Dùng để chọn? | Dùng để báo cáo? | Ước lượng |\n|---|---|---|---|\n| Điểm CV tốt nhất | Có | Có | Lạc quan |\n| CV chọn + test giữ riêng | CV | Test | Khách quan |\n| Nested CV | Vòng trong | Vòng ngoài | Khách quan (cho cả quy trình) |\n\n#### Bẫy thường gặp\n- Tăng số fold không xoá chệch chọn lọc.\n- Càng thử nhiều cấu hình, độ lạc quan càng lớn.\n\n#### Đọc thêm\n- [Nested versus non-nested cross-validation (scikit-learn)](https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html)\n- [Tuning the hyper-parameters (scikit-learn)](https://scikit-learn.org/stable/modules/grid_search.html)",
+   "distractors": {
+    "A": "Mỗi điểm fold riêng lẻ thì đúng là chưa học, nhưng chọn **max** trên 60 cấu hình sẽ ưu tiên cấu hình gặp may trên chính các fold đó (chệch do chọn lọc).",
+    "B": "Học trên 80% dữ liệu có thể làm điểm thấp đi chút ít, nhưng sai lệch lạc quan do chọn max trên 60 cấu hình thường lớn hơn và đi theo chiều ngược lại.",
+    "C": "Tăng số fold không xoá chệch do chọn lọc: điểm tốt nhất vẫn được dùng vừa để chọn vừa để báo cáo."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Con số này không chệch vì mỗi fold đều được chấm trên phần dữ liệu mô hình chưa học"
+    },
+    {
+     "key": "B",
+     "text": "Con số này thường bi quan vì mỗi mô hình chỉ học trên 80% dữ liệu"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ cần tăng từ 5 lên 10 fold là con số trở thành ước lượng không chệch"
+    },
+    {
+     "key": "D",
+     "text": "Con số này lạc quan vì đã dùng để chọn cấu hình; cần test riêng hoặc nested CV"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T09-B08",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Mô hình phát hiện bot được thử trên 1.000 phiên đã gán nhãn, trong đó có 75 phiên là bot. Mô hình gắn cờ 60 phiên, trong đó 45 phiên đúng là bot. Tính F1-score cho lớp bot. **Làm tròn 3 chữ số thập phân.**",
+   "explanation": "$TP = 45$, $FP = 60 - 45 = 15$, $FN = 75 - 45 = 30$. $P = 45/60 = 0{,}75$, $R = 45/75 = 0{,}6$, $F_1 = \\frac{2PR}{P + R} = \\frac{2 \\cdot 45}{2 \\cdot 45 + 15 + 30} = \\frac{90}{135} \\approx 0{,}667$.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nDựng ma trận nhầm lẫn từ dữ kiện, rồi áp công thức. F1 là trung bình **điều hoà** của precision và recall, bị kéo về phía giá trị nhỏ hơn.\n\n#### Từng bước\n| | Gắn cờ | Không gắn cờ | Tổng |\n|---|---|---|---|\n| Bot thật | TP = 45 | FN = 30 | 75 |\n| Người thật | FP = 15 | TN = 910 | 925 |\n| Tổng | 60 | 940 | 1.000 |\n\n- $P = 45/60 = 0{,}75$, $R = 45/75 = 0{,}60$.\n- $F_1 = \\frac{2PR}{P + R} = \\frac{2 \\cdot 0{,}75 \\cdot 0{,}6}{1{,}35} = \\frac{0{,}9}{1{,}35} \\approx 0{,}667$.\n- Kiểm bằng dạng đếm: $F_1 = \\frac{2TP}{2TP + FP + FN} = \\frac{90}{135}$.\n\n#### So sánh các kiểu trung bình\n| Kiểu | Giá trị |\n|---|---|\n| Trung bình cộng | 0,675 |\n| Trung bình nhân $\\sqrt{PR}$ | 0,671 |\n| Trung bình điều hoà (F1) | 0,667 |\n\nKhi P và R lệch nhau xa (ví dụ 0,95 và 0,10), trung bình cộng là 0,525 nhưng F1 chỉ 0,181: F1 không cho phép \"bù\" recall tệ bằng precision đẹp.\n\n#### Bẫy thường gặp\n- Lấy accuracy 0,955: lớp bot chỉ 7,5% nên accuracy cao là dễ.\n- Quên rằng F1 bỏ qua TN; nếu chi phí FP và FN khác nhau nhiều, nên dùng $F_\\beta$ hoặc chi phí trực tiếp.\n\n#### Đọc thêm\n- [Precision, recall and F-measures (scikit-learn)](https://scikit-learn.org/stable/modules/model_evaluation.html)\n- [F-score (Wikipedia)](https://en.wikipedia.org/wiki/F-score)",
+   "mistakes": [
+    {
+     "value": 0.675,
+     "why": "Lấy trung bình cộng (0,75 + 0,6)/2; F1 là trung bình **điều hoà**, luôn ≤ trung bình cộng."
+    },
+    {
+     "value": 0.955,
+     "why": "Đây là accuracy (45 + 910)/1000; với lớp bot hiếm, accuracy cao không phản ánh chất lượng bắt bot."
+    },
+    {
+     "value": 0.45,
+     "why": "Đây là tích precision × recall, thiếu hệ số 2 và mẫu số (P + R) của công thức F1."
+    }
+   ],
+   "answer": 0.667,
+   "tol": 0.0011
+  },
+  {
+   "id": "T09-B09",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Mô hình dự đoán churn có ROC-AUC = 0,85 trên tập test. Diễn giải nào **đúng**?",
+   "explanation": "ROC-AUC bằng xác suất $P(s^+ > s^-)$ với $s^+$, $s^-$ là điểm của một mẫu dương và một mẫu âm chọn ngẫu nhiên (hoà tính 0,5). Nó đo khả năng **xếp hạng**, không phụ thuộc ngưỡng.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nROC-AUC đo chất lượng **xếp hạng**: $\\text{AUC} = P(s^+ > s^-)$, với một khách churn và một khách không churn chọn ngẫu nhiên. Nó tổng hợp mọi ngưỡng nên không gắn với ngưỡng 0,5 nào.\n\n#### Từng bước: ví dụ nhỏ\nBa khách churn có điểm 0,9; 0,6; 0,4 và ba khách không churn có điểm 0,7; 0,3; 0,2. Có $3 \\times 3 = 9$ cặp:\n\n| Churn \\ Không churn | 0,7 | 0,3 | 0,2 |\n|---|---|---|---|\n| 0,9 | đúng | đúng | đúng |\n| 0,6 | sai | đúng | đúng |\n| 0,4 | sai | đúng | đúng |\n\n7/9 cặp xếp đúng → $\\text{AUC} \\approx 0{,}78$. Mỗi ngưỡng cho một cặp (FPR, TPR) khác nhau; AUC là diện tích dưới cả đường cong đó.\n\n#### AUC không cho biết gì?\n| Câu hỏi | AUC trả lời được? |\n|---|---|\n| Mô hình xếp hạng tốt không? | Có |\n| Ở ngưỡng 0,5 đúng bao nhiêu phần trăm? | Không |\n| Cờ churn đúng bao nhiêu (precision)? | Không, phụ thuộc tỉ lệ churn |\n| Xác suất dự đoán có đúng mức (hiệu chỉnh)? | Không |\n\n#### Bẫy thường gặp\n- Hiểu AUC như accuracy hay recall.\n- Với lớp dương rất hiếm, AUC cao vẫn có thể đi kèm precision thấp; xem thêm PR-AUC.\n\n#### Đọc thêm\n- [ROC and AUC (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc)\n- [Receiver operating characteristic (Wikipedia)](https://en.wikipedia.org/wiki/Receiver_operating_characteristic)",
+   "distractors": {
+    "A": "AUC không gắn với một ngưỡng cụ thể nào; accuracy ở ngưỡng 0,5 là một con số khác và phụ thuộc tỉ lệ churn.",
+    "C": "Recall (TPR) thay đổi theo ngưỡng, từ 0 đến 1; AUC là diện tích dưới cả đường cong TPR theo FPR, không phải một recall cố định.",
+    "D": "Đó là precision, phụ thuộc mạnh vào tỉ lệ churn nền; ROC-AUC không chứa thông tin về tỉ lệ này."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Ở ngưỡng 0,5, mô hình phân loại đúng khoảng 85% tổng số khách hàng trong tập test"
+    },
+    {
+     "key": "B",
+     "text": "Lấy ngẫu nhiên một khách churn và một khách không churn, xác suất mô hình chấm điểm khách churn cao hơn là khoảng 0,85"
+    },
+    {
+     "key": "C",
+     "text": "Ở mọi ngưỡng quyết định, mô hình luôn bắt được khoảng 85% số khách churn thật trong tập test"
+    },
+    {
+     "key": "D",
+     "text": "Trong số khách bị mô hình gắn cờ churn, khoảng 85% sẽ thực sự rời đi trong kỳ tới"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T09-B10",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Dữ liệu churn có 5% khách rời bỏ. Nhóm nhân bản ngẫu nhiên (random oversampling) lớp churn lên 50% trên **toàn bộ** dữ liệu, sau đó mới chia train/test. Recall trên test đạt 0,96, cao bất thường so với các thử nghiệm trước. Giải thích nào đúng?",
+   "explanation": "Mọi bước 'học từ dữ liệu' (oversampling, SMOTE, chuẩn hoá, chọn đặc trưng) phải làm **sau** khi chia và chỉ trên train (trong từng fold nếu dùng CV). Test giữ nguyên phân phối thật.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nRandom oversampling tạo **bản sao y hệt** của các khách churn. Nếu nhân bản trước khi chia, một khách có thể có bản sao ở train và bản sao ở test: mô hình chỉ cần nhớ là đoán đúng.\n\n#### Từng bước: ước lượng mức trùng\n- Giả sử 10.000 khách, 500 churn. Để lớp churn thành 50% cần khoảng 9.500 dòng churn, tức mỗi khách churn có trung bình 19 bản.\n- Chia ngẫu nhiên 80/20: xác suất **mọi** bản của một khách đều nằm ở train là $0{,}8^{19} \\approx 0{,}014$. Gần như mọi khách churn ở test đều có bản sao ở train.\n- Recall 0,96 là recall của trí nhớ.\n\n#### Quy trình đúng\n```mermaid\nflowchart LR\n  A[\"Dữ liệu gốc, 5 phần trăm churn\"] --> S[\"Chia train và test trước\"]\n  S --> TR[\"Train\"]\n  S --> TE[\"Test giữ nguyên tỉ lệ thật\"]\n  TR --> O[\"Oversample hoặc class_weight chỉ trên train\"]\n  O --> M[\"Huấn luyện\"]\n  M --> E[\"Đánh giá trên test\"]\n  TE --> E\n```\n\n| Bước | Làm trên |\n|---|---|\n| Oversampling / SMOTE / undersampling | Chỉ train (trong từng fold nếu CV) |\n| Chọn ngưỡng | Validation với tỉ lệ thật |\n| Báo cáo precision, recall, PR-AUC | Test với tỉ lệ thật |\n\nVới CV, dùng `imblearn.pipeline.Pipeline` để bước resample chỉ chạy trên phần học của mỗi fold.\n\n#### Bẫy thường gặp\n- Oversample cả test: precision bị thổi phồng vì tỉ lệ churn giả 50%.\n- Quên rằng `class_weight=\"balanced\"` thường đạt hiệu quả tương tự mà không tạo bản sao.\n\n#### Đọc thêm\n- [Common pitfalls (imbalanced-learn)](https://imbalanced-learn.org/stable/common_pitfalls.html)\n- [Imbalanced datasets (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/overfitting/imbalanced-datasets)",
+   "distractors": {
+    "A": "Oversampling có thể giúp mô hình chú ý lớp hiếm, nhưng ở đây test chứa bản sao y hệt mẫu train, nên 0,96 đo trí nhớ chứ không đo khả năng tổng quát.",
+    "B": "Recall chỉ tính trên lớp dương, không phụ thuộc tỉ lệ lớp; vấn đề là bản sao trùng lặp, và chiều sai lệch ở đây là lạc quan.",
+    "D": "Tập test phải phản ánh phân phối thật (5% churn); oversample test làm sai lệch precision và mọi chỉ số phụ thuộc tỉ lệ lớp."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Oversampling luôn làm recall tăng thật sự, nên con số 0,96 là đáng tin cậy và có thể báo cáo"
+    },
+    {
+     "key": "B",
+     "text": "Tập test đã cân bằng 50/50 nên recall bị ước lượng thấp hơn so với thực tế"
+    },
+    {
+     "key": "C",
+     "text": "Bản sao của cùng một khách churn nằm ở cả train và test nên mô hình chỉ cần nhớ; phải chia trước, chỉ oversample tập train"
+    },
+    {
+     "key": "D",
+     "text": "Nên oversample cả tập test để tỉ lệ lớp giống tập train rồi mới so sánh các mô hình"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T09-C01",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Nhóm xây mô hình dự đoán, **tại thời điểm khách vừa đặt phòng**, đặt phòng đó có bị hủy hay không. Bảng lịch sử có các cột dưới đây. Cột nào gây **rò rỉ nhãn** và phải loại khỏi đặc trưng?",
+   "explanation": "Một đặc trưng hợp lệ phải có giá trị **tại thời điểm dự đoán**. Ngày cập nhật trạng thái cuối chỉ có sau khi đặt phòng kết thúc (với đặt phòng bị hủy, nó chính là ngày hủy), nên mã hoá gián tiếp nhãn.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nCâu hỏi kiểm tra cho mỗi cột: \"**Tại thời điểm dự đoán**, giá trị này đã có chưa, và có bị cập nhật sau đó không?\". Cột chỉ có sau khi kết cục xảy ra là rò rỉ nhãn, dù tên cột trông vô hại.\n\n#### Từng bước\n| Cột | Có lúc khách đặt? | Bị cập nhật sau? | Kết luận |\n|---|---|---|---|\n| `lead_time` | Có | Không | Giữ |\n| `previous_cancellations` | Có (lịch sử trước đó) | Không, nếu chỉ đếm lần hủy trước ngày đặt | Giữ |\n| `deposit_type` | Có | Hiếm | Giữ |\n| `reservation_status_date` | Không | Có, bằng ngày hủy hoặc ngày trả phòng | **Loại** |\n\nVới đặt phòng bị hủy, `reservation_status_date` thường **trước** ngày nhận phòng; với đặt phòng hoàn tất, nó **sau** ngày nhận phòng. Mô hình chỉ cần so sánh hai ngày là đoán đúng nhãn.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  B[\"Khách đặt phòng: thời điểm dự đoán\"] --> W[\"Thời gian chờ\"]\n  W --> C1[\"Hủy: trạng thái và ngày cập nhật đổi\"]\n  W --> C2[\"Nhận phòng rồi trả phòng: trạng thái và ngày cập nhật đổi\"]\n  C1 --> L[\"Cột trạng thái cuối chỉ có sau kết cục\"]\n  C2 --> L\n```\n\n#### Dấu hiệu nhận biết rò rỉ\n- Một đặc trưng đơn lẻ cho AUC gần 1.\n- Hiệu năng offline rất cao nhưng chạy thật sụt mạnh.\n- Tên cột có \"status\", \"final\", \"result\", \"updated\", \"assigned\".\n\n#### Bẫy thường gặp\n- Loại `lead_time` vì nó tương quan mạnh: tương quan mạnh với nhãn chưa phải bằng chứng rò rỉ.\n- Tính `previous_cancellations` bằng cả các lần hủy xảy ra sau ngày đặt hiện tại.\n\n#### Đọc thêm\n- [Common pitfalls: data leakage (scikit-learn)](https://scikit-learn.org/stable/common_pitfalls.html)\n- [Hotel booking demand dataset (Kaggle)](https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand)",
+   "distractors": {
+    "A": "`lead_time` tương quan mạnh với việc hủy nhưng được biết ngay khi đặt; tương quan mạnh không đồng nghĩa với rò rỉ.",
+    "B": "Đây là lịch sử **trước** thời điểm dự đoán, hợp lệ (miễn là chỉ đếm các lần hủy xảy ra trước ngày đặt).",
+    "D": "Loại đặt cọc được chọn lúc đặt, có sẵn tại thời điểm dự đoán."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`lead_time`: số ngày từ lúc đặt đến ngày dự kiến nhận phòng"
+    },
+    {
+     "key": "B",
+     "text": "`previous_cancellations`: số lần khách đã hủy ở các lần đặt trước lần đặt này"
+    },
+    {
+     "key": "C",
+     "text": "`reservation_status_date`: ngày cập nhật trạng thái cuối cùng của đặt phòng"
+    },
+    {
+     "key": "D",
+     "text": "`deposit_type`: loại đặt cọc khách chọn ngay khi đặt"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T09-C02",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Nhóm có 200 khách hàng, 5.000 đặc trưng và nhãn churn. Họ (1) chọn 30 đặc trưng tương quan mạnh nhất với nhãn trên **cả 200 mẫu**, rồi (2) chạy 5-fold CV cho hồi quy logistic với 30 đặc trưng này, được ROC-AUC 0,81. Sau đó họ phát hiện cột nhãn đã bị xáo trộn ngẫu nhiên, không liên quan gì tới đặc trưng. Nhận định nào đúng?",
+   "explanation": "Với 5.000 đặc trưng ngẫu nhiên, luôn có vài chục đặc trưng tình cờ tương quan với nhãn trên chính 200 mẫu đó. Chọn đặc trưng là một bước học từ nhãn, nên phải nằm trong Pipeline và được fit lại trên phần train của mỗi fold.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nChọn đặc trưng theo tương quan với nhãn là một bước **học từ nhãn**. Làm nó trên cả 200 mẫu trước khi CV nghĩa là các fold kiểm tra đã góp nhãn vào việc chọn đặc trưng. Đây là ví dụ kinh điển \"cách làm CV sai\" trong The Elements of Statistical Learning (mục 7.10.2).\n\n#### Từng bước: mô phỏng bằng numpy\nMô phỏng 10 lần: 200 mẫu, 5.000 đặc trưng chuẩn ngẫu nhiên, nhãn ngẫu nhiên cân bằng; chọn 30 đặc trưng có |tương quan| lớn nhất; mô hình là điểm tuyến tính với hệ số = tương quan trên phần học; 5-fold CV.\n\n| Quy trình | AUC trung bình | Nhỏ nhất – lớn nhất |\n|---|---|---|\n| Chọn đặc trưng trên cả 200 mẫu rồi CV (sai) | 0,938 | 0,911 – 0,959 |\n| Chọn đặc trưng bên trong từng fold (đúng) | 0,509 | 0,372 – 0,657 |\n\nNhãn hoàn toàn ngẫu nhiên mà quy trình sai vẫn cho AUC 0,94: với 5.000 đặc trưng, chắc chắn có vài chục đặc trưng \"tình cờ\" khớp nhãn trên chính 200 mẫu này.\n\n#### Hình minh hoạ\n```mermaid\nflowchart TB\n  subgraph SAI[\"Sai\"]\n    A1[\"Cả 200 mẫu, có nhãn\"] --> A2[\"Chọn 30 đặc trưng\"]\n    A2 --> A3[\"5-fold CV\"]\n  end\n  subgraph DUNG[\"Đúng\"]\n    B1[\"5-fold CV\"] --> B2[\"Phần học của fold: chọn 30 đặc trưng và fit\"]\n    B2 --> B3[\"Phần kiểm tra: chỉ chấm\"]\n  end\n```\n\nTrong scikit-learn: đặt `SelectKBest` và mô hình trong cùng một `Pipeline`, rồi gọi `cross_val_score(pipe, X, y)`.\n\n#### Bẫy thường gặp\n- Nghĩ \"bước (2) có CV nên an toàn\".\n- Đổi mô hình hay số fold: không chạm vào nguyên nhân.\n- Chọn đặc trưng **không dùng nhãn** (ví dụ bỏ cột phương sai bằng 0) thì không gây rò rỉ kiểu này.\n\n#### Đọc thêm\n- [Common pitfalls: how to avoid data leakage (scikit-learn)](https://scikit-learn.org/stable/common_pitfalls.html)\n- [Cross-validation (scikit-learn)](https://scikit-learn.org/stable/modules/cross_validation.html)",
+   "distractors": {
+    "B": "CV ở bước (2) đến quá muộn: 30 đặc trưng đã được chọn nhờ nhãn của cả 200 mẫu, kể cả các mẫu sau này làm fold kiểm tra.",
+    "C": "Số fold không liên quan; bao nhiêu fold thì dữ liệu kiểm tra vẫn đã 'góp phần' chọn đặc trưng.",
+    "D": "Lỗi nằm ở quy trình, không ở mô hình; mô hình nào được đánh giá theo cách này cũng bị thổi phồng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "AUC thật khoảng 0,5; bước (1) đã nhìn nhãn của các fold kiểm tra, nên phải chọn đặc trưng bên trong từng fold"
+    },
+    {
+     "key": "B",
+     "text": "AUC 0,81 vẫn đáng tin cậy vì bước (2) đã tách riêng dữ liệu học và dữ liệu đánh giá"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ cần tăng lên 10-fold CV thì AUC sẽ về đúng giá trị thật của mô hình"
+    },
+    {
+     "key": "D",
+     "text": "Lỗi nằm ở hồi quy logistic; đổi sang random forest sẽ cho AUC đúng hơn"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T09-C03",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Mô hình hồi quy logistic dự đoán hủy đặt phòng có hệ số của đặc trưng nhị phân `co_yeu_cau_dac_biet` là $-0{,}69$. Giữ nguyên các đặc trưng khác, khi đặc trưng này đổi từ 0 sang 1 thì điều gì xảy ra?",
+   "explanation": "$\\log \\frac{p}{1 - p} = b + \\dots + w x$; tăng $x$ thêm 1 làm log-odds tăng $w$, tức odds nhân với $e^{w} = e^{-0{,}69} \\approx 0{,}50$ (odds ratio).",
+   "section": "c-ml",
+   "long": "#### Ý chính\nHồi quy logistic tuyến tính trên **log-odds**: $\\log\\frac{p}{1 - p} = b + \\sum_j w_j x_j$. Tăng $x_j$ thêm 1 đơn vị (giữ các biến khác) thì log-odds cộng $w_j$, tức odds **nhân** với $e^{w_j}$ (odds ratio).\n\n#### Từng bước\n- $e^{-0{,}69} \\approx 0{,}502$: odds hủy giảm khoảng một nửa.\n- Ảnh hưởng lên **xác suất** phụ thuộc mức ban đầu:\n\n| $p$ ban đầu | Odds | Odds × 0,5 | $p$ mới | Giảm (điểm %) |\n|---|---|---|---|---|\n| 0,10 | 0,111 | 0,056 | 0,053 | 4,7 |\n| 0,40 | 0,667 | 0,333 | 0,250 | 15,0 |\n| 0,60 | 1,500 | 0,750 | 0,429 | 17,1 |\n| 0,90 | 9,000 | 4,500 | 0,818 | 8,2 |\n\nKhông có con số \"giảm X điểm phần trăm\" chung cho mọi khách; chỉ có tỉ số odds là cố định.\n\n#### Hình dung\n$p = 0{,}6$: cứ 3 đặt phòng hủy thì 2 không hủy (odds 1,5). Có yêu cầu đặc biệt: odds 0,75, tức 3 hủy trên 4 không hủy, $p = 3/7 \\approx 0{,}43$.\n\n#### Bẫy thường gặp\n- Đọc hệ số như hồi quy tuyến tính trên xác suất.\n- Nhầm \"nhân odds với 0,5\" thành \"nhân xác suất với 0,5\".\n- Diễn giải nhân quả: hệ số chỉ là liên hệ có điều kiện; khách có yêu cầu đặc biệt có thể khác ở nhiều mặt chưa đo.\n- Nếu đặc trưng đã chuẩn hoá thì \"tăng 1 đơn vị\" nghĩa là tăng 1 độ lệch chuẩn.\n\n#### Đọc thêm\n- [Odds ratio (Wikipedia)](https://en.wikipedia.org/wiki/Odds_ratio)\n- [Logistic regression (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/logistic-regression)",
+   "distractors": {
+    "A": "Hệ số logistic tác động lên log-odds, không phải lên xác suất; 0,69 điểm phần trăm còn vượt quá mức xác suất của nhiều khách.",
+    "B": "Tỉ số $e^{w}$ áp dụng cho **odds** $p/(1 - p)$; mức thay đổi của xác suất phụ thuộc vào xác suất ban đầu (ví dụ $p = 0{,}6$ thì odds 1,5 → 0,75, $p$ mới $\\approx 0{,}43$, không phải 0,3).",
+    "C": "Hệ số cộng vào **log-odds**; trên thang odds đó là phép nhân với $e^{-0{,}69}$, không phải phép trừ 0,69."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Xác suất hủy giảm đúng 0,69 (tức 69 điểm phần trăm)"
+    },
+    {
+     "key": "B",
+     "text": "Xác suất hủy của mọi khách nhân với $e^{-0{,}69} \\approx 0{,}5$"
+    },
+    {
+     "key": "C",
+     "text": "Odds hủy phòng giảm đi đúng 0,69 đơn vị so với lúc đặc trưng bằng 0"
+    },
+    {
+     "key": "D",
+     "text": "Odds hủy phòng nhân với $e^{-0{,}69} \\approx 0{,}5$, tức giảm khoảng một nửa"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T09-C04",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Bộ phát hiện bot dùng kNN trên hai đặc trưng đã chuẩn hoá. Dữ liệu huấn luyện:\n\n| Phiên | $x_1$ | $x_2$ | Nhãn |\n|---|---|---|---|\n| P1 | 0,5 | 1,0 | bot |\n| P2 | 1,0 | 0,0 | người |\n| P3 | 2,0 | 2,0 | bot |\n| P4 | −1,0 | 0,5 | người |\n| P5 | 1,5 | 1,5 | bot |\n\nPhiên mới $q = (1{,}0;\\ 1{,}0)$. Dùng $k = 3$, khoảng cách Euclid, trọng số mỗi láng giềng $w = 1/d$. Tính điểm bot $= \\frac{\\sum_{\\text{láng giềng bot}} w}{\\sum_{3 \\text{ láng giềng}} w}$. **Làm tròn 2 chữ số thập phân.**",
+   "explanation": "Khoảng cách tới $q$: P1 $0{,}5$; P5 $\\sqrt{0{,}5} \\approx 0{,}707$; P2 $1{,}0$; P3 $\\approx 1{,}414$; P4 $\\approx 2{,}06$. Ba láng giềng: P1 (bot, $w = 2$), P5 (bot, $w \\approx 1{,}414$), P2 (người, $w = 1$). Điểm bot $= 3{,}414 / 4{,}414 \\approx 0{,}77$.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nkNN có trọng số khoảng cách: láng giềng càng gần thì phiếu càng nặng ($w = 1/d$). Tính đủ 5 khoảng cách, chọn 3 gần nhất, rồi lấy tỉ lệ trọng số của lớp bot.\n\n#### Từng bước\n| Phiên | Nhãn | $d$ tới $q = (1, 1)$ | Hạng | $w = 1/d$ |\n|---|---|---|---|---|\n| P1 | bot | $\\sqrt{0{,}25 + 0} = 0{,}5$ | 1 | 2,000 |\n| P5 | bot | $\\sqrt{0{,}25 + 0{,}25} \\approx 0{,}707$ | 2 | 1,414 |\n| P2 | người | $\\sqrt{0 + 1} = 1{,}0$ | 3 | 1,000 |\n| P3 | bot | $\\sqrt{1 + 1} \\approx 1{,}414$ | 4 | (không dùng) |\n| P4 | người | $\\sqrt{4 + 0{,}25} \\approx 2{,}06$ | 5 | (không dùng) |\n\n$$\\text{điểm bot} = \\frac{2 + 1{,}414}{2 + 1{,}414 + 1} = \\frac{3{,}414}{4{,}414} \\approx 0{,}77$$\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"57.5\" y1=\"230.0\" x2=\"437.5\" y2=\"230.0\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"200.0\" y1=\"249.0\" x2=\"200.0\" y2=\"11.5\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"437.5\" y=\"245.0\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">x₁</text>\n<text x=\"206.0\" y=\"15.5\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">x₂</text>\n<circle cx=\"295.0\" cy=\"135.0\" r=\"95.0\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\"/>\n<circle cx=\"247.5\" cy=\"135.0\" r=\"7\" fill=\"#ef4444\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"257.5\" y=\"127.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">P1</text>\n<circle cx=\"295.0\" cy=\"230.0\" r=\"7\" fill=\"#10b981\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"305.0\" y=\"222.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">P2</text>\n<circle cx=\"390.0\" cy=\"40.0\" r=\"7\" fill=\"#ef4444\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"400.0\" y=\"32.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">P3</text>\n<circle cx=\"105.0\" cy=\"182.5\" r=\"7\" fill=\"#10b981\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"115.0\" y=\"174.5\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">P4</text>\n<circle cx=\"342.5\" cy=\"87.5\" r=\"7\" fill=\"#ef4444\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"352.5\" y=\"79.5\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">P5</text>\n<rect x=\"289.0\" y=\"129.0\" width=\"12.0\" height=\"12.0\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"285.0\" y=\"155.0\" font-size=\"13\" text-anchor=\"end\" fill=\"#3b82f6\">q</text>\n<line x1=\"295.0\" y1=\"135.0\" x2=\"247.5\" y2=\"135.0\" stroke=\"#3b82f6\" stroke-width=\"1.2\"/>\n<text x=\"267.2\" y=\"127.0\" font-size=\"11\" text-anchor=\"start\" fill=\"#3b82f6\">0,5</text>\n<line x1=\"295.0\" y1=\"135.0\" x2=\"342.5\" y2=\"87.5\" stroke=\"#3b82f6\" stroke-width=\"1.2\"/>\n<text x=\"324.8\" y=\"115.2\" font-size=\"11\" text-anchor=\"start\" fill=\"#3b82f6\">0,71</text>\n<line x1=\"295.0\" y1=\"135.0\" x2=\"295.0\" y2=\"230.0\" stroke=\"#3b82f6\" stroke-width=\"1.2\"/>\n<text x=\"301.0\" y=\"186.5\" font-size=\"11\" text-anchor=\"start\" fill=\"#3b82f6\">1,0</text>\n<circle cx=\"40.0\" cy=\"20.0\" r=\"6\" fill=\"#ef4444\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"52.0\" y=\"24.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">bot</text>\n<circle cx=\"100.0\" cy=\"20.0\" r=\"6\" fill=\"#10b981\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"112.0\" y=\"24.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">người</text>\n<text x=\"40.0\" y=\"46.0\" font-size=\"11\" text-anchor=\"start\" fill=\"#f59e0b\">vòng vàng: bán kính = d của láng giềng thứ 3</text>\n</svg>\n\n| Biến thể | Điểm bot |\n|---|---|\n| k = 3, không trọng số | 2/3 ≈ 0,67 |\n| k = 3, $w = 1/d$ | 0,77 |\n| k = 3, $w = 1/d^2$ | 6/7 ≈ 0,86 |\n| k = 5, không trọng số | 3/5 = 0,60 |\n\n#### Bẫy thường gặp\n- Tính trọng số cho cả 5 điểm thay vì chỉ 3 láng giềng.\n- Nếu một điểm trùng hệt $q$ ($d = 0$), trọng số $1/d$ vô hạn: scikit-learn khi đó chỉ dùng các điểm trùng.\n\n#### Đọc thêm\n- [Nearest Neighbors Classification (scikit-learn)](https://scikit-learn.org/stable/modules/neighbors.html)\n- [k-nearest neighbors algorithm (Wikipedia)](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm)",
+   "mistakes": [
+    {
+     "value": 0.67,
+     "why": "Bỏ trọng số (mỗi láng giềng 1 phiếu): 2/3. Đề yêu cầu trọng số 1/d."
+    },
+    {
+     "value": 0.86,
+     "why": "Dùng trọng số $1/d^2$ (4, 2, 1 → 6/7) thay vì $1/d$."
+    },
+    {
+     "value": 0.6,
+     "why": "Dùng cả 5 điểm (k = 5) không trọng số: 3 bot / 5 phiên."
+    }
+   ],
+   "answer": 0.77,
+   "tol": 0.0051
+  },
+  {
+   "id": "T09-C05",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Nhóm chọn độ sâu tối đa cho cây hồi quy dự đoán giá phòng (đơn vị: nghìn đồng) bằng 5-fold CV:\n\n| Độ sâu | RMSE train | RMSE CV trung bình | Sai số chuẩn của RMSE CV |\n|---|---|---|---|\n| 2 | 410 | 425 | 12 |\n| 4 | 330 | 352 | 10 |\n| 6 | 290 | 344 | 10 |\n| 10 | 180 | 361 | 14 |\n| 20 | 40 | 430 | 18 |\n\nÁp dụng **quy tắc một sai số chuẩn** (chọn mô hình đơn giản nhất có RMSE CV không vượt quá RMSE CV nhỏ nhất cộng sai số chuẩn của nó), nên chọn độ sâu nào?",
+   "explanation": "RMSE CV nhỏ nhất là 344 (độ sâu 6), sai số chuẩn 10 nên ngưỡng là $344 + 10 = 354$. Các độ sâu có RMSE CV $\\le 354$: 4 (352) và 6 (344). Đơn giản nhất là độ sâu 4.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nĐiểm CV có sai số. Các mô hình có RMSE CV chênh nhau ít hơn một sai số chuẩn thì coi như \"hoà\" về mặt thống kê; khi hoà, chọn mô hình **đơn giản hơn** vì nó thường ổn định hơn khi dữ liệu thay đổi.\n\n#### Từng bước\n1. Tìm RMSE CV nhỏ nhất: 344 ở độ sâu 6, sai số chuẩn 10.\n2. Ngưỡng: $344 + 10 = 354$.\n3. Các độ sâu có RMSE CV $\\le 354$: độ sâu 4 (352) và độ sâu 6 (344).\n4. Đơn giản nhất trong số đó: **độ sâu 4**.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 240\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"60.0\" y1=\"210.0\" x2=\"520.0\" y2=\"210.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"60.0\" y1=\"210.0\" x2=\"60.0\" y2=\"20.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"56.0\" y1=\"210.0\" x2=\"60.0\" y2=\"210.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"52.0\" y=\"214.0\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">0</text>\n<line x1=\"56.0\" y1=\"168.7\" x2=\"60.0\" y2=\"168.7\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"52.0\" y=\"172.7\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">100</text>\n<line x1=\"56.0\" y1=\"127.4\" x2=\"60.0\" y2=\"127.4\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"52.0\" y=\"131.4\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">200</text>\n<line x1=\"56.0\" y1=\"86.1\" x2=\"60.0\" y2=\"86.1\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"52.0\" y=\"90.1\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">300</text>\n<line x1=\"56.0\" y1=\"44.8\" x2=\"60.0\" y2=\"44.8\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"52.0\" y=\"48.8\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">400</text>\n<text x=\"90.0\" y=\"226.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">độ sâu 2</text>\n<text x=\"190.0\" y=\"226.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">độ sâu 4</text>\n<text x=\"290.0\" y=\"226.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">độ sâu 6</text>\n<text x=\"390.0\" y=\"226.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">độ sâu 10</text>\n<text x=\"490.0\" y=\"226.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">độ sâu 20</text>\n<polyline points=\"90.0,40.7 190.0,73.7 290.0,90.2 390.0,135.7 490.0,193.5\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<polyline points=\"90.0,34.5 190.0,64.6 290.0,67.9 390.0,60.9 490.0,32.4\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<line x1=\"90.0\" y1=\"39.4\" x2=\"90.0\" y2=\"29.5\" stroke=\"#ef4444\" stroke-width=\"1.5\"/>\n<circle cx=\"90.0\" cy=\"34.5\" r=\"4\" fill=\"#ef4444\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"190.0\" y1=\"68.7\" x2=\"190.0\" y2=\"60.5\" stroke=\"#ef4444\" stroke-width=\"1.5\"/>\n<circle cx=\"190.0\" cy=\"64.6\" r=\"4\" fill=\"#ef4444\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"290.0\" y1=\"72.0\" x2=\"290.0\" y2=\"63.8\" stroke=\"#ef4444\" stroke-width=\"1.5\"/>\n<circle cx=\"290.0\" cy=\"67.9\" r=\"4\" fill=\"#ef4444\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"390.0\" y1=\"66.7\" x2=\"390.0\" y2=\"55.1\" stroke=\"#ef4444\" stroke-width=\"1.5\"/>\n<circle cx=\"390.0\" cy=\"60.9\" r=\"4\" fill=\"#ef4444\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"490.0\" y1=\"39.8\" x2=\"490.0\" y2=\"25.0\" stroke=\"#ef4444\" stroke-width=\"1.5\"/>\n<circle cx=\"490.0\" cy=\"32.4\" r=\"4\" fill=\"#ef4444\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"60.0\" y1=\"63.8\" x2=\"520.0\" y2=\"63.8\" stroke=\"#f59e0b\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\"/>\n<text x=\"66.0\" y=\"79.8\" font-size=\"11\" text-anchor=\"start\" fill=\"#f59e0b\">ngưỡng 344 + 10 = 354</text>\n<circle cx=\"190.0\" cy=\"64.6\" r=\"9\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2.5\"/>\n<text x=\"204.0\" y=\"50.6\" font-size=\"11\" text-anchor=\"start\" fill=\"#10b981\">chọn độ sâu 4</text>\n<text x=\"486.0\" y=\"185.5\" font-size=\"11\" text-anchor=\"end\" fill=\"#3b82f6\">RMSE train</text>\n<text x=\"480.0\" y=\"20.4\" font-size=\"11\" text-anchor=\"end\" fill=\"#ef4444\">RMSE CV ± SE</text>\n</svg>\n\n| Độ sâu | RMSE train | RMSE CV | Khoảng cách train–CV | Trong ngưỡng 354? |\n|---|---|---|---|---|\n| 2 | 410 | 425 | 15 | Không |\n| 4 | 330 | 352 | 22 | Có, đơn giản nhất |\n| 6 | 290 | 344 | 54 | Có |\n| 10 | 180 | 361 | 181 | Không |\n| 20 | 40 | 430 | 390 | Không |\n\nKhoảng cách train–CV tăng nhanh theo độ sâu: dấu hiệu variance tăng.\n\n#### Bẫy thường gặp\n- Chọn theo RMSE train (độ sâu 20): mô hình nhớ dữ liệu.\n- Hiểu quy tắc là \"chọn mô hình đơn giản nhất\": phải nằm trong ngưỡng.\n- Sai số chuẩn của điểm CV thường ước lượng bằng độ lệch chuẩn qua các fold chia cho $\\sqrt{k}$; đây là ước lượng thô vì các fold không độc lập.\n\n#### Đọc thêm\n- [Balance model complexity and cross-validated score (scikit-learn)](https://scikit-learn.org/stable/auto_examples/model_selection/plot_grid_search_refit_callable.html)\n- [Cross-validation (scikit-learn)](https://scikit-learn.org/stable/modules/cross_validation.html)",
+   "distractors": {
+    "A": "Đây là mô hình có RMSE CV nhỏ nhất; quy tắc một sai số chuẩn chọn mô hình **đơn giản hơn** nếu nó nằm trong ngưỡng 344 + 10 = 354.",
+    "C": "RMSE train nhỏ nhất là dấu hiệu overfit (RMSE CV 430, tệ nhất); không chọn mô hình theo lỗi train.",
+    "D": "Đơn giản nhất nhưng RMSE CV 425 vượt xa ngưỡng 354; quy tắc chỉ xét các mô hình nằm trong ngưỡng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Độ sâu 6"
+    },
+    {
+     "key": "B",
+     "text": "Độ sâu 4"
+    },
+    {
+     "key": "C",
+     "text": "Độ sâu 20"
+    },
+    {
+     "key": "D",
+     "text": "Độ sâu 2"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T09-C06",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Mô hình phân loại ảnh 3 lớp trên 1.000 ảnh test cho ma trận nhầm lẫn (hàng = thực tế, cột = dự đoán):\n\n| | Dự đoán: áo | Dự đoán: giày | Dự đoán: túi |\n|---|---|---|---|\n| Thực tế: áo | 850 | 30 | 20 |\n| Thực tế: giày | 15 | 55 | 10 |\n| Thực tế: túi | 10 | 5 | 5 |\n\nMacro-F1 và accuracy lần lượt xấp xỉ bao nhiêu?",
+   "explanation": "F1 từng lớp: áo $\\frac{2 \\cdot 850}{2 \\cdot 850 + 25 + 50} \\approx 0{,}958$; giày $\\frac{110}{110 + 35 + 25} \\approx 0{,}647$; túi $\\frac{10}{10 + 30 + 15} \\approx 0{,}182$. Macro-F1 $\\approx (0{,}958 + 0{,}647 + 0{,}182)/3 \\approx 0{,}60$; accuracy $= 910/1000 = 0{,}91$.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nAccuracy và micro-F1 bị lớp đông (áo, 900 ảnh) chi phối. **Macro-F1** lấy trung bình đều F1 của từng lớp, nên lớp hiếm (túi, 20 ảnh) có tiếng nói ngang lớp đông.\n\n#### Từng bước\nPrecision theo **cột**, recall theo **hàng**:\n\n| Lớp | TP | Tổng cột (dự đoán) | Tổng hàng (thực tế) | Precision | Recall | F1 |\n|---|---|---|---|---|---|---|\n| Áo | 850 | 875 | 900 | 0,971 | 0,944 | 0,958 |\n| Giày | 55 | 90 | 80 | 0,611 | 0,688 | 0,647 |\n| Túi | 5 | 35 | 20 | 0,143 | 0,250 | 0,182 |\n\n- Macro-F1 $= (0{,}958 + 0{,}647 + 0{,}182)/3 \\approx 0{,}596 \\approx 0{,}60$.\n- Weighted-F1 $= (900 \\cdot 0{,}958 + 80 \\cdot 0{,}647 + 20 \\cdot 0{,}182)/1000 \\approx 0{,}917$.\n- Accuracy $= (850 + 55 + 5)/1000 = 0{,}91$ = micro-F1.\n\n#### Diễn giải\n| Chỉ số | Giá trị | Nói lên |\n|---|---|---|\n| Accuracy / micro-F1 | 0,91 | Trên tổng số ảnh, phần lớn đúng |\n| Weighted-F1 | 0,92 | Vẫn bị lớp áo chi phối |\n| Macro-F1 | 0,60 | Lớp túi gần như hỏng (F1 0,18) |\n\nNếu nhận diện túi quan trọng (ví dụ túi giả nhãn hiệu), báo cáo macro-F1 và F1 từng lớp, không chỉ accuracy.\n\n#### Bẫy thường gặp\n- Đọc ngược hàng/cột khi tính precision và recall từng lớp.\n- Lấy macro-F1 bằng F1 của macro-precision và macro-recall: một định nghĩa khác, có thể cho số khác (ở đây tình cờ cũng ≈ 0,60).\n\n#### Đọc thêm\n- [From binary to multiclass and multilabel (scikit-learn)](https://scikit-learn.org/stable/modules/model_evaluation.html)\n- [F-score (Wikipedia)](https://en.wikipedia.org/wiki/F-score)",
+   "distractors": {
+    "B": "0,92 là F1 có trọng số theo số mẫu (weighted-F1): lớp áo 900 mẫu áp đảo. Macro-F1 lấy trung bình **đều** F1 của 3 lớp.",
+    "C": "0,91 là micro-F1; với bài đơn nhãn, micro-F1 luôn bằng accuracy. Macro-F1 thì khác vì lớp túi (F1 ≈ 0,18) kéo xuống mạnh.",
+    "D": "Đảo hai giá trị: accuracy = (850 + 55 + 5)/1000 = 0,91, còn 0,60 là macro-F1."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$0{,}60$ và $0{,}91$"
+    },
+    {
+     "key": "B",
+     "text": "$0{,}92$ và $0{,}91$"
+    },
+    {
+     "key": "C",
+     "text": "$0{,}91$ và $0{,}91$"
+    },
+    {
+     "key": "D",
+     "text": "$0{,}91$ và $0{,}60$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T09-C07",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Mô hình dự đoán hủy đặt phòng chấm điểm 8 đặt phòng trong tập kiểm tra:\n\n| Đặt phòng | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |\n|---|---|---|---|---|---|---|---|---|\n| Điểm | 0,9 | 0,8 | 0,7 | 0,6 | 0,6 | 0,4 | 0,3 | 0,2 |\n| Thực tế | hủy | không | hủy | hủy | không | hủy | không | không |\n\nTính ROC-AUC (lớp dương = hủy), cặp có điểm bằng nhau tính 0,5. **Làm tròn 3 chữ số thập phân.**",
+   "explanation": "4 dương × 4 âm = 16 cặp. Đếm số âm có điểm thấp hơn từng dương: 0,9 → 4; 0,7 → 3; 0,6 → 2 + 0,5 (hoà); 0,4 → 2. Tổng $11{,}5$, $\\text{AUC} = 11{,}5/16 \\approx 0{,}719$.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nAUC = tỉ lệ cặp (dương, âm) được xếp đúng thứ tự, cặp hoà tính 0,5. Đây cũng là diện tích dưới đường ROC (tương đương thống kê Mann–Whitney U chia cho $n^+ n^-$).\n\n#### Từng bước\nDương (hủy): 0,9; 0,7; 0,6; 0,4. Âm (không): 0,8; 0,6; 0,3; 0,2. Có $4 \\times 4 = 16$ cặp.\n\n| Dương \\ Âm | 0,8 | 0,6 | 0,3 | 0,2 | Cộng |\n|---|---|---|---|---|---|\n| 0,9 | 1 | 1 | 1 | 1 | 4 |\n| 0,7 | 0 | 1 | 1 | 1 | 3 |\n| 0,6 | 0 | 0,5 | 1 | 1 | 2,5 |\n| 0,4 | 0 | 0 | 1 | 1 | 2 |\n\n$\\text{AUC} = 11{,}5/16 = 0{,}71875 \\approx 0{,}719$.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\">\n<polygon points=\"80.0,230.0 80.0,180.0 130.0,180.0 130.0,130.0 180.0,80.0 180.0,30.0 230.0,30.0 280.0,30.0 280.0,230.0\" fill=\"#3b82f6\" fill-opacity=\"0.18\" stroke=\"none\"/>\n<rect x=\"80.0\" y=\"30.0\" width=\"200.0\" height=\"200.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"80.0\" y1=\"230.0\" x2=\"280.0\" y2=\"30.0\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"4 4\"/>\n<polyline points=\"80.0,230.0 80.0,180.0 130.0,180.0 130.0,130.0 180.0,80.0 180.0,30.0 230.0,30.0 280.0,30.0\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"80.0\" cy=\"180.0\" r=\"3.5\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<circle cx=\"130.0\" cy=\"180.0\" r=\"3.5\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<circle cx=\"130.0\" cy=\"130.0\" r=\"3.5\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<circle cx=\"180.0\" cy=\"80.0\" r=\"3.5\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<circle cx=\"180.0\" cy=\"30.0\" r=\"3.5\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<circle cx=\"230.0\" cy=\"30.0\" r=\"3.5\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<circle cx=\"280.0\" cy=\"30.0\" r=\"3.5\" fill=\"#3b82f6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"180.0\" y=\"250.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">FPR</text>\n<text x=\"50.0\" y=\"130.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">TPR</text>\n<text x=\"80.0\" y=\"244.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"280.0\" y=\"244.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"74.0\" y=\"34.0\" font-size=\"10\" text-anchor=\"end\" fill=\"currentColor\">1</text>\n<text x=\"204.0\" y=\"160.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"#3b82f6\" font-weight=\"bold\">AUC = 11,5/16 ≈ 0,719</text>\n<text x=\"192.0\" y=\"118.0\" font-size=\"11\" text-anchor=\"start\" fill=\"#f59e0b\">đoạn chéo = cặp hoà 0,6</text>\n<text x=\"310.0\" y=\"40.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">Ngưỡng giảm dần: 0,9 → 0,2</text>\n<text x=\"310.0\" y=\"58.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">đi lên = gặp mẫu hủy (dương)</text>\n<text x=\"310.0\" y=\"76.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">đi ngang = gặp mẫu không hủy</text>\n</svg>\n\nĐi qua các ngưỡng từ cao xuống thấp: gặp mẫu dương thì đi lên $1/4$, gặp mẫu âm thì sang phải $1/4$. Ở điểm 0,6 gặp cùng lúc một dương và một âm nên đường đi chéo; diện tích tam giác dưới đoạn chéo chính là phần \"0,5\" của cặp hoà.\n\n#### Bẫy thường gặp\n- Bỏ qua cặp hoà (0,688) hoặc tính hoà là đúng (0,75).\n- Tính accuracy ở ngưỡng 0,5 (0,625) rồi gọi là AUC.\n\n#### Đọc thêm\n- [ROC and AUC (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc)\n- [Receiver operating characteristic (Wikipedia)](https://en.wikipedia.org/wiki/Receiver_operating_characteristic)",
+   "mistakes": [
+    {
+     "value": 0.688,
+     "why": "Bỏ qua cặp hoà (đặt phòng 4 và 5 cùng 0,6), tính 11/16; theo định nghĩa cặp hoà được tính 0,5."
+    },
+    {
+     "value": 0.75,
+     "why": "Tính cặp hoà là một cặp đúng (12/16); cặp hoà chỉ được 0,5."
+    },
+    {
+     "value": 0.625,
+     "why": "Đây là accuracy ở ngưỡng 0,5 (5/8 đặt phòng đúng), không phải AUC."
+    }
+   ],
+   "answer": 0.719,
+   "tol": 0.0011
+  },
+  {
+   "id": "T09-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Đặc trưng `agent_id` (mã đại lý, khoảng 3.000 giá trị, nhiều đại lý chỉ có 1–3 đặt phòng) được thay bằng **tỉ lệ hủy trung bình của đại lý**, tính trên toàn bộ tập train, rồi huấn luyện gradient boosting. ROC-AUC trên train là 0,97 nhưng trên tập test (theo thời gian) chỉ 0,79. Cách xử lý đúng nhất là gì?",
+   "explanation": "Với đại lý chỉ có 1 đặt phòng, tỉ lệ hủy của đại lý **chính là nhãn** của dòng đó. Target encoding cần (1) tính out-of-fold, (2) làm trơn: $\\text{enc} = \\frac{n \\bar{y}_{\\text{nhóm}} + m \\bar{y}}{n + m}$ để kéo nhóm ít mẫu về trung bình chung.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nTarget encoding thay một mã phân loại bằng trung bình nhãn của mã đó. Nếu tính trên chính các dòng dùng để huấn luyện, nhãn của mỗi dòng **nằm trong đặc trưng của nó**; với nhóm ít mẫu, đặc trưng gần như bằng nhãn.\n\n#### Từng bước: rò rỉ với đại lý ít mẫu\n| Đại lý | Số đặt phòng | Nhãn | Mã hoá \"ngây thơ\" | Hệ quả |\n|---|---|---|---|---|\n| X | 1 | hủy | 1,00 | Đặc trưng = nhãn |\n| Y | 2 | hủy, không | 0,50 / 0,50 | Ít thông tin nhưng mô hình tin |\n| Z | 400 | 120 hủy | 0,30 | Ổn định, ít rò rỉ |\n\nSửa bằng hai kỹ thuật:\n1. **Out-of-fold (cross fitting)**: chia train thành $K$ fold; mã hoá dòng ở fold $k$ bằng trung bình nhãn tính trên $K - 1$ fold còn lại. Khi dự đoán dữ liệu mới, dùng trung bình trên toàn bộ train.\n2. **Làm trơn**: $\\text{enc} = \\frac{n\\,\\bar{y}_{\\text{nhóm}} + m\\,\\bar{y}}{n + m}$. Ví dụ $\\bar{y} = 0{,}28$, $m = 20$: đại lý X (1 hủy/1) có $\\text{enc} = \\frac{1 + 20 \\cdot 0{,}28}{21} \\approx 0{,}31$, gần mức chung; đại lý Z giữ $\\approx 0{,}30$.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  T[\"Tập train\"] --> F1[\"Fold 1\"]\n  T --> F2[\"Fold 2\"]\n  T --> F3[\"Fold K\"]\n  F2 --> E1[\"Trung bình nhãn theo đại lý từ fold 2 đến K\"]\n  F3 --> E1\n  E1 --> M1[\"Mã hoá các dòng của fold 1\"]\n  F1 --> M1\n```\n\n`sklearn.preprocessing.TargetEncoder` làm sẵn cả cross fitting (trong `fit_transform`) lẫn làm trơn.\n\n#### Bẫy thường gặp\n- Dùng cả nhãn test để mã hoá: rò rỉ trực tiếp.\n- Với dữ liệu theo thời gian, nên tính trung bình chỉ từ các đặt phòng **trước** dòng hiện tại.\n\n#### Đọc thêm\n- [TargetEncoder (scikit-learn)](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.TargetEncoder.html)\n- [Preprocessing: Target Encoder (scikit-learn)](https://scikit-learn.org/stable/modules/preprocessing.html)",
+   "distractors": {
+    "A": "Tăng số cây làm mô hình khai thác cột rò rỉ còn mạnh hơn; khoảng cách train–test không giảm.",
+    "B": "Dùng nhãn test để tạo đặc trưng là rò rỉ trực tiếp sang tập đánh giá; điểm test sẽ đẹp giả tạo.",
+    "C": "Chuẩn hoá không đổi thứ tự giá trị nên cây nhận cùng thông tin; nhãn của chính dòng đó vẫn nằm trong đặc trưng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Giữ nguyên cách mã hoá, chỉ tăng số cây để mô hình ổn định hơn"
+    },
+    {
+     "key": "B",
+     "text": "Tính tỉ lệ hủy trên cả train và test để cột mã hoá có đầy đủ thông tin hơn"
+    },
+    {
+     "key": "C",
+     "text": "Chuẩn hoá cột mã hoá về trung bình 0, phương sai 1 trước khi huấn luyện"
+    },
+    {
+     "key": "D",
+     "text": "Mã hoá out-of-fold và làm trơn về tỉ lệ hủy chung cho các đại lý ít mẫu"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T09-C09",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Để hiểu bias–variance của mô hình dự đoán giá phòng (triệu đồng/đêm) tại một điểm $x_0$ có giá trị thật $f(x_0) = 2{,}5$, nhóm huấn luyện cùng một mô hình trên 5 tập bootstrap và thu được 5 dự đoán: 2,0; 3,0; 2,5; 3,5; 4,0. Nhiễu nhãn có phương sai $\\sigma^2 = 0{,}25$. Theo phân rã $\\mathbb{E}\\big[(y - \\hat{f}(x_0))^2\\big] = \\text{Bias}^2 + \\text{Var} + \\sigma^2$, với Var là phương sai tổng thể (chia cho 5) của 5 dự đoán, tính sai số bình phương kỳ vọng tại $x_0$. **Làm tròn 2 chữ số thập phân.**",
+   "explanation": "$\\bar{f} = 15/5 = 3{,}0$, $\\text{Bias}^2 = (3{,}0 - 2{,}5)^2 = 0{,}25$; $\\text{Var} = \\frac{1 + 0 + 0{,}25 + 0{,}25 + 1}{5} = 0{,}5$; tổng $= 0{,}25 + 0{,}5 + 0{,}25 = 1{,}00$.",
+   "section": "c-ml",
+   "long": "#### Ý chính\nSai số bình phương kỳ vọng tại một điểm tách thành ba phần: $\\text{Bias}^2$ (dự đoán trung bình lệch bao xa so với giá trị thật), Var (dự đoán dao động bao nhiêu khi đổi tập huấn luyện), và $\\sigma^2$ (nhiễu không thể giảm).\n\n#### Từng bước\n| Mô hình bootstrap | $\\hat{f}(x_0)$ | $\\hat{f} - \\bar{f}$ | $(\\hat{f} - \\bar{f})^2$ |\n|---|---|---|---|\n| 1 | 2,0 | $-1{,}0$ | 1,00 |\n| 2 | 3,0 | 0 | 0 |\n| 3 | 2,5 | $-0{,}5$ | 0,25 |\n| 4 | 3,5 | 0,5 | 0,25 |\n| 5 | 4,0 | 1,0 | 1,00 |\n| Trung bình | $\\bar{f} = 3{,}0$ | | Var = 0,50 |\n\n- $\\text{Bias}^2 = (3{,}0 - 2{,}5)^2 = 0{,}25$.\n- Tổng: $0{,}25 + 0{,}50 + 0{,}25 = 1{,}00$ (đơn vị: triệu đồng bình phương).\n\n#### Hình minh hoạ\n```mermaid\npie title Phân rã sai số kỳ vọng tại x0\n  \"Bias bình phương\" : 0.25\n  \"Variance\" : 0.5\n  \"Nhiễu\" : 0.25\n```\n\nVariance chiếm một nửa: mô hình nhạy với tập huấn luyện. Bagging (lấy trung bình 5 mô hình) sẽ giảm phần này; phần nhiễu 0,25 thì không mô hình nào giảm được.\n\n#### Bẫy thường gặp\n- Quên bình phương bias, hoặc quên cộng nhiễu.\n- Dùng phương sai mẫu chia $n - 1$ khi đề yêu cầu chia $n$ (với lý thuyết phân rã, đó là phương sai của phân phối dự đoán).\n\n#### Đọc thêm\n- [Bias–variance tradeoff (Wikipedia)](https://en.wikipedia.org/wiki/Bias%E2%80%93variance_tradeoff)\n- [Generalization (d2l.ai)](https://d2l.ai/chapter_linear-regression/generalization.html)",
+   "mistakes": [
+    {
+     "value": 0.75,
+     "why": "Quên cộng nhiễu không giảm được $\\sigma^2 = 0{,}25$."
+    },
+    {
+     "value": 1.25,
+     "why": "Dùng bias $= 0{,}5$ thay vì $\\text{Bias}^2 = 0{,}25$."
+    },
+    {
+     "value": 1.125,
+     "why": "Tính phương sai mẫu chia cho $n - 1 = 4$ (được 0,625); đề yêu cầu chia cho 5."
+    }
+   ],
+   "answer": 1.0,
+   "tol": 0.0051
+  },
+  {
+   "id": "T09-D01",
+   "module": "D",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung-cao",
+   "prompt": "Công ty viễn thông có 10.000 khách và muốn gửi ưu đãi giữ chân cho khách bị mô hình churn gắn cờ. Mỗi ưu đãi tốn 50.000 đồng (trả cho **mọi** khách được gửi). Khách sắp churn nhận ưu đãi thì 40% ở lại, mỗi khách ở lại mang về 1.000.000 đồng lợi nhuận; khách không định churn nhận ưu đãi thì không đổi hành vi. Kết quả trên tập kiểm tra cùng quy mô:\n\n| Ngưỡng | TP (churn thật bị gắn cờ) | FP (không churn bị gắn cờ) |\n|---|---|---|\n| 0,7 | 300 | 200 |\n| 0,5 | 450 | 700 |\n| 0,3 | 560 | 1.900 |\n| 0,2 | 600 | 3.000 |\n\nTrong 4 ngưỡng, lợi nhuận ròng **lớn nhất** của chiến dịch là bao nhiêu? **Đơn vị: triệu đồng, làm tròn 1 chữ số thập phân.**",
+   "explanation": "Lợi nhuận $= TP \\cdot 0{,}4 \\cdot 1 - (TP + FP) \\cdot 0{,}05$ (triệu đồng): ngưỡng 0,7: $120 - 25 = 95$; 0,5: $180 - 57{,}5 = 122{,}5$; 0,3: $224 - 123 = 101$; 0,2: $240 - 180 = 60$. Lớn nhất là $122{,}5$ triệu đồng ở ngưỡng 0,5.",
+   "section": "c-metric",
+   "long": "#### Ý chính\nChọn ngưỡng theo **giá trị kinh doanh**, không theo precision hay recall riêng lẻ. Viết lợi nhuận theo TP và FP, tính cho từng ngưỡng, rồi lấy ngưỡng tốt nhất.\n\n#### Từng bước\n- Mỗi khách bị gắn cờ tốn 0,05 triệu đồng; mỗi TP mang về kỳ vọng $0{,}4 \\times 1 = 0{,}4$ triệu đồng.\n- Lợi nhuận $= 0{,}4\\,TP - 0{,}05\\,(TP + FP)$.\n\n| Ngưỡng | TP | FP | Gắn cờ | Precision | Thu (triệu đồng) | Chi (triệu đồng) | Lợi nhuận |\n|---|---|---|---|---|---|---|---|\n| 0,7 | 300 | 200 | 500 | 0,600 | 120 | 25 | 95 |\n| 0,5 | 450 | 700 | 1.150 | 0,391 | 180 | 57,5 | **122,5** |\n| 0,3 | 560 | 1.900 | 2.460 | 0,228 | 224 | 123 | 101 |\n| 0,2 | 600 | 3.000 | 3.600 | 0,167 | 240 | 180 | 60 |\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 235\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"70.0\" y1=\"210.0\" x2=\"520.0\" y2=\"210.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<rect x=\"80.0\" y=\"86.5\" width=\"70.0\" height=\"123.5\" fill=\"#3b82f6\" fill-opacity=\"0.85\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"115.0\" y=\"80.5\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">95</text>\n<text x=\"115.0\" y=\"228.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">ngưỡng 0,7</text>\n<rect x=\"190.0\" y=\"50.8\" width=\"70.0\" height=\"159.2\" fill=\"#10b981\" fill-opacity=\"0.85\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"225.0\" y=\"44.8\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">122,5</text>\n<text x=\"225.0\" y=\"228.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">ngưỡng 0,5</text>\n<rect x=\"300.0\" y=\"78.7\" width=\"70.0\" height=\"131.3\" fill=\"#3b82f6\" fill-opacity=\"0.85\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"335.0\" y=\"72.7\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">101</text>\n<text x=\"335.0\" y=\"228.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">ngưỡng 0,3</text>\n<rect x=\"410.0\" y=\"132.0\" width=\"70.0\" height=\"78.0\" fill=\"#3b82f6\" fill-opacity=\"0.85\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"445.0\" y=\"126.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">60</text>\n<text x=\"445.0\" y=\"228.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">ngưỡng 0,2</text>\n<text x=\"300.0\" y=\"22.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">Lợi nhuận ròng theo ngưỡng (triệu đồng)</text>\n</svg>\n\n#### Phân tích biên\nGửi ưu đãi cho một khách có lời khi $p \\cdot 0{,}4 \\gt 0{,}05$, tức precision của **nhóm thêm vào** phải vượt $12{,}5\\%$.\n\n| Hạ ngưỡng | TP thêm | Gắn cờ thêm | Precision biên | Đáng làm? |\n|---|---|---|---|---|\n| 0,7 → 0,5 | 150 | 650 | 23,1% | Có |\n| 0,5 → 0,3 | 110 | 1.310 | 8,4% | Không |\n| 0,3 → 0,2 | 40 | 1.140 | 3,5% | Không |\n\n#### Bẫy thường gặp\n- Quên tỉ lệ giữ chân 40% (ra 437) hoặc quên chi phí ưu đãi cho chính khách churn (ra 145).\n- Giả định ưu đãi chỉ tác động lên khách \"sắp churn\": thực tế nên đo bằng thử nghiệm có nhóm đối chứng (uplift), vì có khách được giữ chân mà không cần ưu đãi.\n\n#### Đọc thêm\n- [Tuning the decision threshold (scikit-learn)](https://scikit-learn.org/stable/modules/classification_threshold.html)\n- [Thresholds and the confusion matrix (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/classification/thresholding)",
+   "mistakes": [
+    {
+     "value": 437,
+     "why": "Quên tỉ lệ giữ chân 40% (coi mọi khách churn nhận ưu đãi đều ở lại), nên chọn nhầm ngưỡng 0,3."
+    },
+    {
+     "value": 145,
+     "why": "Chỉ tính chi phí ưu đãi cho FP, quên rằng khách churn thật cũng nhận ưu đãi 50.000 đồng."
+    },
+    {
+     "value": 95,
+     "why": "Chọn ngưỡng có precision cao nhất (0,7) thay vì tính lợi nhuận của từng ngưỡng."
+    },
+    {
+     "value": 60,
+     "why": "Chọn ngưỡng có recall cao nhất (0,2): bắt nhiều churn nhất nhưng chi phí cho 3.000 FP vượt phần lợi thu thêm."
+    }
+   ],
+   "answer": 122.5,
+   "tol": 0.051,
+   "unit": "triệu đồng"
+  },
+  {
+   "id": "T09-D02",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Một chuỗi khách sạn có 120.000 đặt phòng từ 01/2023 đến 12/2025 (tỉ lệ hủy khoảng 28%). Họ muốn mô hình dự đoán, **ngay khi khách đặt**, xác suất đặt phòng bị hủy, để bán vượt (overbooking) những phòng được dự đoán sẽ hủy. Chi phí ước tính:\n\n- Dự đoán \"sẽ hủy\" nhưng khách vẫn đến (FP): phòng đã bị bán vượt, phải chuyển khách sang khách sạn khác, tốn **1.500.000 đồng**.\n- Dự đoán \"không hủy\" nhưng khách hủy (FN): phòng bỏ trống, mất **600.000 đồng**.\n- Dự đoán đúng: chi phí 0.\n\nBảng dữ liệu có các cột: `lead_time`, `adr` (giá trung bình/đêm lúc đặt), `deposit_type`, `previous_cancellations`, `reservation_status` (Check-Out / Canceled / No-Show), `assigned_room_type` (loại phòng thực tế giao khi nhận phòng), `booking_changes` (số lần sửa đặt phòng, cập nhật đến ngày nhận phòng).\n\nTrên tập validation gồm 10.000 đặt phòng của các tháng gần nhất (2.800 đặt phòng bị hủy), mô hình cho:\n\n| Ngưỡng | TP | FP |\n|---|---|---|\n| 0,50 | 2.100 | 900 |\n| 0,70 | 1.600 | 300 |\n| 0,85 | 1.000 | 80 |\n\nHãy:\n\n(a) Đề xuất cách chia train/validation/test và cross-validation phù hợp, giải thích vì sao.\n\n(b) Chỉ ra các cột gây rò rỉ (hoặc có nguy cơ rò rỉ) và cách xử lý.\n\n(c) Tính tổng chi phí trên tập validation ở từng ngưỡng và so với phương án không bán vượt (không gắn cờ đặt phòng nào). Chọn ngưỡng, đối chiếu với ngưỡng lý thuyết suy ra từ chi phí nếu xác suất đã được hiệu chỉnh tốt, và nêu chỉ số theo dõi sau khi triển khai.",
+   "explanation": "Định hướng chấm: (a) phải chia theo thời gian và nêu được lý do; (b) chỉ ra ít nhất `reservation_status` và `assigned_room_type`, nhận ra rủi ro của `booking_changes`; (c) tính đúng 4 mức chi phí (1.680; 1.770; 1.170; 1.200 triệu đồng), chọn 0,70 và suy ra ngưỡng lý thuyết $p^* = 1{,}5/2{,}1 \\approx 0{,}714$.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nBài toán có ba lớp quyết định: (1) **chia dữ liệu** sao cho mô phỏng tương lai, (2) **rà rò rỉ** theo nguyên tắc \"chỉ dùng thông tin có lúc khách đặt\", (3) **chọn ngưỡng theo chi phí** không đối xứng. Chi phí FP (1,5 triệu đồng) gấp 2,5 lần FN (0,6 triệu đồng) nên phải rất chắc mới bán vượt.\n\n#### Từng bước: tính chi phí\n$FN = 2.800 - TP$; chi phí (triệu đồng) $= 1{,}5\\,FP + 0{,}6\\,FN$.\n\n| Phương án | TP | FP | FN | Chi phí FP | Chi phí FN | Tổng |\n|---|---|---|---|---|---|---|\n| Không bán vượt | 0 | 0 | 2.800 | 0 | 1.680 | 1.680 |\n| Ngưỡng 0,50 | 2.100 | 900 | 700 | 1.350 | 420 | 1.770 |\n| Ngưỡng 0,70 | 1.600 | 300 | 1.200 | 450 | 720 | **1.170** |\n| Ngưỡng 0,85 | 1.000 | 80 | 1.800 | 120 | 1.080 | 1.200 |\n\nNgưỡng lý thuyết khi xác suất đã hiệu chỉnh: gắn cờ khi $p \\cdot 0{,}6 \\gt (1 - p) \\cdot 1{,}5 \\iff p \\gt \\frac{1{,}5}{2{,}1} \\approx 0{,}714$. Ngưỡng 0,70 trong bảng gần nhất với giá trị này và cũng cho chi phí thấp nhất.\n\n#### Hình minh hoạ: quy trình đánh giá\n```mermaid\nflowchart TB\n  A[\"120.000 đặt phòng 2023 đến 2025\"] --> B[\"Loại cột rò rỉ: reservation_status, assigned_room_type, booking_changes bản cuối\"]\n  B --> C[\"Chia theo thời gian: train, validation, test mới nhất\"]\n  C --> D[\"CV nối tiếp trong train để chọn siêu tham số\"]\n  D --> E[\"Hiệu chỉnh xác suất trên validation\"]\n  E --> F[\"Chọn ngưỡng theo chi phí trên validation\"]\n  F --> G[\"Đo một lần trên test, báo cáo chi phí và precision\"]\n  G --> H[\"Giám sát chi phí thực tế và tỉ lệ hủy theo mùa\"]\n```\n\n#### Bẫy thường gặp\n- Chọn ngưỡng 0,5 theo thói quen: ở đây còn tốn hơn không làm gì (1.770 so với 1.680).\n- Tối ưu ngưỡng trên test rồi báo cáo test.\n- Bỏ qua rằng chi phí FP là ước lượng; nên chạy phân tích độ nhạy (ví dụ FP = 1,0 hoặc 2,0 triệu đồng thì ngưỡng tối ưu đổi thế nào).\n\n#### Đọc thêm\n- [Common pitfalls (scikit-learn)](https://scikit-learn.org/stable/common_pitfalls.html)\n- [Tuning the decision threshold (scikit-learn)](https://scikit-learn.org/stable/modules/classification_threshold.html)\n- [Probability calibration (scikit-learn)](https://scikit-learn.org/stable/modules/calibration.html)",
+   "modelAnswer": "**(a) Chia dữ liệu.** Mô hình dùng để dự đoán tương lai nên chia **theo thời gian**:\n\n- Train: 01/2023 – 03/2025; validation: 04/2025 – 09/2025 (chọn siêu tham số, chọn ngưỡng); test: 10/2025 – 12/2025, chỉ dùng **một lần** để báo cáo.\n- Trong train dùng CV nối tiếp (kiểu `TimeSeriesSplit`: học trên các tháng đầu, kiểm tra trên tháng kế tiếp, mốc cắt trượt dần) thay vì k-fold ngẫu nhiên.\n- Nhãn hủy chỉ \"chín\" khi đã qua ngày nhận phòng: với đặt phòng có ngày nhận phòng sau mốc cắt, nhãn chưa biết, phải loại khỏi train hoặc đặt khoảng đệm (gap) bằng `lead_time` tối đa ở mốc cắt.\n- Nếu cùng một khách đặt nhiều lần, cân nhắc chia theo khách để không đánh giá trên khách mô hình đã \"nhớ\".\n\n**(b) Rò rỉ.** Quy tắc: chỉ dùng thông tin có **tại thời điểm đặt**.\n\n| Cột | Đánh giá | Xử lý |\n|---|---|---|\n| `reservation_status` | Chính là nhãn (Canceled) | Loại |\n| `assigned_room_type` | Chỉ biết khi nhận phòng; khách hủy thường không được giao phòng | Loại |\n| `booking_changes` | Giá trị cuối cùng đếm cả các lần sửa sau thời điểm đặt | Thay bằng số lần sửa **tính đến lúc dự đoán** (snapshot) hoặc loại |\n| `lead_time`, `adr`, `deposit_type` | Có lúc đặt | Giữ |\n| `previous_cancellations` | Hợp lệ nếu chỉ đếm các lần hủy trước ngày đặt | Giữ, kiểm tra cách tính |\n\n**(c) Chi phí.** $FN = 2.800 - TP$, chi phí $= FP \\cdot 1{,}5 + FN \\cdot 0{,}6$ (triệu đồng):\n\n| Ngưỡng | FP | FN | Chi phí (triệu đồng) |\n|---|---|---|---|\n| Không bán vượt | 0 | 2.800 | $2.800 \\cdot 0{,}6 = 1.680$ |\n| 0,50 | 900 | 700 | $1.350 + 420 = 1.770$ |\n| 0,70 | 300 | 1.200 | $450 + 720 = 1.170$ |\n| 0,85 | 80 | 1.800 | $120 + 1.080 = 1.200$ |\n\nChọn **ngưỡng 0,70**: tiết kiệm $1.680 - 1.170 = 510$ triệu đồng so với không bán vượt; ngưỡng 0,50 còn tệ hơn không làm gì.\n\nNgưỡng lý thuyết: gắn cờ khi chi phí kỳ vọng của việc gắn cờ nhỏ hơn không gắn cờ, $(1 - p) \\cdot 1{,}5 < p \\cdot 0{,}6 \\iff p > \\frac{1{,}5}{1{,}5 + 0{,}6} \\approx 0{,}714$, khớp với 0,70 (khi xác suất được hiệu chỉnh tốt; nếu không, cần hiệu chỉnh bằng Platt/isotonic trên validation trước).\n\nTheo dõi sau triển khai: chi phí thực tế mỗi tuần, số khách phải chuyển khách sạn (FP), precision ở ngưỡng, tỉ lệ hủy nền theo mùa, độ hiệu chỉnh (reliability), và chạy lại đánh giá khi có mùa vụ/chính sách cọc mới. Không chọn mô hình chỉ theo accuracy hay ROC-AUC vì chúng bỏ qua chi phí không đối xứng.",
+   "rubric": [
+    {
+     "criterion": "(a) Chia theo thời gian (train cũ, validation/test mới hơn, CV nối tiếp), test dùng một lần; có nhắc vấn đề nhãn chưa chín hoặc khoảng đệm",
+     "points": 2
+    },
+    {
+     "criterion": "(b) Chỉ ra đúng cột rò rỉ (reservation_status, assigned_room_type) và rủi ro của booking_changes, nêu quy tắc 'chỉ dùng thông tin có tại thời điểm dự đoán'",
+     "points": 2
+    },
+    {
+     "criterion": "(c) Tính đúng chi phí từng ngưỡng và phương án không bán vượt, chọn 0,70, suy ra ngưỡng lý thuyết ≈ 0,714 và nêu chỉ số theo dõi",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "T09-D03",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Một sàn thương mại điện tử nhận **200.000 ảnh sản phẩm mới mỗi ngày**; khoảng **0,5%** là ảnh vi phạm (hàng cấm). Mô hình phân loại ảnh được đánh giá trên một tập validation dựng **cân bằng** 5.000 ảnh vi phạm + 5.000 ảnh hợp lệ:\n\n| Ngưỡng | TPR (recall) | FPR | Precision đo trên validation cân bằng |\n|---|---|---|---|\n| 0,95 | 0,60 | 0,001 | 0,998 |\n| 0,80 | 0,85 | 0,010 | 0,988 |\n| 0,50 | 0,95 | 0,050 | 0,950 |\n\nRàng buộc vận hành: số ảnh hợp lệ bị **gỡ tự động** nhầm không quá **200 ảnh/ngày**; đội kiểm duyệt xử lý tối đa **3.000 ảnh/ngày** (coi như duyệt đúng 100%).\n\nHãy:\n\n(a) Giải thích vì sao cột precision trên validation cân bằng không dùng được cho vận hành. Tính precision thực tế và số ảnh hợp lệ bị gắn cờ mỗi ngày ở từng ngưỡng.\n\n(b) Thiết kế chính sách hai ngưỡng (gỡ tự động / chuyển người duyệt / cho qua) thoả các ràng buộc, tính số ảnh vào hàng duyệt, số ảnh vi phạm bị lọt mỗi ngày và recall của cả hệ thống.\n\n(c) Đề xuất chỉ số và cách đo để theo dõi hệ thống sau triển khai (ít nhất 3 ý).",
+   "explanation": "Định hướng chấm: dùng công thức precision theo tỉ lệ nền $\\pi = 0{,}005$; tính được FP/ngày (199; 1.990; 9.950) và precision (≈ 0,75; 0,30; 0,09); chính sách tự động ≥ 0,95, duyệt [0,80; 0,95) với 2.041 ảnh/ngày, lọt 150 ảnh, recall 0,85; chỉ số theo dõi có lấy mẫu phần không bị gắn cờ.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nTPR và FPR là tỉ lệ **trong từng lớp** nên mang được từ tập cân bằng sang thực tế. Precision thì không: nó phụ thuộc tỉ lệ nền $\\pi$. Hãy luôn quy về **số ảnh mỗi ngày** để so với ràng buộc vận hành.\n\n#### Từng bước\n$$\\text{Precision}(\\pi) = \\frac{\\text{TPR} \\cdot \\pi}{\\text{TPR} \\cdot \\pi + \\text{FPR} \\cdot (1 - \\pi)}$$\n\nMỗi ngày: $200.000 \\times 0{,}005 = 1.000$ ảnh vi phạm và $199.000$ ảnh hợp lệ.\n\n| Ngưỡng | TP/ngày | FP/ngày | Gắn cờ/ngày | Precision ($\\pi = 0{,}5$) | Precision thực tế |\n|---|---|---|---|---|---|\n| 0,95 | 600 | 199 | 799 | 0,998 | 0,751 |\n| 0,80 | 850 | 1.990 | 2.840 | 0,988 | 0,299 |\n| 0,50 | 950 | 9.950 | 10.900 | 0,950 | 0,087 |\n\nChính sách hai ngưỡng:\n\n| Vùng điểm | Hành động | Số ảnh/ngày | Ràng buộc |\n|---|---|---|---|\n| $\\ge 0{,}95$ | Gỡ tự động | 799 (199 gỡ nhầm) | $199 \\le 200$ ✓ |\n| $[0{,}80;\\ 0{,}95)$ | Người duyệt | $2.840 - 799 = 2.041$ | $\\le 3.000$ ✓ |\n| $\\lt 0{,}80$ | Cho qua | 197.160 (150 vi phạm lọt) | |\n\nRecall hệ thống $= 850/1.000 = 0{,}85$.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  I[\"200.000 ảnh mỗi ngày\"] --> M[\"Mô hình chấm điểm\"]\n  M -->|điểm từ 0,95| A[\"Gỡ tự động: 799 ảnh, 199 nhầm\"]\n  M -->|0,80 đến dưới 0,95| H[\"Hàng duyệt: 2.041 ảnh\"]\n  M -->|dưới 0,80| P[\"Cho qua: 150 vi phạm lọt\"]\n  P --> S[\"Lấy mẫu ngẫu nhiên để đo phần lọt\"]\n```\n\n#### Bẫy thường gặp\n- Tin precision trên tập cân bằng (0,95 ở ngưỡng 0,50) trong khi thực tế chỉ 0,09.\n- Chỉ theo dõi những ảnh bị gắn cờ: không bao giờ biết được recall thật nếu không lấy mẫu phần cho qua.\n- Ngưỡng 0,95 sát giới hạn 200 gỡ nhầm; khi $\\pi$ hoặc phân phối ảnh thay đổi, cần cơ chế cảnh báo.\n\n#### Đọc thêm\n- [Thresholds and the confusion matrix (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/classification/thresholding)\n- [Base rate fallacy (Wikipedia)](https://en.wikipedia.org/wiki/Base_rate_fallacy)\n- [Metrics and scoring (scikit-learn)](https://scikit-learn.org/stable/modules/model_evaluation.html)",
+   "modelAnswer": "**(a) Precision phụ thuộc tỉ lệ nền.** TPR, FPR tính trong từng lớp nên không đổi khi tỉ lệ lớp đổi; precision trộn hai lớp:\n\n$$\\text{Precision} = \\frac{\\text{TPR} \\cdot \\pi}{\\text{TPR} \\cdot \\pi + \\text{FPR} \\cdot (1 - \\pi)}$$\n\nValidation có $\\pi = 0{,}5$ còn thực tế $\\pi = 0{,}005$. Mỗi ngày: $1.000$ ảnh vi phạm, $199.000$ ảnh hợp lệ.\n\n| Ngưỡng | TP/ngày | FP/ngày | Tổng gắn cờ | Precision thực tế |\n|---|---|---|---|---|\n| 0,95 | 600 | 199 | 799 | $\\approx 0{,}751$ |\n| 0,80 | 850 | 1.990 | 2.840 | $\\approx 0{,}299$ |\n| 0,50 | 950 | 9.950 | 10.900 | $\\approx 0{,}087$ |\n\nPrecision \"0,95\" ở ngưỡng 0,50 thực ra chỉ khoảng 0,09: cứ 11 ảnh bị gắn cờ mới có 1 ảnh vi phạm.\n\n**(b) Chính sách hai ngưỡng.**\n\n- Gỡ tự động khi điểm $\\ge 0{,}95$: gỡ nhầm $199 \\le 200$ ảnh/ngày (đạt, sát ngưỡng). Ngưỡng 0,80 cho 1.990 ảnh gỡ nhầm, vượt xa.\n- Chuyển người duyệt khi $0{,}80 \\le$ điểm $< 0{,}95$: $2.840 - 799 = 2.041$ ảnh/ngày $\\le 3.000$ (đạt). Mở rộng xuống 0,50 sẽ thêm $10.900 - 2.840 = 8.060$ ảnh, vượt năng lực.\n- Cho qua khi điểm $< 0{,}80$.\n\nVi phạm bị bắt: $850$ (600 tự động + 250 qua duyệt); bị lọt: $1.000 - 850 = 150$ ảnh/ngày; recall hệ thống $= 0{,}85$. Phần năng lực duyệt còn dư (~960 ảnh) có thể dùng để hạ ngưỡng duyệt một chút (ví dụ tìm ngưỡng giữa 0,80 và 0,50 trên đường cong) hoặc lấy mẫu ngẫu nhiên để đo.\n\n**(c) Theo dõi.**\n\n1. Báo cáo **PR-AUC/precision tại ngưỡng** theo tỉ lệ nền thực tế, không dùng precision trên tập cân bằng; ROC-AUC chỉ dùng phụ trợ.\n2. **Lấy mẫu ngẫu nhiên** một lượng nhỏ ảnh **không** bị gắn cờ mỗi ngày cho người duyệt để ước lượng số vi phạm bị lọt (recall thật), vì ảnh bị cho qua không bao giờ có nhãn.\n3. Theo dõi tỉ lệ khiếu nại/khôi phục của người bán với ảnh bị gỡ tự động (proxy của FP), tách theo ngành hàng.\n4. Theo dõi phân phối điểm và tỉ lệ vi phạm nền $\\pi$ theo tuần (drift); khi $\\pi$ đổi, tính lại số ảnh vào hàng duyệt và precision.\n5. Kiểm tra định kỳ độ hiệu chỉnh và hiệu năng theo nhóm ngành hàng để không có nhóm người bán bị gỡ nhầm nhiều bất thường.",
+   "rubric": [
+    {
+     "criterion": "(a) Giải thích precision phụ thuộc tỉ lệ nền, tính đúng FP/ngày và precision thực tế ở 3 ngưỡng",
+     "points": 2
+    },
+    {
+     "criterion": "(b) Chính sách hai ngưỡng thoả cả hai ràng buộc, tính đúng hàng duyệt (2.041), số lọt (150), recall hệ thống (0,85), có lập luận vì sao không dùng ngưỡng khác",
+     "points": 2
+    },
+    {
+     "criterion": "(c) Ít nhất 3 chỉ số/cách đo hợp lý: precision/PR theo tỉ lệ thật, lấy mẫu phần cho qua để đo recall, khiếu nại/khôi phục, drift tỉ lệ nền, theo nhóm",
+     "points": 2
+    }
+   ]
+  }
+ ]
+}

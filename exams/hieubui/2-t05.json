@@ -1,0 +1,1016 @@
+{
+ "title": "CĐ-05 · Lập trình Python",
+ "description": "Kiểu dữ liệu, list/dict/set/tuple, slicing — 25% · Mutability, aliasing, tham số mặc định — 20% · Hàm, comprehension, generator, closure — 25% · Ngoại lệ, chuỗi, regex — 15% · OOP, dataclass — 15%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T05-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bạn muốn đếm số lần xuất hiện của từng cặp (endpoint, mã trạng thái) trong log truy cập bằng một `dict`. Giá trị nào dưới đây dùng được làm **khóa** của `dict`?",
+   "explanation": "Khóa `dict` phải hashable: giá trị băm không đổi trong suốt vòng đời. `tuple` gồm các phần tử bất biến (chuỗi, số) thì hashable; `list`, `dict`, `set` thì không.",
+   "section": "b-py",
+   "long": "#### Ý chính\n`dict` trong Python là một bảng băm (hash table). Khi bạn viết `d[k] = v`, Python gọi `hash(k)` để chọn ô lưu. Vì vậy khóa phải **hashable**: có giá trị băm không đổi suốt vòng đời và so sánh được bằng `==`. Các kiểu bất biến như `int`, `str`, `tuple` (nếu mọi phần tử bên trong cũng hashable) đáp ứng điều này; `list`, `dict`, `set` thì không, vì nội dung có thể đổi sau khi đã được đặt vào bảng.\n\n#### Từng bước\nChạy thử từng ứng viên:\n\n```python\nfor k in [(\"/api/orders\", 503), [\"/api/orders\", 503],\n          {\"/api/orders\": 503}, {\"/api/orders\", 503}]:\n    try:\n        hash(k)\n        print(type(k).__name__, \"hashable\")\n    except TypeError as e:\n        print(type(k).__name__, \"->\", e)\n```\n\n| Ứng viên | Kiểu | `hash()` | Làm khóa dict? |\n|---|---|---|---|\n| `(\"/api/orders\", 503)` | `tuple` | được | **được** |\n| `[\"/api/orders\", 503]` | `list` | `TypeError: unhashable type: 'list'` | không |\n| `{\"/api/orders\": 503}` | `dict` | `TypeError` | không |\n| `{\"/api/orders\", 503}` | `set` | `TypeError` | không (dùng `frozenset`) |\n\nỨng dụng: đếm theo cặp (endpoint, status) chỉ cần `cnt[(path, status)] = cnt.get((path, status), 0) + 1`, hoặc gọn hơn `collections.Counter`.\n\n#### Bẫy thường gặp\n- Tuple chứa list, ví dụ `(\"/a\", [1])`, **không** hashable dù là tuple: `hash` đi vào từng phần tử.\n- Đổi list thành chuỗi `\"/api/orders|503\"` để làm khóa vẫn chạy, nhưng dễ va chạm nếu dữ liệu chứa ký tự phân tách; tuple an toàn hơn.\n\n#### Đọc thêm\n- [Python Tutorial — Dictionaries](https://docs.python.org/3/tutorial/datastructures.html)\n- [Python Glossary — hashable](https://docs.python.org/3/glossary.html)",
+   "distractors": {
+    "A": "`list` là kiểu khả biến nên không hashable; dùng làm khóa sẽ báo `TypeError: unhashable type: 'list'`.",
+    "C": "`dict` cũng khả biến, không có `__hash__`, nên không làm khóa được.",
+    "D": "`set` khả biến nên không hashable; muốn dùng tập hợp làm khóa phải đổi sang `frozenset`."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`[\"/api/orders\", 503]`"
+    },
+    {
+     "key": "B",
+     "text": "`(\"/api/orders\", 503)`"
+    },
+    {
+     "key": "C",
+     "text": "`{\"/api/orders\": 503}`"
+    },
+    {
+     "key": "D",
+     "text": "`{\"/api/orders\", 503}`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T05-A02",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Lệnh sau in ra gì?\n\n```python\nprint(7 // 2, 7 / 2, -7 // 2)\n```",
+   "explanation": "`//` là floor division: $7 /\\!/ 2 = \\lfloor 3{,}5 \\rfloor = 3$, $-7 /\\!/ 2 = \\lfloor -3{,}5 \\rfloor = -4$. Toán tử `/` luôn cho `float`: $7/2 = 3{,}5$.",
+   "section": "b-py",
+   "long": "#### Ý chính\nPython 3 có hai phép chia: `/` (true division) **luôn** trả `float`, và `//` (floor division) trả $\\lfloor a/b \\rfloor$, tức làm tròn **xuống** về phía $-\\infty$. Với số âm, điều này khác hẳn C/Java (cắt bỏ phần thập phân, làm tròn về 0).\n\n#### Từng bước\n1. `7 // 2` $= \\lfloor 3{,}5 \\rfloor = 3$.\n2. `7 / 2` $= 3{,}5$, kiểu `float`.\n3. `-7 // 2` $= \\lfloor -3{,}5 \\rfloor = -4$ (không phải $-3$).\n4. Python đảm bảo đẳng thức $a = (a /\\!/ b)\\cdot b + (a \\bmod b)$: với $a=-7, b=2$ thì $-4 \\cdot 2 + 1 = -7$, nên `-7 % 2` là `1`.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 130\" width=\"100%\" style=\"max-width:560px\"><defs><marker id=\"arA02\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs><line x1=\"40\" y1=\"60\" x2=\"520\" y2=\"60\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"40\" y1=\"54\" x2=\"40\" y2=\"66\" stroke=\"currentColor\"/><text x=\"40\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">-5</text><line x1=\"88\" y1=\"54\" x2=\"88\" y2=\"66\" stroke=\"currentColor\"/><text x=\"88\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">-4</text><line x1=\"136\" y1=\"54\" x2=\"136\" y2=\"66\" stroke=\"currentColor\"/><text x=\"136\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">-3</text><line x1=\"184\" y1=\"54\" x2=\"184\" y2=\"66\" stroke=\"currentColor\"/><text x=\"184\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">-2</text><line x1=\"232\" y1=\"54\" x2=\"232\" y2=\"66\" stroke=\"currentColor\"/><text x=\"232\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">-1</text><line x1=\"280\" y1=\"54\" x2=\"280\" y2=\"66\" stroke=\"currentColor\"/><text x=\"280\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">0</text><line x1=\"328\" y1=\"54\" x2=\"328\" y2=\"66\" stroke=\"currentColor\"/><text x=\"328\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">1</text><line x1=\"376\" y1=\"54\" x2=\"376\" y2=\"66\" stroke=\"currentColor\"/><text x=\"376\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">2</text><line x1=\"424\" y1=\"54\" x2=\"424\" y2=\"66\" stroke=\"currentColor\"/><text x=\"424\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">3</text><line x1=\"472\" y1=\"54\" x2=\"472\" y2=\"66\" stroke=\"currentColor\"/><text x=\"472\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">4</text><line x1=\"520\" y1=\"54\" x2=\"520\" y2=\"66\" stroke=\"currentColor\"/><text x=\"520\" y=\"84\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">5</text><circle cx=\"112.0\" cy=\"60\" r=\"6\" fill=\"#3b82f6\"/><text x=\"112.0\" y=\"40\" font-size=\"12\" fill=\"#3b82f6\" text-anchor=\"middle\">−3,5</text><line x1=\"106.0\" y1=\"60\" x2=\"92\" y2=\"60\" stroke=\"#10b981\" stroke-width=\"1.6\" marker-end=\"url(#arA02)\"/><text x=\"88\" y=\"110\" font-size=\"12\" fill=\"#10b981\" text-anchor=\"middle\">// cho −4 (floor)</text><text x=\"166\" y=\"110\" font-size=\"12\" fill=\"#ef4444\" text-anchor=\"start\">cắt về 0 cho −3 (C/Java)</text><line x1=\"136\" y1=\"68\" x2=\"136\" y2=\"96\" stroke=\"#ef4444\" stroke-dasharray=\"4 3\"/></svg>\n\n| Biểu thức | Python 3 | C/Java (int) |\n|---|---|---|\n| `7 // 2` hoặc `7 / 2` | `3` và `3.5` | `3` |\n| `-7 // 2` | `-4` | `-3` |\n| `-7 % 2` | `1` | `-1` |\n\n#### Bẫy thường gặp\n- Chia trang kết quả log: `so_trang = -(-n // k)` là mẹo làm tròn lên dựa đúng vào tính chất floor.\n- Dùng `int(a / b)` thay `a // b`: `int()` cắt về 0, cho kết quả khác với số âm và có thể mất chính xác với số nguyên rất lớn (đi qua float).\n\n#### Đọc thêm\n- [Python Tutorial — Numbers](https://docs.python.org/3/tutorial/introduction.html)\n- [Python Reference — Binary arithmetic operations](https://docs.python.org/3/reference/expressions.html)",
+   "distractors": {
+    "A": "Tưởng `//` cắt bỏ phần thập phân (làm tròn về 0) như C/Java; Python làm tròn **xuống** về $-\\infty$ nên $\\lfloor -3{,}5 \\rfloor = -4$.",
+    "B": "Nhầm `//` với phép chia thường `/`; `//` là chia lấy phần nguyên (floor division).",
+    "D": "Tưởng `/` giữa hai số nguyên cho số nguyên như Python 2; trong Python 3, `/` luôn trả `float`."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`3 3.5 -3`"
+    },
+    {
+     "key": "B",
+     "text": "`3.5 3.5 -3.5`"
+    },
+    {
+     "key": "C",
+     "text": "`3 3.5 -4`"
+    },
+    {
+     "key": "D",
+     "text": "`3 3 -4`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T05-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Dashboard giám sát API in tổng số request và tỉ lệ lỗi bằng f-string:\n\n```python\nn = 1234567\nr = 0.0456\nprint(f\"{n:,} | {r:.1%}\")\n```\n\nKết quả in ra là gì?",
+   "explanation": "`:,` chèn dấu phẩy phân cách hàng nghìn; `:.1%` tính $0{,}0456 \\times 100 = 4{,}56$ rồi làm tròn 1 chữ số thập phân thành `4.6` và thêm `%`.",
+   "section": "b-py",
+   "long": "#### Ý chính\nf-string cho phép gắn **format spec** sau dấu `:` trong `{...}`. Hai tuỳ chọn hay dùng khi làm dashboard: `,` chèn dấu phân cách hàng nghìn, và kiểu `%` nhân giá trị với 100, làm tròn theo độ chính xác `.p` rồi thêm ký hiệu `%`.\n\n#### Từng bước\n1. `f\"{1234567:,}\"` → `1,234,567`. Dấu phân cách luôn là dấu phẩy, không phụ thuộc ngôn ngữ máy (muốn theo locale thì dùng kiểu `n`).\n2. `f\"{0.0456:.1%}\"`: tính $0{,}0456 \\times 100 = 4{,}56$, làm tròn 1 chữ số thập phân thành $4{,}6$, thêm `%` → `4.6%`.\n3. Ghép lại với chuỗi ` | ` ở giữa: `1,234,567 | 4.6%`.\n\n| Format spec | Giá trị | Kết quả |\n|---|---|---|\n| `{n:,}` | 1234567 | `1,234,567` |\n| `{n:_}` | 1234567 | `1_234_567` |\n| `{r:.1%}` | 0.0456 | `4.6%` |\n| `{r:.2f}` | 0.0456 | `0.05` |\n| `{n:>12,}` | 1234567 | `   1,234,567` (căn phải 12 ký tự) |\n\n#### Muốn kiểu Việt Nam thì sao?\nCó thể thay ký tự sau khi định dạng: `f\"{n:,}\".replace(\",\", \".\")` cho `1.234.567`. Với số có phần thập phân thì cần hoán đổi cả hai dấu, nên dùng thư viện định dạng theo locale (ví dụ Babel) cho báo cáo chính thức.\n\n#### Bẫy thường gặp\n- Tự nhân 100 rồi lại dùng `%`: `f\"{r*100:.1%}\"` ra `456.0%`.\n- Tưởng format cắt bớt chữ số: `.1%` **làm tròn** (round-half-even trên giá trị nhị phân), không truncate.\n\n#### Đọc thêm\n- [Format Specification Mini-Language](https://docs.python.org/3/library/string.html)\n- [PEP 498 — Literal String Interpolation](https://peps.python.org/pep-0498/)",
+   "distractors": {
+    "B": "Tưởng định dạng theo kiểu Việt Nam; tuỳ chọn `,` trong format spec luôn chèn dấu phẩy làm dấu phân cách hàng nghìn, không phụ thuộc locale.",
+    "C": "Tưởng `%` chỉ gắn thêm ký hiệu phần trăm; thực ra kiểu `%` nhân giá trị với 100 rồi mới làm tròn.",
+    "D": "Tưởng định dạng cắt bớt chữ số; `.1%` **làm tròn** $4{,}56$ thành $4{,}6$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`1,234,567 | 4.6%`"
+    },
+    {
+     "key": "B",
+     "text": "`1.234.567 | 4.6%`"
+    },
+    {
+     "key": "C",
+     "text": "`1,234,567 | 0.0%`"
+    },
+    {
+     "key": "D",
+     "text": "`1,234,567 | 4.5%`"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T05-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Nhóm nào dưới đây gồm **toàn** kiểu dữ liệu bất biến (immutable) trong Python?",
+   "explanation": "Kiểu bất biến không cho sửa nội dung đối tượng sau khi tạo: `int`, `float`, `bool`, `str`, `bytes`, `tuple`, `frozenset`. Kiểu khả biến: `list`, `dict`, `set`, `bytearray`.",
+   "section": "b-py",
+   "long": "#### Ý chính\nMỗi đối tượng Python có **danh tính** (identity), **kiểu** và **giá trị**. Đối tượng *bất biến* (immutable) không cho đổi giá trị sau khi tạo; mọi \"thay đổi\" thật ra tạo đối tượng mới. Đối tượng *khả biến* (mutable) sửa được tại chỗ. Phân biệt hai nhóm là nền tảng để hiểu aliasing, tham số mặc định và khóa dict.\n\n#### Từng bước\nKiểm nhanh bằng thao tác sửa tại chỗ:\n\n```python\ns = \"log\"\n# s[0] = \"L\"      -> TypeError: 'str' object does not support item assignment\nt = (1, 2)\n# t[0] = 9        -> TypeError\nxs = [1, 2]; xs[0] = 9          # được: list khả biến\nst = {1}; st.add(2)             # được: set khả biến\nfs = frozenset({1}); # fs.add(2) -> AttributeError\n```\n\n| Kiểu | Bất biến? | Ví dụ thao tác sửa |\n|---|---|---|\n| `int`, `float`, `bool` | có | không có |\n| `str`, `bytes` | có | `s.upper()` trả chuỗi **mới** |\n| `tuple` | có (vỏ ngoài) | không gán được phần tử |\n| `frozenset` | có | không có `add` |\n| `list` | **không** | `append`, `xs[i] = v` |\n| `dict` | **không** | `d[k] = v`, `pop` |\n| `set` | **không** | `add`, `discard` |\n\nPhương án đúng: `int, str, tuple, frozenset`.\n\n#### Bẫy thường gặp\n- \"Tuple bất biến\" chỉ nói về vỏ ngoài: `([\"a\"], 1)` vẫn chứa list sửa được bên trong (xem câu D01).\n- `x += 1` với `int` không sửa đối tượng 1 mà gắn tên `x` sang đối tượng mới; kiểm bằng `id(x)` trước và sau sẽ thấy khác nhau.\n\n#### Đọc thêm\n- [Data model — Objects, values and types](https://docs.python.org/3/reference/datamodel.html)\n- [Immutable object — Wikipedia](https://en.wikipedia.org/wiki/Immutable_object)",
+   "distractors": {
+    "A": "`list` khả biến: có `append`, `pop`, gán `xs[i] = v`.",
+    "B": "`set` khả biến (`add`, `discard`); chỉ `frozenset` mới bất biến.",
+    "C": "`dict` khả biến: thêm, sửa, xoá khóa tại chỗ được; `bytes` thì bất biến nhưng `dict` làm cả nhóm sai."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`int`, `str`, `list`, `tuple`"
+    },
+    {
+     "key": "B",
+     "text": "`str`, `tuple`, `set`, `bool`"
+    },
+    {
+     "key": "C",
+     "text": "`float`, `str`, `dict`, `bytes`"
+    },
+    {
+     "key": "D",
+     "text": "`int`, `str`, `tuple`, `frozenset`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T05-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "File log có hàng triệu dòng, `lines` là đối tượng file đang mở. Bạn muốn tính độ dài từng dòng **lần lượt** mà không tạo sẵn toàn bộ kết quả trong bộ nhớ. Biểu thức nào tạo ra một **generator**?",
+   "explanation": "Ngoặc tròn quanh biểu thức `for` tạo generator expression: giá trị được sinh lười (lazy) mỗi khi `next()` được gọi, bộ nhớ $O(1)$ thay vì $O(n)$.",
+   "section": "b-py",
+   "long": "#### Ý chính\nBốn cú pháp \"comprehension\" trông giống nhau nhưng tạo ra bốn thứ khác nhau. Chỉ dạng ngoặc tròn `( ... for ... )` là **generator expression**: nó không tính gì ngay, mà sinh từng giá trị khi được hỏi (`next()`, vòng `for`, `sum`...). Với file log hàng triệu dòng, đây là cách xử lý chỉ tốn bộ nhớ $O(1)$.\n\n#### Từng bước\n\n```python\nimport sys\nlines = [\"x\" * 50] * 1_000_000\nlst = [len(l) for l in lines]\ngen = (len(l) for l in lines)\nprint(type(gen).__name__)                       # generator\nprint(sys.getsizeof(lst) > 8_000_000)           # True: list 1 triệu phần tử\nprint(sys.getsizeof(gen) < 500)                 # True: generator chỉ giữ trạng thái\n```\n\n| Cú pháp | Kết quả | Tính khi nào | Bộ nhớ |\n|---|---|---|---|\n| `[f(x) for x in it]` | `list` | ngay | $O(n)$ |\n| `{f(x) for x in it}` | `set` (bỏ trùng) | ngay | $O(n)$ |\n| `{k: v for ...}` | `dict` | ngay | $O(n)$ |\n| `(f(x) for x in it)` | **generator** | khi được hỏi | $O(1)$ |\n| `tuple(f(x) for x in it)` | `tuple` | ngay (tiêu thụ generator) | $O(n)$ |\n\nKhi truyền generator làm đối số duy nhất có thể bỏ ngoặc thừa: `sum(len(l) for l in f)`.\n\n#### Bẫy thường gặp\n- Generator chỉ duyệt được **một lần** (xem câu B07).\n- Không có \"tuple comprehension\": `(x for x in ...)` là generator, không phải tuple.\n\n#### Đọc thêm\n- [Functional Programming HOWTO — Generator expressions](https://docs.python.org/3/howto/functional.html)\n- [PEP 289 — Generator Expressions](https://peps.python.org/pep-0289/)",
+   "distractors": {
+    "A": "List comprehension tính hết ngay và giữ cả list trong RAM.",
+    "C": "Đây là set comprehension: tính hết ngay, còn loại bỏ giá trị trùng.",
+    "D": "Bên trong có generator nhưng `tuple(...)` tiêu thụ hết nó và tạo tuple đầy đủ trong bộ nhớ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`[len(l) for l in lines]`"
+    },
+    {
+     "key": "B",
+     "text": "`(len(l) for l in lines)`"
+    },
+    {
+     "key": "C",
+     "text": "`{len(l) for l in lines}`"
+    },
+    {
+     "key": "D",
+     "text": "`tuple(len(l) for l in lines)`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T05-A06",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Một dòng log đã parse thành `rec = {\"ts\": \"08:15:00\", \"msg\": \"timeout\"}`. Câu lệnh `rec[\"status\"]` ném ra ngoại lệ gì?",
+   "explanation": "Truy cập `d[k]` với khóa không tồn tại ném `KeyError`; muốn có giá trị mặc định thì dùng `d.get(k, default)`.",
+   "section": "b-py",
+   "long": "#### Ý chính\nMỗi kiểu lỗi truy cập có ngoại lệ riêng. Toán tử `[]` trên `dict` với khóa không tồn tại ném `KeyError`. Khi parse log, các dòng thiếu trường là chuyện thường ngày, nên cần chọn giữa \"để lỗi nổ\" (`rec[\"status\"]`) hay \"dùng mặc định\" (`rec.get(\"status\")`).\n\n#### Từng bước\n\n```python\nrec = {\"ts\": \"08:15:00\", \"msg\": \"timeout\"}\ntry:\n    rec[\"status\"]\nexcept KeyError as e:\n    print(\"thiếu khóa\", e)          # thiếu khóa 'status'\nprint(rec.get(\"status\"))             # None\nprint(rec.get(\"status\", 0))          # 0\n```\n\n| Thao tác lỗi | Ngoại lệ |\n|---|---|\n| `d[\"k\"]` khi thiếu khóa | `KeyError` |\n| `xs[10]` khi list có 3 phần tử | `IndexError` |\n| `obj.status` khi không có thuộc tính | `AttributeError` |\n| `int(\"abc\")` | `ValueError` |\n| `\"a\" + 1` | `TypeError` |\n\n`KeyError` và `IndexError` cùng là lớp con của `LookupError`, nên `except LookupError` bắt được cả hai.\n\n#### Khi nào dùng cái nào?\n- Trường **bắt buộc** (thiếu là dữ liệu hỏng): dùng `rec[\"status\"]` và bắt `KeyError` ở tầng ngoài để ghi nhận dòng lỗi.\n- Trường **tuỳ chọn**: `rec.get(\"status\", default)`.\n\n#### Bẫy thường gặp\n- `except Exception: pass` nuốt mọi lỗi, che mất bug thật.\n- `rec.get(\"status\") or 200` biến cả giá trị hợp lệ `0` thành 200.\n\n#### Đọc thêm\n- [Built-in Exceptions](https://docs.python.org/3/library/exceptions.html)\n- [Python Tutorial — Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html)",
+   "distractors": {
+    "B": "`IndexError` dành cho chỉ số vượt phạm vi của dãy (`list`, `tuple`, `str`), không phải khóa dict.",
+    "C": "`AttributeError` xảy ra khi truy cập thuộc tính không tồn tại, ví dụ `rec.status`.",
+    "D": "Nhầm với `rec.get(\"status\")`; toán tử `[]` trên dict thiếu khóa luôn ném lỗi."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`KeyError`"
+    },
+    {
+     "key": "B",
+     "text": "`IndexError`"
+    },
+    {
+     "key": "C",
+     "text": "`AttributeError`"
+    },
+    {
+     "key": "D",
+     "text": "Không ném lỗi, trả về `None`"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T05-A07",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Với các tham số mặc định, decorator `@dataclass` tự sinh những phương thức nào cho lớp?",
+   "explanation": "Mặc định `@dataclass(init=True, repr=True, eq=True, order=False, frozen=False)`: sinh `__init__`, `__repr__`, `__eq__`; vì có `__eq__` mà không frozen nên `__hash__ = None`.",
+   "section": "b-py",
+   "long": "#### Ý chính\n`@dataclass` đọc các *annotation* của lớp và tự sinh phương thức theo các cờ. Giá trị mặc định: `init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False`. Vì vậy mặc định có `__init__`, `__repr__`, `__eq__`; không có phương thức so sánh thứ tự; và `__hash__` bị đặt thành `None`.\n\n#### Từng bước\n\n```python\nfrom dataclasses import dataclass\n\n@dataclass\nclass Point:\n    x: int\n    y: int = 0\n\np = Point(1)\nprint(p)                     # Point(x=1, y=0)        <- __repr__\nprint(p == Point(1, 0))      # True                    <- __eq__ so theo field\nprint(Point.__hash__)        # None                    <- không hash được\n# p < Point(2)  -> TypeError vì order=False\n```\n\n| Cờ | Mặc định | Sinh ra |\n|---|---|---|\n| `init` | True | `__init__` |\n| `repr` | True | `__repr__` |\n| `eq` | True | `__eq__` |\n| `order` | False | `__lt__`, `__le__`, `__gt__`, `__ge__` (khi bật) |\n| `frozen` | False | chặn gán thuộc tính (khi bật) |\n| `__hash__` | (suy ra) | `None` khi `eq=True, frozen=False` |\n\n#### Vì sao `__hash__` là `None`?\nNếu đối tượng so sánh theo giá trị mà vẫn sửa được, hash của nó có thể đổi sau khi đã nằm trong `set`/`dict`, phá vỡ bảng băm. Muốn hash được thì dùng `frozen=True` (xem câu D02).\n\n#### Bẫy thường gặp\n- Tưởng `str(obj)` cần `__str__` riêng: `object.__str__` mặc định gọi `__repr__`.\n\n#### Đọc thêm\n- [dataclasses — Data Classes](https://docs.python.org/3/library/dataclasses.html)\n- [PEP 557 — Data Classes](https://peps.python.org/pep-0557/)",
+   "distractors": {
+    "A": "Các phương thức so sánh thứ tự (`__lt__`, `__le__`…) chỉ được sinh khi `order=True`.",
+    "B": "Mặc định `eq=True`, `frozen=False` nên `__hash__` bị đặt thành `None` (không hash được); `__str__` không được sinh, `str()` dùng lại `__repr__`.",
+    "D": "Bỏ sót `__repr__` (in đẹp) và `__eq__` (so sánh theo giá trị các field), hai phương thức mặc định `repr=True`, `eq=True`."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`__init__`, `__repr__` và `__lt__`"
+    },
+    {
+     "key": "B",
+     "text": "`__init__`, `__hash__` và `__str__`"
+    },
+    {
+     "key": "C",
+     "text": "`__init__`, `__repr__` và `__eq__`"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ `__init__`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T05-A08",
+   "module": "A",
+   "type": "output",
+   "points": 3.5,
+   "level": "nhan-biet",
+   "prompt": "Một bản ghi log được cập nhật trong quá trình xử lý. Đoạn code sau in ra gì? Ghi đúng như Python in.\n\n```python\nrec = {\"level\": \"ERROR\", \"code\": 503}\nrec[\"retry\"] = 2\nrec[\"code\"] = 500\nprint(len(rec), list(rec))\n```",
+   "explanation": "Từ Python 3.7, dict giữ thứ tự chèn. Thêm `retry` tạo mục thứ 3; gán lại `code` chỉ đổi giá trị, vị trí giữ nguyên. `list(rec)` trả danh sách khóa.",
+   "section": "b-py",
+   "long": "#### Ý chính\nTừ Python 3.7, `dict` **giữ thứ tự chèn** (insertion order) như một đảm bảo của ngôn ngữ. Thêm khóa mới thì khóa nằm cuối; gán lại giá trị cho khóa đã có thì **không** đổi vị trí. `len(d)` là số khóa, `list(d)` là danh sách khóa.\n\n#### Từng bước\n1. `rec = {\"level\": \"ERROR\", \"code\": 503}`: 2 khóa.\n2. `rec[\"retry\"] = 2`: khóa mới, thêm vào cuối → 3 khóa.\n3. `rec[\"code\"] = 500`: khóa đã có, chỉ thay giá trị.\n4. `print(len(rec), list(rec))` → `3 ['level', 'code', 'retry']`.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 200\" width=\"100%\" style=\"max-width:560px\"><defs><marker id=\"arA08\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs><text x=\"10\" y=\"22\" font-size=\"14\" fill=\"currentColor\" text-anchor=\"start\">Thứ tự khóa của rec qua 3 câu lệnh</text><text x=\"10\" y=\"57\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"start\">ban đầu</text><rect x=\"120\" y=\"38\" width=\"130\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"185.0\" y=\"57.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">'level': 'ERROR'</text><rect x=\"260\" y=\"38\" width=\"120\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"320.0\" y=\"57.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">'code': 503</text><text x=\"10\" y=\"112\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"start\">thêm retry</text><rect x=\"120\" y=\"93\" width=\"130\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"185.0\" y=\"112.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">'level': 'ERROR'</text><rect x=\"260\" y=\"93\" width=\"120\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"320.0\" y=\"112.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">'code': 503</text><rect x=\"390\" y=\"93\" width=\"120\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"1.6\"/><text x=\"450.0\" y=\"112.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">'retry': 2</text><text x=\"10\" y=\"167\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"start\">code = 500</text><rect x=\"120\" y=\"148\" width=\"130\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"185.0\" y=\"167.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">'level': 'ERROR'</text><rect x=\"260\" y=\"148\" width=\"120\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"1.6\"/><text x=\"320.0\" y=\"167.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">'code': 500</text><rect x=\"390\" y=\"148\" width=\"120\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"450.0\" y=\"167.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">'retry': 2</text><text x=\"320\" y=\"196\" font-size=\"11\" fill=\"#f59e0b\" text-anchor=\"middle\">sửa giá trị tại chỗ, không đổi vị trí</text></svg>\n\n| Muốn lấy | Biểu thức | Kết quả |\n|---|---|---|\n| khóa | `list(rec)` hoặc `list(rec.keys())` | `['level', 'code', 'retry']` |\n| giá trị | `list(rec.values())` | `['ERROR', 500, 2]` |\n| cặp | `list(rec.items())` | `[('level', 'ERROR'), ('code', 500), ('retry', 2)]` |\n\n#### Bẫy thường gặp\n- Muốn đưa một khóa xuống cuối phải `pop` rồi gán lại: `rec[\"code\"] = rec.pop(\"code\")`.\n- `print` dùng `repr` nên chuỗi có nháy đơn `'level'`; gõ nháy kép là sai so với output thật.\n\n#### Đọc thêm\n- [Built-in Types — Mapping Types (dict)](https://docs.python.org/3/library/stdtypes.html)\n- [Python Tutorial — Dictionaries](https://docs.python.org/3/tutorial/datastructures.html)",
+   "mistakes": [
+    {
+     "value": "4 ['level', 'code', 'retry', 'code']",
+     "why": "Tưởng gán vào khóa đã có sẽ thêm mục mới; khóa dict là duy nhất, `rec[\"code\"] = 500` chỉ thay giá trị."
+    },
+    {
+     "value": "3 ['level', 'retry', 'code']",
+     "why": "Tưởng cập nhật giá trị đẩy khóa xuống cuối; dict giữ thứ tự **chèn lần đầu**, sửa giá trị không đổi vị trí."
+    },
+    {
+     "value": "3 ['ERROR', 500, 2]",
+     "why": "`list(d)` duyệt dict theo **khóa**, không phải giá trị; muốn lấy giá trị phải dùng `list(d.values())`."
+    }
+   ],
+   "answer": "3 ['level', 'code', 'retry']",
+   "accept": [
+    "3 ['level', 'code', 'retry']",
+    "3 [\"level\", \"code\", \"retry\"]",
+    "3 ['level','code','retry']",
+    "3 [\"level\",\"code\",\"retry\"]"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T05-B01",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Đoạn code sau in ra gì?\n\n```python\nbuf = [0, 1, 2, 3, 4, 5]\nbuf[1:3] = [\"x\"]\nprint(buf)\n```",
+   "explanation": "Gán lát cắt `a[i:j] = it` thay đoạn $j - i = 2$ phần tử bằng các phần tử của `it` (ở đây 1 phần tử), nên list ngắn đi 1.",
+   "section": "b-py",
+   "long": "#### Ý chính\nLát cắt (slice) đứng bên **trái** dấu `=` nghĩa là \"thay đoạn này bằng các phần tử của iterable bên phải\". Với lát cắt thường (bước 1), hai bên **không cần** cùng độ dài: list có thể co lại hoặc dãn ra.\n\n#### Từng bước\n1. `buf = [0, 1, 2, 3, 4, 5]`; `buf[1:3]` là đoạn chỉ số 1 và 2, gồm `[1, 2]` (độ dài $3 - 1 = 2$).\n2. Vế phải `[\"x\"]` có 1 phần tử.\n3. Đoạn 2 phần tử bị thay bằng 1 phần tử: `[0, 'x', 3, 4, 5]`, độ dài giảm từ 6 xuống 5.\n\n| Câu lệnh (bắt đầu từ `[0, 1, 2, 3, 4, 5]`) | Kết quả |\n|---|---|\n| `buf[1:3] = [\"x\"]` | `[0, 'x', 3, 4, 5]` |\n| `buf[1:3] = [\"x\", \"y\", \"z\"]` | `[0, 'x', 'y', 'z', 3, 4, 5]` (dãn) |\n| `buf[1:3] = []` | `[0, 3, 4, 5]` (giống `del buf[1:3]`) |\n| `buf[2:2] = [\"x\"]` | `[0, 1, 'x', 2, 3, 4, 5]` (chèn) |\n| `buf[1] = [\"x\"]` | `[0, ['x'], 2, 3, 4, 5]` (gán **một** phần tử là list) |\n| `buf[::2] = [\"x\"]` | `ValueError` (extended slice cần đủ 3 phần tử) |\n\nChạy lại bằng Python:\n\n```python\nbuf = [0, 1, 2, 3, 4, 5]\nbuf[1:3] = [\"x\"]\nprint(buf)          # [0, 'x', 3, 4, 5]\n```\n\n#### Bẫy thường gặp\n- Nhầm `buf[1] = [...]` (gán chỉ số) với `buf[1:2] = [...]` (gán lát cắt).\n- Gán lát cắt bằng chuỗi: `buf[0:1] = \"ab\"` chèn **hai** phần tử `'a'`, `'b'` vì chuỗi là iterable.\n\n#### Đọc thêm\n- [Python Tutorial — Lists](https://docs.python.org/3/tutorial/introduction.html)\n- [Built-in Types — Mutable Sequence Types](https://docs.python.org/3/library/stdtypes.html)",
+   "distractors": {
+    "A": "Tưởng gán lát cắt chỉ thay phần tử đầu; thực ra cả lát `buf[1:3]` (gồm 1 và 2) bị thay bằng nội dung list vế phải.",
+    "B": "Tưởng cả list `[\"x\"]` được chèn như một phần tử; gán lát cắt lấy **các phần tử** của iterable vế phải.",
+    "C": "Nhầm với extended slice có bước (ví dụ `buf[::2] = ...`) bắt buộc cùng độ dài; lát cắt thường được phép co giãn."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`[0, 'x', 2, 3, 4, 5]`"
+    },
+    {
+     "key": "B",
+     "text": "`[0, ['x'], 3, 4, 5]`"
+    },
+    {
+     "key": "C",
+     "text": "Báo `ValueError`"
+    },
+    {
+     "key": "D",
+     "text": "`[0, 'x', 3, 4, 5]`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T05-B02",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Tách một dòng access log bằng unpacking có dấu sao. Đoạn code sau in ra gì?\n\n```python\nfirst, *mid, last = \"GET /api/v1/users 200 35ms\".split()\nprint(first, mid, last)\n```",
+   "explanation": "`split()` cho 4 phần tử. `first` lấy phần tử đầu, `last` lấy phần tử cuối, `*mid` gom phần còn lại thành list `['/api/v1/users', '200']`.",
+   "section": "b-py",
+   "long": "#### Ý chính\n*Extended iterable unpacking* (PEP 3132) cho phép một biến có dấu `*` gom \"phần còn lại\" khi giải nén. Biến có sao **luôn** là `list` (kể cả khi rỗng), các biến thường lấy phần tử ở đúng vị trí đầu/cuối.\n\n#### Từng bước\n1. `\"GET /api/v1/users 200 35ms\".split()` → `['GET', '/api/v1/users', '200', '35ms']` (4 phần tử).\n2. `first` nhận phần tử đầu `'GET'`, `last` nhận phần tử **cuối** `'35ms'`.\n3. `*mid` nhận phần giữa: `['/api/v1/users', '200']`.\n4. `print(first, mid, last)`: chuỗi in không có nháy, còn list in theo `repr` các phần tử → `GET ['/api/v1/users', '200'] 35ms`.\n\n| Mẫu | Đầu vào 4 phần tử `[a, b, c, d]` | Kết quả |\n|---|---|---|\n| `first, *mid, last` | | `a`, `[b, c]`, `d` |\n| `*head, last` | | `[a, b, c]`, `d` |\n| `first, *_ ` | | `a`, bỏ phần còn lại |\n| `a, b, *rest, c, d` (4 phần tử) | | `rest = []` |\n\n#### Ứng dụng với log\nDòng log có số trường thay đổi ở giữa (ví dụ đường dẫn chứa khoảng trắng đã mã hoá), nhưng trường đầu (method) và cuối (latency) cố định: `method, *path_parts, latency = line.split()` gọn hơn đánh chỉ số tay.\n\n#### Bẫy thường gặp\n- Muốn in phần giữa không có ngoặc: dùng `print(first, *mid, last)` (dấu sao trong **lời gọi** hàm là giải nén đối số).\n- Chỉ được một biến có sao trong một vế trái; số phần tử phải ít nhất bằng số biến không sao, nếu không ném `ValueError`.\n\n#### Đọc thêm\n- [PEP 3132 — Extended Iterable Unpacking](https://peps.python.org/pep-3132/)\n- [Python Reference — Assignment statements](https://docs.python.org/3/reference/simple_stmts.html)",
+   "mistakes": [
+    {
+     "value": "GET /api/v1/users 200 35ms",
+     "why": "Tưởng `*mid` được \"giải nén\" khi in; thực ra `mid` là một biến chứa list nên `print` in dạng `[...]`."
+    },
+    {
+     "value": "GET ('/api/v1/users', '200') 35ms",
+     "why": "Tưởng biến có dấu sao nhận `tuple`; theo PEP 3132 nó luôn là `list`."
+    },
+    {
+     "value": "GET ['/api/v1/users'] 200",
+     "why": "Tưởng `last` nhận phần tử thứ 3; biến cuối luôn nhận phần tử **cuối cùng**, phần giữa dồn vào `mid`."
+    }
+   ],
+   "answer": "GET ['/api/v1/users', '200'] 35ms",
+   "accept": [
+    "GET ['/api/v1/users', '200'] 35ms",
+    "GET [\"/api/v1/users\", \"200\"] 35ms",
+    "GET ['/api/v1/users','200'] 35ms",
+    "GET [\"/api/v1/users\",\"200\"] 35ms"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T05-B03",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Client gọi API ghép cấu hình mặc định với cấu hình người dùng (Python 3.9+):\n\n```python\ndefaults = {\"timeout\": 5, \"retries\": 3}\nuser = {\"retries\": 5, \"verbose\": True}\ncfg = defaults | user\nprint(cfg[\"retries\"], len(cfg), defaults[\"retries\"])\n```\n\nKết quả in ra là gì?",
+   "explanation": "PEP 584: `d1 | d2` trả dict mới gồm khóa của cả hai, trùng khóa thì lấy giá trị bên phải. `cfg` có 3 khóa, `cfg[\"retries\"] = 5`, còn `defaults` không đổi.",
+   "section": "b-py",
+   "long": "#### Ý chính\nPython 3.9 thêm toán tử hợp dict (PEP 584): `d1 | d2` tạo **dict mới** chứa khóa của cả hai, trùng khóa thì giá trị **bên phải thắng**; `d1 |= d2` cập nhật `d1` tại chỗ (giống `d1.update(d2)`). Đây đúng là mẫu \"cấu hình mặc định + cấu hình người dùng\" của client gọi API.\n\n#### Từng bước\n1. `defaults = {\"timeout\": 5, \"retries\": 3}`, `user = {\"retries\": 5, \"verbose\": True}`.\n2. `cfg = defaults | user` → `{'timeout': 5, 'retries': 5, 'verbose': True}`.\n3. `cfg[\"retries\"]` = 5 (của `user`), `len(cfg)` = 3 khóa, `defaults[\"retries\"]` vẫn là 3.\n4. In ra `5 3 3`.\n\nCác cách ghép và tác động (trùng khóa luôn lấy toán hạng bên phải):\n\n| Cách ghép | Sửa `defaults`? | Ghi chú |\n|---|---|---|\n| toán tử hợp tạo dict mới (như đề) | không | Python 3.9+ |\n| `{**defaults, **user}` | không | chạy cả Python 3.5+ |\n| toán tử hợp tại chỗ (dạng `defaults` hợp-gán `user`) | **có** | giống `update` |\n| `defaults.update(user)` | **có** | trả `None` |\n| đảo toán hạng: `user` đứng trái | không | mặc định đè lựa chọn người dùng: sai ý đồ |\n\n#### Bẫy thường gặp\n- Đảo thứ tự toán hạng làm cấu hình mặc định ghi đè lựa chọn người dùng.\n- Ghép **nông**: nếu giá trị là dict lồng (ví dụ `{\"retry\": {\"times\": 3, \"base\": 0.5}}`), `|` thay **cả** dict con chứ không trộn từng khóa con.\n- Dùng `defaults |= user` trong hàm sẽ làm hỏng dict mặc định dùng chung cho các lần gọi sau.\n\n#### Đọc thêm\n- [PEP 584 — Add Union Operators To dict](https://peps.python.org/pep-0584/)\n- [Built-in Types — dict](https://docs.python.org/3/library/stdtypes.html)",
+   "distractors": {
+    "B": "Tưởng vế trái thắng khi trùng khóa; với `d1 | d2`, giá trị của `d2` (vế phải) ghi đè.",
+    "C": "Nhầm `|` với `|=`: `|` tạo dict **mới**, `defaults` giữ nguyên; chỉ `defaults |= user` mới sửa tại chỗ.",
+    "D": "Tưởng khóa trùng `retries` được giữ cả hai bản; khóa dict là duy nhất nên chỉ còn 3 khóa."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`5 3 3`"
+    },
+    {
+     "key": "B",
+     "text": "`3 3 3`"
+    },
+    {
+     "key": "C",
+     "text": "`5 3 5`"
+    },
+    {
+     "key": "D",
+     "text": "`5 4 3`"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T05-B04",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Trước khi ghi đè, bạn sao chép một bản ghi để thử nghiệm:\n\n```python\nrec = {\"id\": 7, \"tags\": [\"api\"]}\ncp = rec.copy()\ncp[\"id\"] = 8\ncp[\"tags\"].append(\"retry\")\nprint(rec)\n```\n\nKết quả in ra là gì?",
+   "explanation": "`dict.copy()` là shallow copy: tạo dict mới nhưng các giá trị vẫn trỏ cùng đối tượng. Gán `cp[\"id\"]` đổi tham chiếu trong `cp`; `append` sửa list dùng chung. Cần độc lập hoàn toàn thì dùng `copy.deepcopy`.",
+   "section": "b-py",
+   "long": "#### Ý chính\n`dict.copy()` (cũng như `list[:]`, `list(x)`, `copy.copy`) là **shallow copy**: chỉ tạo vỏ chứa mới, các giá trị bên trong vẫn là **cùng đối tượng**. Gán khóa trên bản sao không ảnh hưởng bản gốc, nhưng sửa tại chỗ một đối tượng lồng (list, dict) thì cả hai cùng thấy.\n\n#### Từng bước\n1. `cp = rec.copy()`: `cp` là dict mới; `cp[\"tags\"] is rec[\"tags\"]` là `True`.\n2. `cp[\"id\"] = 8`: gắn khóa `id` của `cp` sang số 8; `rec[\"id\"]` vẫn 7.\n3. `cp[\"tags\"].append(\"retry\")`: sửa list dùng chung.\n4. `print(rec)` → `{'id': 7, 'tags': ['api', 'retry']}`.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 190\" width=\"100%\" style=\"max-width:560px\"><defs><marker id=\"arB04\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs><rect x=\"20\" y=\"30\" width=\"60\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"50.0\" y=\"49.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">rec</text><rect x=\"20\" y=\"120\" width=\"60\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"50.0\" y=\"139.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">cp</text><rect x=\"140\" y=\"15\" width=\"170\" height=\"60\" rx=\"6\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"1.6\"/><text x=\"225.0\" y=\"49.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\"></text><text x=\"225\" y=\"38\" font-size=\"13\" fill=\"currentColor\" text-anchor=\"middle\">{'id': 7,</text><text x=\"225\" y=\"60\" font-size=\"13\" fill=\"currentColor\" text-anchor=\"middle\">'tags': •}</text><rect x=\"140\" y=\"105\" width=\"170\" height=\"60\" rx=\"6\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"1.6\"/><text x=\"225.0\" y=\"139.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\"></text><text x=\"225\" y=\"128\" font-size=\"13\" fill=\"currentColor\" text-anchor=\"middle\">{'id': 8,</text><text x=\"225\" y=\"150\" font-size=\"13\" fill=\"currentColor\" text-anchor=\"middle\">'tags': •}</text><line x1=\"80\" y1=\"45\" x2=\"138\" y2=\"45\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arB04)\"/><line x1=\"80\" y1=\"135\" x2=\"138\" y2=\"135\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arB04)\"/><rect x=\"390\" y=\"72\" width=\"150\" height=\"36\" rx=\"6\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"1.6\"/><text x=\"465.0\" y=\"94.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">['api', 'retry']</text><line x1=\"262\" y1=\"55\" x2=\"388\" y2=\"84\" stroke=\"#10b981\" stroke-width=\"1.6\" marker-end=\"url(#arB04)\"/><line x1=\"262\" y1=\"145\" x2=\"388\" y2=\"98\" stroke=\"#10b981\" stroke-width=\"1.6\" marker-end=\"url(#arB04)\"/><text x=\"465\" y=\"130\" font-size=\"12\" fill=\"#10b981\" text-anchor=\"middle\">list dùng chung</text><text x=\"225\" y=\"185\" font-size=\"11\" fill=\"currentColor\" text-anchor=\"middle\">copy() tạo dict mới, nhưng giá trị bên trong vẫn là cùng đối tượng</text></svg>\n\n| Cách sao chép | Vỏ mới? | Đối tượng lồng mới? |\n|---|---|---|\n| `cp = rec` | không (bí danh) | không |\n| `rec.copy()` / `dict(rec)` / `copy.copy(rec)` | có | không |\n| `copy.deepcopy(rec)` | có | **có** |\n\n```python\nimport copy\nrec = {\"id\": 7, \"tags\": [\"api\"]}\ndeep = copy.deepcopy(rec)\ndeep[\"tags\"].append(\"retry\")\nprint(rec)     # {'id': 7, 'tags': ['api']}\n```\n\n#### Bẫy thường gặp\n- Trong pipeline xử lý log, \"làm sạch\" bản sao nông rồi vô tình sửa luôn dữ liệu gốc dùng cho bước khác.\n- `deepcopy` tốn chi phí với dữ liệu lớn; nhiều khi chỉ cần tạo mới đúng phần cần sửa: `cp = {**rec, \"tags\": rec[\"tags\"] + [\"retry\"]}`.\n\n#### Đọc thêm\n- [copy — Shallow and deep copy operations](https://docs.python.org/3/library/copy.html)\n- [Python FAQ — How do I copy an object](https://docs.python.org/3/faq/programming.html)",
+   "distractors": {
+    "A": "Tưởng `copy()` sao chép sâu; nó chỉ sao chép nông nên list `tags` vẫn dùng chung giữa hai dict.",
+    "B": "Tưởng `cp` là bí danh của `rec` (như `cp = rec`); `copy()` tạo dict mới nên gán `cp[\"id\"]` không ảnh hưởng `rec`.",
+    "D": "Đảo ngược hai cơ chế: gán khóa trên bản sao không chạm bản gốc, còn sửa tại chỗ list lồng bên trong thì có."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`{'id': 7, 'tags': ['api']}`"
+    },
+    {
+     "key": "B",
+     "text": "`{'id': 8, 'tags': ['api', 'retry']}`"
+    },
+    {
+     "key": "C",
+     "text": "`{'id': 7, 'tags': ['api', 'retry']}`"
+    },
+    {
+     "key": "D",
+     "text": "`{'id': 8, 'tags': ['api']}`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T05-B05",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Đoạn code sau in ra gì? Ghi đúng như Python in.\n\n```python\ndef normalize(xs):\n    xs.append(0)\n    xs = [9]\n    xs.append(1)\n    return xs\n\ndata = [5]\nout = normalize(data)\nprint(data, out)\n```",
+   "explanation": "Python truyền tham chiếu tới đối tượng (call by sharing). `append(0)` sửa đối tượng dùng chung; `xs = [9]` chỉ gắn lại tên cục bộ, các thao tác sau không chạm `data`.",
+   "section": "b-py",
+   "long": "#### Ý chính\nPython truyền đối số theo kiểu **call by sharing**: tham số trong hàm là một *tên mới* trỏ tới **cùng đối tượng** mà người gọi truyền vào. Sửa đối tượng (mutation, ví dụ `append`) thì người gọi thấy; **gán lại** tên (rebinding, `xs = ...`) chỉ đổi tên cục bộ, người gọi không bị ảnh hưởng.\n\n#### Từng bước\n1. `normalize(data)`: `xs` và `data` cùng trỏ list `[5]`.\n2. `xs.append(0)`: list dùng chung thành `[5, 0]`, nên `data` cũng là `[5, 0]`.\n3. `xs = [9]`: tên `xs` trỏ sang list **mới**; `data` vẫn trỏ list cũ.\n4. `xs.append(1)`: sửa list mới thành `[9, 1]`, rồi trả về.\n5. `print(data, out)` → `[5, 0] [9, 1]`.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 170\" width=\"100%\" style=\"max-width:560px\"><defs><marker id=\"arB05\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs><rect x=\"20\" y=\"30\" width=\"70\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"55.0\" y=\"49.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">data</text><rect x=\"20\" y=\"105\" width=\"70\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"55.0\" y=\"124.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">xs</text><rect x=\"200\" y=\"30\" width=\"120\" height=\"34\" rx=\"6\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"1.6\"/><text x=\"260.0\" y=\"51.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">[5, 0]</text><rect x=\"200\" y=\"110\" width=\"120\" height=\"34\" rx=\"6\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"1.6\"/><text x=\"260.0\" y=\"131.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">[9, 1]</text><line x1=\"90\" y1=\"45\" x2=\"198\" y2=\"46\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arB05)\"/><line x1=\"90\" y1=\"115\" x2=\"198\" y2=\"52\" stroke=\"#ef4444\" stroke-width=\"1.6\" stroke-dasharray=\"5 4\" marker-end=\"url(#arB05)\"/><text x=\"208\" y=\"90\" font-size=\"11\" fill=\"#ef4444\" text-anchor=\"start\">① trước khi gán</text><line x1=\"90\" y1=\"125\" x2=\"198\" y2=\"127\" stroke=\"#10b981\" stroke-width=\"1.6\" marker-end=\"url(#arB05)\"/><text x=\"150\" y=\"158\" font-size=\"11\" fill=\"#10b981\" text-anchor=\"middle\">② sau xs = [9]</text><text x=\"350\" y=\"50\" font-size=\"12\" fill=\"#3b82f6\" text-anchor=\"start\">append(0) sửa list dùng chung</text><text x=\"350\" y=\"130\" font-size=\"12\" fill=\"#f59e0b\" text-anchor=\"start\">append(1) chỉ sửa list mới</text></svg>\n\n| Thao tác trong hàm | Người gọi thấy? |\n|---|---|\n| `xs.append(v)`, `xs[i] = v`, `xs.sort()`, `xs += [v]` | **có** (sửa tại chỗ) |\n| `xs = [...]`, `xs = xs + [v]`, `xs = sorted(xs)` | không (tạo đối tượng mới) |\n\n#### Bẫy thường gặp\n- `xs += [v]` **có** sửa tại chỗ với list (gọi `__iadd__`), còn `xs = xs + [v]` thì không: hai câu lệnh trông giống nhau nhưng khác hẳn về aliasing.\n- Hàm \"chuẩn hoá\" vừa sửa input vừa trả về giá trị gây khó hiểu; quy ước tốt: hoặc sửa tại chỗ và trả `None` (như `list.sort`), hoặc không sửa và trả bản mới (như `sorted`).\n\n#### Đọc thêm\n- [Python FAQ — How do I write a function with output parameters (call by reference)?](https://docs.python.org/3/faq/programming.html)\n- [Python Reference — Execution model, Naming and binding](https://docs.python.org/3/reference/executionmodel.html)",
+   "mistakes": [
+    {
+     "value": "[5] [9, 1]",
+     "why": "Tưởng Python truyền bản sao của list vào hàm; thực ra `xs` và `data` cùng trỏ một list nên `xs.append(0)` sửa luôn `data`."
+    },
+    {
+     "value": "[9, 1] [9, 1]",
+     "why": "Tưởng gán `xs = [9]` thay luôn đối tượng của `data`; phép gán chỉ cho tên cục bộ `xs` trỏ sang list mới."
+    },
+    {
+     "value": "[5, 0, 1] [9, 1]",
+     "why": "Tưởng `xs.append(1)` vẫn sửa list gốc; sau khi gán lại, `xs` đã trỏ sang list `[9]`."
+    }
+   ],
+   "answer": "[5, 0] [9, 1]",
+   "accept": [
+    "[5, 0] [9, 1]",
+    "[5,0] [9,1]"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T05-B06",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Đếm tần suất từ khóa trong log bằng dict comprehension. Đoạn code sau in ra gì? Ghi đúng như Python in.\n\n```python\nwords = \"Error timeout error retry ERROR ok\".lower().split()\nfreq = {w: words.count(w) for w in words}\nprint(freq)\n```",
+   "explanation": "Sau `lower().split()` có 6 từ, `error` xuất hiện 3 lần. Comprehension ghi `freq[w]` cho cả 6 lần lặp, khóa trùng ghi đè cùng giá trị; thứ tự khóa theo lần gặp đầu.",
+   "section": "b-py",
+   "long": "#### Ý chính\nDict comprehension `{k: v for x in it}` chạy **từng vòng** và ghi `d[k] = v`; khi `k` lặp lại, giá trị cũ bị ghi đè còn vị trí khóa giữ theo lần chèn đầu. Chuẩn hoá chữ hoa thường trước khi đếm (`lower()`) là bước bắt buộc khi đếm từ trong log.\n\n#### Từng bước\n1. `\"Error timeout error retry ERROR ok\".lower()` → `\"error timeout error retry error ok\"`.\n2. `.split()` → `['error', 'timeout', 'error', 'retry', 'error', 'ok']`.\n3. Comprehension chạy 6 vòng:\n\n| Vòng | `w` | `words.count(w)` | `freq` sau vòng |\n|---|---|---|---|\n| 1 | error | 3 | `{'error': 3}` |\n| 2 | timeout | 1 | `+ 'timeout': 1` |\n| 3 | error | 3 | ghi đè, không đổi |\n| 4 | retry | 1 | `+ 'retry': 1` |\n| 5 | error | 3 | ghi đè, không đổi |\n| 6 | ok | 1 | `+ 'ok': 1` |\n\n4. Kết quả: `{'error': 3, 'timeout': 1, 'retry': 1, 'ok': 1}`.\n\n#### Hiệu năng\n`words.count(w)` quét cả list mỗi vòng nên tổng chi phí $O(n^2)$. Với log thật, dùng `collections.Counter` để đếm trong $O(n)$:\n\n```python\nfrom collections import Counter\nwords = \"Error timeout error retry ERROR ok\".lower().split()\nprint(Counter(words))                 # Counter({'error': 3, 'timeout': 1, 'retry': 1, 'ok': 1})\nprint(Counter(words).most_common(1))  # [('error', 3)]\n```\n\n#### Bẫy thường gặp\n- Quên chuẩn hoá: `Error`, `error`, `ERROR` bị đếm thành ba từ khác nhau.\n- Chuỗi có dấu câu (`\"error,\"`) cần tách bằng regex `re.findall(r\"\\w+\", s)` thay vì `split()`.\n\n#### Đọc thêm\n- [Python Tutorial — Dictionaries và dict comprehension](https://docs.python.org/3/tutorial/datastructures.html)\n- [collections.Counter](https://docs.python.org/3/library/collections.html)",
+   "mistakes": [
+    {
+     "value": "{'Error': 1, 'timeout': 1, 'error': 1, 'retry': 1, 'ERROR': 1, 'ok': 1}",
+     "why": "Quên rằng `.lower()` được gọi trước `.split()`, nên mọi từ đã viết thường."
+    },
+    {
+     "value": "{'error': 1, 'timeout': 1, 'retry': 1, 'ok': 1}",
+     "why": "Tưởng mỗi khóa chỉ được tính một lần; giá trị là `words.count(w)` = số lần xuất hiện trong cả list, tức 3 với `error`."
+    },
+    {
+     "value": "{'error': 3, 'timeout': 1, 'error': 3, 'retry': 1, 'error': 3, 'ok': 1}",
+     "why": "Tưởng dict giữ khóa trùng; khóa trùng chỉ ghi đè giá trị, vị trí theo lần chèn đầu tiên."
+    }
+   ],
+   "answer": "{'error': 3, 'timeout': 1, 'retry': 1, 'ok': 1}",
+   "accept": [
+    "{'error': 3, 'timeout': 1, 'retry': 1, 'ok': 1}",
+    "{\"error\": 3, \"timeout\": 1, \"retry\": 1, \"ok\": 1}",
+    "{'error':3,'timeout':1,'retry':1,'ok':1}",
+    "{\"error\":3,\"timeout\":1,\"retry\":1,\"ok\":1}"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T05-B07",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Đoạn code tính tổng độ dài các dòng log:\n\n```python\nlines = [\"GET /a\", \"POST /b\", \"GET /c\"]\nsizes = (len(l) for l in lines)\nprint(sum(sizes), sum(sizes))\n```\n\nKết quả in ra là gì?",
+   "explanation": "Lần `sum` đầu tiêu thụ hết generator: $6 + 7 + 6 = 19$. Lần thứ hai generator đã cạn, `sum` của dãy rỗng là 0.",
+   "section": "b-py",
+   "long": "#### Ý chính\nGenerator là một **iterator**: nó nhớ vị trí hiện tại và chỉ đi tiến. Khi đã sinh hết phần tử, nó ở trạng thái \"cạn\" mãi mãi; duyệt lại sẽ thấy dãy rỗng chứ không báo lỗi.\n\n#### Từng bước\n1. Độ dài các dòng: `len(\"GET /a\") = 6`, `len(\"POST /b\") = 7`, `len(\"GET /c\") = 6`.\n2. `sum(sizes)` lần 1 kéo cả 3 giá trị: $6 + 7 + 6 = 19$.\n3. `sum(sizes)` lần 2: generator đã cạn, `next()` ném `StopIteration` ngay, vòng lặp bên trong `sum` hiểu đó là \"hết dãy\" nên trả giá trị khởi đầu `0`.\n4. In ra `19 0`.\n\n| Đối tượng | Duyệt lần 2 | Ghi chú |\n|---|---|---|\n| `list`, `tuple`, `str` | đủ phần tử | là *iterable*, mỗi lần `iter()` tạo iterator mới |\n| generator, `map`, `filter`, `zip`, file đang mở | **rỗng** | là *iterator*, `iter(g) is g` |\n\n```python\nlines = [\"GET /a\", \"POST /b\", \"GET /c\"]\nsizes = (len(l) for l in lines)\nprint(iter(sizes) is sizes)        # True: iterator trả về chính nó\nprint(sum(sizes), sum(sizes))      # 19 0\n```\n\n#### Cách sửa\n- Cần dùng nhiều lần: tạo list `sizes = [len(l) for l in lines]`.\n- Cần nhiều thống kê trên một lượt (ví dụ tổng và max) với file lớn: duyệt một vòng `for` và cập nhật nhiều biến cùng lúc.\n\n#### Bẫy thường gặp\n- Hàm nhận \"iterable\" rồi duyệt hai lần (ví dụ tính trung bình bằng `sum(x)/len(list(x))`) sẽ sai im lặng khi người gọi truyền generator.\n\n#### Đọc thêm\n- [Python Glossary — iterator, generator iterator](https://docs.python.org/3/glossary.html)\n- [Functional Programming HOWTO — Iterators](https://docs.python.org/3/howto/functional.html)",
+   "distractors": {
+    "A": "Tưởng generator dùng lại được như list; generator chỉ duyệt được **một lần**, lần sau đã cạn.",
+    "C": "`StopIteration` được vòng lặp bên trong `sum` xử lý như tín hiệu kết thúc; generator cạn chỉ cho dãy rỗng.",
+    "D": "Tưởng `sum` chỉ nhận `list`/`tuple`; `sum` nhận mọi iterable, kể cả generator."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`19 19`"
+    },
+    {
+     "key": "B",
+     "text": "`19 0`"
+    },
+    {
+     "key": "C",
+     "text": "Báo lỗi `StopIteration`"
+    },
+    {
+     "key": "D",
+     "text": "Báo lỗi `TypeError`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T05-B08",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Đoạn code sau in ra gì? (Dấu ⏎ phân tách các dòng in ra.)\n\n```python\ndef fetch():\n    try:\n        print(\"try\")\n        return \"data\"\n    finally:\n        print(\"cleanup\")\n\nprint(fetch())\n```",
+   "explanation": "Khi gặp `return \"data\"`, giá trị được giữ lại, khối `finally` chạy (in `cleanup`), rồi hàm mới trả `\"data\"` cho `print` bên ngoài.",
+   "section": "b-py",
+   "long": "#### Ý chính\nKhối `finally` **luôn** chạy khi rời khỏi `try`, dù rời bằng cách bình thường, bằng `return`, `break` hay do ngoại lệ. Với `return` trong `try`, giá trị trả về được tính và *giữ lại*, rồi `finally` chạy, rồi hàm mới thực sự trả giá trị đó.\n\n#### Từng bước\n1. `print(fetch())`: Python phải chạy xong `fetch()` trước khi gọi `print` bên ngoài.\n2. Trong `try`: in `try`, gặp `return \"data\"`, giá trị `\"data\"` được giữ.\n3. Trước khi rời hàm, khối `finally` chạy: in `cleanup`.\n4. Hàm trả `\"data\"`, `print` bên ngoài in `data`.\n\n```mermaid\nflowchart LR\n    A[\"vào try\"] --> B[\"print try\"]\n    B --> C[\"return 'data' (giữ giá trị)\"]\n    C --> D[\"finally: print cleanup\"]\n    D --> E[\"hàm trả 'data'\"]\n    E --> F[\"print bên ngoài in data\"]\n```\n\n| Tình huống trong `try` | `finally` chạy? | Hàm trả |\n|---|---|---|\n| `return x` | có | `x` |\n| ném ngoại lệ không bắt | có | ngoại lệ lan ra sau `finally` |\n| `finally` cũng có `return y` | có | `y` (ghi đè, nuốt cả ngoại lệ) |\n\n#### Ứng dụng\n`finally` dùng để đóng kết nối, giải phóng khoá, ghi log kết thúc cuộc gọi API dù thành công hay lỗi. Thực tế nên ưu tiên `with` (context manager) cho tài nguyên.\n\n#### Bẫy thường gặp\n- Đặt `return` trong `finally`: ghi đè giá trị và **nuốt** ngoại lệ đang lan ra (Python 3.14 bắt đầu cảnh báo `SyntaxWarning` cho mẫu này theo PEP 765).\n\n#### Đọc thêm\n- [Python Tutorial — Defining Clean-up Actions](https://docs.python.org/3/tutorial/errors.html)\n- [Python Reference — The try statement](https://docs.python.org/3/reference/compound_stmts.html)",
+   "distractors": {
+    "A": "Tưởng `return` thoát ngay và bỏ qua `finally`; khối `finally` luôn chạy trước khi hàm thực sự trả về.",
+    "B": "Tưởng `finally` chạy sau khi giá trị trả về được in; `print(fetch())` chỉ in sau khi `fetch()` kết thúc hẳn, tức sau `finally`.",
+    "C": "Tưởng `finally` xoá giá trị trả về; chỉ khi chính `finally` có `return` thì giá trị mới bị thay."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`try` ⏎ `data`"
+    },
+    {
+     "key": "B",
+     "text": "`try` ⏎ `data` ⏎ `cleanup`"
+    },
+    {
+     "key": "C",
+     "text": "`try` ⏎ `cleanup` ⏎ `None`"
+    },
+    {
+     "key": "D",
+     "text": "`try` ⏎ `cleanup` ⏎ `data`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T05-B09",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Một lớp gom dòng log của từng worker:\n\n```python\nclass Collector:\n    lines = []\n    def add(self, line):\n        self.lines.append(line)\n\na = Collector()\nb = Collector()\na.add(\"E1\")\na.add(\"E2\")\nb.add(\"W1\")\nprint(len(a.lines), len(b.lines))\n```\n\nKết quả in ra là gì?",
+   "explanation": "`self.lines` không có trong instance nên Python tìm lên lớp và lấy list dùng chung; ba lần `append` cùng sửa một list. Sửa: khởi tạo `self.lines = []` trong `__init__`.",
+   "section": "b-py",
+   "long": "#### Ý chính\nBiến khai báo ngay trong thân lớp (`lines = []`) là **thuộc tính lớp**, tạo **một lần** khi định nghĩa lớp và mọi instance dùng chung. `self.lines` khi instance không có thuộc tính riêng tên `lines` sẽ tra lên lớp và lấy đúng list dùng chung đó; `append` sửa tại chỗ list này.\n\n#### Từng bước\n1. `a`, `b` là hai instance, `__dict__` của cả hai đều rỗng.\n2. `a.add(\"E1\")`, `a.add(\"E2\")`, `b.add(\"W1\")`: cả ba lần `self.lines` đều là `Collector.lines`.\n3. List dùng chung có 3 phần tử, nên `len(a.lines) = len(b.lines) = 3`.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 170\" width=\"100%\" style=\"max-width:560px\"><defs><marker id=\"arB09\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs><rect x=\"20\" y=\"25\" width=\"60\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"50.0\" y=\"44.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">a</text><rect x=\"20\" y=\"105\" width=\"60\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"50.0\" y=\"124.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">b</text><rect x=\"140\" y=\"25\" width=\"130\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"205.0\" y=\"44.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">instance a: {}</text><rect x=\"140\" y=\"105\" width=\"130\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"205.0\" y=\"124.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">instance b: {}</text><line x1=\"80\" y1=\"40\" x2=\"138\" y2=\"40\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arB09)\"/><line x1=\"80\" y1=\"120\" x2=\"138\" y2=\"120\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arB09)\"/><rect x=\"320\" y=\"60\" width=\"110\" height=\"40\" rx=\"6\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"1.6\"/><text x=\"375.0\" y=\"84.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">Collector</text><line x1=\"270\" y1=\"40\" x2=\"318\" y2=\"72\" stroke=\"#3b82f6\" stroke-width=\"1.6\" stroke-dasharray=\"5 4\" marker-end=\"url(#arB09)\"/><line x1=\"270\" y1=\"120\" x2=\"318\" y2=\"90\" stroke=\"#3b82f6\" stroke-width=\"1.6\" stroke-dasharray=\"5 4\" marker-end=\"url(#arB09)\"/><text x=\"295\" y=\"160\" font-size=\"11\" fill=\"#3b82f6\" text-anchor=\"middle\">tra cứu self.lines: instance → lớp</text><rect x=\"455\" y=\"62\" width=\"95\" height=\"36\" rx=\"6\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"1.6\"/><text x=\"502.5\" y=\"84.0\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">['E1','E2','W1']</text><line x1=\"430\" y1=\"80\" x2=\"453\" y2=\"80\" stroke=\"#10b981\" stroke-width=\"1.6\" marker-end=\"url(#arB09)\"/></svg>\n\n#### Cách sửa\n\n```python\nclass Collector:\n    def __init__(self):\n        self.lines = []          # mỗi instance một list riêng\n    def add(self, line):\n        self.lines.append(line)\n```\n\n| Khai báo | Tạo khi nào | Dùng chung? |\n|---|---|---|\n| `lines = []` trong thân lớp | lúc định nghĩa lớp | **có** |\n| `self.lines = []` trong `__init__` | mỗi lần tạo instance | không |\n| `self.lines = self.lines + [x]` (với thuộc tính lớp) | tạo thuộc tính instance mới | tách ra từ đây |\n\n#### Bẫy thường gặp\n- Đây là cùng một gốc lỗi với tham số mặc định khả biến và `dataclass` cấm `list` mặc định (câu C08): một đối tượng khả biến được tạo một lần rồi bị chia sẻ ngoài ý muốn.\n- Thuộc tính lớp bất biến (hằng số như `MAX_RETRY = 3`) thì hoàn toàn bình thường.\n\n#### Đọc thêm\n- [Python Tutorial — Class and Instance Variables](https://docs.python.org/3/tutorial/classes.html)\n- [Data model — Custom classes](https://docs.python.org/3/reference/datamodel.html)",
+   "distractors": {
+    "B": "Tưởng mỗi đối tượng có list riêng; `lines` khai báo ở thân lớp là **thuộc tính lớp**, mọi instance dùng chung.",
+    "C": "Tưởng `self.lines.append` chỉ sửa bản sao cục bộ; `self.lines` tìm thấy đúng list của lớp và `append` sửa nó tại chỗ.",
+    "D": "Tưởng `self` không thấy thuộc tính lớp; tra cứu thuộc tính đi từ instance lên lớp nên `self.lines` hợp lệ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`3 3`"
+    },
+    {
+     "key": "B",
+     "text": "`2 1`"
+    },
+    {
+     "key": "C",
+     "text": "`0 0`"
+    },
+    {
+     "key": "D",
+     "text": "Báo `AttributeError`"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T05-B10",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Trích mã trạng thái và độ trễ từ log:\n\n```python\nimport re\nlog = \"GET /api/users 200 12ms; GET /api/orders 503 480ms\"\nprint(re.findall(r\"(\\d{3}) (\\d+)ms\", log))\n```\n\nKết quả in ra là gì?",
+   "explanation": "Pattern có 2 nhóm nên `findall` trả list các tuple 2 phần tử, theo thứ tự xuất hiện; giá trị là chuỗi.",
+   "section": "b-py",
+   "long": "#### Ý chính\n`re.findall` trả về kiểu dữ liệu **phụ thuộc số nhóm** trong pattern: không có nhóm → list chuỗi khớp; một nhóm → list nội dung nhóm; từ hai nhóm → list tuple. Mọi thứ bắt được đều là `str`.\n\n#### Từng bước\n1. Pattern `(\\d{3}) (\\d+)ms`: nhóm 1 là đúng 3 chữ số, một dấu cách, nhóm 2 là một hoặc nhiều chữ số, theo sau là chữ `ms`.\n2. Quét chuỗi log, có hai chỗ khớp: `200 12ms` và `503 480ms`.\n3. Có 2 nhóm nên mỗi khớp thành tuple: `[('200', '12'), ('503', '480')]`.\n\n| Pattern | `findall` trả |\n|---|---|\n| `\\d{3} \\d+ms` (0 nhóm) | `['200 12ms', '503 480ms']` |\n| `(\\d{3}) \\d+ms` (1 nhóm) | `['200', '503']` |\n| `(\\d{3}) (\\d+)ms` (2 nhóm) | `[('200', '12'), ('503', '480')]` |\n| `(?:\\d{3}) (\\d+)ms` (nhóm không bắt) | `['12', '480']` |\n\nĐổi sang số để tính toán:\n\n```python\nimport re\nlog = \"GET /api/users 200 12ms; GET /api/orders 503 480ms\"\nrows = [(int(s), int(ms)) for s, ms in re.findall(r\"(\\d{3}) (\\d+)ms\", log)]\nprint(rows, sum(ms for _, ms in rows))      # [(200, 12), (503, 480)] 492\n```\n\n#### Bẫy thường gặp\n- Thêm ngoặc chỉ để nhóm logic (ví dụ `(GET|POST)`) làm thay đổi kiểu kết quả; dùng `(?:...)` nếu không cần bắt.\n- Luôn viết pattern bằng raw string `r\"...\"` để `\\d` không bị hiểu là escape của chuỗi.\n\n#### Đọc thêm\n- [re — Regular expression operations](https://docs.python.org/3/library/re.html)\n- [Regular Expression HOWTO](https://docs.python.org/3/howto/regex.html)",
+   "distractors": {
+    "A": "Tưởng `findall` trả cả chuỗi khớp; khi pattern có từ 2 nhóm trở lên, mỗi phần tử là tuple các nhóm.",
+    "B": "Tưởng regex tự đổi sang số; mọi nhóm bắt được đều là `str`, cần `int()` để chuyển.",
+    "D": "Nhầm với `re.search` chỉ trả khớp đầu tiên; `findall` quét toàn bộ chuỗi."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`['200 12ms', '503 480ms']`"
+    },
+    {
+     "key": "B",
+     "text": "`[(200, 12), (503, 480)]`"
+    },
+    {
+     "key": "C",
+     "text": "`[('200', '12'), ('503', '480')]`"
+    },
+    {
+     "key": "D",
+     "text": "`[('200', '12')]`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T05-C01",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Sau khi đếm từ trong log, bạn xếp hạng từ khóa: tần suất **giảm dần**, hoà thì theo **chữ cái tăng dần**.\n\n```python\nfreq = {\"retry\": 3, \"error\": 5, \"ok\": 3, \"timeout\": 5}\ntop = sorted(freq.items(), key=lambda kv: (-kv[1], kv[0]))\nprint([w for w, _ in top])\n```\n\nKết quả in ra là gì?",
+   "explanation": "Key là tuple $(-\\text{count}, \\text{word})$: so thành phần đầu trước, $-5 < -3$ nên tần suất 5 đứng trước; hoà thì so chuỗi: `error` < `timeout`, `ok` < `retry`.",
+   "section": "b-py",
+   "long": "#### Ý chính\n`sorted(..., key=f)` sắp theo giá trị `f(x)`. Khi `f` trả **tuple**, Python so sánh theo thứ tự từ điển: so phần tử đầu, hoà mới so phần tử thứ hai. Đổi dấu số (`-count`) là mẹo để một tiêu chí giảm dần trong khi tiêu chí khác vẫn tăng dần.\n\n#### Từng bước\nTính key cho từng mục:\n\n| Từ | count | key $(-\\text{count}, \\text{word})$ |\n|---|---|---|\n| retry | 3 | $(-3, \\text{retry})$ |\n| error | 5 | $(-5, \\text{error})$ |\n| ok | 3 | $(-3, \\text{ok})$ |\n| timeout | 5 | $(-5, \\text{timeout})$ |\n\nSắp tăng dần theo key: $(-5, \\text{error}) < (-5, \\text{timeout}) < (-3, \\text{ok}) < (-3, \\text{retry})$ → `['error', 'timeout', 'ok', 'retry']`.\n\n#### Cách khác: dựa vào sort ổn định\nSort của Python ổn định (stable), nên có thể sắp hai lượt, tiêu chí phụ trước:\n\n```python\nfreq = {\"retry\": 3, \"error\": 5, \"ok\": 3, \"timeout\": 5}\nitems = sorted(freq.items())                                  # theo tên\nitems = sorted(items, key=lambda kv: kv[1], reverse=True)     # theo count giảm\nprint([w for w, _ in items])     # ['error', 'timeout', 'ok', 'retry']\n```\n\nCách hai lượt dùng được cả khi tiêu chí giảm dần là chuỗi (không đổi dấu được).\n\n#### Bẫy thường gặp\n- `reverse=True` với key tuple đảo **cả hai** tiêu chí, cho `['timeout', 'error', 'retry', 'ok']`.\n- Chỉ dùng `key=lambda kv: -kv[1]`: hoà thì giữ thứ tự chèn của dict, không phải thứ tự chữ cái.\n- `Counter.most_common()` cũng giữ thứ tự gặp đầu khi hoà, không sắp theo tên.\n\n#### Đọc thêm\n- [Sorting Techniques — Sort Stability and Complex Sorts](https://docs.python.org/3/howto/sorting.html)\n- [Sorting algorithm — Stability (Wikipedia)](https://en.wikipedia.org/wiki/Sorting_algorithm)",
+   "distractors": {
+    "A": "Tưởng dấu trừ đảo chiều cả tuple (như `reverse=True`); `-kv[1]` chỉ đảo thành phần đếm, tên vẫn tăng dần.",
+    "B": "Bỏ qua tiêu chí thứ hai: thứ tự này chỉ đúng nếu key là `-kv[1]` (sort ổn định giữ thứ tự chèn khi hoà).",
+    "C": "Tưởng `-kv[1]` vẫn sắp tần suất tăng dần; key âm làm số lớn đứng trước."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`['timeout', 'error', 'retry', 'ok']`"
+    },
+    {
+     "key": "B",
+     "text": "`['error', 'timeout', 'retry', 'ok']`"
+    },
+    {
+     "key": "C",
+     "text": "`['ok', 'retry', 'error', 'timeout']`"
+    },
+    {
+     "key": "D",
+     "text": "`['error', 'timeout', 'ok', 'retry']`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T05-C02",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Client gọi API đọc timeout từ biến toàn cục. Đoạn code sau in ra gì?\n\n```python\ntimeout = 5\n\ndef call(url, t=timeout):\n    return f\"{url}:{t}\"\n\ntimeout = 30\nprint(call(\"a\"), call(\"b\", timeout))\n```",
+   "explanation": "Biểu thức mặc định được đánh giá **một lần** khi định nghĩa hàm: `t` mặc định = 5. Gán lại `timeout = 30` không ảnh hưởng mặc định; lời gọi thứ hai truyền 30 trực tiếp.",
+   "section": "b-py",
+   "long": "#### Ý chính\nBiểu thức giá trị mặc định của tham số được **đánh giá một lần**, tại thời điểm câu lệnh `def` chạy, rồi lưu vào `func.__defaults__`. Về sau đổi biến toàn cục đã dùng làm mặc định cũng không ảnh hưởng.\n\n#### Từng bước\n1. `timeout = 5`.\n2. `def call(url, t=timeout)`: Python tính `timeout` → 5, lưu `call.__defaults__ == (5,)`.\n3. `timeout = 30`: tên toàn cục trỏ sang 30, nhưng tuple mặc định vẫn giữ 5.\n4. `call(\"a\")` dùng mặc định → `a:5`; `call(\"b\", timeout)` truyền 30 → `b:30`.\n5. In ra `a:5 b:30`.\n\n```python\ntimeout = 5\ndef call(url, t=timeout):\n    return f\"{url}:{t}\"\nprint(call.__defaults__)      # (5,)\ntimeout = 30\nprint(call(\"a\"), call(\"b\", timeout))\n```\n\n| Muốn | Cách viết |\n|---|---|\n| Mặc định cố định lúc định nghĩa | `def call(url, t=5)` |\n| Mặc định đọc cấu hình **lúc gọi** | `def call(url, t=None): t = TIMEOUT if t is None else t` |\n| Mặc định là list/dict mới mỗi lần | `def f(xs=None): xs = [] if xs is None else xs` |\n\n#### Liên hệ với lỗi tham số mặc định khả biến\nCùng cơ chế \"tính một lần\" giải thích vì sao `def f(xs=[])` dùng chung một list qua các lần gọi: đối tượng mặc định được tạo một lần và tái sử dụng.\n\n#### Bẫy thường gặp\n- Cấu hình đọc từ biến môi trường ở đầu module rồi dùng làm mặc định: thay đổi cấu hình lúc chạy (ví dụ trong test) sẽ không có tác dụng.\n\n#### Đọc thêm\n- [Python Tutorial — Default Argument Values](https://docs.python.org/3/tutorial/controlflow.html)\n- [Python FAQ — Why are default values shared between objects?](https://docs.python.org/3/faq/programming.html)",
+   "mistakes": [
+    {
+     "value": "a:30 b:30",
+     "why": "Tưởng giá trị mặc định được đọc lúc **gọi** hàm; nó được tính một lần lúc chạy câu lệnh `def`, khi `timeout` còn là 5."
+    },
+    {
+     "value": "a:5 b:5",
+     "why": "Tưởng tham số `t` bị khoá ở 5; truyền đối số tường minh `timeout` (lúc đó là 30) thì dùng giá trị truyền vào."
+    }
+   ],
+   "answer": "a:5 b:30",
+   "accept": [
+    "a:5 b:30"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T05-C03",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Bạn gom lỗi theo nhóm dịch vụ:\n\n```python\ngroups = dict.fromkeys([\"web\", \"db\"], [])\ngroups[\"web\"].append(\"timeout\")\nprint(groups)\n```\n\nKết quả in ra là gì?",
+   "explanation": "`dict.fromkeys(keys, v)` dùng chung đối tượng `v` cho mọi khóa, nên sửa list qua `groups[\"web\"]` cũng thấy ở `\"db\"`. Sửa: `{k: [] for k in keys}` hoặc `collections.defaultdict(list)`.",
+   "section": "b-py",
+   "long": "#### Ý chính\n`dict.fromkeys(keys, value)` gán **cùng một đối tượng** `value` cho mọi khóa. Với giá trị bất biến (`0`, `None`) thì vô hại; với list/dict thì mọi khóa chia sẻ một vùng chứa, sửa qua khóa này thấy ở khóa khác.\n\n#### Từng bước\n1. `[]` được tạo **một lần** khi đánh giá đối số, rồi gắn cho `\"web\"` và `\"db\"`.\n2. `groups[\"web\"].append(\"timeout\")`: sửa list dùng chung.\n3. `print(groups)` → `{'web': ['timeout'], 'db': ['timeout']}`.\n4. Kiểm: `groups[\"web\"] is groups[\"db\"]` là `True`.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 150\" width=\"100%\" style=\"max-width:560px\"><defs><marker id=\"arC03\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs><rect x=\"20\" y=\"50\" width=\"80\" height=\"34\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"60.0\" y=\"71.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">groups</text><rect x=\"150\" y=\"20\" width=\"90\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"1.6\"/><text x=\"195.0\" y=\"39.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">'web'</text><rect x=\"150\" y=\"85\" width=\"90\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"1.6\"/><text x=\"195.0\" y=\"104.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">'db'</text><line x1=\"100\" y1=\"60\" x2=\"148\" y2=\"36\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arC03)\"/><line x1=\"100\" y1=\"75\" x2=\"148\" y2=\"99\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arC03)\"/><rect x=\"330\" y=\"50\" width=\"130\" height=\"36\" rx=\"6\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"1.6\"/><text x=\"395.0\" y=\"72.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">['timeout']</text><line x1=\"240\" y1=\"35\" x2=\"328\" y2=\"62\" stroke=\"#10b981\" stroke-width=\"1.6\" marker-end=\"url(#arC03)\"/><line x1=\"240\" y1=\"100\" x2=\"328\" y2=\"76\" stroke=\"#10b981\" stroke-width=\"1.6\" marker-end=\"url(#arC03)\"/><text x=\"395\" y=\"110\" font-size=\"12\" fill=\"#10b981\" text-anchor=\"middle\">một list duy nhất</text><text x=\"280\" y=\"140\" font-size=\"11\" fill=\"currentColor\" text-anchor=\"middle\">dict.fromkeys(keys, []) dùng chung đối tượng [] cho mọi khóa</text></svg>\n\n#### Cách gom nhóm đúng\n\n```python\nfrom collections import defaultdict\nlogs = [(\"web\", \"timeout\"), (\"db\", \"deadlock\"), (\"web\", \"502\")]\n\ng1 = {k: [] for k in [\"web\", \"db\"]}        # mỗi khóa một list mới\ng2 = defaultdict(list)                     # tạo list khi gặp khóa lần đầu\nfor svc, err in logs:\n    g1[svc].append(err)\n    g2[svc].append(err)\nprint(g1)        # {'web': ['timeout', '502'], 'db': ['deadlock']}\nprint(dict(g2))  # như trên\n```\n\n| Cách tạo | Mỗi khóa list riêng? |\n|---|---|\n| `dict.fromkeys(keys, [])` | không |\n| `{k: [] for k in keys}` | có |\n| `defaultdict(list)` | có |\n| `d.setdefault(k, []).append(v)` | có (literal `[]` tạo mới mỗi lần gọi) |\n\n#### Bẫy thường gặp\n- Cùng họ lỗi với `[[0] * 3] * 2` và tham số mặc định `xs=[]`: một đối tượng khả biến bị nhân bản tham chiếu.\n\n#### Đọc thêm\n- [Built-in Types — dict.fromkeys](https://docs.python.org/3/library/stdtypes.html)\n- [collections.defaultdict](https://docs.python.org/3/library/collections.html)",
+   "distractors": {
+    "A": "Tưởng mỗi khóa nhận một list rỗng riêng; `fromkeys` gán **cùng một** đối tượng list cho mọi khóa.",
+    "C": "Nhầm với `fromkeys` không truyền giá trị (mặc định `None`); ở đây có truyền `[]`.",
+    "D": "Nhầm yêu cầu hashable của khóa với giá trị; giá trị dict có thể là list."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`{'web': ['timeout'], 'db': []}`"
+    },
+    {
+     "key": "B",
+     "text": "`{'web': ['timeout'], 'db': ['timeout']}`"
+    },
+    {
+     "key": "C",
+     "text": "`{'web': ['timeout'], 'db': None}`"
+    },
+    {
+     "key": "D",
+     "text": "Báo `TypeError`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T05-C04",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Đoạn code sau dùng closure làm bộ đếm. Kết quả in ra là gì?\n\n```python\ndef make_counter():\n    n = 0\n    def inc(step=1):\n        nonlocal n\n        n += step\n        return n\n    return inc\n\nc1 = make_counter()\nc2 = make_counter()\nc1()\nc1(5)\nc2()\nprint(c1(), c2(10))\n```",
+   "explanation": "`c1`: $0 + 1 = 1$, $1 + 5 = 6$, $6 + 1 = 7$. `c2` có biến riêng: $0 + 1 = 1$, $1 + 10 = 11$.",
+   "section": "b-py",
+   "long": "#### Ý chính\n**Closure** là hàm lồng nhớ các biến của hàm bao ngoài kể cả khi hàm ngoài đã trả về. Biến được giữ trong một *cell*. `nonlocal n` cho phép hàm trong **gán** lại biến đó (không có `nonlocal`, `n += step` sẽ ném `UnboundLocalError`). Mỗi lần gọi hàm ngoài tạo một cell mới.\n\n#### Từng bước\n\n| Lời gọi | `n` của c1 | `n` của c2 | Giá trị trả |\n|---|---|---|---|\n| `c1()` | $0+1 = 1$ | 0 | 1 |\n| `c1(5)` | $1+5 = 6$ | 0 | 6 |\n| `c2()` | 6 | $0+1 = 1$ | 1 |\n| `c1()` (trong print) | $6+1 = 7$ | 1 | **7** |\n| `c2(10)` (trong print) | 7 | $1+10 = 11$ | **11** |\n\nIn ra `7 11`.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 160\" width=\"100%\" style=\"max-width:560px\"><defs><marker id=\"arC04\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs><rect x=\"20\" y=\"25\" width=\"60\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"50.0\" y=\"44.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">c1</text><rect x=\"20\" y=\"100\" width=\"60\" height=\"30\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"50.0\" y=\"119.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">c2</text><rect x=\"130\" y=\"20\" width=\"120\" height=\"40\" rx=\"6\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"1.6\"/><text x=\"190.0\" y=\"44.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">inc (closure)</text><rect x=\"130\" y=\"95\" width=\"120\" height=\"40\" rx=\"6\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"1.6\"/><text x=\"190.0\" y=\"119.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">inc (closure)</text><line x1=\"80\" y1=\"40\" x2=\"128\" y2=\"40\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arC04)\"/><line x1=\"80\" y1=\"115\" x2=\"128\" y2=\"115\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arC04)\"/><rect x=\"310\" y=\"22\" width=\"90\" height=\"36\" rx=\"6\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"1.6\"/><text x=\"355.0\" y=\"44.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">cell n = 7</text><rect x=\"310\" y=\"97\" width=\"90\" height=\"36\" rx=\"6\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"1.6\"/><text x=\"355.0\" y=\"119.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">cell n = 11</text><line x1=\"250\" y1=\"40\" x2=\"308\" y2=\"40\" stroke=\"#10b981\" stroke-width=\"1.6\" marker-end=\"url(#arC04)\"/><line x1=\"250\" y1=\"115\" x2=\"308\" y2=\"115\" stroke=\"#f59e0b\" stroke-width=\"1.6\" marker-end=\"url(#arC04)\"/><text x=\"420\" y=\"37\" font-size=\"12\" fill=\"#10b981\" text-anchor=\"start\">1 → 6 → 7</text><text x=\"420\" y=\"112\" font-size=\"12\" fill=\"#f59e0b\" text-anchor=\"start\">1 → 11</text><text x=\"280\" y=\"155\" font-size=\"11\" fill=\"currentColor\" text-anchor=\"middle\">mỗi lần gọi make_counter() tạo một cell n riêng</text></svg>\n\n```python\ndef make_counter():\n    n = 0\n    def inc(step=1):\n        nonlocal n\n        n += step\n        return n\n    return inc\n\nc1 = make_counter()\nc1(); c1(5)\nprint(c1.__closure__[0].cell_contents)   # 6: xem trực tiếp giá trị trong cell\n```\n\n#### Ứng dụng\nClosure dùng làm bộ đếm số lần retry, rate limiter đơn giản, hoặc decorator có trạng thái (câu D03 dùng closure 3 tầng).\n\n#### Bẫy thường gặp\n- Quên `nonlocal`: phép gán biến trong hàm khiến Python coi `n` là biến cục bộ của `inc`, đọc trước khi gán → `UnboundLocalError`.\n- Chỉ **sửa** đối tượng khả biến (ví dụ `state[\"n\"] += 1` với `state` là dict) thì không cần `nonlocal`, vì không gán lại tên.\n\n#### Đọc thêm\n- [PEP 3104 — Access to Names in Outer Scopes](https://peps.python.org/pep-3104/)\n- [Closure (computer programming) — Wikipedia](https://en.wikipedia.org/wiki/Closure_%28computer_programming%29)",
+   "mistakes": [
+    {
+     "value": "1 10",
+     "why": "Tưởng `n` được đặt lại về 0 ở mỗi lần gọi `inc`; `nonlocal` giữ `n` trong cell của closure giữa các lần gọi."
+    },
+    {
+     "value": "8 18",
+     "why": "Tưởng `c1` và `c2` dùng chung biến `n`; mỗi lần gọi `make_counter()` tạo một biến `n` mới riêng cho closure đó."
+    },
+    {
+     "value": "1 1",
+     "why": "Tưởng giá trị đối số `5`, `10` bị bỏ qua và mỗi lời gọi bắt đầu lại; cả `step` lẫn trạng thái `n` đều có tác dụng."
+    }
+   ],
+   "answer": "7 11",
+   "accept": [
+    "7 11"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T05-C05",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Module retry tạo sẵn các hàm tính thời gian chờ (backoff) cho từng lần thử:\n\n```python\ndelays = [lambda: 2 ** k for k in range(4)]\nprint([d() for d in delays])\n```\n\nKết quả in ra là gì?",
+   "explanation": "Cả 4 lambda dùng chung biến `k` của comprehension; khi gọi, `k = 3` nên mỗi hàm trả $2^3 = 8$. Sửa bằng `lambda k=k: 2 ** k`.",
+   "section": "b-py",
+   "long": "#### Ý chính\nClosure trong Python chụp **biến**, không chụp **giá trị**. Giá trị được tra cứu lúc hàm được **gọi** (late binding). Mọi lambda tạo trong cùng một vòng lặp dùng chung một biến `k`; khi gọi sau vòng lặp, chúng đều thấy giá trị cuối cùng.\n\n#### Từng bước\n1. Comprehension tạo 4 lambda; cả 4 tham chiếu biến `k` trong scope của comprehension.\n2. Vòng lặp kết thúc với `k = 3` (giá trị cuối của `range(4)`).\n3. Gọi từng lambda: mỗi cái tính $2^k = 2^3 = 8$.\n4. Kết quả `[8, 8, 8, 8]`.\n\n| Cách viết | Kết quả |\n|---|---|\n| `[lambda: 2 ** k for k in range(4)]` | `[8, 8, 8, 8]` |\n| `[lambda k=k: 2 ** k for k in range(4)]` | `[1, 2, 4, 8]` (mặc định chụp giá trị lúc định nghĩa) |\n| `[functools.partial(pow, 2, k) for k in range(4)]` | `[1, 2, 4, 8]` |\n| `[2 ** k for k in range(4)]` (tính luôn) | `[1, 2, 4, 8]` |\n\n```python\ndelays = [lambda k=k: 2 ** k for k in range(4)]\nprint([d() for d in delays])      # [1, 2, 4, 8]\n```\n\nMẹo `k=k` tận dụng đúng điều ở câu C02: giá trị mặc định được tính **một lần** lúc tạo hàm.\n\n#### Bẫy thường gặp\n- Lỗi này hay xuất hiện khi đăng ký callback trong vòng lặp (nút bấm, handler cho từng endpoint): mọi callback xử lý phần tử cuối.\n- Python 3 cho comprehension scope riêng nên `k` không rò ra ngoài, nhưng closure vẫn giữ cell của `k` nên không có `NameError`.\n\n#### Đọc thêm\n- [Python FAQ — Why do lambdas defined in a loop with different values all return the same result?](https://docs.python.org/3/faq/programming.html)\n- [Exponential backoff — Wikipedia](https://en.wikipedia.org/wiki/Exponential_backoff)",
+   "distractors": {
+    "A": "Tưởng lambda chụp **giá trị** `k` lúc tạo; closure chụp **biến** `k`, đọc giá trị lúc gọi (late binding).",
+    "C": "Tưởng `k` tăng thêm 1 sau vòng cuối như vòng `for` kiểu C (k = 4); `range(4)` dừng ở `k = 3`.",
+    "D": "Tưởng `k` biến mất sau comprehension; closure giữ cell của `k` nên vẫn đọc được giá trị cuối là 3."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`[1, 2, 4, 8]`"
+    },
+    {
+     "key": "B",
+     "text": "`[8, 8, 8, 8]`"
+    },
+    {
+     "key": "C",
+     "text": "`[16, 16, 16, 16]`"
+    },
+    {
+     "key": "D",
+     "text": "Báo `NameError`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T05-C06",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Pipeline đọc log dùng generator. Đoạn code sau in ra gì? Ghi mỗi dòng output trên một dòng.\n\n```python\ndef read(lines):\n    for l in lines:\n        print(\"read\", l)\n        yield l\n\nerrs = (l for l in read([\"ok\", \"E1\", \"E2\"]) if l.startswith(\"E\"))\nprint(\"start\")\nprint(next(errs))\n```",
+   "explanation": "Generator lười: `print(\"start\")` chạy trước. `next(errs)` kéo `ok` (in `read ok`, bị lọc), kéo `E1` (in `read E1`, thoả) rồi trả `E1`. `E2` chưa được đọc.",
+   "section": "b-py",
+   "long": "#### Ý chính\nGenerator **lười** (lazy): tạo generator không chạy dòng code nào bên trong; code chỉ chạy khi có `next()`, và chạy đến `yield` tiếp theo thì dừng. Ghép nhiều generator thành pipeline nghĩa là dữ liệu chảy **từng phần tử một** qua tất cả các tầng.\n\n#### Từng bước\n1. `errs = (... for l in read([...]) if ...)`: tạo hai generator, chưa in gì (biểu thức `read([...])` chỉ tạo generator object).\n2. `print(\"start\")` → dòng 1: `start`.\n3. `next(errs)` kéo phần tử từ `read`: `read` in `read ok`, `yield \"ok\"`; bộ lọc thấy không bắt đầu bằng `E`, kéo tiếp.\n4. `read` in `read E1`, `yield \"E1\"`; bộ lọc chấp nhận, `next` trả `\"E1\"`.\n5. `print` in `E1`. `E2` chưa bao giờ được đọc.\n\n```mermaid\nsequenceDiagram\n    participant M as main\n    participant F as errs (bộ lọc)\n    participant R as read()\n    M->>M: print start\n    M->>F: next()\n    F->>R: next()\n    R-->>F: in 'read ok', yield ok\n    F->>R: next() vì ok bị loại\n    R-->>F: in 'read E1', yield E1\n    F-->>M: E1\n    M->>M: print E1\n```\n\n| Dòng output | Do ai in |\n|---|---|\n| `start` | main |\n| `read ok` | `read` (lần kéo 1) |\n| `read E1` | `read` (lần kéo 2) |\n| `E1` | main |\n\n#### Bẫy thường gặp\n- Tưởng generator chạy ngay khi tạo: thứ tự in bị đảo.\n- Mở file trong generator rồi không duyệt hết: nên dùng `with` bên trong generator để file được đóng khi generator bị thu hồi.\n\n#### Đọc thêm\n- [Functional Programming HOWTO — Generators](https://docs.python.org/3/howto/functional.html)\n- [Python Reference — Yield expressions](https://docs.python.org/3/reference/expressions.html)",
+   "mistakes": [
+    {
+     "value": "read ok\nread E1\nread E2\nstart\nE1",
+     "why": "Tưởng tạo generator expression là chạy hết `read` ngay; generator chỉ chạy khi có ai gọi `next()`."
+    },
+    {
+     "value": "start\nread ok\nread E1\nread E2\nE1",
+     "why": "Tưởng phải lọc xong cả dãy mới trả phần tử đầu; generator dừng ngay khi có phần tử thoả điều kiện."
+    },
+    {
+     "value": "start\nE1",
+     "why": "Quên các lệnh `print` bên trong `read`: chúng chạy khi `next()` kéo từng dòng qua."
+    }
+   ],
+   "answer": "start\nread ok\nread E1\nE1",
+   "accept": [
+    "start\nread ok\nread E1\nE1"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T05-C07",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Trích số từ một dòng log cấu hình:\n\n```python\nimport re\ns = \"user=42 retry=3\"\na = re.match(r\"\\d+\", s)\nb = re.search(r\"\\d+\", s)\nprint(a, b.group(), re.findall(r\"=(\\d+)\", s))\n```\n\nKết quả in ra là gì?",
+   "explanation": "`match` neo ở vị trí 0 nên trả `None`; `search` quét tìm khớp đầu tiên là `42`; `findall` với 1 nhóm trả list nội dung nhóm `['42', '3']`.",
+   "section": "b-py",
+   "long": "#### Ý chính\nBa hàm `re` hay dùng khác nhau ở **vị trí** tìm và **kiểu** kết quả:\n- `re.match(p, s)`: chỉ thử khớp tại **đầu chuỗi**; trả `Match` hoặc `None`.\n- `re.search(p, s)`: quét tìm khớp **đầu tiên** ở bất kỳ đâu; trả `Match` hoặc `None`.\n- `re.findall(p, s)`: trả list **mọi** khớp không chồng lấn (hoặc nội dung nhóm nếu có nhóm).\n\n#### Từng bước\n1. `s = \"user=42 retry=3\"` bắt đầu bằng `u`, không phải chữ số → `re.match(r\"\\d+\", s)` là `None`.\n2. `re.search(r\"\\d+\", s)` tìm thấy `42` ở vị trí 5 → `b.group()` là `'42'`; `print` in chuỗi không nháy: `42`.\n3. `re.findall(r\"=(\\d+)\", s)`: hai khớp `=42`, `=3`; pattern có 1 nhóm nên trả `['42', '3']`.\n4. In ra `None 42 ['42', '3']`.\n\n| Hàm | Pattern `\\d+` trên `\"user=42 retry=3\"` |\n|---|---|\n| `re.match` | `None` |\n| `re.search` | `<re.Match object; span=(5, 7), match='42'>` |\n| `re.fullmatch` | `None` (phải khớp toàn chuỗi) |\n| `re.findall` | `['42', '3']` |\n\nParse cấu hình dạng `key=value` gọn nhất:\n\n```python\nimport re\ns = \"user=42 retry=3\"\ncfg = {k: int(v) for k, v in re.findall(r\"(\\w+)=(\\d+)\", s)}\nprint(cfg)          # {'user': 42, 'retry': 3}\n```\n\n#### Bẫy thường gặp\n- Dùng `re.match` để \"kiểm tra chuỗi có chứa\" số: sai khi phần số không ở đầu.\n- Gọi `.group()` trên kết quả `None` → `AttributeError`; luôn kiểm `if m:` trước.\n\n#### Đọc thêm\n- [re — search() vs. match()](https://docs.python.org/3/library/re.html)\n- [Regular Expression HOWTO](https://docs.python.org/3/howto/regex.html)",
+   "distractors": {
+    "A": "Tưởng `re.match` tìm ở bất kỳ đâu; nó chỉ khớp tại **đầu chuỗi**, mà `s` bắt đầu bằng chữ `u`. Hơn nữa nếu khớp thì in đối tượng `Match`, không phải `42`.",
+    "B": "Tưởng `findall` trả cả phần khớp ngoài nhóm; khi có một nhóm, chỉ nội dung nhóm được trả về.",
+    "C": "Tưởng `findall` dừng ở khớp đầu như `search`; nó trả mọi khớp không chồng lấn."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`42 42 ['42', '3']`"
+    },
+    {
+     "key": "B",
+     "text": "`None 42 ['=42', '=3']`"
+    },
+    {
+     "key": "C",
+     "text": "`None 42 ['42']`"
+    },
+    {
+     "key": "D",
+     "text": "`None 42 ['42', '3']`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T05-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Hàng đợi tác vụ định nghĩa một dataclass:\n\n```python\nfrom dataclasses import dataclass\n\n@dataclass\nclass Job:\n    name: str\n    tags: list = []\n```\n\nĐiều gì xảy ra khi Python thực thi định nghĩa lớp này?",
+   "explanation": "`@dataclass` từ chối mặc định khả biến không hashable (`list`, `dict`, `set`) bằng `ValueError: mutable default ... use default_factory`. Cách đúng: `tags: list = field(default_factory=list)`.",
+   "section": "b-py",
+   "long": "#### Ý chính\nVới lớp thường, `tags = []` trong thân lớp là thuộc tính lớp dùng chung (câu B09). `@dataclass` biến các annotation có giá trị thành **tham số mặc định** của `__init__`, và vì tham số mặc định chỉ tính một lần, mọi đối tượng sẽ dùng chung list. Để chặn lỗi này, `dataclasses` **từ chối** ngay lúc xử lý lớp mọi mặc định là `list`, `dict`, `set` (nói chính xác: đối tượng không hashable) bằng `ValueError`.\n\n#### Từng bước\n1. Python chạy thân lớp, tạo lớp `Job` với `tags = []`.\n2. Decorator `@dataclass` duyệt các field, thấy mặc định của `tags` là list.\n3. Ném `ValueError: mutable default <class 'list'> for field tags is not allowed: use default_factory`.\n4. Chưa có đối tượng nào được tạo.\n\n#### Cách đúng\n\n```python\nfrom dataclasses import dataclass, field\n\n@dataclass\nclass Job:\n    name: str\n    tags: list = field(default_factory=list)   # gọi list() mỗi lần tạo Job\n\na, b = Job(\"a\"), Job(\"b\")\na.tags.append(\"retry\")\nprint(a.tags, b.tags)       # ['retry'] []\n```\n\n| Khai báo trong `@dataclass` | Kết quả |\n|---|---|\n| `tags: list = []` | `ValueError` lúc định nghĩa |\n| `tags: list = field(default_factory=list)` | mỗi đối tượng list riêng |\n| `tags: tuple = ()` | được (tuple bất biến, hashable) |\n| `tags: list = None` rồi xử lý trong `__post_init__` | được, nhưng dài hơn |\n\n#### Bẫy thường gặp\n- Kiểm tra chỉ dựa trên tính hashable: một đối tượng khả biến nhưng có `__hash__` tuỳ biến vẫn lọt qua, nên đừng dựa hoàn toàn vào kiểm tra này.\n\n#### Đọc thêm\n- [dataclasses — Mutable default values](https://docs.python.org/3/library/dataclasses.html)\n- [PEP 557 — Data Classes](https://peps.python.org/pep-0557/)",
+   "distractors": {
+    "B": "Tưởng dataclass tự sao chép giá trị mặc định cho mỗi đối tượng; nó không làm vậy, nên mới chặn list mặc định.",
+    "C": "Đó là hành vi của lớp thường (thuộc tính lớp); `@dataclass` phát hiện mặc định `list`/`dict`/`set` và báo lỗi.",
+    "D": "Lỗi phát sinh lúc decorator xử lý lớp, trước khi tạo bất kỳ đối tượng nào."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Báo `ValueError` ngay khi định nghĩa lớp"
+    },
+    {
+     "key": "B",
+     "text": "Chạy bình thường, mỗi `Job` có list `tags` riêng"
+    },
+    {
+     "key": "C",
+     "text": "Chạy bình thường, mọi `Job` dùng chung list"
+    },
+    {
+     "key": "D",
+     "text": "Báo lỗi khi tạo đối tượng `Job(\"a\")`"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T05-C09",
+   "module": "C",
+   "type": "code",
+   "points": 6,
+   "level": "van-dung",
+   "prompt": "Log của một hệ thống microservice đã được parse thành list các dict:\n\n```python\nrecords = [\n    {\"service\": \"auth\", \"status\": 200, \"ms\": 35},\n    {\"service\": \"pay\",  \"status\": 503, \"ms\": 1200},\n    {\"service\": \"auth\", \"status\": 500, \"ms\": 80},\n    {\"status\": 200, \"ms\": 10},                       # thiếu service\n    {\"service\": \"pay\",  \"status\": 200, \"ms\": 240},\n    {\"service\": \"auth\", \"status\": 200, \"ms\": 41},\n]\n```\n\nViết hàm `summarize(records)` (chỉ dùng thư viện chuẩn) trả về `dict` gom nhóm theo `service`, mỗi giá trị là dict `{\"n\": số bản ghi, \"err\": số bản ghi có status >= 500, \"max_ms\": ms lớn nhất}`. Yêu cầu:\n- bỏ qua bản ghi thiếu khóa `service` hoặc `status`; bản ghi thiếu `ms` thì coi `ms = 0`;\n- thứ tự khóa của kết quả theo lần xuất hiện đầu tiên của service;\n- không sửa `records` đầu vào.\n\nVới dữ liệu trên, `summarize(records)` phải trả về:\n\n```\n{'auth': {'n': 3, 'err': 1, 'max_ms': 80}, 'pay': {'n': 2, 'err': 1, 'max_ms': 1200}}\n```",
+   "explanation": "Định hướng chấm: một lượt duyệt, gom nhóm bằng dict, dùng `get`/`in` để bỏ qua bản ghi thiếu khóa, mỗi nhóm có dict thống kê riêng.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nBài gom nhóm (group-by) thủ công với dict: duyệt **một lượt**, với mỗi bản ghi hợp lệ thì lấy (hoặc tạo) dict thống kê của nhóm rồi cập nhật. Ba điểm hay mất điểm: truy cập khóa thiếu gây `KeyError`, các nhóm vô tình dùng chung một dict thống kê, và sửa input.\n\n#### Lời giải mẫu\n\n```python\ndef summarize(records):\n    out = {}\n    for r in records:\n        svc = r.get(\"service\")\n        if svc is None or \"status\" not in r:\n            continue\n        s = out.setdefault(svc, {\"n\": 0, \"err\": 0, \"max_ms\": 0})\n        s[\"n\"] += 1\n        if r[\"status\"] >= 500:\n            s[\"err\"] += 1\n        s[\"max_ms\"] = max(s[\"max_ms\"], r.get(\"ms\", 0))\n    return out\n```\n\n#### Từng bước với dữ liệu đề\n\n| Bản ghi | Hợp lệ? | auth (n, err, max) | pay (n, err, max) |\n|---|---|---|---|\n| auth 200 35 | có | (1, 0, 35) | |\n| pay 503 1200 | có | | (1, 1, 1200) |\n| auth 500 80 | có | (2, 1, 80) | |\n| (thiếu service) | bỏ | | |\n| pay 200 240 | có | | (2, 1, 1200) |\n| auth 200 41 | có | (3, 1, 80) | |\n\n```mermaid\nflowchart TD\n    A[\"lấy bản ghi r\"] --> B{\"có service và status?\"}\n    B -- không --> A\n    B -- có --> C[\"s = out.setdefault(svc, dict mới)\"]\n    C --> D[\"n += 1, err += 1 nếu status >= 500\"]\n    D --> E[\"max_ms = max(max_ms, ms hoặc 0)\"]\n    E --> A\n```\n\n#### Biến thể với `defaultdict`\n\n```python\nfrom collections import defaultdict\ndef summarize2(records):\n    out = defaultdict(lambda: {\"n\": 0, \"err\": 0, \"max_ms\": 0})\n    for r in records:\n        if \"service\" in r and \"status\" in r:\n            s = out[r[\"service\"]]\n            s[\"n\"] += 1\n            s[\"err\"] += r[\"status\"] >= 500\n            s[\"max_ms\"] = max(s[\"max_ms\"], r.get(\"ms\", 0))\n    return dict(out)\n```\n\n#### Bẫy thường gặp\n- `out = dict.fromkeys(services, {\"n\": 0, ...})`: mọi service dùng chung một dict (câu C03).\n- Khởi tạo `max_ms` bằng `ms` của bản ghi đầu nhưng quên trường hợp thiếu `ms`.\n- Dùng `r[\"service\"]` trước khi kiểm tra → `KeyError` ở bản ghi thứ 4.\n- Độ phức tạp $O(n)$ thời gian, $O(k)$ bộ nhớ với $k$ là số service.\n\n#### Đọc thêm\n- [Built-in Types — dict.setdefault](https://docs.python.org/3/library/stdtypes.html)\n- [collections.defaultdict](https://docs.python.org/3/library/collections.html)",
+   "modelAnswer": "```python\ndef summarize(records):\n    out = {}\n    for r in records:\n        svc = r.get(\"service\")\n        if svc is None or \"status\" not in r:\n            continue  # bỏ qua bản ghi thiếu khóa\n        s = out.setdefault(svc, {\"n\": 0, \"err\": 0, \"max_ms\": 0})\n        s[\"n\"] += 1\n        if r[\"status\"] >= 500:\n            s[\"err\"] += 1\n        s[\"max_ms\"] = max(s[\"max_ms\"], r.get(\"ms\", 0))\n    return out\n```\n\n`setdefault` nhận một dict literal mới ở **mỗi** lần gọi nên mỗi service có dict riêng (khác với `dict.fromkeys(..., {})` dùng chung một dict). Dict giữ thứ tự chèn nên thứ tự khóa theo lần gặp đầu. Độ phức tạp $O(n)$.",
+   "rubric": [
+    {
+     "criterion": "Duyệt một lượt và gom nhóm đúng theo `service` bằng dict (`setdefault`, `defaultdict` hoặc kiểm tra `in`), thứ tự khóa theo lần gặp đầu",
+     "points": 2
+    },
+    {
+     "criterion": "Đếm `n` và `err` đúng (ngưỡng `status >= 500`), tính `max_ms` đúng, mặc định `ms = 0` khi thiếu",
+     "points": 2
+    },
+    {
+     "criterion": "Bỏ qua bản ghi thiếu `service`/`status` không ném `KeyError`; không sửa input; mỗi nhóm có dict thống kê riêng (không dùng chung một dict mặc định)",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "T05-D01",
+   "module": "D",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung-cao",
+   "prompt": "Một lô request được lưu dạng tuple `(danh_sách_id, số_lần_thử)`:\n\n```python\nbatch = ([\"req-1\"], 3)\ntry:\n    batch[0] += [\"req-2\"]\nexcept TypeError:\n    print(\"TypeError\")\nprint(batch)\n```\n\nKết quả in ra là gì? (Dấu ⏎ phân tách các dòng in ra.)",
+   "explanation": "`batch[0] += x` tương đương `tmp = batch[0].__iadd__(x)` (list được mở rộng tại chỗ) rồi `batch[0] = tmp` (tuple không cho gán, ném `TypeError`). Kết quả: có lỗi nhưng list đã bị sửa.",
+   "section": "b-py",
+   "long": "#### Ý chính\nCâu lệnh gán tăng cường `x[i] += y` được Python dịch thành **hai** bước: gọi `x[i].__iadd__(y)` rồi **gán lại** kết quả vào `x[i]`. Với `x` là tuple và `x[i]` là list: bước 1 thành công và sửa list tại chỗ; bước 2 thất bại vì tuple không hỗ trợ gán phần tử. Kết quả là vừa có `TypeError`, vừa có dữ liệu đã bị thay đổi.\n\n#### Từng bước\n1. `batch[0]` là list `['req-1']`.\n2. `list.__iadd__(['req-2'])` mở rộng list thành `['req-1', 'req-2']` và trả chính list đó.\n3. `batch[0] = <list>` → `TypeError: 'tuple' object does not support item assignment`.\n4. Khối `except` in `TypeError`; sau đó `print(batch)` in `(['req-1', 'req-2'], 3)`.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 170\" width=\"100%\" style=\"max-width:560px\"><defs><marker id=\"arD01\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs><text x=\"10\" y=\"22\" font-size=\"13\" fill=\"currentColor\" text-anchor=\"start\">batch[0] += ['req-2'] được thực hiện thành 2 bước</text><rect x=\"20\" y=\"40\" width=\"250\" height=\"50\" rx=\"6\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"1.6\"/><text x=\"145.0\" y=\"69.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\"></text><text x=\"145\" y=\"60\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">① tmp = batch[0].__iadd__(['req-2'])</text><text x=\"145\" y=\"80\" font-size=\"12\" fill=\"#10b981\" text-anchor=\"middle\">list mở rộng tại chỗ ✓</text><line x1=\"270\" y1=\"65\" x2=\"300\" y2=\"65\" stroke=\"currentColor\" stroke-width=\"1.6\" marker-end=\"url(#arD01)\"/><rect x=\"300\" y=\"40\" width=\"240\" height=\"50\" rx=\"6\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"1.6\"/><text x=\"420.0\" y=\"69.0\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\"></text><text x=\"420\" y=\"60\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">② batch[0] = tmp</text><text x=\"420\" y=\"80\" font-size=\"12\" fill=\"#ef4444\" text-anchor=\"middle\">tuple không cho gán ✗ TypeError</text><text x=\"280\" y=\"125\" font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">Ngoại lệ ở bước ②, nhưng bước ① đã sửa list:</text><text x=\"280\" y=\"150\" font-size=\"13\" fill=\"#3b82f6\" text-anchor=\"middle\">batch = (['req-1', 'req-2'], 3)</text></svg>\n\n| Câu lệnh | Lỗi? | List bị sửa? |\n|---|---|---|\n| `batch[0] += [\"req-2\"]` | `TypeError` | **có** |\n| `batch[0].extend([\"req-2\"])` | không | có |\n| `batch[0].append(\"req-2\")` | không | có |\n| `batch[0] = batch[0] + [\"req-2\"]` | `TypeError` | không (`+` tạo list mới) |\n\nXem bytecode để thấy hai bước: `import dis; dis.dis('t[0] += x')` có `BINARY_OP (+=)` rồi `STORE_SUBSCR`.\n\n#### Bẫy thường gặp\n- Tin rằng \"có ngoại lệ thì không có gì thay đổi\": thao tác không nguyên tử (non-atomic), phải kiểm lại trạng thái sau lỗi.\n- \"Tuple bất biến\" chỉ đảm bảo tuple luôn trỏ cùng các đối tượng; đối tượng khả biến bên trong vẫn đổi được. Tuple như vậy cũng không hashable.\n\n#### Đọc thêm\n- [Python FAQ — Why does a_tuple[i] += ['item'] raise an exception when the addition works?](https://docs.python.org/3/faq/programming.html)\n- [Python Reference — Augmented assignment statements](https://docs.python.org/3/reference/simple_stmts.html)",
+   "distractors": {
+    "A": "Tưởng `+=` trên phần tử list chỉ gọi `extend` nên không lỗi; câu lệnh còn bước gán lại `batch[0] = ...` vào tuple, bước này ném `TypeError`.",
+    "B": "Tưởng lỗi xảy ra trước khi list bị sửa; thực tế `list.__iadd__` đã mở rộng list tại chỗ, rồi phép gán vào tuple mới thất bại.",
+    "D": "Nhầm `+=` với `append`; `+=` trên list nối **các phần tử** của vế phải, giống `extend`."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`(['req-1', 'req-2'], 3)`"
+    },
+    {
+     "key": "B",
+     "text": "`TypeError` ⏎ `(['req-1'], 3)`"
+    },
+    {
+     "key": "C",
+     "text": "`TypeError` ⏎ `(['req-1', 'req-2'], 3)`"
+    },
+    {
+     "key": "D",
+     "text": "`TypeError` ⏎ `(['req-1', ['req-2']], 3)`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T05-D02",
+   "module": "D",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung-cao",
+   "prompt": "Đoạn code sau dùng dataclass bất biến có thứ tự. Kết quả in ra là gì?\n\n```python\nfrom dataclasses import dataclass, field\n\n@dataclass(order=True, frozen=True)\nclass Event:\n    level: int\n    msg: str = field(compare=False)\n\nevs = [Event(2, \"b\"), Event(1, \"a\"), Event(2, \"c\")]\nprint(len(set(evs)), sorted(evs)[0].msg, Event(2, \"x\") == Event(2, \"y\"))\n```",
+   "explanation": "Chỉ `level` tham gia so sánh và hash. `Event(2, \"b\")` và `Event(2, \"c\")` bằng nhau nên set còn 2 phần tử; `sorted` đặt `level=1` lên đầu nên in `a`; `Event(2, \"x\") == Event(2, \"y\")` là `True`.",
+   "section": "b-py",
+   "long": "#### Ý chính\nTrong dataclass, `field(compare=False)` loại field khỏi **cả** `__eq__`, các phương thức thứ tự (`order=True`) và (khi `hash=None`, mặc định) cả `__hash__`. Với `frozen=True, eq=True`, dataclass sinh `__hash__` dựa trên các field có `compare=True`. Ở đây chỉ `level` quyết định so sánh và băm.\n\n#### Từng bước\n1. `set(evs)`: `Event(2, \"b\")` và `Event(2, \"c\")` có cùng hash (theo `level=2`) và `==` trả `True` → bị coi là trùng, set giữ 1. Cộng `Event(1, \"a\")` → **2** phần tử.\n2. `sorted(evs)`: so theo tuple `(level,)`; `level=1` nhỏ nhất → phần tử đầu là `Event(1, \"a\")`, `.msg` là `a`.\n3. `Event(2, \"x\") == Event(2, \"y\")`: so `(2,) == (2,)` → `True`.\n4. In ra `2 a True`.\n\n| Cấu hình | `__eq__` | `__hash__` | Dùng trong set? |\n|---|---|---|---|\n| `@dataclass` | có | `None` | không (`TypeError`) |\n| `@dataclass(frozen=True)` | có | sinh từ field compare | có |\n| `@dataclass(eq=False)` | theo identity | theo identity | có |\n| `@dataclass(unsafe_hash=True)` | có | sinh dù khả biến | có, nhưng nguy hiểm |\n\n```python\nfrom dataclasses import dataclass, field\n\n@dataclass(order=True, frozen=True)\nclass Event:\n    level: int\n    msg: str = field(compare=False)\n\nprint(hash(Event(2, \"b\")) == hash(Event(2, \"c\")))   # True\n# Event(1, \"a\").level = 5  -> dataclasses.FrozenInstanceError\n```\n\n#### Ứng dụng\nMẫu này dùng cho hàng đợi ưu tiên (`heapq`) chứa sự kiện log: so theo mức độ, phần dữ liệu đi kèm không tham gia so sánh. Nhưng dùng `set` để khử trùng sẽ **làm mất** sự kiện khác nội dung cùng level, nên chọn `compare=False` cần có chủ đích.\n\n#### Bẫy thường gặp\n- Tưởng `compare=False` chỉ tác động tới `__eq__`.\n- Tưởng mọi dataclass đều không hash được.\n\n#### Đọc thêm\n- [dataclasses — field(), frozen, __hash__](https://docs.python.org/3/library/dataclasses.html)\n- [Data model — object.__hash__](https://docs.python.org/3/reference/datamodel.html)",
+   "mistakes": [
+    {
+     "value": "3 a False",
+     "why": "Tưởng `msg` vẫn tham gia so sánh và băm vì là field; `compare=False` loại `msg` khỏi `__eq__`, `__lt__` và (mặc định) cả `__hash__`."
+    },
+    {
+     "value": "3 a True",
+     "why": "Hiểu đúng `__eq__` nhưng tưởng `__hash__` vẫn dùng mọi field; với `hash=None`, hash lấy theo các field có `compare=True`, nên hai `Event` level 2 bằng nhau và trùng hash."
+    },
+    {
+     "value": "TypeError",
+     "why": "Tưởng dataclass không hash được; điều đó chỉ đúng khi `eq=True` và `frozen=False`. Với `frozen=True`, dataclass sinh `__hash__`."
+    }
+   ],
+   "answer": "2 a True",
+   "accept": [
+    "2 a True"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T05-D03",
+   "module": "D",
+   "type": "code",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Gọi API thanh toán đôi khi lỗi mạng tạm thời. Viết decorator có tham số `retry(times=3, base=0.5, on=(ConnectionError, TimeoutError), sleep=time.sleep)` (chỉ dùng thư viện chuẩn) với đặc tả:\n\n1. Gọi hàm được bọc tối đa `times` lần **tổng cộng**; thành công thì trả ngay kết quả.\n2. Nếu lần thử thứ `i` (đếm từ 0) ném ngoại lệ thuộc `on` và vẫn còn lượt, gọi `sleep(base * 2**i)` rồi thử lại. **Không** ngủ sau lần thử cuối.\n3. Hết lượt thì ném lại **chính** ngoại lệ cuối cùng (giữ nguyên kiểu và traceback).\n4. Ngoại lệ không thuộc `on` (ví dụ `ValueError`) ném ra ngay, không thử lại.\n5. Giữ `__name__` của hàm gốc; `times < 1` thì `retry(...)` ném `ValueError`.\n\nVí dụ (truyền `sleep=waits.append` để test không phải chờ thật):\n\n```python\nwaits = []\ncalls = {\"n\": 0}\n\n@retry(times=4, base=0.5, sleep=waits.append)\ndef get_price(sku):\n    calls[\"n\"] += 1\n    if calls[\"n\"] < 3:\n        raise ConnectionError(\"mất kết nối\")\n    return 42\n\nprint(get_price(\"A1\"), calls[\"n\"], waits)   # 42 3 [0.5, 1.0]\n```",
+   "explanation": "Định hướng chấm: decorator có tham số = closure 3 tầng; `except on` với tuple kiểu ngoại lệ; `raise` trần trong `except` giữ nguyên ngoại lệ; backoff mũ $base \\cdot 2^i$.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nDecorator **có tham số** là một hàm trả về decorator: ba tầng closure `retry(...)` → `deco(func)` → `wrapper(*args, **kwargs)`. Logic retry gồm vòng lặp có giới hạn, `except on` (tuple kiểu ngoại lệ), `raise` trần để ném lại đúng ngoại lệ đang xử lý, và thời gian chờ tăng theo hàm mũ (exponential backoff) $t_i = base \\cdot 2^i$.\n\n#### Lời giải mẫu\n\n```python\nimport functools\nimport time\n\ndef retry(times=3, base=0.5, on=(ConnectionError, TimeoutError), sleep=time.sleep):\n    if times < 1:\n        raise ValueError(\"times phải >= 1\")\n    def deco(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            for i in range(times):\n                try:\n                    return func(*args, **kwargs)\n                except on:\n                    if i == times - 1:\n                        raise\n                    sleep(base * 2 ** i)\n        return wrapper\n    return deco\n```\n\n```mermaid\nflowchart TD\n    S[\"i = 0\"] --> C[\"gọi func\"]\n    C -- \"thành công\" --> OK[\"trả kết quả\"]\n    C -- \"lỗi thuộc on\" --> L{\"i là lần cuối?\"}\n    C -- \"lỗi khác\" --> X[\"ném ra ngay\"]\n    L -- có --> R[\"raise lại lỗi cuối\"]\n    L -- không --> W[\"sleep(base * 2^i), i += 1\"]\n    W --> C\n```\n\n#### Từng bước với ví dụ của đề (`times=4, base=0.5`)\n\n| Lần thử $i$ | Kết quả | Chờ $0{,}5 \\cdot 2^i$ |\n|---|---|---|\n| 0 | `ConnectionError` | 0,5 s |\n| 1 | `ConnectionError` | 1,0 s |\n| 2 | trả 42 | không chờ |\n\nNên in `42 3 [0.5, 1.0]`. Nếu lỗi mãi với `times=3, base=1`: chờ `[1, 2]`, gọi 3 lần, ném lại lỗi của lần 3. Tổng thời gian chờ tối đa: $base\\,(2^{times-1} - 1)$.\n\n#### Bẫy thường gặp\n- `except Exception` thử lại cả lỗi lập trình (`ValueError`, `KeyError`) → che bug và tốn thời gian.\n- `raise e` sau vòng lặp với biến `e` đã bị xoá (Python xoá tên trong `except ... as e` khi ra khỏi khối) → `NameError`/`UnboundLocalError`.\n- Ngủ cả sau lần thử cuối, hoặc vòng lặp kết thúc mà rơi xuống trả `None` im lặng.\n- Thiếu `functools.wraps`: hàm bọc mất `__name__`, `__doc__`, khó debug và log.\n- Thực tế nên thêm *jitter* (ngẫu nhiên hoá thời gian chờ) để nhiều client không cùng retry một lúc, và chỉ retry các thao tác idempotent.\n\n#### Đọc thêm\n- [functools.wraps](https://docs.python.org/3/library/functools.html)\n- [Exponential backoff — Wikipedia](https://en.wikipedia.org/wiki/Exponential_backoff)\n- [PEP 318 — Decorators for Functions and Methods](https://peps.python.org/pep-0318/)",
+   "modelAnswer": "```python\nimport functools\nimport time\n\n\ndef retry(times=3, base=0.5, on=(ConnectionError, TimeoutError), sleep=time.sleep):\n    if times < 1:\n        raise ValueError(\"times phải >= 1\")\n\n    def deco(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            for i in range(times):\n                try:\n                    return func(*args, **kwargs)\n                except on:\n                    if i == times - 1:\n                        raise          # ném lại đúng ngoại lệ cuối\n                    sleep(base * 2 ** i)\n        return wrapper\n\n    return deco\n```\n\nVới `times=4, base=0.5`: lần 0 lỗi → chờ $0{,}5 \\cdot 2^0 = 0{,}5$ s; lần 1 lỗi → chờ $0{,}5 \\cdot 2^1 = 1$ s; lần 2 thành công → trả 42. Tổng thời gian chờ tối đa là $\\sum_{i=0}^{times-2} base \\cdot 2^i = base\\,(2^{times-1} - 1)$.",
+   "rubric": [
+    {
+     "criterion": "Cấu trúc decorator có tham số 3 tầng (`retry` → `deco(func)` → `wrapper(*args, **kwargs)`), dùng `functools.wraps`, kiểm `times < 1`",
+     "points": 1.5
+    },
+    {
+     "criterion": "Vòng thử lại đúng số lần tổng cộng, trả kết quả ngay khi thành công, truyền đúng `*args, **kwargs`",
+     "points": 1.5
+    },
+    {
+     "criterion": "Chỉ bắt `except on`, ngoại lệ khác lọt ra ngay; hết lượt thì `raise` lại đúng ngoại lệ cuối (không nuốt lỗi, không trả `None`)",
+     "points": 1.5
+    },
+    {
+     "criterion": "Thời gian chờ đúng `base * 2**i`, không ngủ sau lần cuối, gọi qua tham số `sleep` (test được không cần chờ thật)",
+     "points": 1.5
+    }
+   ]
+  }
+ ]
+}

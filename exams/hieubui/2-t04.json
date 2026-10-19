@@ -1,0 +1,1014 @@
+{
+ "title": "CĐ-04 · Thống kê và kiểm định A/B",
+ "description": "Thống kê mô tả: trung vị, phân vị, độ lệch — 15% · Sai số chuẩn, khoảng tin cậy — 20% · Kiểm định, p-value, sai lầm loại I/II, power — 25% · Thiết kế A/B: cỡ mẫu, SRM, nhìn trộm, đa so sánh — 30% · Tương quan, nhân quả, nghịch lý Simpson — 10%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T04-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Đội backend đo độ trễ API `POST /orders` (gọi khi người dùng bấm nút **Đặt hàng**) của 9 yêu cầu, đơn vị ms:\n\n180, 150, 210, 160, 2900, 170, 190, 200, 165\n\nTrung vị và trung bình cộng của mẫu này lần lượt là bao nhiêu?",
+   "explanation": "Sắp xếp: 150, 160, 165, 170, **180**, 190, 200, 210, 2900; $n = 9$ lẻ nên trung vị là phần tử thứ $(n+1)/2 = 5$, bằng 180 ms. Trung bình $\\bar{x} = 4325/9 \\approx 480{,}6$ ms, bị một yêu cầu 2900 ms kéo lên gần gấp 3 trung vị.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nTrung vị là giá trị đứng giữa **sau khi sắp xếp**; trung bình cộng dùng mọi giá trị nên rất nhạy với ngoại lai. Với độ trễ (phân phối lệch phải, có yêu cầu bị treo), trung vị mô tả trải nghiệm \"điển hình\" tốt hơn.\n\n#### Từng bước\n1. Sắp xếp: 150, 160, 165, 170, **180**, 190, 200, 210, 2900.\n2. $n = 9$ lẻ nên trung vị là phần tử thứ $(9+1)/2 = 5$: **180 ms**.\n3. Tổng $= 4325$, trung bình $\\bar{x} = 4325/9 \\approx 480{,}6$ ms.\n4. Một yêu cầu 2900 ms làm trung bình lớn gần gấp 3 trung vị, trong khi 8/9 yêu cầu đều dưới 211 ms.\n\n```python\nimport statistics as st\nx = [180, 150, 210, 160, 2900, 170, 190, 200, 165]\nprint(st.median(x), round(st.mean(x), 1))   # 180 480.6\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 170\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"40.0\" y1=\"110.0\" x2=\"530.0\" y2=\"110.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"40.0\" y1=\"110.0\" x2=\"40.0\" y2=\"116.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"40.0\" y=\"132.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<line x1=\"121.7\" y1=\"110.0\" x2=\"121.7\" y2=\"116.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"121.7\" y=\"132.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">500</text>\n<line x1=\"203.3\" y1=\"110.0\" x2=\"203.3\" y2=\"116.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"203.3\" y=\"132.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1000</text>\n<line x1=\"285.0\" y1=\"110.0\" x2=\"285.0\" y2=\"116.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"285.0\" y=\"132.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1500</text>\n<line x1=\"366.7\" y1=\"110.0\" x2=\"366.7\" y2=\"116.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"366.7\" y=\"132.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">2000</text>\n<line x1=\"448.3\" y1=\"110.0\" x2=\"448.3\" y2=\"116.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"448.3\" y=\"132.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">2500</text>\n<line x1=\"530.0\" y1=\"110.0\" x2=\"530.0\" y2=\"116.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"530.0\" y=\"132.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">3000</text>\n<text x=\"285.0\" y=\"155.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">độ trễ (ms)</text>\n<circle cx=\"64.5\" cy=\"104.0\" r=\"4\" fill=\"#3b82f6\"/>\n<circle cx=\"66.1\" cy=\"95.0\" r=\"4\" fill=\"#3b82f6\"/>\n<circle cx=\"67.0\" cy=\"86.0\" r=\"4\" fill=\"#3b82f6\"/>\n<circle cx=\"67.8\" cy=\"77.0\" r=\"4\" fill=\"#3b82f6\"/>\n<circle cx=\"69.4\" cy=\"104.0\" r=\"4\" fill=\"#3b82f6\"/>\n<circle cx=\"71.0\" cy=\"95.0\" r=\"4\" fill=\"#3b82f6\"/>\n<circle cx=\"72.7\" cy=\"86.0\" r=\"4\" fill=\"#3b82f6\"/>\n<circle cx=\"74.3\" cy=\"77.0\" r=\"4\" fill=\"#3b82f6\"/>\n<circle cx=\"513.7\" cy=\"104.0\" r=\"4\" fill=\"#3b82f6\"/>\n<line x1=\"69.4\" y1=\"30.0\" x2=\"69.4\" y2=\"110.0\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<text x=\"73.4\" y=\"24.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#10b981\" font-weight=\"bold\">trung vị 180</text>\n<line x1=\"118.5\" y1=\"50.0\" x2=\"118.5\" y2=\"110.0\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-dasharray=\"5 4\"/>\n<text x=\"122.5\" y=\"46.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\" font-weight=\"bold\">trung bình ≈ 480,6</text>\n<text x=\"513.7\" y=\"88.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">2900 (ngoại lai)</text>\n</svg>\n\n| Cách tính | Trung vị | Trung bình |\n|---|---|---|\n| Đúng (cả 9 yêu cầu) | 180 | 480,6 |\n| Lấy phần tử giữa khi chưa sắp xếp | 2900 | 480,6 |\n| Loại 2900 rồi tính | 175 | 178,1 |\n\n#### Bẫy thường gặp\n- Quên sắp xếp trước khi lấy phần tử giữa.\n- Với $n$ chẵn, trung vị là trung bình hai phần tử giữa.\n- Tự ý xoá ngoại lai: yêu cầu 2900 ms là trải nghiệm thật của người dùng; nên báo cáo thêm p95/p99 thay vì xoá.\n\n#### Đọc thêm\n- [Median (Wikipedia)](https://en.wikipedia.org/wiki/Median)\n- [Robust statistics (Wikipedia)](https://en.wikipedia.org/wiki/Robust_statistics)\n",
+   "distractors": {
+    "A": "Lấy phần tử ở giữa danh sách **chưa sắp xếp** (vị trí thứ 5 là 2900). Trung vị phải tính sau khi sắp xếp.",
+    "C": "Đảo vai trò hai đại lượng: trung bình mới là con số bị ngoại lai kéo lên, trung vị thì không.",
+    "D": "Tự ý loại 2900 ms rồi mới tính. Đề hỏi thống kê của cả mẫu 9 yêu cầu; loại ngoại lai phải có lý do và phải báo cáo."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Trung vị $2900$ ms; trung bình $\\approx 480{,}6$ ms"
+    },
+    {
+     "key": "B",
+     "text": "Trung vị $180$ ms; trung bình $\\approx 480{,}6$ ms"
+    },
+    {
+     "key": "C",
+     "text": "Trung vị $480{,}6$ ms; trung bình $180$ ms"
+    },
+    {
+     "key": "D",
+     "text": "Trung vị $175$ ms; trung bình $\\approx 178{,}1$ ms"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T04-A02",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Dashboard trang thanh toán ghi: **p95 độ trễ của nút Đặt hàng = 820 ms** trong ngày hôm qua (tính trên toàn bộ yêu cầu). Phát biểu nào diễn giải đúng con số này?",
+   "explanation": "p95 là phân vị thứ 95: giá trị $q_{0{,}95}$ sao cho khoảng 95% quan sát $\\le q_{0{,}95}$. Nó mô tả đuôi chậm (5% yêu cầu tệ nhất) mà trung bình thường che mất.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nPhân vị thứ $k$ ($p_k$) là giá trị mà khoảng $k\\%$ quan sát nhỏ hơn hoặc bằng nó. p95 độ trễ = 820 ms nghĩa là khoảng 95% yêu cầu hoàn tất trong tối đa 820 ms, 5% chậm hơn. Đội SRE dùng p95/p99 vì người dùng cảm nhận rõ nhất những lần **chậm**, còn trung bình bị đa số yêu cầu nhanh che mất đuôi.\n\n#### Từng bước\n1. Sắp xếp toàn bộ $N$ yêu cầu theo độ trễ.\n2. p95 là giá trị ở vị trí khoảng $0{,}95 N$ (có nhiều quy ước nội suy: nearest-rank, tuyến tính… cho kết quả hơi khác nhau với mẫu nhỏ).\n3. Diễn giải: $P(\\text{độ trễ} \\le 820 \\text{ ms}) \\approx 0{,}95$.\n\n#### Hình minh hoạ\nPhân phối độ trễ thường lệch phải: p50 < trung bình < p95.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 220\" width=\"100%\" style=\"max-width:560px\">\n<path d=\"M 291.1 170.0 L 291.3 157.0 L 293.8 157.5 L 296.2 158.1 L 298.7 158.5 L 301.1 159.0 L 303.6 159.5 L 306.1 159.9 L 308.5 160.3 L 311.0 160.7 L 313.5 161.1 L 315.9 161.5 L 318.4 161.8 L 320.8 162.1 L 323.3 162.5 L 325.8 162.8 L 328.2 163.1 L 330.7 163.3 L 333.1 163.6 L 335.6 163.9 L 338.1 164.1 L 340.5 164.3 L 343.0 164.6 L 345.4 164.8 L 347.9 165.0 L 350.4 165.2 L 352.8 165.4 L 355.3 165.6 L 357.7 165.7 L 360.2 165.9 L 362.7 166.1 L 365.1 166.2 L 367.6 166.4 L 370.0 166.5 L 372.5 166.7 L 375.0 166.8 L 377.4 166.9 L 379.9 167.0 L 382.4 167.2 L 384.8 167.3 L 387.3 167.4 L 389.7 167.5 L 392.2 167.6 L 394.7 167.7 L 397.1 167.8 L 399.6 167.8 L 402.0 167.9 L 404.5 168.0 L 407.0 168.1 L 409.4 168.2 L 411.9 168.2 L 414.3 168.3 L 416.8 168.4 L 419.3 168.4 L 421.7 168.5 L 424.2 168.5 L 426.6 168.6 L 429.1 168.6 L 431.6 168.7 L 434.0 168.7 L 436.5 168.8 L 439.0 168.8 L 441.4 168.9 L 443.9 168.9 L 446.3 169.0 L 448.8 169.0 L 451.3 169.0 L 453.7 169.1 L 456.2 169.1 L 458.6 169.1 L 461.1 169.2 L 463.6 169.2 L 466.0 169.2 L 468.5 169.3 L 470.9 169.3 L 473.4 169.3 L 475.9 169.3 L 478.3 169.4 L 480.8 169.4 L 483.2 169.4 L 485.7 169.4 L 488.2 169.4 L 490.6 169.5 L 493.1 169.5 L 495.5 169.5 L 498.0 169.5 L 500.5 169.5 L 502.9 169.6 L 505.4 169.6 L 507.9 169.6 L 510.3 169.6 L 512.8 169.6 L 515.2 169.6 L 517.7 169.6 L 520.2 169.7 L 522.6 169.7 L 525.1 169.7 L 527.5 169.7 L 530.0 169.7 L 530.0 170.0 Z\" stroke=\"none\" stroke-width=\"0\" fill=\"#ef4444\" fill-opacity=\"0.35\"/>\n<path d=\"M 40.3 170.0 L 42.8 170.0 L 45.2 170.0 L 47.7 170.0 L 50.1 170.0 L 52.6 169.9 L 55.1 169.7 L 57.5 169.2 L 60.0 168.2 L 62.5 166.5 L 64.9 163.9 L 67.4 160.5 L 69.8 156.1 L 72.3 150.8 L 74.8 144.7 L 77.2 137.9 L 79.7 130.6 L 82.1 122.9 L 84.6 115.0 L 87.1 107.0 L 89.5 99.2 L 92.0 91.6 L 94.4 84.3 L 96.9 77.4 L 99.4 71.1 L 101.8 65.3 L 104.3 60.1 L 106.7 55.6 L 109.2 51.6 L 111.7 48.3 L 114.1 45.5 L 116.6 43.4 L 119.1 41.8 L 121.5 40.7 L 124.0 40.1 L 126.4 40.0 L 128.9 40.3 L 131.4 41.0 L 133.8 42.0 L 136.3 43.3 L 138.7 44.9 L 141.2 46.8 L 143.7 48.8 L 146.1 51.1 L 148.6 53.5 L 151.0 56.0 L 153.5 58.6 L 156.0 61.4 L 158.4 64.2 L 160.9 67.0 L 163.3 69.9 L 165.8 72.8 L 168.3 75.7 L 170.7 78.6 L 173.2 81.5 L 175.6 84.3 L 178.1 87.1 L 180.6 89.9 L 183.0 92.6 L 185.5 95.3 L 188.0 98.0 L 190.4 100.5 L 192.9 103.1 L 195.3 105.5 L 197.8 107.9 L 200.3 110.2 L 202.7 112.5 L 205.2 114.7 L 207.6 116.8 L 210.1 118.8 L 212.6 120.8 L 215.0 122.7 L 217.5 124.6 L 219.9 126.4 L 222.4 128.1 L 224.9 129.8 L 227.3 131.4 L 229.8 133.0 L 232.2 134.5 L 234.7 135.9 L 237.2 137.3 L 239.6 138.6 L 242.1 139.9 L 244.6 141.1 L 247.0 142.3 L 249.5 143.4 L 251.9 144.5 L 254.4 145.6 L 256.9 146.6 L 259.3 147.5 L 261.8 148.5 L 264.2 149.4 L 266.7 150.2 L 269.2 151.0 L 271.6 151.8 L 274.1 152.6 L 276.5 153.3 L 279.0 154.0 L 281.5 154.6 L 283.9 155.3 L 286.4 155.9 L 288.8 156.5 L 291.3 157.0 L 293.8 157.5 L 296.2 158.1 L 298.7 158.5 L 301.1 159.0 L 303.6 159.5 L 306.1 159.9 L 308.5 160.3 L 311.0 160.7 L 313.5 161.1 L 315.9 161.5 L 318.4 161.8 L 320.8 162.1 L 323.3 162.5 L 325.8 162.8 L 328.2 163.1 L 330.7 163.3 L 333.1 163.6 L 335.6 163.9 L 338.1 164.1 L 340.5 164.3 L 343.0 164.6 L 345.4 164.8 L 347.9 165.0 L 350.4 165.2 L 352.8 165.4 L 355.3 165.6 L 357.7 165.7 L 360.2 165.9 L 362.7 166.1 L 365.1 166.2 L 367.6 166.4 L 370.0 166.5 L 372.5 166.7 L 375.0 166.8 L 377.4 166.9 L 379.9 167.0 L 382.4 167.2 L 384.8 167.3 L 387.3 167.4 L 389.7 167.5 L 392.2 167.6 L 394.7 167.7 L 397.1 167.8 L 399.6 167.8 L 402.0 167.9 L 404.5 168.0 L 407.0 168.1 L 409.4 168.2 L 411.9 168.2 L 414.3 168.3 L 416.8 168.4 L 419.3 168.4 L 421.7 168.5 L 424.2 168.5 L 426.6 168.6 L 429.1 168.6 L 431.6 168.7 L 434.0 168.7 L 436.5 168.8 L 439.0 168.8 L 441.4 168.9 L 443.9 168.9 L 446.3 169.0 L 448.8 169.0 L 451.3 169.0 L 453.7 169.1 L 456.2 169.1 L 458.6 169.1 L 461.1 169.2 L 463.6 169.2 L 466.0 169.2 L 468.5 169.3 L 470.9 169.3 L 473.4 169.3 L 475.9 169.3 L 478.3 169.4 L 480.8 169.4 L 483.2 169.4 L 485.7 169.4 L 488.2 169.4 L 490.6 169.5 L 493.1 169.5 L 495.5 169.5 L 498.0 169.5 L 500.5 169.5 L 502.9 169.6 L 505.4 169.6 L 507.9 169.6 L 510.3 169.6 L 512.8 169.6 L 515.2 169.6 L 517.7 169.6 L 520.2 169.7 L 522.6 169.7 L 525.1 169.7 L 527.5 169.7 L 530.0 169.7\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\"/>\n<line x1=\"40.0\" y1=\"170.0\" x2=\"530.0\" y2=\"170.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"40.0\" y1=\"170.0\" x2=\"40.0\" y2=\"175.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"40.0\" y=\"189.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<line x1=\"162.5\" y1=\"170.0\" x2=\"162.5\" y2=\"175.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"162.5\" y=\"189.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">400</text>\n<line x1=\"285.0\" y1=\"170.0\" x2=\"285.0\" y2=\"175.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"285.0\" y=\"189.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">800</text>\n<line x1=\"407.5\" y1=\"170.0\" x2=\"407.5\" y2=\"175.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"407.5\" y=\"189.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1200</text>\n<line x1=\"530.0\" y1=\"170.0\" x2=\"530.0\" y2=\"175.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"530.0\" y=\"189.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1600</text>\n<line x1=\"150.3\" y1=\"30.0\" x2=\"150.3\" y2=\"170.0\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<text x=\"150.3\" y=\"24.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#10b981\" font-weight=\"bold\">p50 ≈ 360</text>\n<line x1=\"165.0\" y1=\"50.0\" x2=\"165.0\" y2=\"170.0\" stroke=\"#3b82f6\" stroke-width=\"2\" stroke-dasharray=\"5 4\"/>\n<text x=\"169.0\" y=\"60.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">mean ≈ 408</text>\n<line x1=\"291.1\" y1=\"30.0\" x2=\"291.1\" y2=\"170.0\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<text x=\"295.1\" y=\"30.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\" font-weight=\"bold\">p95 = 820</text>\n<text x=\"351.1\" y=\"140.0\" font-size=\"11\" text-anchor=\"start\" fill=\"#ef4444\">5% yêu cầu chậm nhất</text>\n<text x=\"285.0\" y=\"214.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">độ trễ (ms) — phân phối lệch phải</text>\n</svg>\n\n| Đại lượng | Trả lời câu hỏi |\n|---|---|\n| p50 (trung vị) | Yêu cầu \"điển hình\" mất bao lâu? |\n| Trung bình | Tổng thời gian chờ chia đều cho mọi yêu cầu |\n| p95 | 1 trong 20 yêu cầu chậm hơn mức nào? |\n| p99 | 1 trong 100 yêu cầu chậm hơn mức nào? |\n\n#### Bẫy thường gặp\n- Đảo chiều: 95% **nhanh hơn hoặc bằng** ngưỡng, không phải chậm hơn.\n- Nhầm p95 theo yêu cầu với p95 theo người dùng: người dùng gửi nhiều yêu cầu thì gần như chắc chắn từng gặp một yêu cầu thuộc 5% chậm nhất.\n- Lấy trung bình các p95 theo giờ để ra p95 theo ngày là **sai**: phân vị không cộng trung bình được.\n\n#### Đọc thêm\n- [Percentile (Wikipedia)](https://en.wikipedia.org/wiki/Percentile)\n- [numpy.percentile — các phương pháp nội suy](https://numpy.org/doc/stable/reference/generated/numpy.percentile.html)\n",
+   "distractors": {
+    "A": "Nhầm phân vị với trung bình cắt (trimmed mean). p95 là một ngưỡng, không phải trung bình của nhóm nào.",
+    "B": "p95 không nói ai cũng chờ đúng 820 ms; đa số yêu cầu nhanh hơn nhiều. Ngoài ra p95 tính trên yêu cầu chứ không phải trên người dùng.",
+    "D": "Đảo chiều định nghĩa: 95% là phần **không vượt** ngưỡng, 5% là phần vượt."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Trung bình độ trễ của 95% yêu cầu nhanh nhất là 820 ms"
+    },
+    {
+     "key": "B",
+     "text": "95% người dùng phải chờ đúng 820 ms mỗi lần bấm nút"
+    },
+    {
+     "key": "C",
+     "text": "Khoảng 95% yêu cầu xong trong tối đa 820 ms, 5% còn lại chậm hơn"
+    },
+    {
+     "key": "D",
+     "text": "Khoảng 95% yêu cầu chậm hơn 820 ms, chỉ 5% yêu cầu nhanh hơn mức đó"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T04-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Trong thử nghiệm nút Đặt hàng, nhánh B có $n$ người dùng và tỉ lệ chuyển đổi quan sát là $\\hat{p}$. **Sai số chuẩn** (standard error) của $\\hat{p}$ được ước lượng bằng công thức nào?",
+   "explanation": "$\\hat{p}$ là trung bình của $n$ biến Bernoulli nên $\\operatorname{Var}(\\hat{p}) = p(1-p)/n$ và $SE = \\sqrt{\\hat{p}(1-\\hat{p})/n}$; SE giảm theo $1/\\sqrt{n}$.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nSai số chuẩn (SE) là độ lệch chuẩn của **ước lượng** qua các lần lấy mẫu, không phải độ lệch chuẩn của từng quan sát. Với tỉ lệ chuyển đổi $\\hat{p} = X/n$, mỗi người là một biến Bernoulli có phương sai $p(1-p)$.\n\n#### Từng bước\n$$\\operatorname{Var}(\\hat{p}) = \\operatorname{Var}\\!\\left(\\frac{1}{n}\\sum_{i=1}^n Y_i\\right) = \\frac{n \\cdot p(1-p)}{n^2} = \\frac{p(1-p)}{n}$$\n$$SE(\\hat{p}) = \\sqrt{\\frac{\\hat{p}(1-\\hat{p})}{n}}$$\n\nVí dụ $\\hat{p} = 0{,}08$, $n = 5000$: $SE = \\sqrt{0{,}08 \\cdot 0{,}92/5000} \\approx 0{,}00384$, tức khoảng 0,38 điểm %.\n\n```python\nimport math\nprint(math.sqrt(0.08 * 0.92 / 5000))   # 0.003836...\n```\n\n#### Bảng so sánh các công thức dễ nhầm\n| Công thức | Là gì | Đơn vị |\n|---|---|---|\n| $p(1-p)$ | phương sai của 1 người (Bernoulli) | tỉ lệ² |\n| $\\sqrt{p(1-p)}$ | độ lệch chuẩn của 1 người | tỉ lệ |\n| $\\sqrt{n p(1-p)}$ | độ lệch chuẩn của **số** người chuyển đổi $X$ | người |\n| $p(1-p)/n$ | phương sai của $\\hat{p}$ | tỉ lệ² |\n| $\\sqrt{p(1-p)/n}$ | **SE của $\\hat{p}$** | tỉ lệ |\n\n#### Bẫy thường gặp\n- Quên căn bậc hai (nhầm phương sai với SE).\n- Nghĩ rằng tăng $n$ gấp đôi thì SE giảm một nửa: thật ra chỉ giảm $\\sqrt{2} \\approx 1{,}41$ lần.\n\n#### Đọc thêm\n- [Standard error (Wikipedia)](https://en.wikipedia.org/wiki/Standard_error)\n- [OpenIntro Statistics (sách miễn phí)](https://www.openintro.org/book/os/)\n",
+   "distractors": {
+    "A": "Đây là **phương sai** của $\\hat{p}$; quên lấy căn bậc hai nên đơn vị và độ lớn đều sai.",
+    "B": "Đây là độ lệch chuẩn của **một** quan sát Bernoulli, chưa chia cho $n$; độ chính xác của $\\hat{p}$ không tăng theo cỡ mẫu.",
+    "C": "Đây là độ lệch chuẩn của **số lượt** chuyển đổi $X = n\\hat{p}$, không phải của tỉ lệ $\\hat{p}$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\hat{p}(1-\\hat{p})/n$"
+    },
+    {
+     "key": "B",
+     "text": "$\\sqrt{\\hat{p}(1-\\hat{p})}$"
+    },
+    {
+     "key": "C",
+     "text": "$\\sqrt{n\\,\\hat{p}(1-\\hat{p})}$"
+    },
+    {
+     "key": "D",
+     "text": "$\\sqrt{\\hat{p}(1-\\hat{p})/n}$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T04-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Báo cáo thử nghiệm nút Đặt hàng mới ghi: chênh lệch tỉ lệ chuyển đổi $B - A = +1{,}0$ điểm %, **khoảng tin cậy 95%: $[+0{,}3;\\ +1{,}7]$ điểm %**. Phát biểu nào đúng theo nghĩa tần suất (frequentist) của khoảng tin cậy?",
+   "explanation": "Độ tin cậy 95% là tính chất của **quy trình**: khoảng $\\hat{\\Delta} \\pm 1{,}96\\,SE$ chứa tham số thật ở khoảng 95% số lần lặp. Khoảng này không chứa 0 nên tương ứng $p < 0{,}05$ (hai phía).",
+   "section": "a-tk",
+   "long": "#### Ý chính\nKhoảng tin cậy 95% là kết quả của một **quy trình**: nếu lặp lại việc lấy mẫu và tính khoảng $\\hat{\\Delta} \\pm 1{,}96\\,SE$ rất nhiều lần, khoảng 95% số khoảng tạo ra sẽ chứa giá trị thật $\\Delta$. Với một khoảng cụ thể, giá trị thật hoặc nằm trong, hoặc không; ta \"tin\" 95% vào quy trình.\n\n#### Từng bước với số liệu đề\n1. Ước lượng điểm $\\hat{\\Delta} = +1{,}0$ điểm %, biên sai số $0{,}7$ nên $SE \\approx 0{,}7/1{,}96 \\approx 0{,}357$ điểm %.\n2. Khoảng $[+0{,}3;\\ +1{,}7]$ không chứa 0, tương đương kiểm định hai phía có $p < 0{,}05$: $z = 1{,}0/0{,}357 \\approx 2{,}8$.\n3. Về kinh doanh: hiệu ứng thật hợp lý nằm từ +0,3 đến +1,7 điểm %; cận dưới cho biết kịch bản thận trọng.\n\n#### Hình minh hoạ: 20 lần lặp quy trình\nMỗi vạch là khoảng tin cậy từ một mẫu khác nhau; thường khoảng 1 trong 20 khoảng (màu đỏ) bỏ lỡ giá trị thật.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"290.0\" y1=\"15.0\" x2=\"290.0\" y2=\"230.0\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<text x=\"290.0\" y=\"248.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#10b981\" font-weight=\"bold\">chênh lệch thật (chưa biết)</text>\n<line x1=\"182.7\" y1=\"20.0\" x2=\"397.4\" y2=\"20.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"290.1\" cy=\"20.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"199.2\" y1=\"30.5\" x2=\"413.8\" y2=\"30.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"306.5\" cy=\"30.5\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"167.5\" y1=\"41.0\" x2=\"382.2\" y2=\"41.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"274.9\" cy=\"41.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"133.5\" y1=\"51.5\" x2=\"348.2\" y2=\"51.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"240.8\" cy=\"51.5\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"157.6\" y1=\"62.0\" x2=\"372.2\" y2=\"62.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"264.9\" cy=\"62.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"127.9\" y1=\"72.5\" x2=\"342.6\" y2=\"72.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"235.3\" cy=\"72.5\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"186.0\" y1=\"83.0\" x2=\"400.7\" y2=\"83.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"293.3\" cy=\"83.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"256.6\" y1=\"93.5\" x2=\"471.3\" y2=\"93.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"364.0\" cy=\"93.5\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"155.5\" y1=\"104.0\" x2=\"370.2\" y2=\"104.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"262.8\" cy=\"104.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"148.4\" y1=\"114.5\" x2=\"363.1\" y2=\"114.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"255.7\" cy=\"114.5\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"209.7\" y1=\"125.0\" x2=\"424.4\" y2=\"125.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"317.0\" cy=\"125.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"202.4\" y1=\"135.5\" x2=\"417.0\" y2=\"135.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"309.7\" cy=\"135.5\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"188.5\" y1=\"146.0\" x2=\"403.2\" y2=\"146.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"295.8\" cy=\"146.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"328.3\" y1=\"156.5\" x2=\"543.0\" y2=\"156.5\" stroke=\"#ef4444\" stroke-width=\"2.5\"/>\n<circle cx=\"435.7\" cy=\"156.5\" r=\"2.5\" fill=\"#ef4444\"/>\n<line x1=\"181.1\" y1=\"167.0\" x2=\"395.7\" y2=\"167.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"288.4\" cy=\"167.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"221.0\" y1=\"177.5\" x2=\"435.7\" y2=\"177.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"328.4\" cy=\"177.5\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"108.5\" y1=\"188.0\" x2=\"323.1\" y2=\"188.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"215.8\" cy=\"188.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"157.4\" y1=\"198.5\" x2=\"372.1\" y2=\"198.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"264.7\" cy=\"198.5\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"77.7\" y1=\"209.0\" x2=\"292.4\" y2=\"209.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"185.1\" cy=\"209.0\" r=\"2.5\" fill=\"#3b82f6\"/>\n<line x1=\"111.5\" y1=\"219.5\" x2=\"326.2\" y2=\"219.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<circle cx=\"218.8\" cy=\"219.5\" r=\"2.5\" fill=\"#3b82f6\"/>\n<text x=\"30.0\" y=\"120.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">20 lần</text>\n<text x=\"30.0\" y=\"134.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">lấy mẫu</text>\n<text x=\"530.0\" y=\"160.0\" font-size=\"11\" text-anchor=\"end\" fill=\"#ef4444\">đỏ = khoảng</text>\n<text x=\"530.0\" y=\"174.0\" font-size=\"11\" text-anchor=\"end\" fill=\"#ef4444\">không chứa giá trị thật</text>\n</svg>\n\n| Phát biểu | Đúng/sai |\n|---|---|\n| 95% số khoảng (qua nhiều lần lặp) chứa giá trị thật | Đúng |\n| 95% người dùng có mức tăng trong khoảng | Sai: nói về tham số, không về cá nhân |\n| 95% ước lượng mới rơi vào khoảng này | Sai |\n| Giá trị thật chắc chắn bằng ước lượng điểm | Sai |\n\n#### Bẫy thường gặp\nNhiều người nói \"95% xác suất giá trị thật nằm trong khoảng\": theo thống kê tần suất, đó là cách nói không chính xác (đó là ý của khoảng tin cậy Bayes, credible interval).\n\n#### Đọc thêm\n- [Confidence interval (Wikipedia)](https://en.wikipedia.org/wiki/Confidence_interval)\n- [Khoảng tin cậy (Wikipedia tiếng Việt)](https://vi.wikipedia.org/wiki/Kho%E1%BA%A3ng_tin_c%E1%BA%ADy)\n",
+   "distractors": {
+    "B": "Khoảng tin cậy nói về một tham số của tổng thể (hiệu hai tỉ lệ), không mô tả mức tăng của từng người dùng.",
+    "C": "Khoảng mới sẽ dịch chuyển theo mẫu mới; tỉ lệ ước lượng mới rơi vào đúng đoạn cũ không phải 95% (đó là ý của khoảng dự báo, và cũng không bằng 95%).",
+    "D": "$\\pm 0{,}7$ là sai số **lấy mẫu** ($1{,}96\\,SE$), không phải lỗi log; giá trị thật không chắc chắn bằng ước lượng điểm."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Nếu lặp lại cả quy trình lấy mẫu và tính khoảng nhiều lần, khoảng 95% số khoảng tạo ra sẽ chứa chênh lệch thật"
+    },
+    {
+     "key": "B",
+     "text": "95% người dùng ở nhánh B có mức tăng chuyển đổi nằm trong khoảng từ +0,3 đến +1,7 điểm %"
+    },
+    {
+     "key": "C",
+     "text": "Nếu chạy lại thí nghiệm, 95% số ước lượng điểm mới sẽ rơi vào đúng đoạn $[+0{,}3;\\ +1{,}7]$"
+    },
+    {
+     "key": "D",
+     "text": "Chênh lệch thật chắc chắn bằng +1,0 điểm %, còn phần $\\pm 0{,}7$ chỉ là sai số đo do hệ thống log ghi thiếu một số sự kiện"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T04-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Thực tế nút Đặt hàng mới **không** làm thay đổi tỉ lệ chuyển đổi. Tuy vậy kiểm định cho $p = 0{,}02 < \\alpha = 0{,}05$ và đội kết luận \"nút mới tốt hơn\". Đây là loại sai lầm nào, và xác suất mắc nó (khi $H_0$ đúng) được khống chế bởi đại lượng nào?",
+   "explanation": "Bác bỏ $H_0$ khi $H_0$ đúng là sai lầm loại I; $P(\\text{bác bỏ } H_0 \\mid H_0 \\text{ đúng}) = \\alpha$. Sai lầm loại II là không bác bỏ khi $H_1$ đúng, xác suất $\\beta$.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nCó hai cách sai khi kiểm định:\n\n| | $H_0$ đúng (nút mới không tác động) | $H_1$ đúng (có tác động) |\n|---|---|---|\n| Bác bỏ $H_0$ | **Sai lầm loại I** (dương tính giả), xác suất $\\alpha$ | Đúng, xác suất power $= 1-\\beta$ |\n| Không bác bỏ $H_0$ | Đúng, xác suất $1-\\alpha$ | **Sai lầm loại II** (âm tính giả), xác suất $\\beta$ |\n\nTình huống của đề: thực tế không có tác động nhưng đội kết luận \"tốt hơn\" nên là sai lầm loại I. Khi đặt $\\alpha = 0{,}05$, ta chấp nhận rằng khoảng 1 trong 20 thử nghiệm \"vô tác dụng\" sẽ cho kết quả có ý nghĩa do ngẫu nhiên.\n\n#### Từng bước\n1. Xác định \"sự thật\": $H_0$ đúng.\n2. Xác định \"quyết định\": bác bỏ $H_0$ (vì $p = 0{,}02 < 0{,}05$).\n3. Tra bảng: ô (bác bỏ, $H_0$ đúng) là loại I, xác suất $\\alpha$.\n\n```python\nimport numpy as np\nrng = np.random.default_rng(0)\n# 10.000 thử nghiệm A/A: p-value phân phối đều trên [0, 1] khi H0 đúng\np = rng.uniform(size=10000)\nprint((p < 0.05).mean())   # khoảng 0.05\n```\n\n#### Hệ quả cho sản phẩm\nSai lầm loại I làm triển khai thay đổi vô ích (tốn công bảo trì, có thể kèm rủi ro). Sai lầm loại II làm bỏ lỡ cải tiến tốt. Giảm $\\alpha$ thì bớt loại I nhưng tăng loại II nếu giữ nguyên cỡ mẫu.\n\n#### Bẫy thường gặp\n- Nhớ ngược \"loại I/loại II\". Mẹo: loại I = \"báo động giả\" (thấy cái không có).\n- Nghĩ $p = 0{,}02$ nghĩa là \"chỉ 2% khả năng kết luận sai\": p-value không phải xác suất $H_0$ đúng.\n\n#### Đọc thêm\n- [Type I and type II errors (Wikipedia)](https://en.wikipedia.org/wiki/Type_I_and_type_II_errors)\n- [Null hypothesis (Wikipedia)](https://en.wikipedia.org/wiki/Null_hypothesis)\n",
+   "distractors": {
+    "B": "Sai lầm loại II là bỏ sót hiệu ứng có thật; ở đây hiệu ứng không có mà lại \"thấy\", nên là loại I.",
+    "C": "Đúng tên sai lầm nhưng sai đại lượng: power $1-\\beta$ là xác suất phát hiện khi $H_1$ đúng, không liên quan tới trường hợp $H_0$ đúng.",
+    "D": "Nhầm tên: sai lầm khi $H_0$ đúng mà bị bác bỏ là loại I, không phải loại II."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Sai lầm loại I (dương tính giả); khống chế bởi mức ý nghĩa $\\alpha$"
+    },
+    {
+     "key": "B",
+     "text": "Sai lầm loại II (âm tính giả); khống chế bởi $\\beta = 1 - \\text{power}$ của kiểm định"
+    },
+    {
+     "key": "C",
+     "text": "Sai lầm loại I (dương tính giả); khống chế bởi power $1 - \\beta$"
+    },
+    {
+     "key": "D",
+     "text": "Sai lầm loại II (âm tính giả); khống chế bởi mức ý nghĩa $\\alpha$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T04-A06",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Kế hoạch thử nghiệm ghi: \"$\\alpha = 0{,}05$ hai phía, **power 80%** với MDE (hiệu ứng nhỏ nhất cần phát hiện) là +0,5 điểm % tỉ lệ chuyển đổi\". Câu \"power 80%\" nghĩa là gì?",
+   "explanation": "$\\text{power} = 1 - \\beta = P(\\text{bác bỏ } H_0 \\mid \\Delta = \\text{MDE})$. Hiệu ứng thật lớn hơn MDE thì power cao hơn 80%, nhỏ hơn thì thấp hơn.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nPower (độ mạnh) là xác suất kiểm định **phát hiện** được hiệu ứng khi hiệu ứng thật có một độ lớn cụ thể (thường là MDE):\n$$\\text{power} = P(\\text{bác bỏ } H_0 \\mid \\Delta = \\text{MDE}) = 1 - \\beta$$\nXấp xỉ cho kiểm định hai phía: $\\text{power} \\approx \\Phi\\!\\left(\\frac{|\\Delta|}{SE} - z_{1-\\alpha/2}\\right)$.\n\n#### Hình minh hoạ\nĐường đen là phân phối của hiệu ước lượng khi $H_0$ đúng, đường xanh là khi hiệu thật bằng MDE. Vùng xanh lá bên phải ngưỡng là power; vùng vàng là $\\beta$; vùng đỏ là $\\alpha/2$.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 230\" width=\"100%\" style=\"max-width:560px\">\n<path d=\"M 313.8 180.0 L 315.4 56.9 L 317.7 54.0 L 320.0 51.3 L 322.2 48.9 L 324.5 46.8 L 326.8 44.9 L 329.1 43.3 L 331.4 42.0 L 333.7 41.1 L 335.9 40.4 L 338.2 40.1 L 340.5 40.0 L 342.8 40.3 L 345.1 40.9 L 347.4 41.9 L 349.6 43.1 L 351.9 44.7 L 354.2 46.5 L 356.5 48.6 L 358.8 51.0 L 361.1 53.6 L 363.3 56.5 L 365.6 59.5 L 367.9 62.8 L 370.2 66.2 L 372.5 69.8 L 374.7 73.5 L 377.0 77.3 L 379.3 81.3 L 381.6 85.2 L 383.9 89.3 L 386.2 93.3 L 388.4 97.4 L 390.7 101.5 L 393.0 105.5 L 395.3 109.5 L 397.6 113.4 L 399.9 117.3 L 402.1 121.0 L 404.4 124.7 L 406.7 128.3 L 409.0 131.7 L 411.3 135.0 L 413.6 138.2 L 415.8 141.2 L 418.1 144.2 L 420.4 146.9 L 422.7 149.5 L 425.0 152.0 L 427.3 154.4 L 429.5 156.6 L 431.8 158.6 L 434.1 160.5 L 436.4 162.3 L 438.7 164.0 L 441.0 165.5 L 443.2 166.9 L 445.5 168.2 L 447.8 169.4 L 450.1 170.6 L 452.4 171.6 L 454.7 172.5 L 456.9 173.3 L 459.2 174.1 L 461.5 174.7 L 463.8 175.4 L 466.1 175.9 L 468.4 176.4 L 470.6 176.8 L 472.9 177.2 L 475.2 177.6 L 477.5 177.9 L 479.8 178.2 L 482.1 178.4 L 484.3 178.6 L 486.6 178.8 L 488.9 179.0 L 491.2 179.1 L 493.5 179.2 L 495.8 179.4 L 498.0 179.5 L 500.3 179.5 L 502.6 179.6 L 504.9 179.7 L 507.2 179.7 L 509.5 179.8 L 511.7 179.8 L 514.0 179.8 L 516.3 179.9 L 518.6 179.9 L 520.9 179.9 L 523.2 179.9 L 525.4 179.9 L 527.7 179.9 L 530.0 180.0 L 530.0 180.0 Z\" stroke=\"none\" stroke-width=\"0\" fill=\"#10b981\" fill-opacity=\"0.3\"/>\n<path d=\"M 30.0 180.0 L 30.0 180.0 L 32.3 180.0 L 34.6 180.0 L 36.8 180.0 L 39.1 180.0 L 41.4 180.0 L 43.7 180.0 L 46.0 180.0 L 48.3 180.0 L 50.5 180.0 L 52.8 180.0 L 55.1 180.0 L 57.4 180.0 L 59.7 180.0 L 62.0 180.0 L 64.2 180.0 L 66.5 180.0 L 68.8 180.0 L 71.1 180.0 L 73.4 180.0 L 75.7 180.0 L 77.9 180.0 L 80.2 180.0 L 82.5 180.0 L 84.8 180.0 L 87.1 180.0 L 89.4 180.0 L 91.6 180.0 L 93.9 180.0 L 96.2 180.0 L 98.5 180.0 L 100.8 180.0 L 103.1 180.0 L 105.3 180.0 L 107.6 180.0 L 109.9 180.0 L 112.2 180.0 L 114.5 180.0 L 116.8 180.0 L 119.0 180.0 L 121.3 180.0 L 123.6 180.0 L 125.9 180.0 L 128.2 180.0 L 130.5 180.0 L 132.7 180.0 L 135.0 180.0 L 137.3 180.0 L 139.6 180.0 L 141.9 180.0 L 144.2 180.0 L 146.4 180.0 L 148.7 180.0 L 151.0 179.9 L 153.3 179.9 L 155.6 179.9 L 157.9 179.9 L 160.1 179.9 L 162.4 179.9 L 164.7 179.8 L 167.0 179.8 L 169.3 179.8 L 171.6 179.7 L 173.8 179.7 L 176.1 179.6 L 178.4 179.5 L 180.7 179.5 L 183.0 179.4 L 185.3 179.3 L 187.5 179.1 L 189.8 179.0 L 192.1 178.8 L 194.4 178.7 L 196.7 178.4 L 198.9 178.2 L 201.2 177.9 L 203.5 177.6 L 205.8 177.3 L 208.1 176.9 L 210.4 176.5 L 212.6 176.0 L 214.9 175.4 L 217.2 174.8 L 219.5 174.2 L 221.8 173.4 L 224.1 172.6 L 226.3 171.7 L 228.6 170.7 L 230.9 169.6 L 233.2 168.4 L 235.5 167.1 L 237.8 165.7 L 240.0 164.2 L 242.3 162.6 L 244.6 160.8 L 246.9 158.9 L 249.2 156.9 L 251.5 154.7 L 253.7 152.4 L 256.0 149.9 L 258.3 147.3 L 260.6 144.6 L 262.9 141.7 L 265.2 138.6 L 267.4 135.5 L 269.7 132.2 L 272.0 128.8 L 274.3 125.2 L 276.6 121.6 L 278.9 117.8 L 281.1 114.0 L 283.4 110.1 L 285.7 106.1 L 288.0 102.0 L 290.3 98.0 L 292.6 93.9 L 294.8 89.9 L 297.1 85.8 L 299.4 81.8 L 301.7 77.9 L 304.0 74.1 L 306.3 70.3 L 308.5 66.7 L 310.8 63.3 L 313.1 60.0 L 313.8 180.0 Z\" stroke=\"none\" stroke-width=\"0\" fill=\"#f59e0b\" fill-opacity=\"0.3\"/>\n<path d=\"M 313.8 180.0 L 315.4 160.8 L 317.7 162.6 L 320.0 164.2 L 322.2 165.7 L 324.5 167.1 L 326.8 168.4 L 329.1 169.6 L 331.4 170.7 L 333.7 171.7 L 335.9 172.6 L 338.2 173.4 L 340.5 174.2 L 342.8 174.8 L 345.1 175.4 L 347.4 176.0 L 349.6 176.5 L 351.9 176.9 L 354.2 177.3 L 356.5 177.6 L 358.8 177.9 L 361.1 178.2 L 363.3 178.4 L 365.6 178.7 L 367.9 178.8 L 370.2 179.0 L 372.5 179.1 L 374.7 179.3 L 377.0 179.4 L 379.3 179.5 L 381.6 179.5 L 383.9 179.6 L 386.2 179.7 L 388.4 179.7 L 390.7 179.8 L 393.0 179.8 L 395.3 179.8 L 397.6 179.9 L 399.9 179.9 L 402.1 179.9 L 404.4 179.9 L 406.7 179.9 L 409.0 179.9 L 411.3 180.0 L 413.6 180.0 L 415.8 180.0 L 418.1 180.0 L 420.4 180.0 L 422.7 180.0 L 425.0 180.0 L 427.3 180.0 L 429.5 180.0 L 431.8 180.0 L 434.1 180.0 L 436.4 180.0 L 438.7 180.0 L 441.0 180.0 L 443.2 180.0 L 445.5 180.0 L 447.8 180.0 L 450.1 180.0 L 452.4 180.0 L 454.7 180.0 L 456.9 180.0 L 459.2 180.0 L 461.5 180.0 L 463.8 180.0 L 466.1 180.0 L 468.4 180.0 L 470.6 180.0 L 472.9 180.0 L 475.2 180.0 L 477.5 180.0 L 479.8 180.0 L 482.1 180.0 L 484.3 180.0 L 486.6 180.0 L 488.9 180.0 L 491.2 180.0 L 493.5 180.0 L 495.8 180.0 L 498.0 180.0 L 500.3 180.0 L 502.6 180.0 L 504.9 180.0 L 507.2 180.0 L 509.5 180.0 L 511.7 180.0 L 514.0 180.0 L 516.3 180.0 L 518.6 180.0 L 520.9 180.0 L 523.2 180.0 L 525.4 180.0 L 527.7 180.0 L 530.0 180.0 L 530.0 180.0 Z\" stroke=\"none\" stroke-width=\"0\" fill=\"#ef4444\" fill-opacity=\"0.6\"/>\n<path d=\"M 30.0 180.0 L 32.3 179.9 L 34.6 179.9 L 36.8 179.9 L 39.1 179.9 L 41.4 179.9 L 43.7 179.9 L 46.0 179.8 L 48.3 179.8 L 50.5 179.8 L 52.8 179.7 L 55.1 179.7 L 57.4 179.6 L 59.7 179.5 L 62.0 179.5 L 64.2 179.4 L 66.5 179.2 L 68.8 179.1 L 71.1 179.0 L 73.4 178.8 L 75.7 178.6 L 77.9 178.4 L 80.2 178.2 L 82.5 177.9 L 84.8 177.6 L 87.1 177.2 L 89.4 176.8 L 91.6 176.4 L 93.9 175.9 L 96.2 175.4 L 98.5 174.7 L 100.8 174.1 L 103.1 173.3 L 105.3 172.5 L 107.6 171.6 L 109.9 170.6 L 112.2 169.4 L 114.5 168.2 L 116.8 166.9 L 119.0 165.5 L 121.3 164.0 L 123.6 162.3 L 125.9 160.5 L 128.2 158.6 L 130.5 156.6 L 132.7 154.4 L 135.0 152.0 L 137.3 149.5 L 139.6 146.9 L 141.9 144.2 L 144.2 141.2 L 146.4 138.2 L 148.7 135.0 L 151.0 131.7 L 153.3 128.3 L 155.6 124.7 L 157.9 121.0 L 160.1 117.3 L 162.4 113.4 L 164.7 109.5 L 167.0 105.5 L 169.3 101.5 L 171.6 97.4 L 173.8 93.3 L 176.1 89.3 L 178.4 85.2 L 180.7 81.3 L 183.0 77.3 L 185.3 73.5 L 187.5 69.8 L 189.8 66.2 L 192.1 62.8 L 194.4 59.5 L 196.7 56.5 L 198.9 53.6 L 201.2 51.0 L 203.5 48.6 L 205.8 46.5 L 208.1 44.7 L 210.4 43.1 L 212.6 41.9 L 214.9 40.9 L 217.2 40.3 L 219.5 40.0 L 221.8 40.1 L 224.1 40.4 L 226.3 41.1 L 228.6 42.0 L 230.9 43.3 L 233.2 44.9 L 235.5 46.8 L 237.8 48.9 L 240.0 51.3 L 242.3 54.0 L 244.6 56.9 L 246.9 60.0 L 249.2 63.3 L 251.5 66.7 L 253.7 70.3 L 256.0 74.1 L 258.3 77.9 L 260.6 81.8 L 262.9 85.8 L 265.2 89.9 L 267.4 93.9 L 269.7 98.0 L 272.0 102.0 L 274.3 106.1 L 276.6 110.1 L 278.9 114.0 L 281.1 117.8 L 283.4 121.6 L 285.7 125.2 L 288.0 128.8 L 290.3 132.2 L 292.6 135.5 L 294.8 138.6 L 297.1 141.7 L 299.4 144.6 L 301.7 147.3 L 304.0 149.9 L 306.3 152.4 L 308.5 154.7 L 310.8 156.9 L 313.1 158.9 L 315.4 160.8 L 317.7 162.6 L 320.0 164.2 L 322.2 165.7 L 324.5 167.1 L 326.8 168.4 L 329.1 169.6 L 331.4 170.7 L 333.7 171.7 L 335.9 172.6 L 338.2 173.4 L 340.5 174.2 L 342.8 174.8 L 345.1 175.4 L 347.4 176.0 L 349.6 176.5 L 351.9 176.9 L 354.2 177.3 L 356.5 177.6 L 358.8 177.9 L 361.1 178.2 L 363.3 178.4 L 365.6 178.7 L 367.9 178.8 L 370.2 179.0 L 372.5 179.1 L 374.7 179.3 L 377.0 179.4 L 379.3 179.5 L 381.6 179.5 L 383.9 179.6 L 386.2 179.7 L 388.4 179.7 L 390.7 179.8 L 393.0 179.8 L 395.3 179.8 L 397.6 179.9 L 399.9 179.9 L 402.1 179.9 L 404.4 179.9 L 406.7 179.9 L 409.0 179.9 L 411.3 180.0 L 413.6 180.0 L 415.8 180.0 L 418.1 180.0 L 420.4 180.0 L 422.7 180.0 L 425.0 180.0 L 427.3 180.0 L 429.5 180.0 L 431.8 180.0 L 434.1 180.0 L 436.4 180.0 L 438.7 180.0 L 441.0 180.0 L 443.2 180.0 L 445.5 180.0 L 447.8 180.0 L 450.1 180.0 L 452.4 180.0 L 454.7 180.0 L 456.9 180.0 L 459.2 180.0 L 461.5 180.0 L 463.8 180.0 L 466.1 180.0 L 468.4 180.0 L 470.6 180.0 L 472.9 180.0 L 475.2 180.0 L 477.5 180.0 L 479.8 180.0 L 482.1 180.0 L 484.3 180.0 L 486.6 180.0 L 488.9 180.0 L 491.2 180.0 L 493.5 180.0 L 495.8 180.0 L 498.0 180.0 L 500.3 180.0 L 502.6 180.0 L 504.9 180.0 L 507.2 180.0 L 509.5 180.0 L 511.7 180.0 L 514.0 180.0 L 516.3 180.0 L 518.6 180.0 L 520.9 180.0 L 523.2 180.0 L 525.4 180.0 L 527.7 180.0 L 530.0 180.0\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\"/>\n<path d=\"M 30.0 180.0 L 32.3 180.0 L 34.6 180.0 L 36.8 180.0 L 39.1 180.0 L 41.4 180.0 L 43.7 180.0 L 46.0 180.0 L 48.3 180.0 L 50.5 180.0 L 52.8 180.0 L 55.1 180.0 L 57.4 180.0 L 59.7 180.0 L 62.0 180.0 L 64.2 180.0 L 66.5 180.0 L 68.8 180.0 L 71.1 180.0 L 73.4 180.0 L 75.7 180.0 L 77.9 180.0 L 80.2 180.0 L 82.5 180.0 L 84.8 180.0 L 87.1 180.0 L 89.4 180.0 L 91.6 180.0 L 93.9 180.0 L 96.2 180.0 L 98.5 180.0 L 100.8 180.0 L 103.1 180.0 L 105.3 180.0 L 107.6 180.0 L 109.9 180.0 L 112.2 180.0 L 114.5 180.0 L 116.8 180.0 L 119.0 180.0 L 121.3 180.0 L 123.6 180.0 L 125.9 180.0 L 128.2 180.0 L 130.5 180.0 L 132.7 180.0 L 135.0 180.0 L 137.3 180.0 L 139.6 180.0 L 141.9 180.0 L 144.2 180.0 L 146.4 180.0 L 148.7 180.0 L 151.0 179.9 L 153.3 179.9 L 155.6 179.9 L 157.9 179.9 L 160.1 179.9 L 162.4 179.9 L 164.7 179.8 L 167.0 179.8 L 169.3 179.8 L 171.6 179.7 L 173.8 179.7 L 176.1 179.6 L 178.4 179.5 L 180.7 179.5 L 183.0 179.4 L 185.3 179.3 L 187.5 179.1 L 189.8 179.0 L 192.1 178.8 L 194.4 178.7 L 196.7 178.4 L 198.9 178.2 L 201.2 177.9 L 203.5 177.6 L 205.8 177.3 L 208.1 176.9 L 210.4 176.5 L 212.6 176.0 L 214.9 175.4 L 217.2 174.8 L 219.5 174.2 L 221.8 173.4 L 224.1 172.6 L 226.3 171.7 L 228.6 170.7 L 230.9 169.6 L 233.2 168.4 L 235.5 167.1 L 237.8 165.7 L 240.0 164.2 L 242.3 162.6 L 244.6 160.8 L 246.9 158.9 L 249.2 156.9 L 251.5 154.7 L 253.7 152.4 L 256.0 149.9 L 258.3 147.3 L 260.6 144.6 L 262.9 141.7 L 265.2 138.6 L 267.4 135.5 L 269.7 132.2 L 272.0 128.8 L 274.3 125.2 L 276.6 121.6 L 278.9 117.8 L 281.1 114.0 L 283.4 110.1 L 285.7 106.1 L 288.0 102.0 L 290.3 98.0 L 292.6 93.9 L 294.8 89.9 L 297.1 85.8 L 299.4 81.8 L 301.7 77.9 L 304.0 74.1 L 306.3 70.3 L 308.5 66.7 L 310.8 63.3 L 313.1 60.0 L 315.4 56.9 L 317.7 54.0 L 320.0 51.3 L 322.2 48.9 L 324.5 46.8 L 326.8 44.9 L 329.1 43.3 L 331.4 42.0 L 333.7 41.1 L 335.9 40.4 L 338.2 40.1 L 340.5 40.0 L 342.8 40.3 L 345.1 40.9 L 347.4 41.9 L 349.6 43.1 L 351.9 44.7 L 354.2 46.5 L 356.5 48.6 L 358.8 51.0 L 361.1 53.6 L 363.3 56.5 L 365.6 59.5 L 367.9 62.8 L 370.2 66.2 L 372.5 69.8 L 374.7 73.5 L 377.0 77.3 L 379.3 81.3 L 381.6 85.2 L 383.9 89.3 L 386.2 93.3 L 388.4 97.4 L 390.7 101.5 L 393.0 105.5 L 395.3 109.5 L 397.6 113.4 L 399.9 117.3 L 402.1 121.0 L 404.4 124.7 L 406.7 128.3 L 409.0 131.7 L 411.3 135.0 L 413.6 138.2 L 415.8 141.2 L 418.1 144.2 L 420.4 146.9 L 422.7 149.5 L 425.0 152.0 L 427.3 154.4 L 429.5 156.6 L 431.8 158.6 L 434.1 160.5 L 436.4 162.3 L 438.7 164.0 L 441.0 165.5 L 443.2 166.9 L 445.5 168.2 L 447.8 169.4 L 450.1 170.6 L 452.4 171.6 L 454.7 172.5 L 456.9 173.3 L 459.2 174.1 L 461.5 174.7 L 463.8 175.4 L 466.1 175.9 L 468.4 176.4 L 470.6 176.8 L 472.9 177.2 L 475.2 177.6 L 477.5 177.9 L 479.8 178.2 L 482.1 178.4 L 484.3 178.6 L 486.6 178.8 L 488.9 179.0 L 491.2 179.1 L 493.5 179.2 L 495.8 179.4 L 498.0 179.5 L 500.3 179.5 L 502.6 179.6 L 504.9 179.7 L 507.2 179.7 L 509.5 179.8 L 511.7 179.8 L 514.0 179.8 L 516.3 179.9 L 518.6 179.9 L 520.9 179.9 L 523.2 179.9 L 525.4 179.9 L 527.7 179.9 L 530.0 180.0\" stroke=\"#3b82f6\" stroke-width=\"2\" fill=\"none\"/>\n<line x1=\"30.0\" y1=\"180.0\" x2=\"530.0\" y2=\"180.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"313.8\" y1=\"20.0\" x2=\"313.8\" y2=\"180.0\" stroke=\"#ef4444\" stroke-width=\"1.5\" stroke-dasharray=\"5 4\"/>\n<text x=\"220.5\" y=\"28.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">H0: hiệu = 0</text>\n<text x=\"349.5\" y=\"28.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">H1: hiệu = +0,5</text>\n<text x=\"317.8\" y=\"88.0\" font-size=\"11\" text-anchor=\"start\" fill=\"#ef4444\">ngưỡng 1,96·SE</text>\n<text x=\"446.7\" y=\"140.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#10b981\" font-weight=\"bold\">power</text>\n<text x=\"256.2\" y=\"168.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"#f59e0b\" font-weight=\"bold\">β</text>\n<text x=\"339.5\" y=\"174.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"#ef4444\" font-weight=\"bold\">α/2</text>\n<text x=\"280.0\" y=\"208.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">phân phối của hiệu ước lượng (điểm %)</text>\n<text x=\"280.0\" y=\"224.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">ví dụ SE = 0,2: power = Φ(0,5/0,2 − 1,96) ≈ 0.71</text>\n</svg>\n\n#### Từng bước (ví dụ minh hoạ)\nGiả sử $SE = 0{,}2$ điểm %, MDE $= 0{,}5$ điểm %: $0{,}5/0{,}2 = 2{,}5$; power $\\approx \\Phi(2{,}5 - 1{,}96) = \\Phi(0{,}54) \\approx 0{,}71$. Muốn 80% thì cần $|\\Delta|/SE \\approx 1{,}96 + 0{,}84 = 2{,}8$, tức SE nhỏ hơn (cỡ mẫu lớn hơn).\n\n| Yếu tố tăng | Ảnh hưởng tới power |\n|---|---|\n| Cỡ mẫu $n$ | tăng (SE giảm theo $1/\\sqrt{n}$) |\n| Hiệu ứng thật $\\lvert\\Delta\\rvert$ | tăng |\n| Phương sai chỉ số | giảm |\n| $\\alpha$ (nới lỏng) | tăng, nhưng đổi lại nhiều dương tính giả hơn |\n\n#### Bẫy thường gặp\n- Power không phải \"xác suất B tốt hơn\".\n- Power 80% chỉ đúng **tại** MDE; hiệu ứng nhỏ hơn MDE có power thấp hơn nhiều.\n\n#### Đọc thêm\n- [Power (statistics) (Wikipedia)](https://en.wikipedia.org/wiki/Power_%28statistics%29)\n- [Evan Miller — Sample Size Calculator](https://www.evanmiller.org/ab-testing/sample-size.html)\n",
+   "distractors": {
+    "A": "Power là xác suất của kết quả kiểm định khi giả định một hiệu ứng cho trước, không phải xác suất hậu nghiệm \"B tốt hơn\".",
+    "B": "Khi $H_0$ đúng, xác suất không bác bỏ là $1 - \\alpha = 95\\%$, không phải 80%; đó không phải power.",
+    "D": "Power phụ thuộc kích thước hiệu ứng: hiệu ứng nhỏ hơn MDE có power thấp hơn 80% nhiều."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Có 80% xác suất nút mới tốt hơn nút cũ, tính từ dữ liệu sẽ thu được"
+    },
+    {
+     "key": "B",
+     "text": "Nếu nút mới không có tác động, có 80% khả năng kiểm định không bác bỏ $H_0$"
+    },
+    {
+     "key": "C",
+     "text": "Nếu hiệu ứng thật đúng bằng +0,5 điểm %, kiểm định bác bỏ $H_0$ với xác suất khoảng 80%"
+    },
+    {
+     "key": "D",
+     "text": "Mọi hiệu ứng khác 0, dù nhỏ đến đâu, đều được phát hiện trong 80% số lần chạy thử nghiệm"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T04-A07",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Thử nghiệm đổi nút Đặt hàng thành nút nổi (sticky) có chỉ số chính (OEC) là tỉ lệ người dùng đặt hàng thành công. Chỉ số nào dưới đây đóng vai trò **guardrail** (chỉ số bảo vệ) điển hình?",
+   "explanation": "Guardrail là chỉ số **không được xấu đi** (độ trễ, lỗi, huỷ đơn…) dù chỉ số chính tăng; vi phạm guardrail đã khai báo trước thì không triển khai.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nMột thử nghiệm tốt có nhiều loại chỉ số với vai trò khác nhau:\n\n| Loại | Vai trò | Ví dụ trong thử nghiệm nút nổi |\n|---|---|---|\n| Chỉ số chính (OEC) | quyết định thắng/thua | tỉ lệ người dùng đặt hàng thành công |\n| Guardrail kinh doanh/kỹ thuật | **không được xấu đi** | p95 độ trễ, tỉ lệ lỗi API, tỉ lệ huỷ đơn |\n| Guardrail độ tin cậy | dữ liệu có đáng tin không | SRM, tỉ lệ log mất |\n| Chỉ số chẩn đoán | giải thích cơ chế | số lần nhấn nút, thời gian trên trang |\n\n#### Từng bước chọn guardrail\n1. Hỏi: thay đổi này có thể làm hỏng gì? Nút nổi thêm JavaScript và gọi API tính tổng tiền, nên có thể làm chậm trang và tăng lỗi.\n2. Chọn chỉ số đo được hằng ngày, có ngưỡng rõ: \"p95 không tăng quá 50 ms\", \"tỉ lệ lỗi không tăng có ý nghĩa\".\n3. Khai báo **trước** khi chạy, cùng ngưỡng và cách kiểm định.\n\n```mermaid\nflowchart LR\n  T[\"Nút nổi (treatment)\"] --> O[\"Chỉ số chính: tỉ lệ đặt hàng\"]\n  T --> G1[\"Guardrail: p95 độ trễ\"]\n  T --> G2[\"Guardrail: tỉ lệ lỗi API\"]\n  T --> D1[\"Chẩn đoán: số lần nhấn nút\"]\n  O --> Q{\"Quyết định\"}\n  G1 --> Q\n  G2 --> Q\n```\n\n#### Bẫy thường gặp\n- Lấy chỉ số chẩn đoán (lượt nhấn) làm chỉ số thành công: nút to hơn dễ được nhấn nhầm mà không tăng đơn.\n- Chỉ theo dõi chỉ số chính, phát hiện chậm trễ khi đã triển khai.\n\n#### Đọc thêm\n- [Trustworthy Online Controlled Experiments (Kohavi, Tang, Xu)](https://experimentguide.com/)\n- [A/B testing (Wikipedia)](https://en.wikipedia.org/wiki/A/B_testing)\n",
+   "distractors": {
+    "A": "Đây chính là chỉ số chính (OEC) của thử nghiệm, không phải guardrail.",
+    "C": "Đây là chỉ số chẩn đoán (diagnostic): giải thích cơ chế, dễ tăng mà không kéo theo giá trị kinh doanh.",
+    "D": "Đây là yếu tố được thay đổi (treatment), không phải chỉ số đo kết quả."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Tỉ lệ người dùng đặt hàng thành công trong 7 ngày"
+    },
+    {
+     "key": "B",
+     "text": "p95 độ trễ trang thanh toán và tỉ lệ lỗi của API đặt hàng"
+    },
+    {
+     "key": "C",
+     "text": "Số lần nhấn nút nổi trên mỗi phiên, để xem nút có được chú ý"
+    },
+    {
+     "key": "D",
+     "text": "Màu sắc và vị trí của nút trong từng biến thể"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T04-A08",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Phân tích log cho thấy người dùng có bật tính năng \"lưu địa chỉ giao hàng\" có tỉ lệ đặt hàng cao gấp 3 lần người không bật. PM đề xuất bắt buộc mọi người lưu địa chỉ để đơn hàng tăng gấp 3. Nhận xét nào đúng nhất?",
+   "explanation": "Tương quan quan sát có thể do biến gây nhiễu (mức độ trung thành, tần suất mua) tác động lên cả hai biến. Ngẫu nhiên hoá cắt mọi đường từ biến gây nhiễu tới việc được can thiệp, nên A/B mới cho ước lượng nhân quả.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nTương quan quan sát $\\ne$ nhân quả. Người bật \"lưu địa chỉ\" khác người không bật ở nhiều mặt: họ mua thường xuyên hơn, trung thành hơn, đã quyết tâm mua. Biến gây nhiễu (confounder) \"mức độ gắn bó\" tác động lên **cả** việc lưu địa chỉ **lẫn** việc đặt hàng.\n\n#### Sơ đồ nhân quả\n```mermaid\nflowchart TD\n  C[\"Mức độ gắn bó / ý định mua (biến gây nhiễu)\"] --> X[\"Bật lưu địa chỉ\"]\n  C --> Y[\"Đặt hàng\"]\n  X -. \"tác động thật? chưa biết\" .-> Y\n```\n\n#### Từng bước lập luận\n1. Chênh lệch gấp 3 lần = (tác động thật của tính năng) + (khác biệt sẵn có giữa hai nhóm tự chọn).\n2. Dữ liệu quan sát không tách được hai phần này.\n3. Bắt buộc mọi người lưu địa chỉ không làm họ \"gắn bó\" hơn, nên đơn hàng gần như không thể tăng gấp 3; thậm chí có thể giảm vì thêm bước phiền.\n4. Cách trả lời đúng: A/B ngẫu nhiên (ví dụ gợi ý lưu địa chỉ cho nhóm B), vì ngẫu nhiên hoá làm hai nhóm giống nhau về mọi biến gây nhiễu, kể cả biến không đo được.\n\n| Bằng chứng | Trả lời được câu hỏi nhân quả? |\n|---|---|\n| Tương quan trên log | Không (có biến gây nhiễu, tự chọn) |\n| $p$ rất nhỏ trên log | Không (chỉ loại trừ may rủi) |\n| A/B ngẫu nhiên | Có, trong phạm vi thử nghiệm |\n\n#### Bẫy thường gặp\nÝ nghĩa thống kê và độ lớn tương quan **không** giải quyết vấn đề gây nhiễu.\n\n#### Đọc thêm\n- [Correlation does not imply causation (Wikipedia)](https://en.wikipedia.org/wiki/Correlation_does_not_imply_causation)\n- [Confounding (Wikipedia)](https://en.wikipedia.org/wiki/Confounding)\n",
+   "distractors": {
+    "A": "Có ý nghĩa thống kê chỉ loại trừ may rủi, không loại trừ biến gây nhiễu hay tự chọn (self-selection).",
+    "B": "Độ lớn của tương quan không biến nó thành nhân quả; tương quan mạnh vẫn có thể hoàn toàn do biến gây nhiễu.",
+    "C": "Tương quan vẫn tính được với biến nhị phân (hệ số phi, point-biserial); vấn đề ở đây là nhân quả, không phải loại biến."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Đúng, chênh lệch gấp 3 lần trên hàng trăm nghìn người là quá lớn để do ngẫu nhiên, nên chắc chắn là quan hệ nhân quả"
+    },
+    {
+     "key": "B",
+     "text": "Đúng nếu hệ số tương quan lớn hơn 0,5, vì tương quan đủ mạnh thì hàm ý nhân quả"
+    },
+    {
+     "key": "C",
+     "text": "Sai, vì hệ số tương quan chỉ có nghĩa khi cả hai biến đều là biến liên tục"
+    },
+    {
+     "key": "D",
+     "text": "Chưa kết luận được: người hay mua sắm vốn dễ lưu địa chỉ (biến gây nhiễu); cần A/B ngẫu nhiên"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T04-B01",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Số đơn đặt hàng qua nút mới trong 5 ngày đầu: 42, 50, 46, 38, 54. Tính **độ lệch chuẩn mẫu** $s$ (dùng để ước lượng độ biến động thật từ mẫu nhỏ này). **Làm tròn 2 chữ số thập phân.**",
+   "explanation": "$\\bar{x} = 230/5 = 46$; độ lệch: $-4, 4, 0, -8, 8$; $\\sum (x_i - \\bar{x})^2 = 160$. $s = \\sqrt{160/(5-1)} = \\sqrt{40} \\approx 6{,}32$ đơn.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nĐộ lệch chuẩn mẫu đo mức phân tán quanh trung bình:\n$$s = \\sqrt{\\frac{1}{n-1}\\sum_{i=1}^n (x_i - \\bar{x})^2}$$\nChia cho $n - 1$ (hiệu chỉnh Bessel) vì ta dùng $\\bar{x}$ ước lượng từ chính mẫu, làm tổng bình phương bị thiếu một \"bậc tự do\".\n\n#### Từng bước\n| Ngày | $x_i$ | $x_i - \\bar{x}$ | $(x_i - \\bar{x})^2$ |\n|---|---|---|---|\n| 1 | 42 | −4 | 16 |\n| 2 | 50 | 4 | 16 |\n| 3 | 46 | 0 | 0 |\n| 4 | 38 | −8 | 64 |\n| 5 | 54 | 8 | 64 |\n| Tổng | 230 | 0 | 160 |\n\n1. $\\bar{x} = 230/5 = 46$.\n2. $s^2 = 160/4 = 40$.\n3. $s = \\sqrt{40} \\approx 6{,}32$ đơn.\n\n```python\nimport statistics as st\nd = [42, 50, 46, 38, 54]\nprint(st.stdev(d), st.pstdev(d))   # 6.3245... 5.6568...\n```\n\n#### Bẫy thường gặp\n- `statistics.pstdev` / `numpy.std` mặc định (`ddof=0`) chia $n$; `statistics.stdev` / `pandas.Series.std` mặc định chia $n - 1$. Hai thư viện khác mặc định là nguồn lỗi phổ biến.\n- Quên lấy căn: phương sai có đơn vị \"đơn²\", khó diễn giải.\n- Với $n$ lớn, khác biệt giữa $n$ và $n - 1$ không đáng kể; với $n = 5$ thì lệch khoảng 12%.\n\n#### Đọc thêm\n- [Standard deviation (Wikipedia)](https://en.wikipedia.org/wiki/Standard_deviation)\n- [Python statistics — stdev và pstdev](https://docs.python.org/3/library/statistics.html)\n",
+   "mistakes": [
+    {
+     "value": 5.66,
+     "why": "Chia cho $n = 5$ (độ lệch chuẩn tổng thể $\\sigma$) thay vì $n - 1 = 4$: $\\sqrt{160/5} \\approx 5{,}66$. Ước lượng từ mẫu dùng $n - 1$ (hiệu chỉnh Bessel)."
+    },
+    {
+     "value": 40,
+     "why": "Đây là phương sai mẫu $s^2 = 160/4$; quên lấy căn bậc hai."
+    },
+    {
+     "value": 32,
+     "why": "Phương sai tổng thể $160/5$, vừa chia $n$ vừa quên lấy căn."
+    }
+   ],
+   "answer": 6.32,
+   "tol": 0.0051,
+   "unit": "đơn"
+  },
+  {
+   "id": "T04-B02",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "12 giá trị p95 độ trễ theo giờ của API đặt hàng (ms, đã sắp xếp): 120, 130, 135, 140, 150, 155, 160, 170, 180, 190, 260, 420. Dùng quy tắc Tukey: một giá trị là ngoại lai nếu nằm ngoài $[Q_1 - 1{,}5 \\cdot IQR;\\ Q_3 + 1{,}5 \\cdot IQR]$, với $Q_1, Q_3$ là trung vị của nửa dưới và nửa trên của dữ liệu. Có bao nhiêu điểm ngoại lai?",
+   "explanation": "$Q_1 = (135 + 140)/2 = 137{,}5$; $Q_3 = (180 + 190)/2 = 185$; $IQR = 47{,}5$. Ngưỡng trên $185 + 1{,}5 \\cdot 47{,}5 = 256{,}25$, ngưỡng dưới $66{,}25$, nên 260 và 420 là ngoại lai.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nQuy tắc Tukey dùng tứ phân vị (bền vững với ngoại lai) thay vì trung bình và độ lệch chuẩn (bị chính ngoại lai kéo lệch). Hàng rào: $[Q_1 - 1{,}5 \\cdot IQR;\\ Q_3 + 1{,}5 \\cdot IQR]$, $IQR = Q_3 - Q_1$.\n\n#### Từng bước\n1. 12 giá trị, nửa dưới: 120, 130, 135, 140, 150, 155 nên $Q_1 = (135 + 140)/2 = 137{,}5$.\n2. Nửa trên: 160, 170, 180, 190, 260, 420 nên $Q_3 = (180 + 190)/2 = 185$.\n3. $IQR = 47{,}5$; $1{,}5 \\cdot IQR = 71{,}25$.\n4. Hàng rào: $[66{,}25;\\ 256{,}25]$. Ngoài hàng rào: **260 và 420**.\n\n```python\nimport statistics as st, numpy as np\nv = [120,130,135,140,150,155,160,170,180,190,260,420]\nq1, q3 = st.median(v[:6]), st.median(v[6:])\nprint(q1, q3, q3 + 1.5*(q3-q1))           # 137.5 185.0 256.25\nprint(np.percentile(v, [25, 75]))         # [138.75 182.5] — cách nội suy khác, vẫn ra 2 ngoại lai\n```\n\n#### Hình minh hoạ (box plot)\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 170\" width=\"100%\" style=\"max-width:560px\">\n<rect x=\"85.1\" y=\"48\" width=\"69.9\" height=\"44\" fill=\"#3b82f6\" fill-opacity=\"0.2\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<line x1=\"114.6\" y1=\"48.0\" x2=\"114.6\" y2=\"92.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<line x1=\"59.4\" y1=\"70.0\" x2=\"85.1\" y2=\"70.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"155.0\" y1=\"70.0\" x2=\"162.4\" y2=\"70.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"59.4\" y1=\"60.0\" x2=\"59.4\" y2=\"80.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"162.4\" y1=\"60.0\" x2=\"162.4\" y2=\"80.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"259.8\" y1=\"20.0\" x2=\"259.8\" y2=\"120.0\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-dasharray=\"6 4\"/>\n<text x=\"259.8\" y=\"14.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"#ef4444\" font-weight=\"bold\">Q3 + 1,5·IQR = 256,25</text>\n<circle cx=\"265.3\" cy=\"70\" r=\"5\" fill=\"#ef4444\"/>\n<circle cx=\"500.6\" cy=\"70\" r=\"5\" fill=\"#ef4444\"/>\n<text x=\"85.1\" y=\"108.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">Q1=137,5</text>\n<text x=\"155.0\" y=\"108.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">Q3=185</text>\n<line x1=\"30.0\" y1=\"135.0\" x2=\"530.0\" y2=\"135.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"30.0\" y1=\"135.0\" x2=\"30.0\" y2=\"140.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"30.0\" y=\"154.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">100</text>\n<line x1=\"103.5\" y1=\"135.0\" x2=\"103.5\" y2=\"140.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"103.5\" y=\"154.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">150</text>\n<line x1=\"177.1\" y1=\"135.0\" x2=\"177.1\" y2=\"140.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"177.1\" y=\"154.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">200</text>\n<line x1=\"250.6\" y1=\"135.0\" x2=\"250.6\" y2=\"140.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"250.6\" y=\"154.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">250</text>\n<line x1=\"324.1\" y1=\"135.0\" x2=\"324.1\" y2=\"140.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"324.1\" y=\"154.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">300</text>\n<line x1=\"397.6\" y1=\"135.0\" x2=\"397.6\" y2=\"140.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"397.6\" y=\"154.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">350</text>\n<line x1=\"471.2\" y1=\"135.0\" x2=\"471.2\" y2=\"140.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"471.2\" y=\"154.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">400</text>\n<text x=\"500.6\" y=\"58.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"#ef4444\">420</text>\n<text x=\"265.3\" y=\"58.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"#ef4444\">260</text>\n</svg>\n\n| Quy tắc | Ngưỡng trên | Số ngoại lai |\n|---|---|---|\n| Tukey $1{,}5 \\cdot IQR$ | 256,25 | 2 |\n| \"Cực đoan\" $3 \\cdot IQR$ | 327,5 | 1 |\n| $\\bar{x} + 2s$ ($\\bar{x} \\approx 184{,}2$, $s \\approx 82{,}9$) | ≈ 350 | 1 |\n\nQuy tắc $\\bar{x} + 2s$ bị chính điểm 420 làm phình $s$ nên \"che\" điểm 260 (hiện tượng masking).\n\n#### Bẫy thường gặp\nNgoại lai theo Tukey là tín hiệu cần **điều tra** (giờ cao điểm? sự cố?), không phải tự động xoá.\n\n#### Đọc thêm\n- [Interquartile range (Wikipedia)](https://en.wikipedia.org/wiki/Interquartile_range)\n- [Box plot (Wikipedia)](https://en.wikipedia.org/wiki/Box_plot)\n",
+   "distractors": {
+    "B": "Dùng hệ số $3 \\cdot IQR$ (ngưỡng ngoại lai \"cực đoan\") thay cho $1{,}5 \\cdot IQR$ mà đề yêu cầu.",
+    "C": "Lấy luôn $Q_3$ làm ngưỡng, quên cộng $1{,}5 \\cdot IQR$; khi đó 25% dữ liệu trên cùng đều thành \"ngoại lai\".",
+    "D": "Lấy khoảng [min; max] làm chuẩn thì không bao giờ có ngoại lai; quy tắc Tukey dựa trên tứ phân vị."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "2 điểm: 260 và 420 (ngưỡng trên $256{,}25$ ms)"
+    },
+    {
+     "key": "B",
+     "text": "1 điểm: chỉ 420 (ngưỡng trên $327{,}5$ ms)"
+    },
+    {
+     "key": "C",
+     "text": "3 điểm: 190, 260 và 420 (ngưỡng trên $185$ ms)"
+    },
+    {
+     "key": "D",
+     "text": "0 điểm: mọi giá trị nằm trong khoảng $[120;\\ 420]$ ms"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T04-B03",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "A/B nút Đặt hàng: nhánh A có 5.000 người dùng, 400 người đặt hàng; nhánh B có 5.000 người dùng, 460 người đặt hàng. Dùng sai số chuẩn **không gộp** (unpooled) của hiệu hai tỉ lệ và $z = 1{,}96$, tính **biên sai số** (nửa độ rộng khoảng tin cậy 95%) của hiệu $\\hat{p}_B - \\hat{p}_A$. **Đơn vị: điểm phần trăm, làm tròn 2 chữ số thập phân** (ví dụ 0,85).",
+   "explanation": "$\\hat{p}_A = 0{,}08$, $\\hat{p}_B = 0{,}092$. $SE = \\sqrt{0{,}08 \\cdot 0{,}92/5000 + 0{,}092 \\cdot 0{,}908/5000} \\approx 0{,}005606$. Biên sai số $= 1{,}96 \\cdot 0{,}005606 \\approx 0{,}01099$, tức khoảng 1,10 điểm %.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nPhương sai của hiệu hai ước lượng độc lập bằng **tổng** hai phương sai:\n$$SE_{B-A} = \\sqrt{\\frac{\\hat{p}_A(1-\\hat{p}_A)}{n_A} + \\frac{\\hat{p}_B(1-\\hat{p}_B)}{n_B}}$$\nKhoảng tin cậy 95%: $(\\hat{p}_B - \\hat{p}_A) \\pm 1{,}96\\,SE_{B-A}$; biên sai số là $1{,}96\\,SE_{B-A}$.\n\n#### Từng bước\n1. $\\hat{p}_A = 400/5000 = 0{,}08$; $\\hat{p}_B = 460/5000 = 0{,}092$; hiệu $= 1{,}2$ điểm %.\n2. $\\hat{p}_A(1-\\hat{p}_A)/n_A = 0{,}0736/5000 = 1{,}472 \\cdot 10^{-5}$.\n3. $\\hat{p}_B(1-\\hat{p}_B)/n_B = 0{,}083536/5000 \\approx 1{,}6707 \\cdot 10^{-5}$.\n4. $SE = \\sqrt{3{,}1427 \\cdot 10^{-5}} \\approx 0{,}005606$.\n5. Biên $= 1{,}96 \\cdot 0{,}005606 \\approx 0{,}01099$, tức **1,10 điểm %**. Khoảng: $1{,}2 \\pm 1{,}10 = [+0{,}10;\\ +2{,}30]$ điểm %.\n\n```python\nimport math\npa, pb, n = 0.08, 0.092, 5000\nse = math.sqrt(pa*(1-pa)/n + pb*(1-pb)/n)\nprint(round(se, 6), round(1.96*se*100, 2))   # 0.005606 1.1\n```\n\n#### Bảng các cách tính sai\n| Cách tính | Kết quả (điểm %) |\n|---|---|\n| Đúng: $1{,}96\\sqrt{SE_A^2 + SE_B^2}$ | 1,10 |\n| Quên 1,96 | 0,56 |\n| Cộng hai biên: $1{,}96(SE_A + SE_B)$ | 1,55 |\n| Chỉ dùng nhánh B | 0,80 |\n\n#### Bẫy thường gặp\n- Cộng độ lệch chuẩn thay vì cộng phương sai.\n- Nhầm đơn vị: 0,011 (tỉ lệ) và 1,10 (điểm phần trăm) là một, nhưng đề yêu cầu điểm %.\n- \"Điểm phần trăm\" (hiệu tuyệt đối) khác \"phần trăm tương đối\" ($1{,}2/8 = 15\\%$ tương đối).\n\n#### Đọc thêm\n- [Binomial proportion confidence interval (Wikipedia)](https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval)\n- [OpenIntro Statistics (sách miễn phí)](https://www.openintro.org/book/os/)\n",
+   "mistakes": [
+    {
+     "value": 0.56,
+     "why": "Đây mới là $SE \\approx 0{,}56$ điểm %; quên nhân với $z = 1{,}96$."
+    },
+    {
+     "value": 1.55,
+     "why": "Cộng hai biên sai số riêng ($0{,}75 + 0{,}80$). Phương sai cộng được, độ lệch chuẩn thì không: $SE_{\\text{hiệu}} = \\sqrt{SE_A^2 + SE_B^2}$."
+    },
+    {
+     "value": 0.8,
+     "why": "Chỉ dùng biên sai số của nhánh B, bỏ qua độ bất định của nhánh A."
+    },
+    {
+     "value": 0.011,
+     "why": "Nhập dạng tỉ lệ (0,011) trong khi đề yêu cầu đơn vị điểm phần trăm (1,10)."
+    }
+   ],
+   "answer": 1.1,
+   "tol": 0.0051,
+   "unit": "điểm %"
+  },
+  {
+   "id": "T04-B04",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Với cùng một bộ dữ liệu A/B, nhà phân tích đổi từ khoảng tin cậy 95% ($z = 1{,}96$) sang khoảng tin cậy 99% ($z = 2{,}576$). Độ rộng khoảng tin cậy thay đổi thế nào?",
+   "explanation": "Độ rộng $= 2 z \\cdot SE$, SE không đổi nên tỉ số là $2{,}576/1{,}96 \\approx 1{,}31$. Muốn chắc chắn hơn (99%) thì phải chấp nhận khoảng rộng hơn.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nKhoảng tin cậy có dạng $\\hat{\\theta} \\pm z \\cdot SE$; độ rộng $= 2z \\cdot SE$. Cùng dữ liệu thì SE không đổi, nên tỉ số độ rộng chính là tỉ số giá trị $z$.\n\n#### Từng bước\n1. $z_{0{,}975} = 1{,}96$ (95% hai phía); $z_{0{,}995} = 2{,}576$ (99% hai phía).\n2. Tỉ số: $2{,}576/1{,}96 \\approx 1{,}31$.\n3. Ví dụ: nếu khoảng 95% là $1{,}0 \\pm 0{,}70$ thì khoảng 99% là $1{,}0 \\pm 0{,}92$.\n\n```python\nfrom scipy.stats import norm\nfor c in (0.90, 0.95, 0.99):\n    print(c, round(norm.ppf(1 - (1-c)/2), 3))\n# 0.9 1.645 / 0.95 1.96 / 0.99 2.576\n```\n\n#### Bảng giá trị z hay dùng\n| Mức tin cậy (hai phía) | $z$ | Độ rộng so với 95% |\n|---|---|---|\n| 80% | 1,282 | 0,65 lần |\n| 90% | 1,645 | 0,84 lần |\n| 95% | 1,960 | 1 lần |\n| 99% | 2,576 | 1,31 lần |\n\n#### Đánh đổi\nMuốn **vừa** tin cậy 99% **vừa** giữ độ rộng như cũ thì cần cỡ mẫu gấp $(2{,}576/1{,}96)^2 \\approx 1{,}73$ lần, vì độ rộng tỉ lệ với $1/\\sqrt{n}$.\n\n#### Bẫy thường gặp\n- Nghĩ \"tin cậy cao hơn thì khoảng hẹp hơn\".\n- Nhầm 1,645 (90% hai phía / 95% một phía) với 1,96.\n\n#### Đọc thêm\n- [Standard normal table (Wikipedia)](https://en.wikipedia.org/wiki/Standard_normal_table)\n- [Confidence interval (Wikipedia)](https://en.wikipedia.org/wiki/Confidence_interval)\n",
+   "distractors": {
+    "A": "Nhầm \"độ tin cậy\" với \"độ chính xác\": để chứa giá trị thật thường xuyên hơn, khoảng phải rộng ra chứ không hẹp lại.",
+    "C": "Độ rộng tỉ lệ với $z$, không tỉ lệ với phần trăm tin cậy.",
+    "D": "$1{,}645$ là $z$ cho khoảng 90% hai phía (hoặc 95% một phía), không phải mốc 95% hai phía của đề."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Hẹp lại còn khoảng 0,76 lần, vì độ tin cậy cao hơn thì ước lượng chính xác hơn"
+    },
+    {
+     "key": "B",
+     "text": "Rộng ra khoảng 1,31 lần, vì độ rộng tỉ lệ thuận với giá trị $z$"
+    },
+    {
+     "key": "C",
+     "text": "Rộng ra khoảng 1,04 lần, đúng bằng tỉ số $99/95$ của hai mức tin cậy"
+    },
+    {
+     "key": "D",
+     "text": "Rộng ra khoảng 1,57 lần, theo tỉ số $2{,}576/1{,}645$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T04-B05",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "A/B nút Đặt hàng: nhánh A có 8.000 người, 640 đơn; nhánh B có 8.000 người, 720 đơn. Kiểm định z hai tỉ lệ với $H_0: p_A = p_B$, dùng **tỉ lệ gộp** $\\hat{p}$ để tính sai số chuẩn. Tính thống kê $z = (\\hat{p}_B - \\hat{p}_A)/SE$. **Làm tròn 2 chữ số thập phân.**",
+   "explanation": "$\\hat{p}_A = 0{,}08$, $\\hat{p}_B = 0{,}09$, $\\hat{p} = 1360/16000 = 0{,}085$. $SE = \\sqrt{0{,}085 \\cdot 0{,}915 \\cdot (2/8000)} \\approx 0{,}004409$; $z = 0{,}01/0{,}004409 \\approx 2{,}27$.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nKhi kiểm định $H_0: p_A = p_B$, dưới $H_0$ hai nhánh có chung một tỉ lệ, nên ước lượng nó bằng **tỉ lệ gộp**:\n$$\\hat{p} = \\frac{X_A + X_B}{n_A + n_B}, \\qquad SE_0 = \\sqrt{\\hat{p}(1-\\hat{p})\\left(\\frac{1}{n_A} + \\frac{1}{n_B}\\right)}, \\qquad z = \\frac{\\hat{p}_B - \\hat{p}_A}{SE_0}$$\n\n#### Từng bước\n1. $\\hat{p}_A = 640/8000 = 0{,}08$; $\\hat{p}_B = 720/8000 = 0{,}09$.\n2. $\\hat{p} = 1360/16000 = 0{,}085$.\n3. $SE_0 = \\sqrt{0{,}085 \\cdot 0{,}915 \\cdot 0{,}00025} = \\sqrt{1{,}944 \\cdot 10^{-5}} \\approx 0{,}004409$.\n4. $z = 0{,}01/0{,}004409 \\approx 2{,}27$; p-value hai phía $\\approx 0{,}023 < 0{,}05$.\n\n```python\nimport math\nfrom scipy.stats import norm\np = 1360/16000\nse = math.sqrt(p*(1-p)*(1/8000 + 1/8000))\nz = 0.01/se\nprint(round(z, 2), round(2*norm.sf(z), 3))   # 2.27 0.023\n```\n\n#### Bảng lỗi hay gặp\n| Cách tính SE | $z$ |\n|---|---|\n| Đúng: $\\sqrt{\\hat{p}(1-\\hat{p})(1/n_A + 1/n_B)}$ | 2,27 |\n| Quên một nhánh: $\\sqrt{\\hat{p}(1-\\hat{p})/8000}$ | 3,21 |\n| Dùng tổng $n$: $\\sqrt{\\hat{p}(1-\\hat{p})/16000}$ | 4,54 |\n\n#### Gộp hay không gộp?\nKiểm định dùng SE gộp (đúng dưới $H_0$); khoảng tin cậy dùng SE không gộp. Với $n_A = n_B$ và tỉ lệ gần nhau, hai cách cho kết quả gần như bằng nhau (ở đây đều $\\approx 2{,}27$).\n\n#### Bẫy thường gặp\nQuên chia cho SE, báo cáo \"hiệu 0,01\" như thể đó là thống kê kiểm định.\n\n#### Đọc thêm\n- [Two-proportion Z-test (Wikipedia)](https://en.wikipedia.org/wiki/Two-proportion_Z-test)\n- [OpenIntro Statistics (sách miễn phí)](https://www.openintro.org/book/os/)\n",
+   "mistakes": [
+    {
+     "value": 3.21,
+     "why": "Dùng $SE = \\sqrt{\\hat{p}(1-\\hat{p})/n}$ của **một** nhánh; hiệu hai tỉ lệ cần $\\sqrt{\\hat{p}(1-\\hat{p})(1/n_A + 1/n_B)}$."
+    },
+    {
+     "value": 4.54,
+     "why": "Chia cho tổng $n = 16.000$ thay vì cộng $1/n_A + 1/n_B$, làm SE nhỏ đi một nửa."
+    },
+    {
+     "value": 0.01,
+     "why": "Mới tính hiệu $0{,}09 - 0{,}08 = 0{,}01$, chưa chia cho sai số chuẩn."
+    }
+   ],
+   "answer": 2.27,
+   "tol": 0.0051
+  },
+  {
+   "id": "T04-B06",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Kiểm định z hai phía cho thử nghiệm nút Đặt hàng ra $z = 1{,}80$. Cho $\\Phi(1{,}80) = 0{,}9641$ ($\\Phi$ là hàm phân phối tích luỹ của phân phối chuẩn tắc). p-value **hai phía** và kết luận ở $\\alpha = 0{,}05$ là gì?",
+   "explanation": "$p = 2\\,[1 - \\Phi(1{,}80)] = 2 \\cdot 0{,}0359 \\approx 0{,}072 > 0{,}05$ nên không bác bỏ $H_0$. Tương đương: $|z| = 1{,}80 < 1{,}96$.",
+   "section": "a-tk",
+   "long": "#### Ý chính\np-value hai phía là xác suất, **giả sử $H_0$ đúng**, thu được thống kê ít nhất cực đoan như đã quan sát theo **cả hai hướng**:\n$$p = P(|Z| \\ge |z_{\\text{obs}}|) = 2\\,[1 - \\Phi(|z_{\\text{obs}}|)]$$\n\n#### Từng bước\n1. $\\Phi(1{,}80) = 0{,}9641$ nên đuôi phải $= 1 - 0{,}9641 = 0{,}0359$.\n2. Hai phía: $p = 2 \\cdot 0{,}0359 \\approx 0{,}072$.\n3. $0{,}072 > 0{,}05$: không bác bỏ $H_0$. Tương đương $|z| = 1{,}80 < 1{,}96$.\n\n```python\nfrom scipy.stats import norm\nprint(norm.cdf(1.8), norm.sf(1.8), 2*norm.sf(1.8))\n# 0.9641 0.0359 0.0719\n```\n\n#### Hình dung\n| Đại lượng | Giá trị | Ý nghĩa |\n|---|---|---|\n| $\\Phi(1{,}80)$ | 0,964 | phần thân bên trái $z$ |\n| $1 - \\Phi(1{,}80)$ | 0,036 | đuôi phải (p một phía) |\n| $2[1 - \\Phi(1{,}80)]$ | 0,072 | **p hai phía** |\n| $1 - p$ | 0,928 | không có ý nghĩa thống kê đặc biệt |\n\n```mermaid\nflowchart LR\n  Z[\"z quan sát = 1,80\"] --> T[\"Tra Φ(1,80) = 0,9641\"]\n  T --> O[\"Đuôi một phía = 0,0359\"]\n  O --> P[\"Nhân 2: p = 0,072\"]\n  P --> K{\"p nhỏ hơn 0,05?\"}\n  K -->|Không| N[\"Không bác bỏ H0\"]\n```\n\n#### Bẫy thường gặp\n- Dùng p một phía khi kế hoạch là hai phía (hoặc đổi sang một phía **sau** khi xem dữ liệu): làm sai lầm loại I tăng gấp đôi.\n- \"Không bác bỏ\" khác \"chứng minh $H_0$ đúng\".\n\n#### Đọc thêm\n- [P-value (Wikipedia)](https://en.wikipedia.org/wiki/P-value)\n- [scipy.stats.norm](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html)\n",
+   "distractors": {
+    "A": "Đây là p-value **một phía** $1 - \\Phi(1{,}80)$; đề yêu cầu hai phía nên phải nhân 2.",
+    "B": "Lấy nhầm $\\Phi(1{,}80)$ làm p-value; p-value là xác suất phần đuôi, không phải phần thân.",
+    "D": "$0{,}928 = 1 - p$, không phải p-value, và \"độ tin cậy\" không phải tiêu chí bác bỏ $H_0$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$p \\approx 0{,}036$; bác bỏ $H_0$ vì $p < 0{,}05$"
+    },
+    {
+     "key": "B",
+     "text": "$p \\approx 0{,}964$; không bác bỏ $H_0$ vì $p$ rất lớn"
+    },
+    {
+     "key": "C",
+     "text": "$p \\approx 0{,}072$; chưa đủ bằng chứng để bác bỏ $H_0$"
+    },
+    {
+     "key": "D",
+     "text": "$p \\approx 0{,}928$; bác bỏ $H_0$ vì độ tin cậy trên 90%"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T04-B07",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Thử nghiệm nút Đặt hàng chạy 5 ngày, mỗi nhánh 3.000 người. Kết quả: chênh lệch $+0{,}4$ điểm %, $p = 0{,}33$, khoảng tin cậy 95% $[-0{,}4;\\ +1{,}2]$ điểm %. Kinh doanh coi mức tăng +0,5 điểm % là đáng giá. PM viết: \"Nút mới không có tác dụng, đóng thử nghiệm\". Nhận định nào đúng nhất?",
+   "explanation": "Không bác bỏ $H_0$ không có nghĩa $H_0$ đúng. Khoảng $[-0{,}4;\\ +1{,}2]$ vẫn chứa mức tăng đáng giá (+0,5 đến +1,2), nên kết quả là **chưa đủ dữ liệu**; cần tính cỡ mẫu cho MDE 0,5 điểm % rồi chạy đủ.",
+   "section": "a-tk",
+   "long": "#### Ý chính\n$p > 0{,}05$ chỉ có nghĩa \"dữ liệu chưa đủ để bác bỏ $H_0$\". Muốn nói \"không có tác động đáng kể\", cần khoảng tin cậy **hẹp**, nằm trọn trong vùng \"không đáng kể\" (ví dụ dưới +0,5 điểm %).\n\n#### Từng bước với số liệu đề\n1. Khoảng tin cậy $[-0{,}4;\\ +1{,}2]$: biên $0{,}8$ nên $SE \\approx 0{,}8/1{,}96 \\approx 0{,}41$ điểm %.\n2. $z = 0{,}4/0{,}41 \\approx 0{,}98$, $p \\approx 0{,}33$: khớp đề.\n3. Khoảng vẫn chứa +0,5 đến +1,2 (mức đáng giá), nên kết luận \"không tác dụng\" là sai.\n4. Power để thấy MDE 0,5 với SE 0,41: $\\Phi(0{,}5/0{,}41 - 1{,}96) = \\Phi(-0{,}74) \\approx 0{,}23$, quá thấp.\n\n```python\nfrom scipy.stats import norm\nse = 0.8/1.96\nprint(round(2*norm.sf(0.4/se), 2), round(norm.cdf(0.5/se - 1.96), 2))   # 0.33 0.23\n```\n\n#### Bảng đọc kết quả theo khoảng tin cậy\n| Khoảng tin cậy (điểm %) | Đọc |\n|---|---|\n| $[+0{,}3;\\ +1{,}7]$ | tăng có ý nghĩa |\n| $[-0{,}1;\\ +0{,}2]$ | nếu có tác động thì rất nhỏ, dưới MDE |\n| $[-0{,}4;\\ +1{,}2]$ | **chưa kết luận được**, thiếu dữ liệu |\n| $[-1{,}5;\\ -0{,}3]$ | giảm có ý nghĩa |\n\n#### Bẫy thường gặp\n- Đổi sang một phía sau khi xem dữ liệu, hoặc chạy tiếp \"cho đến khi có ý nghĩa\": đều làm sai lầm loại I tăng.\n- Công bố thắng chỉ dựa trên dấu của ước lượng điểm.\n\n#### Đọc thêm\n- [Statistical significance (Wikipedia)](https://en.wikipedia.org/wiki/Statistical_significance)\n- [Power (statistics) (Wikipedia)](https://en.wikipedia.org/wiki/Power_%28statistics%29)\n",
+   "distractors": {
+    "A": "\"Absence of evidence is not evidence of absence\": p lớn chỉ cho thấy dữ liệu chưa đủ để bác bỏ, không chứng minh bằng nhau.",
+    "B": "Ước lượng điểm dương nhưng khoảng tin cậy chứa 0 và cả giá trị âm; công bố thắng là bỏ qua độ bất định.",
+    "C": "Đổi sang một phía sau khi thấy dữ liệu và chạy tới khi $p < 0{,}05$ đều làm tăng sai lầm loại I (p-hacking, nhìn trộm)."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "PM đúng: $p > 0{,}05$ đã chứng minh hai nút có tỉ lệ chuyển đổi bằng nhau"
+    },
+    {
+     "key": "B",
+     "text": "Nên công bố nút mới thắng ngay vì ước lượng điểm +0,4 điểm % là số dương"
+    },
+    {
+     "key": "C",
+     "text": "Nên đổi sang kiểm định một phía để $p$ còn khoảng 0,16, rồi chạy tiếp đến khi nào $p < 0{,}05$ thì dừng"
+    },
+    {
+     "key": "D",
+     "text": "Chưa kết luận được: khoảng tin cậy chứa cả 0 lẫn mức +1 điểm %; thử nghiệm thiếu power"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T04-B08",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Đội sản phẩm kiểm tra p-value **mỗi ngày** trong 14 ngày và định dừng thử nghiệm nút Đặt hàng vào ngày đầu tiên thấy $p < 0{,}05$ (kiểm định z thông thường, $\\alpha = 0{,}05$ mỗi lần). Giả sử nút mới thực ra không có tác động. Điều gì xảy ra?",
+   "explanation": "Mỗi lần nhìn là một cơ hội để z vượt $\\pm 1{,}96$ do ngẫu nhiên; $P(\\exists\\, t: |z_t| > 1{,}96 \\mid H_0)$ với 14 lần nhìn khoảng 0,2 (mô phỏng). Cách sửa: cố định cỡ mẫu và chỉ đọc kết quả ở cuối, hoặc dùng kiểm định tuần tự (alpha spending, mSPRT).",
+   "section": "a-tk",
+   "long": "#### Ý chính\nKiểm định cỡ mẫu cố định đảm bảo $P(\\text{dương tính giả}) = \\alpha$ **chỉ khi đọc kết quả một lần** ở cuối. Nhìn mỗi ngày và dừng khi lần đầu thấy $p < 0{,}05$ là cho 14 cơ hội để nhiễu vượt ngưỡng.\n\n#### Từng bước (mô phỏng)\n1. Dưới $H_0$, z tích luỹ theo ngày dao động như một bước đi ngẫu nhiên đã chuẩn hoá.\n2. Đếm tỉ lệ thử nghiệm A/A mà **ít nhất một ngày** có $|z| > 1{,}96$.\n\n```python\nimport numpy as np\nrng = np.random.default_rng(0)\nz = rng.standard_normal((100_000, 14)).cumsum(1) / np.sqrt(np.arange(1, 15))\nprint((np.abs(z) > 1.96).any(1).mean())   # khoảng 0.22\nprint((np.abs(z[:, -1]) > 1.96).mean())   # khoảng 0.05 nếu chỉ nhìn ngày cuối\n```\n\n#### Hình minh hoạ\nBa thử nghiệm A/A (không có tác động thật). Đường vàng chạm ngưỡng ở ngày 13: nếu dừng lúc đó, đội sẽ công bố một \"chiến thắng\" giả, dù đến ngày 14 nó đã quay về trong ngưỡng.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 220\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"40.0\" y1=\"47.7\" x2=\"530.0\" y2=\"47.7\" stroke=\"#ef4444\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\"/>\n<line x1=\"40.0\" y1=\"152.3\" x2=\"530.0\" y2=\"152.3\" stroke=\"#ef4444\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\"/>\n<line x1=\"40.0\" y1=\"100.0\" x2=\"530.0\" y2=\"100.0\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"530.0\" y=\"42.7\" font-size=\"11\" text-anchor=\"end\" fill=\"#ef4444\">+1,96</text>\n<text x=\"530.0\" y=\"166.3\" font-size=\"11\" text-anchor=\"end\" fill=\"#ef4444\">−1,96</text>\n<path d=\"M 40.0 70.6 L 77.7 72.9 L 115.4 86.1 L 153.1 104.8 L 190.8 126.9 L 228.5 124.3 L 266.2 130.7 L 303.8 137.0 L 341.5 136.8 L 379.2 135.4 L 416.9 152.0 L 454.6 142.7 L 492.3 156.0 L 530.0 140.7\" stroke=\"#f59e0b\" stroke-width=\"2\" fill=\"none\"/>\n<circle cx=\"492.3\" cy=\"156.0\" r=\"5\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<path d=\"M 40.0 111.5 L 77.7 129.5 L 115.4 113.7 L 153.1 126.6 L 190.8 99.8 L 228.5 89.7 L 266.2 94.1 L 303.8 89.1 L 341.5 75.4 L 379.2 52.8 L 416.9 62.4 L 454.6 55.8 L 492.3 53.7 L 530.0 57.4\" stroke=\"#3b82f6\" stroke-width=\"2\" fill=\"none\"/>\n<path d=\"M 40.0 109.9 L 77.7 88.2 L 115.4 84.0 L 153.1 94.4 L 190.8 87.0 L 228.5 103.9 L 266.2 97.6 L 303.8 103.1 L 341.5 97.3 L 379.2 93.7 L 416.9 100.2 L 454.6 96.1 L 492.3 93.7 L 530.0 98.6\" stroke=\"#10b981\" stroke-width=\"2\" fill=\"none\"/>\n<line x1=\"40.0\" y1=\"182.0\" x2=\"40.0\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"40.0\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<line x1=\"77.7\" y1=\"182.0\" x2=\"77.7\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"77.7\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<line x1=\"115.4\" y1=\"182.0\" x2=\"115.4\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"115.4\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<line x1=\"153.1\" y1=\"182.0\" x2=\"153.1\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"153.1\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<line x1=\"190.8\" y1=\"182.0\" x2=\"190.8\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"190.8\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">5</text>\n<line x1=\"228.5\" y1=\"182.0\" x2=\"228.5\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"228.5\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">6</text>\n<line x1=\"266.2\" y1=\"182.0\" x2=\"266.2\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"266.2\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">7</text>\n<line x1=\"303.8\" y1=\"182.0\" x2=\"303.8\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"303.8\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">8</text>\n<line x1=\"341.5\" y1=\"182.0\" x2=\"341.5\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"341.5\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">9</text>\n<line x1=\"379.2\" y1=\"182.0\" x2=\"379.2\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"379.2\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">10</text>\n<line x1=\"416.9\" y1=\"182.0\" x2=\"416.9\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"416.9\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">11</text>\n<line x1=\"454.6\" y1=\"182.0\" x2=\"454.6\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"454.6\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">12</text>\n<line x1=\"492.3\" y1=\"182.0\" x2=\"492.3\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"492.3\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">13</text>\n<line x1=\"530.0\" y1=\"182.0\" x2=\"530.0\" y2=\"186.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"530.0\" y=\"199.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">14</text>\n<text x=\"285.0\" y=\"216.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">ngày (z tích luỹ dưới H0 — không có tác động thật)</text>\n<text x=\"44.0\" y=\"24.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">z</text>\n</svg>\n\n| Số lần nhìn (đều nhau) | Sai lầm loại I thực tế (mô phỏng) |\n|---|---|\n| 1 | 5% |\n| 5 | khoảng 14% |\n| 10 | khoảng 19% |\n| 14 | khoảng 22% |\n\n#### Cách làm đúng\n- Tính cỡ mẫu trước, chỉ ra quyết định khi đủ cỡ mẫu.\n- Hoặc dùng thiết kế tuần tự: ngưỡng chặt hơn ở các lần nhìn sớm (Pocock, O'Brien–Fleming, alpha spending) hoặc mSPRT/always-valid p-value.\n- Dashboard hằng ngày vẫn hữu ích để bắt **lỗi nghiêm trọng** (SRM, guardrail sập), không phải để tuyên bố thắng.\n\n#### Đọc thêm\n- [Evan Miller — How Not To Run an A/B Test](https://www.evanmiller.org/how-not-to-run-an-ab-test.html)\n- [Evan Miller — Simple Sequential A/B Testing](https://www.evanmiller.org/sequential-ab-testing.html)\n- [Sequential analysis (Wikipedia)](https://en.wikipedia.org/wiki/Sequential_analysis)\n",
+   "distractors": {
+    "B": "Mỗi lần nhìn có $\\alpha = 0{,}05$, nhưng xác suất **ít nhất một lần** vượt ngưỡng tích luỹ qua 14 lần nhìn nên lớn hơn 5% nhiều.",
+    "C": "Nhầm với hiệu chỉnh Bonferroni: chỉ khi **chủ động** hạ ngưỡng mỗi lần nhìn thì sai lầm mới bị khống chế; nhìn nhiều lần không tự làm giảm sai lầm.",
+    "D": "Ngẫu nhiên hoá đúng không cứu được quy tắc dừng sai; vấn đề chính là sai lầm loại I tăng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Dương tính giả vượt xa 5% (mô phỏng cho khoảng 20%); cần chốt cỡ mẫu trước hoặc dùng kiểm định tuần tự"
+    },
+    {
+     "key": "B",
+     "text": "Tỉ lệ dương tính giả vẫn là 5% vì mỗi lần nhìn đều dùng đúng ngưỡng $\\alpha = 0{,}05$"
+    },
+    {
+     "key": "C",
+     "text": "Tỉ lệ dương tính giả giảm còn khoảng $0{,}05/14$ vì kiểm tra nhiều lần thì chắc chắn hơn"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ power bị giảm, còn sai lầm loại I không đổi vì việc chia nhóm vẫn là ngẫu nhiên"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T04-B09",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Thử nghiệm nút Đặt hàng được cấu hình chia **70% vào A, 30% vào B**. Sau 1 tuần có 50.000 người: A = 35.400, B = 14.600. Tính thống kê khi bình phương $\\chi^2 = \\sum (O - E)^2/E$ (goodness-of-fit, 1 bậc tự do) để kiểm tra SRM (sample ratio mismatch). **Làm tròn 2 chữ số thập phân.** (Tham khảo: ngưỡng $\\chi^2$ 1 bậc tự do ở $p = 0{,}001$ là $10{,}83$.)",
+   "explanation": "Kỳ vọng $E_A = 35000$, $E_B = 15000$. $\\chi^2 = 400^2/35000 + 400^2/15000 \\approx 4{,}571 + 10{,}667 = 15{,}24 > 10{,}83$, $p \\approx 0{,}0001$: có SRM, chưa được tin kết quả.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nSRM (sample ratio mismatch) là khi tỉ lệ người dùng thực tế giữa các nhánh lệch khỏi cấu hình nhiều hơn mức ngẫu nhiên cho phép. SRM là dấu hiệu lỗi hệ thống (gán nhánh, log, redirect, lọc bot…), khiến **mọi** kết quả khác không đáng tin.\n\n#### Từng bước\n1. Kỳ vọng theo cấu hình 70/30: $E_A = 0{,}7 \\cdot 50000 = 35000$; $E_B = 15000$.\n2. $\\chi^2 = \\frac{(35400 - 35000)^2}{35000} + \\frac{(14600 - 15000)^2}{15000} = 4{,}571 + 10{,}667 \\approx 15{,}24$.\n3. Một bậc tự do: $p \\approx 0{,}0001 < 0{,}001$, có SRM.\n\n```python\nfrom scipy.stats import chisquare\nr = chisquare([35400, 14600], f_exp=[35000, 15000])\nprint(round(r.statistic, 2), r.pvalue)   # 15.24 9.5e-05\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 150\" width=\"100%\" style=\"max-width:560px\">\n<rect x=\"40.0\" y=\"30\" width=\"336.0\" height=\"30\" fill=\"#3b82f6\" fill-opacity=\"0.35\"/>\n<rect x=\"376.0\" y=\"30\" width=\"144.0\" height=\"30\" fill=\"#f59e0b\" fill-opacity=\"0.35\"/>\n<text x=\"208.0\" y=\"50.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">kỳ vọng A = 35.000 (70%)</text>\n<text x=\"448.0\" y=\"50.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">B = 15.000</text>\n<rect x=\"40.0\" y=\"85\" width=\"339.8\" height=\"30\" fill=\"#3b82f6\"/>\n<rect x=\"379.8\" y=\"85\" width=\"140.2\" height=\"30\" fill=\"#f59e0b\"/>\n<text x=\"209.9\" y=\"105.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#ffffff\" font-weight=\"bold\">quan sát A = 35.400</text>\n<text x=\"449.9\" y=\"105.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#ffffff\" font-weight=\"bold\">B = 14.600</text>\n<text x=\"280.0\" y=\"138.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#ef4444\" font-weight=\"bold\">lệch 400 người mỗi nhánh → χ² ≈ 15,24, p ≈ 0,0001</text>\n<text x=\"280.0\" y=\"20.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">Cấu hình 70/30 với 50.000 người</text>\n</svg>\n\nLệch 400 người nghe nhỏ (0,8% tổng), nhưng với 50.000 người thì độ lệch chuẩn của số người vào B chỉ là $\\sqrt{50000 \\cdot 0{,}3 \\cdot 0{,}7} \\approx 102$, nên 400 người là khoảng 3,9 độ lệch chuẩn.\n\n#### Quy trình xử lý khi có SRM\n```mermaid\nflowchart TD\n  S[\"Phát hiện SRM, p nhỏ hơn 0,001\"] --> F[\"Không đọc kết quả chỉ số chính\"]\n  F --> G[\"Chia theo ngày, nền tảng, trình duyệt, phiên bản app\"]\n  G --> H{\"Lệch tập trung ở đâu?\"}\n  H --> R1[\"Redirect hoặc tải chậm ở nhánh B làm mất log phơi nhiễm\"]\n  H --> R2[\"Lọc bot khác nhau giữa hai nhánh\"]\n  H --> R3[\"Lỗi gán nhánh hoặc cache\"]\n  R1 --> X[\"Sửa lỗi rồi chạy lại\"]\n  R2 --> X\n  R3 --> X\n```\n\n#### Bẫy thường gặp\n- Dùng kỳ vọng 50/50 khi cấu hình là 70/30.\n- Coi \"lệch chưa tới 1%\" là bỏ qua được: cần kiểm định, không phải cảm tính.\n- Xoá bớt người dùng để cân bằng lại: không sửa được thiên lệch.\n\n#### Đọc thêm\n- [Evan Miller — Chi-Squared Test](https://www.evanmiller.org/ab-testing/chi-squared.html)\n- [Pearson's chi-squared test (Wikipedia)](https://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test)\n",
+   "mistakes": [
+    {
+     "value": 8652.8,
+     "why": "Dùng kỳ vọng 50/50 (25.000 mỗi nhánh) trong khi cấu hình là 70/30."
+    },
+    {
+     "value": 10.67,
+     "why": "Chỉ tính số hạng của nhánh B ($400^2/15000$), quên cộng số hạng của nhánh A."
+    },
+    {
+     "value": 4.57,
+     "why": "Chỉ tính số hạng của nhánh A ($400^2/35000$), quên số hạng của nhánh B."
+    }
+   ],
+   "answer": 15.24,
+   "tol": 0.0051
+  },
+  {
+   "id": "T04-B10",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "5 ngày gần đây (mỗi ngày một cặp số liệu): p95 độ trễ trang thanh toán $x$ (ms) = 400, 450, 500, 550, 600; tỉ lệ chuyển đổi $y$ (%) = 6,0; 5,9; 5,5; 5,6; 5,0. Tính hệ số tương quan Pearson $r$ giữa $x$ và $y$. **Làm tròn 2 chữ số thập phân** (nhớ dấu).",
+   "explanation": "$\\bar{x} = 500$, $\\bar{y} = 5{,}6$. $S_{xy} = -115$, $S_{xx} = 25000$, $S_{yy} = 0{,}62$; $r = S_{xy}/\\sqrt{S_{xx} S_{yy}} = -115/\\sqrt{15500} \\approx -0{,}92$.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nHệ số tương quan Pearson đo mức độ quan hệ **tuyến tính**, nằm trong $[-1;\\ 1]$:\n$$r = \\frac{S_{xy}}{\\sqrt{S_{xx}\\,S_{yy}}}, \\quad S_{xy} = \\sum (x_i - \\bar{x})(y_i - \\bar{y})$$\n\n#### Từng bước\n| $x$ (ms) | $y$ (%) | $x - \\bar{x}$ | $y - \\bar{y}$ | tích | $(x-\\bar{x})^2$ | $(y-\\bar{y})^2$ |\n|---|---|---|---|---|---|---|\n| 400 | 6,0 | −100 | 0,4 | −40 | 10000 | 0,16 |\n| 450 | 5,9 | −50 | 0,3 | −15 | 2500 | 0,09 |\n| 500 | 5,5 | 0 | −0,1 | 0 | 0 | 0,01 |\n| 550 | 5,6 | 50 | 0,0 | 0 | 2500 | 0 |\n| 600 | 5,0 | 100 | −0,6 | −60 | 10000 | 0,36 |\n| Tổng | | | | −115 | 25000 | 0,62 |\n\n$\\bar{x} = 500$, $\\bar{y} = 5{,}6$. $r = -115/\\sqrt{25000 \\cdot 0{,}62} = -115/124{,}5 \\approx -0{,}92$.\n\n```python\nfrom scipy.stats import pearsonr\nr = pearsonr([400,450,500,550,600], [6.0,5.9,5.5,5.6,5.0])[0]\nprint(round(r, 4), round(r*r, 4))   # -0.9237 0.8532\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 230\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"60.0\" y1=\"180.0\" x2=\"530.0\" y2=\"180.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"60.0\" y1=\"20.0\" x2=\"60.0\" y2=\"180.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"79.6\" y1=\"30.7\" x2=\"510.4\" y2=\"146.4\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-dasharray=\"6 4\"/>\n<circle cx=\"99.2\" cy=\"42.9\" r=\"6\" fill=\"#3b82f6\"/>\n<circle cx=\"197.1\" cy=\"54.3\" r=\"6\" fill=\"#3b82f6\"/>\n<circle cx=\"295.0\" cy=\"100.0\" r=\"6\" fill=\"#3b82f6\"/>\n<circle cx=\"392.9\" cy=\"88.6\" r=\"6\" fill=\"#3b82f6\"/>\n<circle cx=\"490.8\" cy=\"157.1\" r=\"6\" fill=\"#3b82f6\"/>\n<line x1=\"99.2\" y1=\"180.0\" x2=\"99.2\" y2=\"185.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"99.2\" y=\"198.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">400</text>\n<line x1=\"197.1\" y1=\"180.0\" x2=\"197.1\" y2=\"185.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"197.1\" y=\"198.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">450</text>\n<line x1=\"295.0\" y1=\"180.0\" x2=\"295.0\" y2=\"185.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"295.0\" y=\"198.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">500</text>\n<line x1=\"392.9\" y1=\"180.0\" x2=\"392.9\" y2=\"185.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"392.9\" y=\"198.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">550</text>\n<line x1=\"490.8\" y1=\"180.0\" x2=\"490.8\" y2=\"185.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"490.8\" y=\"198.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">600</text>\n<line x1=\"55.0\" y1=\"157.1\" x2=\"60.0\" y2=\"157.1\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"52.0\" y=\"161.1\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">5,0</text>\n<line x1=\"55.0\" y1=\"100.0\" x2=\"60.0\" y2=\"100.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"52.0\" y=\"104.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">5,5</text>\n<line x1=\"55.0\" y1=\"42.9\" x2=\"60.0\" y2=\"42.9\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<text x=\"52.0\" y=\"46.9\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">6,0</text>\n<text x=\"295.0\" y=\"224.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">p95 độ trễ trang thanh toán (ms)</text>\n<text x=\"20.0\" y=\"24.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">CR %</text>\n<text x=\"412.5\" y=\"48.6\" font-size=\"12\" text-anchor=\"middle\" fill=\"#ef4444\" font-weight=\"bold\">r ≈ −0,92, độ dốc ≈ -0,46 điểm % / 100 ms</text>\n</svg>\n\n#### Diễn giải đúng\nTương quan âm mạnh, nhưng chỉ có 5 điểm, và những ngày chậm có thể trùng ngày tải cao, khuyến mãi kết thúc… (biến gây nhiễu). Muốn biết độ trễ **gây ra** giảm chuyển đổi, cần thử nghiệm làm chậm có kiểm soát (slowdown experiment).\n\n#### Bẫy thường gặp\n- Bỏ dấu âm; nhầm $r$ với $r^2$, với hiệp phương sai ($-28{,}75$) hay độ dốc ($-0{,}0046$ điểm % mỗi ms).\n- $r$ chỉ đo quan hệ tuyến tính; quan hệ cong mạnh vẫn có thể cho $r \\approx 0$.\n\n#### Đọc thêm\n- [Pearson correlation coefficient (Wikipedia)](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient)\n- [scipy.stats.pearsonr](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html)\n",
+   "mistakes": [
+    {
+     "value": 0.92,
+     "why": "Bỏ mất dấu âm: độ trễ tăng thì chuyển đổi giảm, nên $r < 0$."
+    },
+    {
+     "value": 0.85,
+     "why": "Đây là $r^2 \\approx 0{,}85$ (hệ số xác định), không phải $r$."
+    },
+    {
+     "value": -28.75,
+     "why": "Đây là hiệp phương sai mẫu $S_{xy}/(n-1)$, chưa chuẩn hoá bằng hai độ lệch chuẩn."
+    },
+    {
+     "value": -0.0046,
+     "why": "Đây là độ dốc hồi quy $S_{xy}/S_{xx}$ (điểm % trên mỗi ms), không phải hệ số tương quan."
+    }
+   ],
+   "answer": -0.92,
+   "tol": 0.0051
+  },
+  {
+   "id": "T04-C01",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Báo cáo ghi: tỉ lệ chuyển đổi A = 10,0%, khoảng tin cậy 95% $[9{,}4;\\ 10{,}6]$; B = 11,0%, khoảng tin cậy 95% $[10{,}4;\\ 11{,}6]$ (hai nhánh độc lập, mỗi khoảng có dạng $\\hat{p} \\pm 1{,}96\\,SE$). Hai khoảng chồng lấn nhau. Khoảng tin cậy 95% của hiệu $B - A$ (điểm %) và kết luận ở mức 5% là gì?",
+   "explanation": "Mỗi nhánh $SE = 0{,}6/1{,}96 \\approx 0{,}306$ điểm %. $SE_{B-A} = \\sqrt{0{,}306^2 + 0{,}306^2} \\approx 0{,}433$; biên $= 1{,}96 \\cdot 0{,}433 \\approx 0{,}85$, nên khoảng là $1{,}0 \\pm 0{,}85 = [+0{,}15;\\ +1{,}85]$.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nHai khoảng tin cậy 95% chồng lấn **không** có nghĩa hiệu không có ý nghĩa. Vì $SE_{B-A} = \\sqrt{SE_A^2 + SE_B^2} < SE_A + SE_B$, biên của hiệu nhỏ hơn tổng hai biên.\n\n#### Từng bước\n1. Biên mỗi nhánh $0{,}6$ điểm % nên $SE_A = SE_B = 0{,}6/1{,}96 \\approx 0{,}306$.\n2. $SE_{B-A} = \\sqrt{2} \\cdot 0{,}306 \\approx 0{,}433$.\n3. Biên của hiệu: $1{,}96 \\cdot 0{,}433 \\approx 0{,}849$.\n4. Khoảng: $1{,}0 \\pm 0{,}85 = [+0{,}15;\\ +1{,}85]$, không chứa 0, nên có ý nghĩa ở mức 5% ($z = 1{,}0/0{,}433 \\approx 2{,}31$, $p \\approx 0{,}021$).\n\n```python\nimport math\nfrom scipy.stats import norm\nse = 0.6/1.96\nsd = math.sqrt(2)*se\nprint(round(1 - 1.96*sd, 2), round(1 + 1.96*sd, 2), round(2*norm.sf(1/sd), 3))\n# 0.15 1.85 0.021\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 200\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"59.2\" y1=\"10.0\" x2=\"59.2\" y2=\"175.0\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 3\"/>\n<text x=\"59.2\" y=\"190.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<line x1=\"420.2\" y1=\"30.0\" x2=\"466.2\" y2=\"30.0\" stroke=\"#3b82f6\" stroke-width=\"4\"/>\n<line x1=\"420.2\" y1=\"23.0\" x2=\"420.2\" y2=\"37.0\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<line x1=\"466.2\" y1=\"23.0\" x2=\"466.2\" y2=\"37.0\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<circle cx=\"443.2\" cy=\"30\" r=\"4\" fill=\"#3b82f6\"/>\n<line x1=\"458.6\" y1=\"70.0\" x2=\"504.6\" y2=\"70.0\" stroke=\"#f59e0b\" stroke-width=\"4\"/>\n<line x1=\"458.6\" y1=\"63.0\" x2=\"458.6\" y2=\"77.0\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n<line x1=\"504.6\" y1=\"63.0\" x2=\"504.6\" y2=\"77.0\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n<circle cx=\"481.6\" cy=\"70\" r=\"4\" fill=\"#f59e0b\"/>\n<line x1=\"65.0\" y1=\"130.0\" x2=\"130.2\" y2=\"130.0\" stroke=\"#10b981\" stroke-width=\"4\"/>\n<line x1=\"65.0\" y1=\"123.0\" x2=\"65.0\" y2=\"137.0\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<line x1=\"130.2\" y1=\"123.0\" x2=\"130.2\" y2=\"137.0\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<circle cx=\"97.6\" cy=\"130\" r=\"4\" fill=\"#10b981\"/>\n<text x=\"462.4\" y=\"16.0\" font-size=\"12\" text-anchor=\"end\" fill=\"#3b82f6\">A: 10,0% [9,4; 10,6]</text>\n<text x=\"462.4\" y=\"96.0\" font-size=\"12\" text-anchor=\"end\" fill=\"#f59e0b\">B: 11,0% [10,4; 11,6]</text>\n<text x=\"143.7\" y=\"134.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#10b981\" font-weight=\"bold\">hiệu B − A = +1,0 điểm %, CI [+0,15; +1,85]</text>\n<text x=\"289.6\" y=\"165.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">biên của hiệu = 1,96·√(SE²+SE²) ≈ 0,85, nhỏ hơn 0,6 + 0,6 = 1,2</text>\n</svg>\n\n| Cách làm | Khoảng của hiệu | Kết luận |\n|---|---|---|\n| Đúng: cộng phương sai | $[+0{,}15;\\ +1{,}85]$ | có ý nghĩa |\n| Cộng biên (hoặc trừ đầu mút) | $[-0{,}2;\\ +2{,}2]$ | (sai) không ý nghĩa |\n| Chỉ dùng SE một nhánh | $[+0{,}4;\\ +1{,}6]$ | (sai) quá tự tin |\n\n#### Bẫy thường gặp\nQuy tắc \"nhìn hai khoảng có chồng lấn không\" quá bảo thủ: hai khoảng 95% có thể chồng lấn tới khoảng 1/4 chiều dài mà hiệu vẫn có ý nghĩa. Luôn tính khoảng tin cậy **của hiệu**.\n\n#### Đọc thêm\n- [Confidence interval (Wikipedia)](https://en.wikipedia.org/wiki/Confidence_interval)\n- [OpenIntro Statistics (sách miễn phí)](https://www.openintro.org/book/os/)\n",
+   "distractors": {
+    "A": "Cộng thẳng hai biên sai số ($0{,}6 + 0{,}6$), tương đương lấy hiệu hai đầu mút. Đúng phải cộng **phương sai** rồi lấy căn.",
+    "B": "Chỉ dùng SE của một nhánh ($\\pm 0{,}6$), bỏ qua độ bất định của nhánh còn lại.",
+    "D": "Hai khoảng 95% chồng lấn **không** suy ra hiệu không có ý nghĩa; quy tắc nhìn chồng lấn quá bảo thủ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$[-0{,}2;\\ +2{,}2]$, chứa 0 nên chưa có ý nghĩa thống kê"
+    },
+    {
+     "key": "B",
+     "text": "$[+0{,}4;\\ +1{,}6]$, không chứa 0 nên có ý nghĩa thống kê"
+    },
+    {
+     "key": "C",
+     "text": "$[+0{,}15;\\ +1{,}85]$, không chứa 0 nên có ý nghĩa thống kê"
+    },
+    {
+     "key": "D",
+     "text": "Không cần tính: hai khoảng chồng lấn thì chắc chắn chưa có ý nghĩa"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T04-C02",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Thử nghiệm được ngẫu nhiên hoá **theo người dùng** (mỗi nhánh khoảng 40.000 người). Analyst tính chỉ số \"tỉ lệ nhấn nút Đặt hàng trên mỗi lượt xem trang sản phẩm\" rồi coi khoảng 1,2 triệu lượt xem mỗi nhánh là 1,2 triệu quan sát Bernoulli độc lập, ra $p = 0{,}01$. Vấn đề và cách sửa đúng là gì?",
+   "explanation": "Đơn vị phân tích (lượt xem) khác đơn vị ngẫu nhiên hoá (người dùng): các lượt xem của một người không độc lập, nên $\\sqrt{\\hat{p}(1-\\hat{p})/N_{\\text{lượt xem}}}$ quá nhỏ. Với chỉ số tỉ số $\\sum_i X_i / \\sum_i Y_i$ theo người dùng, dùng delta method hoặc bootstrap theo người dùng.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nCông thức $SE = \\sqrt{\\hat{p}(1-\\hat{p})/N}$ giả định $N$ quan sát **độc lập**. Thử nghiệm ngẫu nhiên hoá theo người dùng thì người dùng mới là đơn vị độc lập; các lượt xem của cùng một người tương quan (người thích mua nhấn nhiều lần, người chỉ xem thì không nhấn lần nào).\n\n#### Từng bước\n1. Chỉ số theo người dùng $i$: $X_i$ = số lần nhấn, $Y_i$ = số lượt xem. Chỉ số của nhánh là tỉ số $R = \\sum X_i / \\sum Y_i$.\n2. Delta method cho tỉ số trung bình $\\bar{X}/\\bar{Y}$:\n$$\\operatorname{Var}(R) \\approx \\frac{1}{n\\,\\bar{Y}^2}\\left(\\sigma_X^2 - 2R\\,\\sigma_{XY} + R^2 \\sigma_Y^2\\right)$$\nvới $n$ là số **người dùng**.\n3. Hoặc bootstrap: lấy mẫu lại người dùng (kèm mọi lượt xem), tính $R$, lặp nhiều lần.\n\n```python\nimport numpy as np\nrng = np.random.default_rng(0)\nn = 40_000\nviews = rng.poisson(30, n) + 1                 # ~1,2 triệu lượt xem\nrate = rng.beta(0.2, 8, n)                      # mỗi người một xu hướng nhấn khác nhau\nclicks = rng.binomial(views, rate)\nR = clicks.sum()/views.sum()\nnaive = np.sqrt(R*(1-R)/views.sum())\nyb = views.mean()\nvar = (clicks.var() - 2*R*np.cov(clicks, views)[0,1] + R*R*views.var())/(n*yb*yb)\nprint(round(naive, 5), round(np.sqrt(var), 5))  # 0.00014 0.00029: SE đúng gấp khoảng 2 lần SE \"ngây thơ\"\n```\n\n#### Hình dung\n```mermaid\nflowchart LR\n  U1[\"Người dùng 1: 40 lượt xem, 6 lần nhấn\"] --> M[\"Gộp 1,2 triệu lượt xem như độc lập\"]\n  U2[\"Người dùng 2: 25 lượt xem, 0 lần nhấn\"] --> M\n  M --> W[\"SE quá nhỏ, p-value nhỏ giả tạo\"]\n  U1 --> C[\"Phân tích theo người dùng: delta method hoặc bootstrap\"]\n  U2 --> C\n  C --> OK[\"SE đúng\"]\n```\n\n#### Bẫy thường gặp\nThêm Bonferroni hay đổi sang một phía không sửa được phương sai sai. Quy tắc: **đơn vị phân tích phải khớp đơn vị ngẫu nhiên hoá**, hoặc dùng phương pháp tính phương sai phù hợp.\n\n#### Đọc thêm\n- [Delta method (Wikipedia)](https://en.wikipedia.org/wiki/Delta_method)\n- [Trustworthy Online Controlled Experiments (Kohavi, Tang, Xu)](https://experimentguide.com/)\n",
+   "distractors": {
+    "A": "Cỡ mẫu \"hiệu dụng\" gần với số người (khoảng 40.000 mỗi nhánh) hơn là số lượt xem; coi lượt xem độc lập làm p-value nhỏ giả tạo.",
+    "C": "Một phía không giải quyết sai SE; hơn nữa nút mới hoàn toàn có thể làm giảm tỉ lệ nhấn.",
+    "D": "Bonferroni dành cho nhiều giả thuyết; ở đây chỉ có một giả thuyết, lỗi nằm ở cách tính phương sai."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Không có vấn đề: 1,2 triệu quan sát là cỡ mẫu rất lớn nên SE nhỏ và $p = 0{,}01$ hoàn toàn đáng tin cậy"
+    },
+    {
+     "key": "B",
+     "text": "Lượt xem của cùng một người tương quan nên SE bị ước lượng thấp; dùng delta method hoặc bootstrap theo người dùng"
+    },
+    {
+     "key": "C",
+     "text": "Nên đổi sang kiểm định một phía vì nút mới chỉ có thể làm tỉ lệ nhấn tăng lên chứ không thể làm giảm"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ cần áp dụng hiệu chỉnh Bonferroni vì có quá nhiều lượt xem được kiểm định cùng một lúc"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T04-C03",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Lên kế hoạch A/B nút Đặt hàng: tỉ lệ chuyển đổi nền 5%, kỳ vọng nút mới đạt 6%, mỗi nhánh 6.000 người, kiểm định hai phía $\\alpha = 0{,}05$ ($z_{0{,}975} = 1{,}96$). Dùng xấp xỉ $\\text{power} \\approx \\Phi\\!\\left(\\dfrac{|p_B - p_A|}{SE} - 1{,}96\\right)$ với $SE = \\sqrt{p_A(1-p_A)/n + p_B(1-p_B)/n}$.\n\nBảng tra $\\Phi$: $\\Phi(0{,}40) = 0{,}6554$; $\\Phi(0{,}44) = 0{,}6700$; $\\Phi(0{,}45) = 0{,}6736$; $\\Phi(0{,}50) = 0{,}6915$; $\\Phi(0{,}76) = 0{,}7764$; $\\Phi(2{,}40) = 0{,}9918$.\n\nTính power. **Nhập dạng thập phân, làm tròn 2 chữ số** (ví dụ 0,55).",
+   "explanation": "$SE = \\sqrt{0{,}05 \\cdot 0{,}95/6000 + 0{,}06 \\cdot 0{,}94/6000} \\approx 0{,}004161$; $0{,}01/0{,}004161 \\approx 2{,}40$; power $\\approx \\Phi(2{,}40 - 1{,}96) = \\Phi(0{,}44) \\approx 0{,}67$.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nPower xấp xỉ cho kiểm định z hai phía:\n$$\\text{power} \\approx \\Phi\\!\\left(\\frac{|p_B - p_A|}{SE} - z_{1-\\alpha/2}\\right)$$\n(bỏ qua phần đuôi ở phía ngược lại, rất nhỏ).\n\n#### Từng bước\n1. $SE = \\sqrt{0{,}05 \\cdot 0{,}95/6000 + 0{,}06 \\cdot 0{,}94/6000} = \\sqrt{7{,}917 \\cdot 10^{-6} + 9{,}4 \\cdot 10^{-6}} \\approx 0{,}004161$.\n2. $0{,}01/0{,}004161 \\approx 2{,}403$.\n3. $2{,}403 - 1{,}96 = 0{,}443$; tra bảng $\\Phi(0{,}44) = 0{,}6700$ (nội suy $\\approx 0{,}671$).\n4. Power $\\approx 0{,}67$: có khoảng 1/3 khả năng bỏ sót mức tăng thật 1 điểm %.\n\n```python\nimport math\nfrom scipy.stats import norm\nse = math.sqrt(.05*.95/6000 + .06*.94/6000)\nz = 0.01/se\nprint(round(z, 3), round(norm.cdf(z - 1.96), 3))   # 2.403 0.671\n```\n\n#### Power theo cỡ mẫu (cùng 5% lên 6%)\n| $n$ mỗi nhánh | power |\n|---|---|\n| 4.000 | 0,50 |\n| 6.000 | 0,67 |\n| 8.000 | 0,79 |\n| 10.000 | 0,87 |\n\n```python\nfor n in (4000, 6000, 8000, 10000):\n    se = math.sqrt(.05*.95/n + .06*.94/n); print(n, round(norm.cdf(0.01/se - 1.96), 2))\n```\n\n#### Bẫy thường gặp\n- Quên trừ $z_{1-\\alpha/2}$: $\\Phi(2{,}40) \\approx 0{,}99$ là xác suất khác.\n- Nhầm power với $\\beta$.\n- Dùng 1,645 khi kế hoạch là hai phía.\n\n#### Đọc thêm\n- [Power (statistics) (Wikipedia)](https://en.wikipedia.org/wiki/Power_%28statistics%29)\n- [Evan Miller — Sample Size Calculator](https://www.evanmiller.org/ab-testing/sample-size.html)\n",
+   "mistakes": [
+    {
+     "value": 0.99,
+     "why": "Quên trừ $1{,}96$: $\\Phi(2{,}40) \\approx 0{,}99$ là xác suất khác, không phải power."
+    },
+    {
+     "value": 0.33,
+     "why": "Đây là $\\beta = 1 - \\text{power}$ (xác suất bỏ sót hiệu ứng)."
+    },
+    {
+     "value": 0.78,
+     "why": "Dùng $z = 1{,}645$ (một phía) trong khi đề là hai phía: $\\Phi(2{,}40 - 1{,}645) \\approx 0{,}78$."
+    }
+   ],
+   "answer": 0.67,
+   "tol": 0.0051
+  },
+  {
+   "id": "T04-C04",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Để đạt power 80%, thử nghiệm nút Đặt hàng cần khoảng 20.000 người mỗi nhánh. Nhóm áp dụng CUPED: dùng số đơn của mỗi người trong 30 ngày trước thử nghiệm làm biến hiệp (covariate); tương quan giữa biến này và chỉ số kết quả là $\\rho = 0{,}6$. Với CUPED, phương sai của chỉ số giảm theo hệ số $1 - \\rho^2$. Cỡ mẫu mỗi nhánh cho cùng power và cùng MDE xấp xỉ bao nhiêu?",
+   "explanation": "$n \\propto \\sigma^2/\\Delta^2$. CUPED đưa phương sai về $\\sigma^2(1 - \\rho^2) = 0{,}64\\,\\sigma^2$ nên $n_{\\text{mới}} \\approx 0{,}64 \\cdot 20000 = 12800$ người mỗi nhánh.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nCUPED (Controlled-experiment Using Pre-Experiment Data) điều chỉnh chỉ số $Y$ bằng một biến $X$ đo **trước** thử nghiệm (không bị treatment ảnh hưởng):\n$$Y^{\\text{cv}} = Y - \\theta\\,(X - \\bar{X}), \\quad \\theta = \\frac{\\operatorname{Cov}(X, Y)}{\\operatorname{Var}(X)}$$\nPhương sai mới: $\\operatorname{Var}(Y^{\\text{cv}}) = \\operatorname{Var}(Y)\\,(1 - \\rho^2)$. Kỳ vọng hiệu giữa hai nhánh không đổi (vì $X$ cân bằng nhờ ngẫu nhiên hoá), chỉ nhiễu giảm.\n\n#### Từng bước\n1. Cỡ mẫu $n \\propto \\sigma^2/\\Delta^2$; giữ nguyên $\\Delta$ (MDE) và power.\n2. $\\sigma^2$ giảm còn $(1 - 0{,}6^2)\\sigma^2 = 0{,}64\\,\\sigma^2$.\n3. $n_{\\text{mới}} = 0{,}64 \\cdot 20000 = 12800$ người mỗi nhánh (tiết kiệm 36% thời gian chạy).\n\n```python\nimport numpy as np\nrng = np.random.default_rng(0)\nx = rng.normal(size=200_000)\ny = 0.6*x + 0.8*rng.normal(size=200_000)       # corr(x, y) = 0,6\ntheta = np.cov(x, y)[0,1]/x.var()\nycv = y - theta*(x - x.mean())\nprint(round(ycv.var()/y.var(), 3))             # khoảng 0.64\n```\n\n#### Bảng theo $\\rho$\n| $\\rho$ | $1 - \\rho^2$ | Cỡ mẫu cần (từ 20.000) |\n|---|---|---|\n| 0,3 | 0,91 | 18.200 |\n| 0,5 | 0,75 | 15.000 |\n| 0,6 | 0,64 | 12.800 |\n| 0,8 | 0,36 | 7.200 |\n\n#### Bẫy thường gặp\n- Dùng $1 - \\rho$ hoặc nhân với $\\sqrt{1-\\rho^2}$ (hệ số của độ lệch chuẩn).\n- Dùng biến hiệp đo **trong** thử nghiệm (bị treatment ảnh hưởng) làm chệch ước lượng.\n- Người dùng mới không có dữ liệu quá khứ: CUPED giảm phương sai ít hơn.\n\n#### Đọc thêm\n- [Variance reduction (Wikipedia)](https://en.wikipedia.org/wiki/Variance_reduction)\n- [Trustworthy Online Controlled Experiments (Kohavi, Tang, Xu)](https://experimentguide.com/)\n",
+   "distractors": {
+    "A": "Dùng $1 - \\rho$ thay cho $1 - \\rho^2$; phần phương sai giải thích được bởi biến hiệp là $\\rho^2$.",
+    "B": "Nhân cỡ mẫu với hệ số của **độ lệch chuẩn** (0,8); cỡ mẫu tỉ lệ với **phương sai** (0,64).",
+    "C": "Nhầm phần bị loại bỏ ($\\rho^2$) với phần còn lại ($1 - \\rho^2$)."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Khoảng 8.000 người, vì cỡ mẫu nhân với hệ số $1 - \\rho = 0{,}4$"
+    },
+    {
+     "key": "B",
+     "text": "Khoảng 16.000 người, vì độ lệch chuẩn nhân với $\\sqrt{1 - \\rho^2} = 0{,}8$"
+    },
+    {
+     "key": "C",
+     "text": "Khoảng 7.200 người, vì cỡ mẫu nhân với hệ số $\\rho^2 = 0{,}36$"
+    },
+    {
+     "key": "D",
+     "text": "Khoảng 12.800 người, vì cỡ mẫu tỉ lệ thuận với phương sai"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T04-C05",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Guardrail của thử nghiệm là **p95 độ trễ** API đặt hàng. Mỗi nhánh có khoảng 30.000 người dùng, mỗi người gửi nhiều yêu cầu; phân phối độ trễ lệch phải mạnh. Cách nào phù hợp nhất để có khoảng tin cậy 95% cho hiệu p95 $(B - A)$?",
+   "explanation": "p95 không có công thức SE đơn giản và yêu cầu của cùng một người tương quan với nhau; bootstrap theo **đơn vị ngẫu nhiên hoá** (người dùng) giữ cấu trúc đó. Khoảng phân vị: $[\\hat{\\Delta}^*_{(2{,}5\\%)};\\ \\hat{\\Delta}^*_{(97{,}5\\%)}]$.",
+   "section": "a-tk",
+   "long": "#### Ý chính\np95 là thống kê phân vị, không có công thức SE đơn giản như trung bình; hơn nữa yêu cầu của cùng một người không độc lập. Bootstrap theo **đơn vị ngẫu nhiên hoá** (người dùng) giải quyết cả hai vấn đề.\n\n#### Các bước bootstrap\n```mermaid\nflowchart TD\n  A[\"Mỗi nhánh: danh sách người dùng, mỗi người kèm mọi yêu cầu\"] --> B[\"Lấy mẫu có hoàn lại n người dùng ở mỗi nhánh\"]\n  B --> C[\"Gộp yêu cầu của người được chọn, tính p95 của A và B\"]\n  C --> D[\"Lưu hiệu p95 B trừ A\"]\n  D --> E{\"Đủ khoảng 2000 lần?\"}\n  E -->|Chưa| B\n  E -->|Rồi| F[\"Khoảng tin cậy 95% = phân vị 2,5% và 97,5% của các hiệu\"]\n```\n\n```python\nimport numpy as np\nrng = np.random.default_rng(1)\ndef p95_diff_ci(A, B, reps=2000):      # A, B: list mảng độ trễ theo từng người dùng\n    d = []\n    for _ in range(reps):\n        a = np.concatenate([A[i] for i in rng.integers(0, len(A), len(A))])\n        b = np.concatenate([B[i] for i in rng.integers(0, len(B), len(B))])\n        d.append(np.percentile(b, 95) - np.percentile(a, 95))\n    return np.percentile(d, [2.5, 97.5])\n```\n(Thư viện `scipy.stats.bootstrap` làm được với dữ liệu một chiều; với cụm theo người dùng cần tự viết vòng lặp như trên.)\n\n#### So sánh các phương án\n| Cách | Đo đúng p95? | Xử lý tương quan trong người dùng? |\n|---|---|---|\n| Bootstrap theo người dùng | Có | Có |\n| t-test trên từng yêu cầu | Không (đo trung bình) | Không |\n| So hai con số p95 | Có, nhưng không có độ bất định | Không |\n| t-test trên log | Không (đo trung bình nhân) | Không |\n\n#### Bẫy thường gặp\n- Bootstrap theo **yêu cầu** thay vì theo người dùng: khoảng quá hẹp.\n- Số lần lặp quá ít (dưới vài trăm) làm cận khoảng dao động.\n\n#### Đọc thêm\n- [Bootstrapping (statistics) (Wikipedia)](https://en.wikipedia.org/wiki/Bootstrapping_%28statistics%29)\n- [scipy.stats.bootstrap](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html)\n",
+   "distractors": {
+    "B": "Kiểm định t so **trung bình**, không phải p95; coi yêu cầu độc lập còn làm SE quá nhỏ.",
+    "C": "Mẫu lớn vẫn có nhiễu lấy mẫu, đặc biệt ở đuôi phân phối (p95 dựa vào ít quan sát hơn trung vị).",
+    "D": "Hiệu trung bình của log là tỉ số trung bình nhân (geometric mean), không phải hiệu p95."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Bootstrap theo người dùng: lấy mẫu lại người dùng (kèm mọi yêu cầu của họ), tính hiệu p95, lặp nhiều lần, lấy phân vị 2,5% và 97,5%"
+    },
+    {
+     "key": "B",
+     "text": "Chạy kiểm định t cho trung bình độ trễ của từng yêu cầu, coi mọi yêu cầu độc lập, rồi dùng kết quả đó cho p95"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ cần so hai con số p95; dữ liệu lớn nên mọi chênh lệch đều là thật, không cần khoảng tin cậy"
+    },
+    {
+     "key": "D",
+     "text": "Lấy log độ trễ rồi chạy kiểm định t; hiệu trung bình của log chính là hiệu p95"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T04-C06",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Tỉ lệ chuyển đổi nền của nút Đặt hàng là 8%; nhóm muốn phát hiện mức tăng tuyệt đối lên 9% với $\\alpha = 0{,}05$ hai phía ($z_{1-\\alpha/2} = 1{,}96$) và power 80% ($z_{1-\\beta} = 0{,}84$). Cỡ mẫu **mỗi nhánh** theo công thức\n\n$$n = \\frac{(z_{1-\\alpha/2} + z_{1-\\beta})^2\\,[p_1(1-p_1) + p_2(1-p_2)]}{(p_2 - p_1)^2}$$\n\nTính $n$. **Đơn vị: nghìn người, làm tròn 1 chữ số thập phân** (ví dụ 7,5).",
+   "explanation": "$(1{,}96 + 0{,}84)^2 = 7{,}84$; $0{,}08 \\cdot 0{,}92 + 0{,}09 \\cdot 0{,}91 = 0{,}1555$; $n = 7{,}84 \\cdot 0{,}1555/0{,}0001 \\approx 12191$ người, tức khoảng 12,2 nghìn người mỗi nhánh.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nCỡ mẫu mỗi nhánh cho kiểm định hai tỉ lệ:\n$$n = \\frac{(z_{1-\\alpha/2} + z_{1-\\beta})^2\\,[p_1(1-p_1) + p_2(1-p_2)]}{(p_2 - p_1)^2}$$\nCỡ mẫu tỉ lệ nghịch với **bình phương** MDE: muốn phát hiện hiệu ứng nhỏ bằng một nửa thì cần gấp 4 lần người.\n\n#### Từng bước\n1. $(1{,}96 + 0{,}84)^2 = 2{,}8^2 = 7{,}84$.\n2. $p_1(1-p_1) = 0{,}08 \\cdot 0{,}92 = 0{,}0736$; $p_2(1-p_2) = 0{,}09 \\cdot 0{,}91 = 0{,}0819$; tổng $0{,}1555$.\n3. $(p_2 - p_1)^2 = 0{,}01^2 = 0{,}0001$.\n4. $n = 7{,}84 \\cdot 0{,}1555/0{,}0001 = 12191{,}2$, khoảng **12,2 nghìn người mỗi nhánh** (tổng khoảng 24,4 nghìn).\n\n```python\nfrom scipy.stats import norm\nza, zb = norm.ppf(0.975), norm.ppf(0.80)       # 1.95996, 0.84162\nn_exact = (za+zb)**2*(0.08*0.92 + 0.09*0.91)/0.01**2\nn_round = (1.96+0.84)**2*(0.08*0.92 + 0.09*0.91)/0.01**2\nprint(round(n_exact), round(n_round))           # 12205 12191\n```\n\n#### Cỡ mẫu theo MDE (nền 8%)\n| Mục tiêu | MDE tuyệt đối | $n$ mỗi nhánh |\n|---|---|---|\n| 8% lên 10% | 2 điểm % | khoảng 3,2 nghìn |\n| 8% lên 9% | 1 điểm % | khoảng 12,2 nghìn |\n| 8% lên 8,5% | 0,5 điểm % | khoảng 47,5 nghìn |\n\n#### Bẫy thường gặp\n- Quên bình phương mẫu số; nhầm \"mỗi nhánh\" với \"tổng\".\n- Dùng $z$ một phía khi kế hoạch là hai phía.\n- MDE nên là mức có **ý nghĩa kinh doanh**, không phải mức \"hy vọng\".\n\n#### Đọc thêm\n- [Evan Miller — Sample Size Calculator](https://www.evanmiller.org/ab-testing/sample-size.html)\n- [Sample size determination (Wikipedia)](https://en.wikipedia.org/wiki/Sample_size_determination)\n",
+   "mistakes": [
+    {
+     "value": 24.4,
+     "why": "Đây là tổng hai nhánh; đề hỏi cỡ mẫu **mỗi nhánh**."
+    },
+    {
+     "value": 9.6,
+     "why": "Dùng $z = 1{,}645$ (một phía) thay cho $1{,}96$ (hai phía)."
+    },
+    {
+     "value": 11.5,
+     "why": "Dùng $2\\,p_1(1-p_1)$ thay cho $p_1(1-p_1) + p_2(1-p_2)$, bỏ qua phương sai lớn hơn ở nhánh 9%."
+    },
+    {
+     "value": 0.1,
+     "why": "Quên bình phương mẫu số: chia cho $0{,}01$ thay vì $0{,}01^2$, ra khoảng 122 người."
+    }
+   ],
+   "answer": 12.2,
+   "tol": 0.051,
+   "unit": "nghìn người"
+  },
+  {
+   "id": "T04-C07",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Thử nghiệm 4 màu nút Đặt hàng (V1 đến V4), mỗi màu so với nút gốc. p-value hai phía: V1 = 0,004; V2 = 0,015; V3 = 0,03; V4 = 0,30. Muốn giữ tỉ lệ sai lầm theo họ (FWER) không quá 5% bằng **thủ tục Holm–Bonferroni**. Những biến thể nào được kết luận khác nút gốc?",
+   "explanation": "Holm: sắp p tăng dần, so $p_{(k)}$ với $\\alpha/(m - k + 1)$: $0{,}004 < 0{,}0125$ ✓, $0{,}015 < 0{,}0167$ ✓, $0{,}03 > 0{,}025$ ✗ thì dừng. Vậy V1, V2 có ý nghĩa; Holm vẫn khống chế FWER $\\le 5\\%$ nhưng mạnh hơn Bonferroni.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nKhi so sánh nhiều biến thể, xác suất có **ít nhất một** dương tính giả (FWER) tăng: với 4 phép so sánh độc lập ở $\\alpha = 0{,}05$, FWER $= 1 - 0{,}95^4 \\approx 18{,}5\\%$. Bonferroni dùng ngưỡng $\\alpha/m$ cho mọi p; Holm là phiên bản theo bậc, vẫn khống chế FWER nhưng ít bảo thủ hơn.\n\n#### Thủ tục Holm\n1. Sắp p tăng dần: $p_{(1)} \\le \\dots \\le p_{(m)}$.\n2. Với $k = 1, 2, \\dots$: nếu $p_{(k)} < \\alpha/(m - k + 1)$ thì bác bỏ và đi tiếp; nếu không thì **dừng**, mọi giả thuyết còn lại không bác bỏ.\n\n| Bậc $k$ | Biến thể | $p$ | Ngưỡng Holm $0{,}05/(5-k)$ | Bonferroni $0{,}0125$ | Kết quả Holm |\n|---|---|---|---|---|---|\n| 1 | V1 | 0,004 | 0,0125 | đạt | bác bỏ |\n| 2 | V2 | 0,015 | 0,0167 | không | bác bỏ |\n| 3 | V3 | 0,03 | 0,025 | không | dừng |\n| 4 | V4 | 0,30 | 0,05 | không | không bác bỏ |\n\n```python\np = {\"V1\": 0.004, \"V2\": 0.015, \"V3\": 0.03, \"V4\": 0.30}\nm, out = len(p), []\nfor k, (v, x) in enumerate(sorted(p.items(), key=lambda t: t[1])):\n    if x < 0.05/(m - k): out.append(v)\n    else: break\nprint(out, round(1 - 0.95**4, 3))   # ['V1', 'V2'] 0.185\n```\n\n```mermaid\nflowchart LR\n  A[\"V1: 0,004 nhỏ hơn 0,0125\"] -->|bác bỏ| B[\"V2: 0,015 nhỏ hơn 0,0167\"]\n  B -->|bác bỏ| C[\"V3: 0,03 lớn hơn 0,025\"]\n  C -->|dừng| D[\"V3, V4 không bác bỏ\"]\n```\n\n#### Bẫy thường gặp\n- Dừng sai chỗ: Holm phải dừng ở giả thuyết đầu tiên không đạt, kể cả khi p sau đó nhỏ hơn ngưỡng của nó.\n- Nhiều chỉ số phụ cũng là đa so sánh; có thể dùng Benjamini–Hochberg (khống chế FDR) cho chỉ số khám phá.\n\n#### Đọc thêm\n- [Holm–Bonferroni method (Wikipedia)](https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method)\n- [Multiple comparisons problem (Wikipedia)](https://en.wikipedia.org/wiki/Multiple_comparisons_problem)\n",
+   "distractors": {
+    "A": "Đây là kết quả Bonferroni (mọi p so với $\\alpha/m$); Holm nới ngưỡng dần nên V2 cũng đạt.",
+    "C": "Không hiệu chỉnh: với 4 phép so sánh, FWER có thể tới $1 - 0{,}95^4 \\approx 18{,}5\\%$.",
+    "D": "Không có ngưỡng $\\alpha/m^2$ trong Bonferroni hay Holm; ngưỡng này quá chặt, làm mất power vô lý."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Chỉ V1, vì chỉ có $0{,}004 < 0{,}05/4 = 0{,}0125$"
+    },
+    {
+     "key": "B",
+     "text": "V1 và V2: $0{,}004 < 0{,}05/4$, $0{,}015 < 0{,}05/3$, rồi dừng vì $0{,}03 > 0{,}05/2$"
+    },
+    {
+     "key": "C",
+     "text": "V1, V2 và V3, vì cả ba đều có $p < 0{,}05$"
+    },
+    {
+     "key": "D",
+     "text": "Không biến thể nào, vì phải dùng ngưỡng $0{,}05/4^2 \\approx 0{,}003$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T04-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Kế hoạch đã khai báo trước guardrail: \"p95 độ trễ trang thanh toán của B **không được cao hơn A quá 50 ms**\". Kết quả: chỉ số chính tăng có ý nghĩa; hiệu p95 $(B - A) = +41$ ms, khoảng tin cậy 95% (bootstrap) $[+12;\\ +71]$ ms. Kết luận đúng về guardrail là gì?",
+   "explanation": "Guardrail kiểu không-kém-hơn (non-inferiority) đạt khi **cả** khoảng tin cậy nằm dưới ngưỡng: cần cận trên $< 50$ ms. Ở đây cận trên 71 ms nên chưa đạt; cận dưới 12 ms $> 0$ còn cho thấy B chậm hơn có ý nghĩa. Cần tối ưu rồi chạy lại.",
+   "section": "a-tk",
+   "long": "#### Ý chính\nGuardrail dạng \"không được tệ hơn quá $\\delta$\" là một kiểm định **không-kém-hơn** (non-inferiority): muốn kết luận an toàn, cần bằng chứng rằng hiệu thật $< \\delta$, tức **cận trên** khoảng tin cậy phải nhỏ hơn $\\delta$.\n\n#### Từng bước\n1. Ngưỡng $\\delta = +50$ ms; khoảng tin cậy hiệu p95: $[+12;\\ +71]$ ms.\n2. Cận trên $71 > 50$: chưa loại trừ được khả năng B chậm hơn quá 50 ms nên **chưa đạt** guardrail.\n3. Cận dưới $12 > 0$: B chậm hơn A có ý nghĩa thống kê (dù có thể chưa vượt ngưỡng).\n4. Hành động: không triển khai ngay; tìm nguyên nhân chậm (script nút nổi, API tính tổng tiền), tối ưu và chạy lại.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 170\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"127.3\" y1=\"20.0\" x2=\"127.3\" y2=\"130.0\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 3\"/>\n<text x=\"127.3\" y=\"146.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<line x1=\"345.5\" y1=\"20.0\" x2=\"345.5\" y2=\"130.0\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-dasharray=\"6 4\"/>\n<text x=\"345.5\" y=\"146.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"#ef4444\" font-weight=\"bold\">ngưỡng +50 ms</text>\n<line x1=\"179.6\" y1=\"70.0\" x2=\"437.1\" y2=\"70.0\" stroke=\"#3b82f6\" stroke-width=\"4\"/>\n<line x1=\"179.6\" y1=\"62.0\" x2=\"179.6\" y2=\"78.0\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<line x1=\"437.1\" y1=\"62.0\" x2=\"437.1\" y2=\"78.0\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<circle cx=\"306.2\" cy=\"70\" r=\"5\" fill=\"#3b82f6\"/>\n<text x=\"306.2\" y=\"52.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#3b82f6\" font-weight=\"bold\">+41 [+12; +71] ms</text>\n<rect x=\"345.5\" y=\"30\" width=\"91.6\" height=\"80\" fill=\"#ef4444\" fill-opacity=\"0.15\"/>\n<text x=\"498.2\" y=\"100.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"#ef4444\">phần CI</text>\n<text x=\"498.2\" y=\"114.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"#ef4444\">vượt ngưỡng</text>\n<text x=\"280.0\" y=\"165.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">Đạt guardrail khi CẢ khoảng tin cậy nằm bên trái ngưỡng 50 ms</text>\n<text x=\"40.0\" y=\"146.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">-20</text>\n<text x=\"214.5\" y=\"146.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">20</text>\n<text x=\"301.8\" y=\"146.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">40</text>\n<text x=\"389.1\" y=\"146.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">60</text>\n<text x=\"476.4\" y=\"146.0\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">80</text>\n</svg>\n\n| Khoảng tin cậy hiệu p95 | Kết luận guardrail (ngưỡng +50 ms) |\n|---|---|\n| $[-5;\\ +30]$ | đạt |\n| $[+12;\\ +40]$ | đạt (chậm hơn nhưng trong ngưỡng) |\n| $[+12;\\ +71]$ | **chưa đạt**, chưa chứng minh an toàn |\n| $[+60;\\ +95]$ | vi phạm rõ ràng |\n\n#### Bẫy thường gặp\n- Chỉ nhìn ước lượng điểm (+41 dưới 50).\n- Gạt bỏ guardrail vì chỉ số chính đẹp: độ trễ ảnh hưởng doanh thu dài hạn và mọi trang khác.\n- Không khai báo ngưỡng trước, rồi chọn ngưỡng sau khi xem dữ liệu.\n\n#### Đọc thêm\n- [Equivalence test (Wikipedia)](https://en.wikipedia.org/wiki/Equivalence_test)\n- [Trustworthy Online Controlled Experiments (Kohavi, Tang, Xu)](https://experimentguide.com/)\n",
+   "distractors": {
+    "A": "Ước lượng điểm dưới ngưỡng chưa đủ; độ bất định cho phép mức chậm thật tới 71 ms.",
+    "B": "Cận trên vượt ngưỡng không có nghĩa chắc chắn vi phạm; giá trị thật có thể từ 12 đến 71 ms. Kết luận đúng là chưa chứng minh được an toàn.",
+    "D": "Guardrail khai báo trước là điều kiện bắt buộc để triển khai, không bị gạt bỏ vì chỉ số chính đẹp."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Đạt guardrail vì ước lượng điểm +41 ms nhỏ hơn ngưỡng 50 ms"
+    },
+    {
+     "key": "B",
+     "text": "Vi phạm chắc chắn vì cận trên +71 ms đã vượt ngưỡng 50 ms"
+    },
+    {
+     "key": "C",
+     "text": "Chưa đạt: khoảng tin cậy còn vượt 50 ms nên chưa chứng minh được B không chậm hơn quá ngưỡng"
+    },
+    {
+     "key": "D",
+     "text": "Bỏ qua guardrail vì chỉ số chính đã tăng có ý nghĩa, độ trễ là việc của đội hạ tầng"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T04-C09",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Nút Đặt hàng mới chỉ xuất hiện ở trang thanh toán, nhưng thử nghiệm ngẫu nhiên hoá **mọi** người dùng mở app. Chỉ 25% người dùng vào trang thanh toán. Trong nhóm đã vào trang thanh toán, tỉ lệ đặt hàng là 20% (A) và 22% (B). Cách phân tích và diễn giải nào đúng?",
+   "explanation": "Phân tích theo điều kiện kích hoạt (triggering) giữ người không bao giờ thấy nút ra ngoài, giảm nhiễu và tăng power; điều kiện phải xác định **giống nhau** ở hai nhánh. Hiệu ứng pha loãng lên toàn app: $0{,}25 \\cdot 2 = 0{,}5$ điểm % (5% lên 5,5%).",
+   "section": "a-tk",
+   "long": "#### Ý chính\nChỉ người **có cơ hội thấy** thay đổi (vào trang thanh toán) mới có thể bị tác động. Phân tích trên nhóm được kích hoạt (triggered) loại 75% người chỉ thêm nhiễu, làm tăng power. Điều kiện kích hoạt phải xác định **như nhau** ở hai nhánh (nhánh A: người lẽ ra sẽ thấy nút mới, tức cũng vào trang thanh toán).\n\n#### Từng bước\n1. Trong nhóm kích hoạt: $22\\% - 20\\% = +2$ điểm % (tương đối +10%).\n2. Pha loãng ra toàn app: tỉ lệ toàn app $= 25\\% \\times 20\\% = 5\\%$ (A) và $25\\% \\times 22\\% = 5{,}5\\%$ (B), nên hiệu $= 0{,}25 \\cdot 2 = +0{,}5$ điểm %. Tương đối vẫn +10%.\n3. So sánh cỡ mẫu cần ($\\alpha = 0{,}05$, power 80%) để phát hiện cùng hiệu ứng:\n\n```python\nk = (1.96 + 0.84)**2\nn_trig = k*(0.20*0.80 + 0.22*0.78)/0.02**2            # người được kích hoạt mỗi nhánh\nn_all  = k*(0.05*0.95 + 0.055*0.945)/0.005**2          # người dùng app mỗi nhánh\nprint(round(n_trig), round(n_trig/0.25), round(n_all))  # 6499 25997 31195\n```\nPhân tích kích hoạt cần khoảng 26 nghìn người dùng app mỗi nhánh (để có 6,5 nghìn người vào trang thanh toán), so với 31,2 nghìn nếu phân tích toàn bộ.\n\n```mermaid\nflowchart TD\n  U[\"100% người dùng mở app, ngẫu nhiên A hoặc B\"] --> T[\"25% vào trang thanh toán (kích hoạt)\"]\n  U --> N[\"75% không vào, không thể bị tác động\"]\n  T --> E[\"So A và B trong nhóm kích hoạt: +2 điểm %\"]\n  E --> D[\"Quy ra toàn app: 0,25 × 2 = +0,5 điểm %\"]\n```\n\n#### Bẫy thường gặp\n- Kích hoạt chỉ ở nhánh B (ví dụ \"người đã nhấn nút mới\"): so nhóm tự chọn, thiên lệch nặng.\n- Báo cáo +2 điểm % như tác động toàn app (thổi phồng 4 lần).\n- Điều kiện kích hoạt bị chính treatment ảnh hưởng (B làm nhiều người vào trang thanh toán hơn) thì phải kiểm SRM trong nhóm kích hoạt.\n\n#### Đọc thêm\n- [Trustworthy Online Controlled Experiments (Kohavi, Tang, Xu)](https://experimentguide.com/)\n- [Selection bias (Wikipedia)](https://en.wikipedia.org/wiki/Selection_bias)\n",
+   "distractors": {
+    "A": "So nhóm tự chọn (người đã nhấn) với cả nhánh A phá vỡ ngẫu nhiên hoá, gây thiên lệch lớn.",
+    "B": "+2 điểm % chỉ đúng cho 25% người được kích hoạt; trên toàn app phải pha loãng còn +0,5 điểm %.",
+    "C": "Thêm 75% người không chịu tác động chỉ thêm nhiễu: hiệu ứng giảm 4 lần nên power thường **thấp hơn**."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "So người đã nhấn nút mới ở B với toàn bộ người dùng nhánh A, vì chỉ những người nhấn nút mới thực sự chịu tác động"
+    },
+    {
+     "key": "B",
+     "text": "Báo cáo lãnh đạo mức tăng +2 điểm % cho toàn bộ người dùng app, vì phân tích nhóm thanh toán là đủ"
+    },
+    {
+     "key": "C",
+     "text": "Luôn phân tích trên toàn bộ người dùng vì cỡ mẫu gấp 4 lần nên power chắc chắn cao hơn"
+    },
+    {
+     "key": "D",
+     "text": "Phân tích nhóm đã vào trang thanh toán ở cả hai nhánh (+2 điểm %), quy ra toàn app là $25\\% \\times 2 = +0{,}5$ điểm %"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T04-D01",
+   "module": "D",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung-cao",
+   "prompt": "Kế hoạch A/B nút Đặt hàng: tỉ lệ chuyển đổi nền 5%, MDE **tương đối** +10%; $\\alpha = 0{,}05$ hai phía ($z = 1{,}96$), power 80% ($z = 0{,}84$); cỡ mẫu mỗi nhánh $n = (z_{1-\\alpha/2} + z_{1-\\beta})^2\\,[p_1(1-p_1) + p_2(1-p_2)]/(p_2 - p_1)^2$. Mỗi ngày có 15.000 người dùng đủ điều kiện, nhưng vì đang chạy thử nghiệm khác, thử nghiệm này chỉ được nhận **40% lưu lượng, chia đều cho A và B**. Cần chạy tối thiểu bao nhiêu ngày? **Nhập số nguyên (làm tròn lên), đơn vị: ngày.**",
+   "explanation": "$p_2 = 5\\% \\cdot 1{,}1 = 5{,}5\\%$; $n = 7{,}84 \\cdot (0{,}0475 + 0{,}05198)/0{,}005^2 \\approx 31195$ người mỗi nhánh. Mỗi nhánh nhận $15000 \\cdot 0{,}4/2 = 3000$ người/ngày nên cần $31195/3000 \\approx 10{,}4$, làm tròn lên **11 ngày** (thực tế nên chạy trọn 14 ngày để phủ chu kỳ tuần).",
+   "section": "a-tk",
+   "long": "#### Ý chính\nBài toán ba bước: (1) chuyển MDE tương đối thành tỉ lệ cụ thể; (2) tính cỡ mẫu mỗi nhánh; (3) chia cho lưu lượng **mỗi nhánh mỗi ngày** sau khi trừ phần lưu lượng dành cho thử nghiệm khác.\n\n#### Từng bước\n1. MDE tương đối +10% trên nền 5%: $p_2 = 5\\% \\cdot 1{,}1 = 5{,}5\\%$, hiệu tuyệt đối $0{,}5$ điểm %.\n2. $n = 7{,}84 \\cdot (0{,}05 \\cdot 0{,}95 + 0{,}055 \\cdot 0{,}945)/0{,}005^2 = 7{,}84 \\cdot 0{,}099475/0{,}000025 \\approx 31195$ người mỗi nhánh.\n3. Lưu lượng: $15000 \\cdot 40\\% = 6000$ người/ngày vào thử nghiệm, chia đôi: **3000 người/nhánh/ngày**.\n4. Số ngày: $31195/3000 \\approx 10{,}4$, làm tròn lên **11 ngày**.\n\n```python\nimport math\np1 = 0.05; p2 = p1*1.1\nn = (1.96+0.84)**2*(p1*(1-p1) + p2*(1-p2))/(p2-p1)**2\nprint(round(n), round(n/3000, 2), math.ceil(n/3000))   # 31195 10.4 11\n```\n\n#### Bảng các lỗi hay gặp\n| Hiểu sai | Lưu lượng/nhánh/ngày | Số ngày |\n|---|---|---|\n| Đúng | 3.000 | 11 |\n| Quên giới hạn 40% | 7.500 | 5 |\n| Mỗi nhánh 40% | 6.000 | 6 |\n| Chia $2n$ cho 3.000 | 3.000 | 21 |\n| MDE thành 10 điểm % tuyệt đối | 3.000 | 1 |\n\n#### Thực tế\nNên làm tròn lên **bội số của tuần (14 ngày)** để phủ chu kỳ ngày trong tuần và giảm hiệu ứng mới lạ; đồng thời không dừng sớm khi \"thấy có ý nghĩa\" ở ngày 7.\n\n```mermaid\nflowchart LR\n  A[\"MDE tương đối 10%, p2 = 5,5%\"] --> B[\"n ≈ 31.195 mỗi nhánh\"]\n  B --> C[\"3.000 người mỗi nhánh mỗi ngày\"]\n  C --> D[\"10,4 ngày, làm tròn 11\"]\n  D --> E[\"Thực tế: chạy 14 ngày\"]\n```\n\n#### Đọc thêm\n- [Evan Miller — Sample Size Calculator](https://www.evanmiller.org/ab-testing/sample-size.html)\n- [Sample size determination (Wikipedia)](https://en.wikipedia.org/wiki/Sample_size_determination)\n",
+   "mistakes": [
+    {
+     "value": 5,
+     "why": "Quên rằng chỉ có 40% lưu lượng: lấy 7.500 người/nhánh/ngày nên ra khoảng 4,2 ngày, làm tròn lên 5."
+    },
+    {
+     "value": 6,
+     "why": "Hiểu nhầm mỗi nhánh nhận 40% (6.000 người/ngày) thay vì 40% chia đôi (3.000 người/nhánh/ngày)."
+    },
+    {
+     "value": 21,
+     "why": "Chia tổng hai nhánh ($2n \\approx 62.400$) cho lưu lượng của **một** nhánh (3.000/ngày)."
+    },
+    {
+     "value": 1,
+     "why": "Hiểu MDE tương đối 10% thành tăng tuyệt đối 10 điểm % (5% lên 15%), nên cỡ mẫu nhỏ vô lý."
+    },
+    {
+     "value": 10,
+     "why": "Làm tròn xuống 10,4 thành 10: sau 10 ngày mới có khoảng 30.000 người mỗi nhánh, chưa đủ cỡ mẫu."
+    }
+   ],
+   "answer": 11,
+   "tol": 0,
+   "unit": "ngày"
+  },
+  {
+   "id": "T04-D02",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Bạn là data analyst của một sàn thương mại điện tử. Đội thiết kế đề xuất thay nút **Đặt hàng** ở trang thanh toán bằng nút nổi (sticky) luôn hiện ở cuối màn hình, kèm tổng tiền. Số liệu hiện tại:\n\n| Chỉ số | Giá trị hiện tại |\n|---|---|\n| Người dùng vào trang thanh toán | 12.000 người/ngày |\n| Tỉ lệ đặt hàng thành công (trên người vào trang thanh toán) | 6,0% |\n| p95 độ trễ API đặt hàng | 450 ms (SLO: 600 ms) |\n| Tỉ lệ huỷ đơn trong 24 giờ | 4,0% |\n\nKinh doanh chỉ quan tâm nếu mức tăng tuyệt đối ít nhất **+0,6 điểm %**. Hãy viết **kế hoạch thử nghiệm** gồm:\n\n**(a)** giả thuyết, chỉ số chính và 2 đến 3 chỉ số guardrail kèm ngưỡng cụ thể;\n\n**(b)** đơn vị ngẫu nhiên hoá; tính cỡ mẫu mỗi nhánh ($\\alpha = 0{,}05$ hai phía, $z = 1{,}96$; power 80%, $z = 0{,}84$; công thức $n = (z_{1-\\alpha/2} + z_{1-\\beta})^2 [p_1(1-p_1) + p_2(1-p_2)]/(p_2 - p_1)^2$), thời lượng chạy và lý do chọn thời lượng đó;\n\n**(c)** các kiểm tra độ tin cậy trước khi đọc kết quả (ít nhất SRM) và quy tắc chống nhìn trộm;\n\n**(d)** quy tắc ra quyết định triển khai khi có nhiều chỉ số (chỉ số chính, guardrail, chỉ số phụ).",
+   "explanation": "Định hướng chấm: cần đúng chỉ số chính theo người dùng, guardrail có ngưỡng và kiểu không-kém-hơn; $n \\approx 25{,}7$ nghìn người mỗi nhánh, chỉ cần khoảng 4,3 ngày nhưng nên chạy trọn 14 ngày; có kiểm tra SRM, không nhìn trộm (hoặc kiểm định tuần tự), quy tắc quyết định rõ cho chỉ số chính, guardrail và chỉ số phụ.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nMột kế hoạch thử nghiệm tốt được **viết trước khi chạy**: giả thuyết, chỉ số chính, guardrail có ngưỡng, đơn vị ngẫu nhiên hoá, cỡ mẫu và thời lượng, kiểm tra độ tin cậy, quy tắc dừng và quy tắc ra quyết định. Viết trước giúp tránh \"chọn chỉ số đẹp\" sau khi xem dữ liệu.\n\n#### Vòng đời thử nghiệm\n```mermaid\nflowchart TD\n  H[\"Giả thuyết và chỉ số chính\"] --> G[\"Guardrail và ngưỡng\"]\n  G --> N[\"Cỡ mẫu và thời lượng (bội số tuần)\"]\n  N --> AA[\"A/A hoặc kiểm tra log\"]\n  AA --> RUN[\"Chạy, theo dõi SRM và guardrail an toàn mỗi ngày\"]\n  RUN --> CHK{\"Có SRM?\"}\n  CHK -->|Có| FIX[\"Dừng đọc kết quả, tìm lỗi, chạy lại\"]\n  CHK -->|Không| READ[\"Đọc kết quả khi đủ cỡ mẫu\"]\n  READ --> DEC{\"Chỉ số chính có ý nghĩa và mọi guardrail đạt?\"}\n  DEC -->|Có| SHIP[\"Triển khai, theo dõi sau triển khai\"]\n  DEC -->|Không| ITER[\"Không triển khai, rút kinh nghiệm\"]\n```\n\n#### Tính cỡ mẫu\n$p_1 = 0{,}06$, $p_2 = 0{,}066$:\n$$n = \\frac{7{,}84 \\cdot (0{,}0564 + 0{,}061644)}{0{,}006^2} \\approx 25708 \\text{ người mỗi nhánh}$$\n\n```python\nimport math\nn = (1.96+0.84)**2*(0.06*0.94 + 0.066*0.934)/0.006**2\nprint(math.ceil(n), round(2*n/12000, 2))   # 25708 4.28 (làm tròn lên)\nprint(round(2.8*math.sqrt((0.06*0.94+0.066*0.934)/(7*12000))*100, 2))  # MDE nếu chạy 14 ngày: 0.33 điểm %\n```\n\n| Phương án thời lượng | Người mỗi nhánh | MDE phát hiện được (power 80%) |\n|---|---|---|\n| 5 ngày (vừa đủ cỡ mẫu) | 30.000 | khoảng 0,56 điểm % |\n| 14 ngày (khuyến nghị) | 84.000 | khoảng 0,33 điểm % |\n\nChọn 14 ngày vì: chu kỳ tuần (hành vi cuối tuần khác), hiệu ứng mới lạ của nút nổi, và guardrail (huỷ đơn 24 giờ) cần thêm thời gian để đo đủ.\n\n#### Gợi ý chấm\n- Thiếu guardrail có ngưỡng cụ thể hoặc chỉ nêu tên chỉ số: trừ điểm (a).\n- Tính cỡ mẫu sai đơn vị (điểm % so với tỉ lệ) hoặc chỉ chạy 4 đến 5 ngày không giải thích: trừ điểm (b).\n- Có nhắc kiểm định tuần tự hoặc chốt cỡ mẫu trước: đạt phần chống nhìn trộm.\n\n#### Đọc thêm\n- [Trustworthy Online Controlled Experiments (Kohavi, Tang, Xu)](https://experimentguide.com/)\n- [Evan Miller — How Not To Run an A/B Test](https://www.evanmiller.org/how-not-to-run-an-ab-test.html)\n- [A/B testing (Wikipedia)](https://en.wikipedia.org/wiki/A/B_testing)\n",
+   "modelAnswer": "**(a) Giả thuyết và chỉ số**\n- $H_0$: nút nổi không làm thay đổi tỉ lệ đặt hàng thành công; $H_1$: có thay đổi (kiểm định hai phía, vì nút nổi cũng có thể gây khó chịu, che nội dung).\n- Chỉ số chính (OEC): tỉ lệ người dùng vào trang thanh toán có ít nhất một đơn thành công (đơn vị = người dùng). MDE tuyệt đối +0,6 điểm % (6,0% lên 6,6%).\n- Guardrail (khai báo trước, kiểu không-kém-hơn): (1) p95 độ trễ API đặt hàng: cận trên khoảng tin cậy 95% của hiệu $B - A$ phải $< +50$ ms và p95 của B phải $\\le 600$ ms (SLO); (2) tỉ lệ huỷ đơn 24 giờ: cận trên của hiệu $< +0{,}5$ điểm %; (3) tỉ lệ lỗi API đặt hàng không tăng có ý nghĩa.\n\n**(b) Ngẫu nhiên hoá, cỡ mẫu, thời lượng**\n- Ngẫu nhiên hoá theo **người dùng** (hash ổn định của `user_id` + salt của thử nghiệm), để một người luôn thấy cùng một nút; phân tích cũng theo người dùng.\n- $p_1 = 0{,}06$, $p_2 = 0{,}066$:\n$$n = \\frac{(1{,}96 + 0{,}84)^2\\,(0{,}06 \\cdot 0{,}94 + 0{,}066 \\cdot 0{,}934)}{0{,}006^2} = \\frac{7{,}84 \\cdot 0{,}118044}{0{,}000036} \\approx 25\\,708 \\text{ người mỗi nhánh}$$\n- Tổng $\\approx 51\\,416$ người; với 12.000 người/ngày chia 50/50 thì chỉ cần $\\approx 4{,}3$ ngày. Tuy vậy chọn **14 ngày (2 tuần trọn)**: phủ chu kỳ ngày trong tuần (cuối tuần mua khác ngày thường), giảm ảnh hưởng hiệu ứng mới lạ, và đủ power cho guardrail. Khi đó mỗi nhánh có khoảng 84.000 người, MDE thực tế khoảng $2{,}8\\sqrt{0{,}118/84000} \\approx 0{,}33$ điểm %.\n\n**(c) Kiểm tra độ tin cậy, chống nhìn trộm**\n- SRM: kiểm định $\\chi^2$ tỉ lệ 50/50 hằng ngày, ngưỡng $p < 0{,}001$; có SRM thì dừng đọc kết quả, tìm nguyên nhân (log phơi nhiễm, redirect, bot, crash phiên bản app).\n- A/A test hoặc kiểm tra tiền-thử nghiệm: hai nhánh giống nhau về chỉ số trước khi bật tính năng; kiểm tra log sự kiện đặt hàng đầy đủ ở cả hai nhánh.\n- Chống nhìn trộm: chốt cỡ mẫu và ngày đọc kết quả trước; dashboard hằng ngày chỉ để theo dõi SRM và guardrail an toàn (dừng sớm chỉ khi gây hại nghiêm trọng như lỗi tăng vọt). Nếu cần đọc sớm thì dùng kiểm định tuần tự (alpha spending kiểu O'Brien–Fleming hoặc mSPRT).\n\n**(d) Quy tắc quyết định**\n- Triển khai khi: chỉ số chính tăng có ý nghĩa ($p < 0{,}05$, khoảng tin cậy không chứa 0), **mọi** guardrail đạt (cận trên dưới ngưỡng), không có SRM.\n- Chỉ số chính có ý nghĩa nhưng guardrail chưa đạt: không triển khai, tối ưu (ví dụ độ trễ) rồi chạy lại.\n- Chỉ số phụ (giá trị đơn, thời gian thanh toán…): chỉ dùng để giải thích; nếu xét nhiều chỉ số phụ thì hiệu chỉnh đa so sánh (Holm hoặc Benjamini–Hochberg), không đổi chỉ số chính sau khi xem dữ liệu.\n- Không có ý nghĩa: báo cáo khoảng tin cậy (ví dụ \"hiệu ứng thật nhiều khả năng nhỏ hơn +0,6 điểm %\"), không kết luận \"không có tác dụng\".",
+   "rubric": [
+    {
+     "criterion": "(a) Giả thuyết hai phía, chỉ số chính định nghĩa theo người dùng, 2 đến 3 guardrail có ngưỡng cụ thể (p95 so với SLO 600 ms, huỷ đơn, lỗi)",
+     "points": 1.5
+    },
+    {
+     "criterion": "(b) Ngẫu nhiên hoá theo người dùng; tính đúng $n \\approx 25{,}7$ nghìn người mỗi nhánh; suy ra khoảng 4,3 ngày nhưng chọn bội số tuần (14 ngày) và giải thích lý do",
+     "points": 2
+    },
+    {
+     "criterion": "(c) Kiểm tra SRM (khi bình phương, ngưỡng chặt) cùng ít nhất một kiểm tra khác (A/A, log); quy tắc chốt cỡ mẫu trước hoặc dùng kiểm định tuần tự",
+     "points": 1.5
+    },
+    {
+     "criterion": "(d) Quy tắc quyết định: chỉ số chính có ý nghĩa và mọi guardrail đạt; xử lý chỉ số phụ bằng hiệu chỉnh đa so sánh; diễn giải đúng khi không có ý nghĩa",
+     "points": 1
+    }
+   ]
+  },
+  {
+   "id": "T04-D03",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Thử nghiệm nút Đặt hàng mới được triển khai theo hai giai đoạn: **Giai đoạn 1** (3 ngày đợt khuyến mãi lớn, ramp-up thận trọng) chia 90% A / 10% B; **Giai đoạn 2** (ngày thường) chia 50% / 50%. Số liệu:\n\n| Giai đoạn | A: người dùng | A: đơn | B: người dùng | B: đơn |\n|---|---|---|---|---|\n| 1 (khuyến mãi) | 90.000 | 9.000 | 10.000 | 1.050 |\n| 2 (ngày thường) | 50.000 | 2.500 | 50.000 | 2.700 |\n\nMột báo cáo cộng gộp hai giai đoạn kết luận: \"B làm giảm chuyển đổi gần 2 điểm %, dừng ngay\". Hãy:\n\n**(a)** tính tỉ lệ chuyển đổi của mỗi nhánh trong từng giai đoạn và khi cộng gộp, chỉ ra nghịch lý;\n\n**(b)** giải thích nguyên nhân bằng khái niệm biến gây nhiễu, và vì sao so sánh **trong từng giai đoạn** vẫn hợp lệ;\n\n**(c)** đề xuất cách ước lượng hiệu ứng đúng (có ít nhất một con số) và kiểm định ý nghĩa cho giai đoạn 2 bằng kiểm định z hai tỉ lệ ($z = 1{,}96$);\n\n**(d)** rút ra 2 bài học về thiết kế hoặc báo cáo thử nghiệm để tránh lặp lại.",
+   "explanation": "Định hướng chấm: tính đúng 10,0/10,5%, 5,0/5,4% và cộng gộp 8,21%/6,25%; nêu biến gây nhiễu là giai đoạn (vừa ảnh hưởng chuyển đổi vừa ảnh hưởng tỉ lệ phân bổ); ước lượng phân tầng khoảng +0,45 điểm % hoặc giai đoạn 2: $z \\approx 2{,}85$, khoảng tin cậy $[+0{,}13;\\ +0{,}68]$ điểm %; bài học về ramp-up và phân tầng.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nNghịch lý Simpson: một xu hướng đúng trong **mọi** nhóm con lại đảo chiều khi cộng gộp, vì tỉ trọng các nhóm con khác nhau giữa hai bên so sánh. Trong A/B, điều này xảy ra khi tỉ lệ phân bổ thay đổi theo thời gian (ramp-up) trong khi tỉ lệ chuyển đổi nền cũng thay đổi theo thời gian.\n\n#### Từng bước\n| | A | B | B − A |\n|---|---|---|---|\n| GĐ1 (khuyến mãi) | 10,0% | 10,5% | +0,5 |\n| GĐ2 (ngày thường) | 5,0% | 5,4% | +0,4 |\n| Cộng gộp | 8,21% | 6,25% | −1,96 |\n\nTỉ trọng người dùng từ GĐ1: A $= 90000/140000 \\approx 64{,}3\\%$, B $= 10000/60000 \\approx 16{,}7\\%$. Tỉ lệ cộng gộp là trung bình có trọng số:\n$$\\text{CR}_A = 0{,}643 \\cdot 10\\% + 0{,}357 \\cdot 5\\% \\approx 8{,}21\\%, \\quad \\text{CR}_B = 0{,}167 \\cdot 10{,}5\\% + 0{,}833 \\cdot 5{,}4\\% = 6{,}25\\%$$\n\n```python\nimport math\nfrom scipy.stats import norm\npa = (9000+2500)/140000; pb = (1050+2700)/60000\nprint(round(pa*100, 2), round(pb*100, 2))                 # 8.21 6.25\nw = (100000*0.5 + 100000*0.4)/200000; print(w)             # 0.45 (phân tầng)\np = 5200/100000; se = math.sqrt(p*(1-p)*2/50000)\nz = 0.004/se; print(round(z, 2), round(2*norm.sf(z), 4))   # 2.85 0.0044\nseu = math.sqrt(.05*.95/50000 + .054*.946/50000)\nprint(round((0.004-1.96*seu)*100, 3), round((0.004+1.96*seu)*100, 3))  # 0.125 0.675\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"40.0\" y1=\"200.0\" x2=\"540.0\" y2=\"200.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<rect x=\"70\" y=\"58.3\" width=\"44\" height=\"141.7\" fill=\"#3b82f6\"/>\n<text x=\"92.0\" y=\"52.3\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">10,00%</text>\n<text x=\"92.0\" y=\"215.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#3b82f6\" font-weight=\"bold\">A</text>\n<rect x=\"120\" y=\"51.2\" width=\"44\" height=\"148.8\" fill=\"#f59e0b\"/>\n<text x=\"142.0\" y=\"45.2\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">10,50%</text>\n<text x=\"142.0\" y=\"215.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#f59e0b\" font-weight=\"bold\">B</text>\n<text x=\"117.0\" y=\"234.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">GĐ1 khuyến mãi</text>\n<rect x=\"235\" y=\"129.2\" width=\"44\" height=\"70.8\" fill=\"#3b82f6\"/>\n<text x=\"257.0\" y=\"123.2\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">5,00%</text>\n<text x=\"257.0\" y=\"215.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#3b82f6\" font-weight=\"bold\">A</text>\n<rect x=\"285\" y=\"123.5\" width=\"44\" height=\"76.5\" fill=\"#f59e0b\"/>\n<text x=\"307.0\" y=\"117.5\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">5,40%</text>\n<text x=\"307.0\" y=\"215.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#f59e0b\" font-weight=\"bold\">B</text>\n<text x=\"282.0\" y=\"234.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">GĐ2 ngày thường</text>\n<rect x=\"400\" y=\"83.6\" width=\"44\" height=\"116.4\" fill=\"#3b82f6\"/>\n<text x=\"422.0\" y=\"77.6\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">8,21%</text>\n<text x=\"422.0\" y=\"215.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#3b82f6\" font-weight=\"bold\">A</text>\n<rect x=\"450\" y=\"111.5\" width=\"44\" height=\"88.5\" fill=\"#f59e0b\"/>\n<text x=\"472.0\" y=\"105.5\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">6,25%</text>\n<text x=\"472.0\" y=\"215.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#f59e0b\" font-weight=\"bold\">B</text>\n<text x=\"447.0\" y=\"234.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">Cộng gộp</text>\n<text x=\"150.0\" y=\"18.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#10b981\" font-weight=\"bold\">Từng giai đoạn: B cao hơn A</text>\n<text x=\"445.0\" y=\"18.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#ef4444\" font-weight=\"bold\">Cộng gộp: B thấp hơn A</text>\n</svg>\n\n#### Sơ đồ biến gây nhiễu\n```mermaid\nflowchart TD\n  P[\"Giai đoạn: khuyến mãi hay ngày thường\"] --> R[\"Tỉ lệ phân bổ vào B (10% hay 50%)\"]\n  P --> C[\"Tỉ lệ chuyển đổi nền (10% hay 5%)\"]\n  R --> AGG[\"So sánh cộng gộp bị đảo chiều\"]\n  C --> AGG\n```\n\n#### Gợi ý chấm\n- (a) cần đủ 6 tỉ lệ và nêu rõ chiều đảo ngược.\n- (b) phải nói được giai đoạn ảnh hưởng **cả hai**: chuyển đổi và tỉ lệ phân bổ.\n- (c) chấp nhận phân tầng (+0,45 điểm %), trọng số nghịch đảo phương sai, CMH, hoặc chỉ dùng GĐ2 ($z \\approx 2{,}85$, khoảng $[+0{,}13;\\ +0{,}68]$ điểm %).\n\n#### Bẫy thường gặp\nKiểm SRM trên dữ liệu cộng gộp theo 50/50 sẽ báo động giả (140.000 so với 60.000); phải kiểm theo tỉ lệ cấu hình của từng giai đoạn.\n\n#### Đọc thêm\n- [Simpson's paradox (Wikipedia)](https://en.wikipedia.org/wiki/Simpson%27s_paradox)\n- [Nghịch lý Simpson (Wikipedia tiếng Việt)](https://vi.wikipedia.org/wiki/Ngh%E1%BB%8Bch_l%C3%BD_Simpson)\n- [Cochran–Mantel–Haenszel statistics (Wikipedia)](https://en.wikipedia.org/wiki/Cochran%E2%80%93Mantel%E2%80%93Haenszel_statistics)\n",
+   "modelAnswer": "**(a) Số liệu**\n\n| | A | B | B − A |\n|---|---|---|---|\n| Giai đoạn 1 | $9000/90000 = 10{,}0\\%$ | $1050/10000 = 10{,}5\\%$ | +0,5 điểm % |\n| Giai đoạn 2 | $2500/50000 = 5{,}0\\%$ | $2700/50000 = 5{,}4\\%$ | +0,4 điểm % |\n| Cộng gộp | $11500/140000 \\approx 8{,}21\\%$ | $3750/60000 = 6{,}25\\%$ | −1,96 điểm % |\n\nB tốt hơn A **trong cả hai giai đoạn** nhưng kém hơn khi cộng gộp: đây là nghịch lý Simpson.\n\n**(b) Nguyên nhân**\n- Biến gây nhiễu là **giai đoạn** (khuyến mãi hay ngày thường): nó ảnh hưởng mạnh tới chuyển đổi (10% so với 5%) **và** tới tỉ lệ người dùng thuộc mỗi nhánh (A có $90000/140000 \\approx 64\\%$ người dùng từ giai đoạn khuyến mãi, B chỉ có $10000/60000 \\approx 17\\%$).\n- Cộng gộp vì thế so \"A chủ yếu trong mùa khuyến mãi\" với \"B chủ yếu ngày thường\", không còn là so sánh ngẫu nhiên.\n- Trong **mỗi** giai đoạn, tỉ lệ chia cố định và người dùng được gán ngẫu nhiên, nên hai nhánh tương đương về mọi đặc điểm, so sánh trong giai đoạn là hợp lệ (kiểm tra SRM theo tỉ lệ cấu hình của **từng** giai đoạn, không theo 50/50 tổng).\n\n**(c) Ước lượng đúng**\n- Cách 1, phân tầng: lấy trung bình có trọng số của hiệu trong từng giai đoạn, trọng số theo tổng người dùng của giai đoạn: $\\frac{100000 \\cdot 0{,}5 + 100000 \\cdot 0{,}4}{200000} = +0{,}45$ điểm %. (Có thể dùng trọng số nghịch đảo phương sai hoặc kiểm định Cochran–Mantel–Haenszel.)\n- Cách 2, chỉ dùng giai đoạn 2 (chia ổn định 50/50, ngày thường đại diện hơn):\n  - $\\hat{p} = 5200/100000 = 0{,}052$; $SE_{\\text{gộp}} = \\sqrt{0{,}052 \\cdot 0{,}948 \\cdot (2/50000)} \\approx 0{,}001404$.\n  - $z = 0{,}004/0{,}001404 \\approx 2{,}85 > 1{,}96$, $p \\approx 0{,}004$: có ý nghĩa.\n  - Khoảng tin cậy 95% (SE không gộp, cũng $\\approx 0{,}001404$): $0{,}4 \\pm 0{,}275 = [+0{,}13;\\ +0{,}68]$ điểm %.\n- Giai đoạn 1 riêng lẻ: $SE = \\sqrt{0{,}1 \\cdot 0{,}9/90000 + 0{,}105 \\cdot 0{,}895/10000} \\approx 0{,}00322$, khoảng $0{,}5 \\pm 0{,}63$ điểm % nên chưa có ý nghĩa (nhánh B chỉ 10.000 người), nhưng cùng chiều.\n- Kết luận: B **tăng** chuyển đổi khoảng +0,4 đến +0,45 điểm %; báo cáo \"giảm 2 điểm %\" là sai và không nên dừng thử nghiệm vì lý do đó (vẫn phải xét guardrail).\n\n**(d) Bài học**\n1. Không cộng gộp dữ liệu qua các giai đoạn có tỉ lệ phân bổ khác nhau (ramp-up); hoặc phân tích từng giai đoạn rồi kết hợp có trọng số, hoặc chỉ dùng giai đoạn chia ổn định.\n2. Tránh bắt đầu/thay đổi tỉ lệ chia trùng sự kiện đặc biệt (khuyến mãi); nếu buộc phải, ghi rõ trong kế hoạch phân tích và báo cáo theo phân tầng.\n3. Luôn kiểm SRM và so sánh phân bố đặc điểm (ngày, thiết bị) giữa hai nhánh trước khi đọc kết quả; báo cáo kèm bảng theo phân tầng.",
+   "rubric": [
+    {
+     "criterion": "(a) Tính đúng tỉ lệ từng giai đoạn và cộng gộp, chỉ rõ chiều hiệu ứng đảo ngược (nghịch lý Simpson)",
+     "points": 1.5
+    },
+    {
+     "criterion": "(b) Xác định giai đoạn là biến gây nhiễu (ảnh hưởng cả chuyển đổi lẫn tỉ lệ phân bổ), giải thích vì sao so sánh trong từng giai đoạn vẫn ngẫu nhiên",
+     "points": 1.5
+    },
+    {
+     "criterion": "(c) Ước lượng đúng (phân tầng khoảng +0,45 điểm % hoặc dùng giai đoạn 2), kiểm định z giai đoạn 2 đúng ($z \\approx 2{,}85$) kèm khoảng tin cậy hoặc kết luận",
+     "points": 2
+    },
+    {
+     "criterion": "(d) Hai bài học cụ thể, áp dụng được (không cộng gộp qua ramp-up, phân tầng, kiểm SRM theo từng giai đoạn…)",
+     "points": 1
+    }
+   ]
+  }
+ ]
+}

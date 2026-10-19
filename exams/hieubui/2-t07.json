@@ -1,0 +1,1003 @@
+{
+ "title": "CĐ-07 · NumPy và độ phức tạp thuật toán",
+ "description": "ndarray, shape, axis, broadcasting — 30% · Vector hóa so với vòng lặp — 15% · Big-O: vòng lặp, đệ quy, cấu trúc dữ liệu — 30% · Tìm kiếm, sắp xếp, hash, heap, hai con trỏ — 25%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T07-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Một batch embedding gồm 32 câu, mỗi câu được mã hoá thành vector 768 chiều và lưu trong mảng NumPy `E` với `E.shape == (32, 768)`. Giá trị của `E.ndim` và `E.size` lần lượt là gì?",
+   "explanation": "`ndim` là số trục: $\\text{len}(\\text{shape}) = 2$. `size` là tổng số phần tử: $32 \\times 768 = 24576$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nMọi mảng NumPy được mô tả bởi `shape`, tuple độ dài của từng trục. Hai thuộc tính hay hỏi đều suy ra từ `shape`:\n- `ndim = len(shape)`: số **trục** của mảng (đừng nhầm với số chiều của vector embedding).\n- `size` = tích các phần tử của `shape`: tổng số phần tử.\n\n#### Từng bước\n| Thuộc tính | Cách tính | Giá trị với `E` |\n|---|---|---|\n| `E.shape` | cho sẵn | `(32, 768)` |\n| `E.ndim` | `len(E.shape)` | 2 |\n| `E.size` | $32 \\times 768$ | 24576 |\n| `len(E)` | `E.shape[0]` | 32 |\n\n```python\nimport numpy as np\nE = np.zeros((32, 768), dtype=np.float32)\nprint(E.ndim, E.size, len(E))   # 2 24576 32\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 520 200\" width=\"100%\" style=\"max-width:560px\">\n<rect x=\"70\" y=\"40\" width=\"400\" height=\"110\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<rect x=\"70\" y=\"40\" width=\"400\" height=\"18\" fill=\"#3b82f6\" fill-opacity=\"0.3\"/>\n<line x1=\"70\" y1=\"58\" x2=\"470\" y2=\"58\" stroke=\"currentColor\" stroke-opacity=\"0.5\"/>\n<line x1=\"70\" y1=\"76\" x2=\"470\" y2=\"76\" stroke=\"currentColor\" stroke-opacity=\"0.3\"/>\n<line x1=\"70\" y1=\"94\" x2=\"470\" y2=\"94\" stroke=\"currentColor\" stroke-opacity=\"0.3\"/>\n<text x=\"270\" y=\"30\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">trục 1: 768 chiều embedding (shape[1])</text>\n<text x=\"40\" y=\"100\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\" transform=\"rotate(-90 40 100)\">trục 0: 32 câu</text>\n<text x=\"480\" y=\"54\" font-size=\"12\" fill=\"#3b82f6\">E[0]</text>\n<text x=\"270\" y=\"120\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">⋮</text>\n<text x=\"270\" y=\"180\" text-anchor=\"middle\" font-size=\"14\" fill=\"#10b981\">ndim = 2 · size = 32 × 768 = 24576</text>\n</svg>\n\nMỗi hàng `E[i]` là một vector 768 chiều; cả bảng chỉ có hai trục.\n\n#### Bẫy thường gặp\n- \"Vector 768 chiều\" là độ dài trục 1, không phải `ndim`.\n- `len(E)` chỉ trả độ dài trục 0 (32), không phải tổng số phần tử.\n- Cộng các kích thước ($32 + 768 = 800$) thay vì nhân.\n\n#### Đọc thêm\n- [numpy.ndarray — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html)\n",
+   "distractors": {
+    "A": "Cộng các kích thước $32 + 768 = 800$; `size` là **tích** các kích thước trong `shape`.",
+    "C": "Nhầm `ndim` (số trục) với `len(E)` hay `E.shape[0]` (độ dài trục 0, tức số câu).",
+    "D": "Nghĩ \"một danh sách vector\" là mảng 1 chiều; thực tế mảng có 2 trục: câu và chiều embedding."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`2` và `800`"
+    },
+    {
+     "key": "B",
+     "text": "`2` và `24576`"
+    },
+    {
+     "key": "C",
+     "text": "`32` và `24576`"
+    },
+    {
+     "key": "D",
+     "text": "`1` và `24576`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T07-A02",
+   "module": "A",
+   "type": "output",
+   "points": 3.5,
+   "level": "nhan-biet",
+   "prompt": "Mảng `a` ghi điểm của 3 mô hình (hàng) trên 2 bộ test (cột). Đoạn code sau in ra gì? Ghi đúng từng dòng.\n\n```python\nimport numpy as np\na = np.array([[4, 9],\n              [7, 2],\n              [5, 6]])\nprint(a.max(axis=0).tolist())\nprint(a.argmax(axis=1).tolist())\n```",
+   "explanation": "`axis=k` là trục bị gộp: shape $(3, 2)$ gộp trục 0 còn $(2,)$ = max mỗi cột $[7, 9]$; gộp trục 1 còn $(3,)$ = vị trí max mỗi hàng $[1, 0, 1]$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nTham số `axis=k` chỉ **trục bị gộp** (biến mất khỏi shape kết quả):\n- `a.max(axis=0)`: đi dọc xuống các hàng, mỗi **cột** cho một giá trị, shape $(3, 2) \\to (2,)$.\n- `a.argmax(axis=1)`: đi ngang trong mỗi hàng, mỗi **hàng** cho một chỉ số cột, shape $(3, 2) \\to (3,)$.\n\n#### Từng bước\n| | cột 0 | cột 1 | `argmax(axis=1)` |\n|---|---|---|---|\n| hàng 0 | 4 | **9** | 1 |\n| hàng 1 | **7** | 2 | 0 |\n| hàng 2 | 5 | **6** | 1 |\n| `max(axis=0)` | **7** | **9** | |\n\nDòng 1 in `[7, 9]`, dòng 2 in `[1, 0, 1]`. `.tolist()` đổi sang list Python nên định dạng in không phụ thuộc phiên bản NumPy.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 190\" width=\"100%\" style=\"max-width:560px\">\n<rect x=\"60\" y=\"30\" width=\"160\" height=\"120\" fill=\"none\" stroke=\"currentColor\"/>\n<line x1=\"140\" y1=\"30\" x2=\"140\" y2=\"150\" stroke=\"currentColor\" stroke-opacity=\"0.4\"/>\n<line x1=\"60\" y1=\"70\" x2=\"220\" y2=\"70\" stroke=\"currentColor\" stroke-opacity=\"0.4\"/>\n<line x1=\"60\" y1=\"110\" x2=\"220\" y2=\"110\" stroke=\"currentColor\" stroke-opacity=\"0.4\"/>\n<text x=\"100\" y=\"56\" text-anchor=\"middle\" font-size=\"16\" fill=\"currentColor\">4</text>\n<text x=\"180\" y=\"56\" text-anchor=\"middle\" font-size=\"16\" fill=\"#10b981\">9</text>\n<text x=\"100\" y=\"96\" text-anchor=\"middle\" font-size=\"16\" fill=\"#10b981\">7</text>\n<text x=\"180\" y=\"96\" text-anchor=\"middle\" font-size=\"16\" fill=\"currentColor\">2</text>\n<text x=\"100\" y=\"136\" text-anchor=\"middle\" font-size=\"16\" fill=\"currentColor\">5</text>\n<text x=\"180\" y=\"136\" text-anchor=\"middle\" font-size=\"16\" fill=\"currentColor\">6</text>\n<line x1=\"40\" y1=\"35\" x2=\"40\" y2=\"145\" stroke=\"#3b82f6\" stroke-width=\"3\"/>\n<polygon points=\"34,140 46,140 40,152\" fill=\"#3b82f6\"/>\n<text x=\"30\" y=\"175\" font-size=\"13\" fill=\"#3b82f6\">axis=0: gộp hàng → mỗi cột 1 số</text>\n<line x1=\"240\" y1=\"90\" x2=\"300\" y2=\"90\" stroke=\"#f59e0b\" stroke-width=\"3\"/>\n<polygon points=\"300,84 300,96 312,90\" fill=\"#f59e0b\"/>\n<text x=\"320\" y=\"60\" font-size=\"13\" fill=\"#f59e0b\">axis=1: gộp cột</text>\n<text x=\"320\" y=\"80\" font-size=\"13\" fill=\"#f59e0b\">→ mỗi hàng 1 chỉ số</text>\n<text x=\"320\" y=\"110\" font-size=\"13\" fill=\"currentColor\">argmax = [1, 0, 1]</text>\n<text x=\"320\" y=\"130\" font-size=\"13\" fill=\"currentColor\">max(axis=0) = [7, 9]</text>\n</svg>\n\n#### Bẫy thường gặp\n- Đọc `axis=0` là \"theo từng hàng\" nên lấy max mỗi hàng $[9, 7, 6]$.\n- Nhầm `argmax` (chỉ số) với `max` (giá trị).\n- Quên rằng shape kết quả mất đúng trục được gộp: `axis=1` cho 3 phần tử chứ không phải 2.\n\n#### Đọc thêm\n- [numpy.argmax — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.argmax.html)\n- [numpy.sum (cách hiểu axis) — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.sum.html)\n",
+   "mistakes": [
+    {
+     "value": "[9, 7, 6]\n[1, 0, 1]",
+     "why": "Hiểu `axis=0` là \"lấy theo từng hàng\". Thực ra `axis=0` là trục **bị gộp** (đi dọc xuống các hàng), nên được một giá trị cho mỗi **cột**: $[7, 9]$."
+    },
+    {
+     "value": "[7, 9]\n[9, 7, 6]",
+     "why": "Nhầm `argmax` (trả **chỉ số** của phần tử lớn nhất) với `max` (trả giá trị)."
+    },
+    {
+     "value": "[7, 9]\n[1, 0]",
+     "why": "Tính `argmax` theo `axis=0` (mỗi cột một chỉ số). Với `axis=1` trục cột bị gộp, kết quả có 3 phần tử, mỗi hàng một chỉ số."
+    }
+   ],
+   "answer": "[7, 9]\n[1, 0, 1]",
+   "accept": [
+    "[7, 9]\n[1, 0, 1]",
+    "[7,9]\n[1,0,1]"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T07-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Cho `a` và `b` là hai mảng NumPy 1 chiều cùng shape `(n,)`, và `c = np.empty(n)`. Vòng lặp sau tương đương với biểu thức vector hoá nào?\n\n```python\nfor i in range(n):\n    c[i] = a[i] * b[i]\n```",
+   "explanation": "Phép `*` giữa hai mảng là ufunc `np.multiply`, tính từng cặp $c_i = a_i b_i$ bằng vòng lặp C bên trong NumPy; kết quả shape $(n,)$ giống hệt vòng lặp.",
+   "section": "b-np",
+   "long": "#### Ý chính\nCác phép toán số học giữa hai mảng cùng shape (`+ - * /`) là **ufunc**: NumPy áp dụng từng phần tử với từng phần tử (elementwise) bằng vòng lặp viết sẵn trong C. Vòng lặp `c[i] = a[i] * b[i]` vì vậy tương đương đúng `c = a * b` (tức `np.multiply(a, b)`).\n\n#### Từng bước\nThử với `a = [1, 2, 3]`, `b = [4, 5, 6]`:\n\n| Biểu thức | Kết quả | Shape | Ý nghĩa |\n|---|---|---|---|\n| `a * b` | `[4, 10, 18]` | `(3,)` | nhân từng cặp, giống vòng lặp |\n| `a @ b` | `32` | `()` | tích vô hướng $\\sum_i a_i b_i$ |\n| `np.outer(a, b)` | ma trận $3 \\times 3$ | `(3, 3)` | mọi cặp $a_i b_j$ |\n| `np.prod([a, b])` | `720` | `()` | nhân **tất cả** 6 số |\n\n```python\nimport numpy as np\na = np.array([1, 2, 3]); b = np.array([4, 5, 6])\nprint((a * b).tolist(), a @ b, np.outer(a, b).shape, np.prod([a, b]))\n# [4, 10, 18] 32 (3, 3) 720\n```\n\n#### Bẫy thường gặp\n- Dùng `@` hoặc `np.dot` vì \"nhân vector\": với hai mảng 1 chiều đó là tích vô hướng.\n- `np.prod` và `np.sum` không chỉ định `axis` sẽ gộp **toàn bộ** mảng. `np.prod([a, b], axis=0)` mới cho `[4, 10, 18]`.\n- Tưởng vector hoá đổi kết quả: nó chỉ đổi **nơi chạy vòng lặp** (C thay cho Python), kết quả giống hệt.\n\n#### Đọc thêm\n- [Universal functions (ufunc) — NumPy docs](https://numpy.org/doc/stable/reference/ufuncs.html)\n- [Array programming — Wikipedia](https://en.wikipedia.org/wiki/Array_programming)\n",
+   "distractors": {
+    "B": "`@` là tích ma trận; với hai vector 1 chiều nó cho **tích vô hướng** $\\sum_i a_i b_i$ (một số), không phải mảng $n$ phần tử.",
+    "C": "Tích ngoài cho ma trận shape $(n, n)$ với phần tử $a_i b_j$, gồm cả các cặp $i \\ne j$.",
+    "D": "`np.prod` không chỉ định `axis` nhân **tất cả** $2n$ phần tử thành một số; muốn nhân từng cặp phải dùng `axis=0`."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`c = a * b`"
+    },
+    {
+     "key": "B",
+     "text": "`c = a @ b`"
+    },
+    {
+     "key": "C",
+     "text": "`c = np.outer(a, b)`"
+    },
+    {
+     "key": "D",
+     "text": "`c = np.prod([a, b])`"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T07-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Mảng `scores` shape `(n,)` chứa xác suất mô hình phân loại spam gán cho $n$ email. Biểu thức vector hoá nào **đếm đúng** số email có điểm lớn hơn 0,8?",
+   "explanation": "`scores > 0.8` cho mảng bool; khi cộng, True tính là 1 và False là 0, nên tổng chính là số phần tử thỏa điều kiện (tương đương `np.count_nonzero(scores > 0.8)`).",
+   "section": "b-np",
+   "long": "#### Ý chính\nSo sánh một mảng với một số (`scores > 0.8`) cho **mảng bool** cùng shape. Khi cộng, NumPy coi `True = 1`, `False = 0`, nên tổng của mặt nạ bool chính là số phần tử thỏa điều kiện. Đây là cách đếm vector hoá chuẩn, tương đương `np.count_nonzero(scores > 0.8)`.\n\n#### Từng bước\nVí dụ `scores = [0.95, 0.42, 0.81, 0.8, 0.67]`:\n\n| Biểu thức | Kết quả | Vì sao |\n|---|---|---|\n| `scores > 0.8` | `[T, F, T, F, F]` | 0,8 không lớn hơn 0,8 |\n| `(scores > 0.8).sum()` | `2` | đếm số True |\n| `len(scores > 0.8)` | `5` | độ dài mặt nạ, luôn bằng $n$ |\n| `np.sum(scores[scores > 0.8])` | `1.76` | cộng **giá trị** $0{,}95 + 0{,}81$ |\n| `np.count_nonzero(scores) > 0.8` | `True` | $5 > 0{,}8$ |\n\n```python\nimport numpy as np\nscores = np.array([0.95, 0.42, 0.81, 0.8, 0.67])\nmask = scores > 0.8\nprint(int(mask.sum()), np.count_nonzero(mask), round(float(scores[mask].sum()), 2))  # 2 2 1.76\n```\nTỉ lệ email bị gắn cờ: `mask.mean()` $= 2/5 = 0{,}4$.\n\n#### Bẫy thường gặp\n- `len(mask)` luôn bằng $n$, không đếm True.\n- Lọc (`scores[mask]`) rồi `sum` là cộng điểm, không phải đếm.\n- Đặt ngoặc sai làm phép so sánh áp dụng lên kết quả đếm.\n\n#### Đọc thêm\n- [numpy.count_nonzero — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.count_nonzero.html)\n- [Boolean array indexing — NumPy docs](https://numpy.org/doc/stable/user/basics.indexing.html)\n",
+   "distractors": {
+    "A": "`scores > 0.8` là mảng bool cùng độ dài $n$, nên `len` luôn trả $n$ bất kể bao nhiêu phần tử là True.",
+    "B": "Lọc đúng các phần tử nhưng rồi **cộng giá trị điểm** của chúng, không phải đếm số phần tử.",
+    "C": "Đặt sai ngoặc: đếm số phần tử khác 0 rồi so với 0,8, kết quả là một giá trị bool."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`len(scores > 0.8)`"
+    },
+    {
+     "key": "B",
+     "text": "`np.sum(scores[scores > 0.8])`"
+    },
+    {
+     "key": "C",
+     "text": "`np.count_nonzero(scores) > 0.8`"
+    },
+    {
+     "key": "D",
+     "text": "`(scores > 0.8).sum()`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T07-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Theo bảng TimeComplexity của CPython, với `lst` là list $n$ phần tử, `s` là set và `d` là dict (mỗi cái $n$ phần tử), thao tác nào có chi phí **trung bình** $O(n)$?",
+   "explanation": "List lưu phần tử liên tiếp trong mảng; `pop(0)` bỏ phần tử đầu nên phải dịch $n-1$ phần tử còn lại sang trái: $O(n)$. Ngược lại `pop()` bỏ phần tử cuối chỉ $O(1)$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nList của CPython là **mảng động liên tục**: phần tử thứ $i$ nằm ngay sau phần tử $i-1$. Thao tác ở **cuối** rẻ, thao tác ở **đầu hoặc giữa** phải dịch các phần tử phía sau. Set và dict là **bảng băm**: tra, thêm, gán theo khóa trung bình $O(1)$.\n\n#### Từng bước\n| Thao tác | Chi phí trung bình (Python Wiki) | Lý do |\n|---|---|---|\n| `lst.append(x)` | $O(1)$ khấu hao | ghi vào ô trống cuối mảng |\n| `lst.pop()` | $O(1)$ | bỏ phần tử cuối |\n| `lst.pop(0)` | $O(n)$ | dịch $n-1$ phần tử sang trái |\n| `lst.insert(0, x)` | $O(n)$ | dịch $n$ phần tử sang phải |\n| `x in lst` | $O(n)$ | quét tuần tự |\n| `x in s` (set) | $O(1)$ | băm |\n| `d[k] = v` (dict) | $O(1)$ | băm |\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 520 150\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"10\" y=\"22\" font-size=\"13\" fill=\"currentColor\">lst.pop(0): mọi phần tử còn lại dịch trái 1 ô</text>\n<rect x=\"20\" y=\"40\" width=\"60\" height=\"36\" fill=\"#ef4444\" fill-opacity=\"0.3\" stroke=\"currentColor\"/>\n<rect x=\"80\" y=\"40\" width=\"60\" height=\"36\" fill=\"none\" stroke=\"currentColor\"/>\n<rect x=\"140\" y=\"40\" width=\"60\" height=\"36\" fill=\"none\" stroke=\"currentColor\"/>\n<rect x=\"200\" y=\"40\" width=\"60\" height=\"36\" fill=\"none\" stroke=\"currentColor\"/>\n<rect x=\"260\" y=\"40\" width=\"60\" height=\"36\" fill=\"none\" stroke=\"currentColor\"/>\n<text x=\"50\" y=\"64\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">x0</text>\n<text x=\"110\" y=\"64\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">x1</text>\n<text x=\"170\" y=\"64\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">x2</text>\n<text x=\"230\" y=\"64\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">x3</text>\n<text x=\"290\" y=\"64\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">x4</text>\n<path d=\"M110 82 q-30 22 -60 0\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n<path d=\"M170 82 q-30 22 -60 0\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n<path d=\"M230 82 q-30 22 -60 0\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n<path d=\"M290 82 q-30 22 -60 0\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n<text x=\"20\" y=\"130\" font-size=\"13\" fill=\"#f59e0b\">n − 1 lần dịch → O(n)</text>\n<text x=\"340\" y=\"64\" font-size=\"13\" fill=\"#10b981\">pop() chỉ bỏ ô cuối → O(1)</text>\n</svg>\n\nCần lấy ra ở đầu thường xuyên (hàng đợi FIFO) thì dùng `collections.deque` với `popleft()` $O(1)$.\n\n#### Bẫy thường gặp\n- Nghĩ mọi `pop` đều $O(1)$.\n- Nghĩ `in` trên set cũng tuyến tính như list.\n- Quên rằng $O(1)$ của bảng băm là **trung bình**; trường hợp xấu (va chạm hàng loạt) là $O(n)$.\n\n#### Đọc thêm\n- [TimeComplexity — Python Wiki](https://wiki.python.org/moin/TimeComplexity)\n",
+   "distractors": {
+    "A": "`append` thêm vào cuối, chi phí khấu hao $O(1)$: thỉnh thoảng mới phải cấp lại vùng nhớ.",
+    "C": "Set là bảng băm, kiểm tra thành viên trung bình $O(1)$ (chỉ xấu $O(n)$ khi va chạm băm hàng loạt).",
+    "D": "Gán theo khóa trong dict là thao tác băm, trung bình $O(1)$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`lst.append(x)`"
+    },
+    {
+     "key": "B",
+     "text": "`lst.pop(0)`"
+    },
+    {
+     "key": "C",
+     "text": "`x in s`"
+    },
+    {
+     "key": "D",
+     "text": "`d[k] = v`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T07-A06",
+   "module": "A",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "nhan-biet",
+   "prompt": "Đoạn code sau in ra giá trị nào (cũng chính là số lần lệnh `dem += 1` được thực thi)? **Nhập số nguyên.**\n\n```python\ndem = 0\nfor i in range(12):\n    for j in range(i, 12):\n        dem += 1\nprint(dem)\n```",
+   "explanation": "Với mỗi $i$ vòng trong chạy $12 - i$ lần: $\\sum_{i=0}^{11}(12 - i) = 12 + 11 + \\dots + 1 = \\frac{12 \\cdot 13}{2} = 78$. Tổng quát $\\frac{n(n+1)}{2} = O(n^2)$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nĐếm số lần lặp của hai vòng lồng nhau bằng cách cộng số lần chạy của vòng trong cho từng giá trị của vòng ngoài. Khi vòng trong bắt đầu từ `i`, số lần chạy giảm dần: $12, 11, \\dots, 1$.\n\n#### Từng bước\n| `i` | `j` chạy từ … đến … | Số lần |\n|---|---|---|\n| 0 | 0 … 11 | 12 |\n| 1 | 1 … 11 | 11 |\n| 2 | 2 … 11 | 10 |\n| ⋮ | ⋮ | ⋮ |\n| 11 | 11 … 11 | 1 |\n\n$$\\sum_{i=0}^{11}(12 - i) = \\frac{12 \\cdot 13}{2} = 78.$$\n\nTổng quát với $n$: $\\frac{n(n+1)}{2} = \\frac{n^2}{2} + \\frac{n}{2} = O(n^2)$. Hằng số $\\frac{1}{2}$ không làm đổi bậc.\n\n#### Hình minh hoạ\nCác cặp $(i, j)$ được đếm là nửa trên **kể cả đường chéo** (ví dụ thu nhỏ $n = 6$: 21 ô $= \\frac{6 \\cdot 7}{2}$).\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 230\" width=\"100%\" style=\"max-width:560px\">\n<g stroke=\"currentColor\" stroke-opacity=\"0.35\" fill=\"none\">\n<rect x=\"40\" y=\"20\" width=\"180\" height=\"180\"/>\n</g>\n<g fill=\"#3b82f6\" fill-opacity=\"0.35\">\n<rect x=\"40\" y=\"20\" width=\"180\" height=\"30\"/>\n<rect x=\"70\" y=\"50\" width=\"150\" height=\"30\"/>\n<rect x=\"100\" y=\"80\" width=\"120\" height=\"30\"/>\n<rect x=\"130\" y=\"110\" width=\"90\" height=\"30\"/>\n<rect x=\"160\" y=\"140\" width=\"60\" height=\"30\"/>\n<rect x=\"190\" y=\"170\" width=\"30\" height=\"30\"/>\n</g>\n<g fill=\"#10b981\">\n<rect x=\"40\" y=\"20\" width=\"30\" height=\"30\" fill-opacity=\"0.8\"/>\n<rect x=\"70\" y=\"50\" width=\"30\" height=\"30\" fill-opacity=\"0.8\"/>\n<rect x=\"100\" y=\"80\" width=\"30\" height=\"30\" fill-opacity=\"0.8\"/>\n<rect x=\"130\" y=\"110\" width=\"30\" height=\"30\" fill-opacity=\"0.8\"/>\n<rect x=\"160\" y=\"140\" width=\"30\" height=\"30\" fill-opacity=\"0.8\"/>\n<rect x=\"190\" y=\"170\" width=\"30\" height=\"30\" fill-opacity=\"0.8\"/>\n</g>\n<text x=\"130\" y=\"14\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">j →</text>\n<text x=\"24\" y=\"110\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">i ↓</text>\n<text x=\"240\" y=\"60\" font-size=\"13\" fill=\"#10b981\">đường chéo j = i: n ô</text>\n<text x=\"240\" y=\"90\" font-size=\"13\" fill=\"#3b82f6\">phía trên: n(n−1)/2 ô</text>\n<text x=\"240\" y=\"130\" font-size=\"13\" fill=\"currentColor\">n = 6: 6 + 15 = 21</text>\n<text x=\"240\" y=\"155\" font-size=\"13\" fill=\"currentColor\">n = 12: 12 + 66 = 78</text>\n</svg>\n\n#### Bẫy thường gặp\n- Tính đủ hình vuông $12^2 = 144$.\n- Bỏ đường chéo (tưởng `j` từ `i + 1`), ra 66.\n- Ước lượng \"nửa hình vuông\" $72$ mà quên cộng đường chéo.\n\n#### Đọc thêm\n- [Time complexity — Wikipedia](https://en.wikipedia.org/wiki/Time_complexity)\n",
+   "mistakes": [
+    {
+     "value": 144,
+     "why": "Tính như hai vòng lặp đầy đủ $12 \\times 12$; vòng trong bắt đầu từ `i` nên ngắn dần."
+    },
+    {
+     "value": 66,
+     "why": "Tưởng vòng trong bắt đầu từ `i + 1` (bỏ cặp $j = i$), cho $\\frac{12 \\cdot 11}{2} = 66$."
+    },
+    {
+     "value": 72,
+     "why": "Tính $\\frac{n^2}{2} = 72$ theo trực giác \"nửa hình vuông\", quên cộng thêm đường chéo $j = i$ ($n/2 = 6$ lần)."
+    }
+   ],
+   "answer": 78,
+   "tol": 0
+  },
+  {
+   "id": "T07-A07",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Phân tích một thuật toán cho số phép toán $T(n) = 4n\\log_2 n + 0{,}5\\,n^{1{,}5} + 200$. Cận Big-O **chặt nhất** (dạng gọn) của $T(n)$ là gì?",
+   "explanation": "Vì $\\frac{n\\log n}{n^{1{,}5}} = \\frac{\\log n}{\\sqrt{n}} \\to 0$, số hạng $0{,}5\\,n^{1{,}5}$ trội; bỏ hằng số ta được $T(n) = \\Theta(n^{1{,}5})$, nên cận chặt là $O(n^{1{,}5})$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nVới tổng nhiều số hạng, Big-O giữ **số hạng tăng nhanh nhất** và bỏ hằng số. Hệ số lớn chỉ thắng khi $n$ nhỏ; khi $n \\to \\infty$, bậc tăng mới quyết định.\n\n#### Từng bước\n1. So sánh hai số hạng chính: $\\frac{4n\\log_2 n}{0{,}5\\,n^{1{,}5}} = \\frac{8\\log_2 n}{\\sqrt{n}} \\to 0$ khi $n \\to \\infty$.\n2. Vậy $0{,}5\\,n^{1{,}5}$ trội; hằng số 200 không đáng kể.\n3. $T(n) = \\Theta(n^{1{,}5})$, cận Big-O chặt là $O(n^{1{,}5})$.\n\n| $n$ | $4n\\log_2 n$ | $0{,}5\\,n^{1{,}5}$ | Số hạng lớn hơn |\n|---|---|---|---|\n| $10^2$ | 2658 | 500 | $n\\log n$ |\n| $10^4$ | 531508 | 500000 | $n\\log n$ (sát nút) |\n| $10^6$ | $\\approx 7{,}97 \\times 10^7$ | $5 \\times 10^8$ | $n^{1{,}5}$ |\n\n```python\nimport math\nfor n in (10**2, 10**4, 10**6):\n    print(n, round(4*n*math.log2(n)), round(0.5*n**1.5))\n```\n\n#### Bẫy thường gặp\n- Chọn số hạng có hệ số lớn nhất ($4n\\log n$): đúng với $n$ nhỏ, sai về tiệm cận.\n- $O(n^2)$ là cận trên đúng nhưng **không chặt**.\n- Nhân các số hạng ($n^{1{,}5}\\log n$): chỉ nhân khi các vòng lặp lồng nhau, còn các bước nối tiếp thì cộng.\n\n#### Đọc thêm\n- [Big O notation — Wikipedia](https://en.wikipedia.org/wiki/Big_O_notation)\n",
+   "distractors": {
+    "A": "Chọn theo hệ số lớn nhất (4 so với 0,5). Big-O bỏ hằng số và chỉ giữ số hạng tăng nhanh nhất; $n^{1{,}5}$ vượt $n\\log n$ khi $n$ đủ lớn.",
+    "B": "Là một cận trên **đúng** nhưng không chặt; câu hỏi yêu cầu cận chặt nhất.",
+    "D": "Nhân các số hạng với nhau. Tổng các số hạng thì lấy số hạng trội, không nhân."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$O(n\\log n)$"
+    },
+    {
+     "key": "B",
+     "text": "$O(n^2)$"
+    },
+    {
+     "key": "C",
+     "text": "$O(n^{1{,}5})$"
+    },
+    {
+     "key": "D",
+     "text": "$O(n^{1{,}5}\\log n)$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T07-A08",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Tìm kiếm nhị phân trên mảng **đã sắp xếp** gồm $n = 10^6$ phần tử; mỗi vòng lặp so sánh với phần tử giữa rồi bỏ đi một nửa khoảng. Trong trường hợp xấu nhất cần khoảng bao nhiêu vòng lặp?",
+   "explanation": "Sau $t$ vòng khoảng còn $\\approx n/2^t$ phần tử; dừng khi còn 1: $t = \\lfloor\\log_2 10^6\\rfloor + 1 = 19 + 1 = 20$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nTìm kiếm nhị phân chỉ đúng trên mảng **đã sắp xếp**. Mỗi vòng so sánh với phần tử giữa rồi bỏ một nửa khoảng, nên sau $t$ vòng chỉ còn khoảng $n / 2^t$ phần tử. Số vòng xấu nhất là $\\lfloor \\log_2 n \\rfloor + 1$.\n\n#### Từng bước\n- $2^{19} = 524288 \\le 10^6 < 2^{20} = 1048576$ nên $\\lfloor \\log_2 10^6 \\rfloor = 19$.\n- Số vòng xấu nhất: $19 + 1 = 20$.\n\n| Vòng | Kích thước khoảng còn lại (xấp xỉ) |\n|---|---|\n| 0 | 1000000 |\n| 1 | 500000 |\n| 5 | 31250 |\n| 10 | 977 |\n| 15 | 31 |\n| 19 | 1 |\n| 20 | khoảng rỗng → dừng |\n\n```mermaid\nflowchart LR\n  A[\"n = 1000000\"] --> B[\"500000\"] --> C[\"250000\"] --> D[\"… chia đôi …\"] --> E[\"2\"] --> F[\"1\"]\n  F --> G[\"Tổng khoảng 20 vòng = log2 n\"]\n```\n\n```python\nimport math\nprint(math.floor(math.log2(10**6)) + 1)   # 20\n```\n\n#### Bẫy thường gặp\n- Dùng $\\log_{10}$ (ra 6): mỗi bước chia **đôi**, cơ số là 2.\n- Nhầm với tìm tuyến tính ($n/2$ trung bình) hay tìm nhảy bước ($\\sqrt n$).\n- Áp dụng trên mảng chưa sắp: kết quả sai mà không báo lỗi.\n\n#### Đọc thêm\n- [Binary search — Wikipedia](https://en.wikipedia.org/wiki/Binary_search)\n",
+   "distractors": {
+    "B": "Lấy $\\sqrt{n} = 1000$; đó là bậc của tìm kiếm nhảy bước (jump search), không phải tìm nhị phân.",
+    "C": "Lấy $n/2$ như tìm tuyến tính trung bình; tìm nhị phân chia đôi khoảng mỗi bước nên chỉ cần $\\log_2 n$.",
+    "D": "Dùng $\\log_{10} 10^6 = 6$; mỗi bước chia **đôi** nên cơ số là 2."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Khoảng $20$ vòng"
+    },
+    {
+     "key": "B",
+     "text": "Khoảng $1000$ vòng"
+    },
+    {
+     "key": "C",
+     "text": "Khoảng $500\\,000$ vòng"
+    },
+    {
+     "key": "D",
+     "text": "Khoảng $6$ vòng"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T07-B01",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Đoạn code sau in ra gì?\n\n```python\nimport numpy as np\na = np.arange(5)\nb = a[1:4]\nb[0] = 100\nc = a[[0, 2]]\nc[0] = -1\nprint(a.tolist())\n```",
+   "explanation": "`b = a[1:4]` là view nên `b[0] = 100` ghi vào `a[1]`. `c = a[[0, 2]]` là bản sao (advanced indexing) nên `c[0] = -1` không ảnh hưởng `a`.",
+   "section": "b-np",
+   "long": "#### Ý chính\nNumPy có hai kiểu chỉ mục với hành vi bộ nhớ khác nhau:\n- **Basic indexing** (cắt lát `a[1:4]`, `a[::2]`, số nguyên đơn) trả **view**: mảng mới nhưng dùng chung dữ liệu với `a`.\n- **Advanced indexing** (list hoặc mảng chỉ số `a[[0, 2]]`, mặt nạ bool) luôn trả **bản sao**.\n\n#### Từng bước\n| Lệnh | `a` sau lệnh | Ghi chú |\n|---|---|---|\n| `a = np.arange(5)` | `[0, 1, 2, 3, 4]` | |\n| `b = a[1:4]` | không đổi | `b` là view vào `a[1]…a[3]` |\n| `b[0] = 100` | `[0, 100, 2, 3, 4]` | ghi qua view |\n| `c = a[[0, 2]]` | không đổi | `c` là bản sao `[0, 2]` |\n| `c[0] = -1` | `[0, 100, 2, 3, 4]` | chỉ sửa bản sao |\n\n```mermaid\nflowchart LR\n  A[\"a: bộ nhớ gốc 0 100 2 3 4\"]\n  B[\"b = a[1:4] (view)\"] -- \"dùng chung\" --> A\n  C[\"c = a[[0, 2]] (bản sao)\"] -. \"chép một lần\" .-> A\n```\n\nKiểm tra: `np.shares_memory(a, b)` là `True`, còn `np.shares_memory(a, c)` là `False`.\n\n#### Bẫy thường gặp\n- Mang thói quen list Python (cắt lát là sao chép) sang NumPy.\n- Muốn bản độc lập từ lát cắt phải viết `a[1:4].copy()`.\n- Gán `a[[0, 2]] = -1` (ở **vế trái**) thì sửa trực tiếp `a`; bản sao chỉ xảy ra khi lấy ra rồi gán cho biến khác.\n\n#### Đọc thêm\n- [Copies and views — NumPy docs](https://numpy.org/doc/stable/user/basics.copies.html)\n",
+   "distractors": {
+    "A": "Tưởng cắt lát `a[1:4]` tạo bản sao như list Python. Với NumPy, cắt lát cơ bản trả **view** dùng chung bộ nhớ.",
+    "C": "Tưởng chỉ mục bằng list `a[[0, 2]]` cũng trả view. Advanced indexing luôn tạo **bản sao**.",
+    "D": "Đảo ngược hai quy tắc: cho rằng cắt lát sao chép còn chỉ mục bằng list thì dùng chung bộ nhớ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`[0, 1, 2, 3, 4]`"
+    },
+    {
+     "key": "B",
+     "text": "`[0, 100, 2, 3, 4]`"
+    },
+    {
+     "key": "C",
+     "text": "`[-1, 100, 2, 3, 4]`"
+    },
+    {
+     "key": "D",
+     "text": "`[-1, 1, 2, 3, 4]`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T07-B02",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Với `X = np.ones(sx)` và `Y = np.ones(sy)`, cặp shape `sx`, `sy` nào khiến `X + Y` báo lỗi `ValueError` vì không broadcast được?",
+   "explanation": "So shape từ phải sang trái; hai kích thước tương thích khi bằng nhau hoặc một bên bằng 1. Với $(32, 768)$ và $(32,)$, trục cuối là 768 so với 32: khác nhau, không có 1, nên lỗi. Muốn cộng theo hàng phải dùng `Y[:, None]` shape $(32, 1)$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nQuy tắc broadcasting: viết hai shape **căn phải**, so từng cặp kích thước từ phải sang trái. Một cặp tương thích khi hai số bằng nhau **hoặc** một trong hai bằng 1; trục bị thiếu coi như 1. Shape kết quả lấy giá trị lớn hơn ở mỗi cặp.\n\n#### Từng bước\n| Cặp | Căn phải | Từng cặp (phải → trái) | Kết quả |\n|---|---|---|---|\n| `(32, 1)` và `(1, 768)` | `32 1` / `1 768` | 1–768 ✓, 32–1 ✓ | `(32, 768)` |\n| `(4, 1, 3)` và `(5, 1)` | `4 1 3` / `_ 5 1` | 3–1 ✓, 1–5 ✓, 4–_ ✓ | `(4, 5, 3)` |\n| `(32, 768)` và `(32,)` | `32 768` / `_ 32` | **768–32 ✗** | `ValueError` |\n| `(2, 3, 4)` và `(3, 1)` | `2 3 4` / `_ 3 1` | 4–1 ✓, 3–3 ✓, 2–_ ✓ | `(2, 3, 4)` |\n\n```python\nimport numpy as np\nX = np.ones((32, 768)); y = np.ones(32)\n# X + y            -> ValueError: operands could not be broadcast together\nprint((X + y[:, None]).shape)   # (32, 768): cộng y_i vào cả hàng i\n```\n\n#### Bẫy thường gặp\n- Căn **trái** khi so shape (so 4 với 5, 2 với 3).\n- Nghĩ vector độ dài 32 \"tự hiểu\" là theo hàng; NumPy luôn khớp với trục **cuối**. Muốn theo hàng thì thêm trục: `y[:, None]` hoặc `keepdims=True` khi tạo `y`.\n- Nhầm \"một bên bằng 1\" với \"hai bên bằng nhau\": $(32, 1)$ với $(1, 768)$ vẫn hợp lệ.\n\n#### Đọc thêm\n- [Broadcasting — NumPy docs](https://numpy.org/doc/stable/user/basics.broadcasting.html)\n",
+   "distractors": {
+    "A": "Mỗi trục đều có một bên bằng 1 nên hợp lệ, kết quả shape $(32, 768)$ (kiểu phép \"ngoài\").",
+    "B": "Căn trái nên tưởng 4 phải khớp 5. Căn **phải**: 3 với 1, 1 với 5, 4 với (thiếu) đều hợp lệ, ra $(4, 5, 3)$.",
+    "D": "Căn phải: 4 với 1, 3 với 3 đều hợp lệ, ra $(2, 3, 4)$. Lỗi hay gặp là so 2 với 3 do căn trái."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`(32, 1)` và `(1, 768)`"
+    },
+    {
+     "key": "B",
+     "text": "`(4, 1, 3)` và `(5, 1)`"
+    },
+    {
+     "key": "C",
+     "text": "`(32, 768)` và `(32,)`"
+    },
+    {
+     "key": "D",
+     "text": "`(2, 3, 4)` và `(3, 1)`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T07-B03",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Bảng `x` đếm lượt click của 3 sản phẩm (hàng) trên 2 kênh web và app (cột). Cần tỉ lệ đóng góp của từng kênh **trong mỗi sản phẩm**. Đoạn code sau in ra gì?\n\n```python\nimport numpy as np\nx = np.array([[1., 3.],\n              [2., 6.],\n              [0., 5.]])\nm = x.sum(axis=1, keepdims=True)\np = x / m\nprint(m.shape, p[:, 0].tolist())\n```",
+   "explanation": "Tổng mỗi hàng $[4, 8, 5]$ được giữ dạng cột shape $(3, 1)$; broadcast chia mỗi hàng cho tổng của nó, cột 0 là $\\frac{1}{4}, \\frac{2}{8}, \\frac{0}{5} = 0{,}25;\\ 0{,}25;\\ 0$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nMuốn chia mỗi hàng cho tổng của chính hàng đó, tổng phải có shape $(3, 1)$ (dạng cột) để broadcast với $(3, 2)$. `keepdims=True` giữ lại trục bị gộp với độ dài 1, nên `x.sum(axis=1, keepdims=True)` cho đúng shape $(3, 1)$.\n\n#### Từng bước\n| Sản phẩm | web | app | `m` (tổng hàng) | `p[:, 0]` = web / tổng |\n|---|---|---|---|---|\n| 0 | 1 | 3 | 4 | $1/4 = 0{,}25$ |\n| 1 | 2 | 6 | 8 | $2/8 = 0{,}25$ |\n| 2 | 0 | 5 | 5 | $0/5 = 0$ |\n\n- `m.shape` là `(3, 1)`.\n- `p[:, 0].tolist()` là `[0.25, 0.25, 0.0]` (số thực nên in `0.0`).\n- Mỗi hàng của `p` cộng lại bằng 1: `p.sum(axis=1)` là `[1., 1., 1.]`.\n\n| Phép chia | Shape | Kết quả |\n|---|---|---|\n| `x / x.sum(axis=1, keepdims=True)` | $(3,2) / (3,1)$ | chuẩn hoá theo hàng ✓ |\n| `x / x.sum(axis=1)` | $(3,2) / (3,)$ | `ValueError` (2 khác 3) |\n| `x / x.sum(axis=0)` | $(3,2) / (2,)$ | chuẩn hoá theo **cột** |\n\n#### Bẫy thường gặp\n- Bỏ `keepdims` rồi vẫn đoán shape là $(3, 1)$.\n- Nhầm `axis=1` là tổng theo cột: $[3, 14]$, cho tỉ lệ $1/3, 2/3, 0$ mỗi cột.\n- Khi một hàng có tổng 0, phép chia sinh `nan`; thực tế nên dùng `np.divide(..., where=m > 0)`.\n\n#### Đọc thêm\n- [numpy.sum (keepdims) — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.sum.html)\n- [Broadcasting — NumPy docs](https://numpy.org/doc/stable/user/basics.broadcasting.html)\n",
+   "mistakes": [
+    {
+     "value": "(3,) [0.25, 0.25, 0.0]",
+     "why": "Bỏ qua `keepdims=True`. Tham số này giữ trục bị gộp với độ dài 1, nên shape là $(3, 1)$; chính nhờ vậy $(3, 2) / (3, 1)$ broadcast được (với $(3,)$ thì phép chia báo lỗi)."
+    },
+    {
+     "value": "(1, 2) [0.3333333333333333, 0.6666666666666666, 0.0]",
+     "why": "Nhầm `axis=1` thành tổng theo cột ($[3, 14]$). `axis=1` gộp các cột nên cho tổng **mỗi hàng** $[4, 8, 5]$."
+    }
+   ],
+   "answer": "(3, 1) [0.25, 0.25, 0.0]",
+   "accept": [
+    "(3, 1) [0.25, 0.25, 0.0]",
+    "(3,1) [0.25,0.25,0.0]",
+    "(3, 1) [0.25, 0.25, 0]"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T07-B04",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Một hệ thống RAG lưu chỉ mục vector gồm $5 \\times 10^5$ đoạn văn, mỗi đoạn một embedding 768 chiều, trong một mảng NumPy liên tục `E` kiểu `float32`. Thuộc tính `E.nbytes` tương ứng bao nhiêu GB? (Quy ước 1 GB $= 10^9$ byte; **làm tròn 3 chữ số thập phân**, chỉ nhập số, không kèm đơn vị.)",
+   "explanation": "$\\text{nbytes} = \\text{size} \\times \\text{itemsize} = 5 \\times 10^5 \\times 768 \\times 4 = 1{,}536 \\times 10^9$ byte, tức $1{,}536$ GB.",
+   "section": "b-np",
+   "long": "#### Ý chính\nBộ nhớ dữ liệu của một mảng NumPy liên tục bằng **số phần tử × số byte mỗi phần tử**:\n$$\\text{nbytes} = \\text{size} \\times \\text{itemsize}.$$\n`float32` chiếm 4 byte, `float64` (mặc định của NumPy) chiếm 8 byte.\n\n#### Từng bước\n1. `size` $= 5 \\times 10^5 \\times 768 = 3{,}84 \\times 10^8$ phần tử.\n2. `itemsize` của `float32` là 4 byte.\n3. `nbytes` $= 3{,}84 \\times 10^8 \\times 4 = 1{,}536 \\times 10^9$ byte $= 1{,}536$ GB.\n\n| dtype | Byte/phần tử | `nbytes` (GB) |\n|---|---|---|\n| `float64` | 8 | 3,072 |\n| `float32` | 4 | **1,536** |\n| `float16` | 2 | 0,768 |\n| `int8` (lượng tử hoá) | 1 | 0,384 |\n\n```python\nimport numpy as np\nn, d = 500_000, 768\nfor dt in (np.float64, np.float32, np.float16, np.int8):\n    print(np.dtype(dt).name, n * d * np.dtype(dt).itemsize / 1e9)\n```\n\nBảng trên giải thích vì sao các vector database hay lưu `float32` hoặc lượng tử hoá: giảm một nửa dtype là giảm một nửa RAM.\n\n#### Bẫy thường gặp\n- Quên rằng `np.array(list_of_floats)` mặc định là `float64`, gấp đôi bộ nhớ dự kiến.\n- Nhầm `size` (số phần tử) với `nbytes` (số byte).\n- Nhầm GB ($10^9$) với GiB ($2^{30} \\approx 1{,}074 \\times 10^9$).\n\n#### Đọc thêm\n- [numpy.ndarray.nbytes — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.nbytes.html)\n- [Data types — NumPy docs](https://numpy.org/doc/stable/user/basics.types.html)\n",
+   "mistakes": [
+    {
+     "value": 3.072,
+     "why": "Dùng 8 byte mỗi phần tử (`float64`, kiểu mặc định của NumPy); đề cho `float32` nên chỉ 4 byte."
+    },
+    {
+     "value": 0.384,
+     "why": "Quên nhân số byte mỗi phần tử: $5 \\times 10^5 \\times 768 = 3{,}84 \\times 10^8$ là **số phần tử** (`size`), không phải số byte."
+    },
+    {
+     "value": 1.431,
+     "why": "Chia cho $2^{30}$ (GiB) thay vì $10^9$ như quy ước của đề."
+    }
+   ],
+   "answer": 1.536,
+   "tol": 0.00051
+  },
+  {
+   "id": "T07-B05",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Bạn có hàm Python thuần `f(x)` xử lý một số vô hướng, rồi viết `vf = np.vectorize(f)` và gọi `vf(arr)` trên mảng 1 triệu phần tử. Phát biểu nào **đúng**?",
+   "explanation": "Theo tài liệu, `np.vectorize` \"chủ yếu cho tiện, không vì hiệu năng; về bản chất là một vòng lặp for\". Muốn nhanh thật phải viết lại `f` bằng phép toán mảng (ufunc, `np.where`, …).",
+   "section": "b-np",
+   "long": "#### Ý chính\n\"Vector hoá\" thật sự nghĩa là vòng lặp qua các phần tử chạy **trong mã C đã biên dịch** của NumPy (ufunc), không phải trong trình thông dịch Python. `np.vectorize` chỉ là lớp vỏ tiện lợi: nó lo broadcasting và shape đầu ra, nhưng vẫn gọi hàm Python `f` một lần cho mỗi phần tử.\n\n#### Từng bước\n```mermaid\nflowchart TB\n  subgraph V[\"vf = np.vectorize(f)\"]\n    V1[\"vf(arr)\"] --> V2[\"vòng lặp: gọi f(x) bằng Python cho từng phần tử\"] --> V3[\"1 triệu lần gọi hàm Python\"]\n  end\n  subgraph U[\"ufunc thật, ví dụ np.exp hoặc np.where\"]\n    U1[\"np.exp(arr)\"] --> U2[\"vòng lặp C trên bộ nhớ liên tục\"] --> U3[\"không có chi phí gọi hàm Python\"]\n  end\n```\n\n| Cách viết | Vòng lặp chạy ở đâu | Độ phức tạp | Tốc độ tương đối |\n|---|---|---|---|\n| `for x in arr: f(x)` | Python | $O(n)$ | chậm |\n| `np.vectorize(f)(arr)` | Python (bọc) | $O(n)$ | gần như vòng `for` |\n| ufunc / phép toán mảng | C | $O(n)$ | nhanh hơn nhiều lần |\n\nVí dụ viết lại một hàm có `if`: thay `def f(x): return x * 2 if x > 0 else 0` bằng `np.where(arr > 0, arr * 2, 0)`.\n\n#### Bẫy thường gặp\n- Tin vào cái tên \"vectorize\". Tài liệu NumPy ghi rõ hàm này \"provided primarily for convenience, not for performance\".\n- Nghĩ vector hoá giảm bậc Big-O: nó chỉ giảm **hằng số** mỗi phần tử.\n- Nghĩ NumPy tự chạy đa lõi cho mọi phép: phần lớn ufunc chạy một luồng (BLAS cho `@` là ngoại lệ thường gặp).\n\n#### Đọc thêm\n- [numpy.vectorize — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.vectorize.html)\n- [numpy.where — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.where.html)\n",
+   "distractors": {
+    "A": "`np.vectorize` không biên dịch gì; tài liệu NumPy nói rõ nó dành cho sự tiện lợi, không phải hiệu năng.",
+    "B": "Không có song song hoá nào; các lần gọi `f` chạy tuần tự trong một luồng Python.",
+    "C": "Vector hoá (kể cả thật) chỉ giảm hằng số chi phí mỗi phần tử; vẫn phải xử lý đủ $n$ phần tử nên vẫn là $O(n)$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Nó dịch `f` sang mã C nên chạy nhanh ngang các ufunc có sẵn như `np.exp`."
+    },
+    {
+     "key": "B",
+     "text": "Nó tự chia các lần gọi `f` ra nhiều lõi CPU để chạy song song."
+    },
+    {
+     "key": "C",
+     "text": "Nó làm độ phức tạp giảm từ $O(n)$ xuống $O(1)$ với $n$ phần tử."
+    },
+    {
+     "key": "D",
+     "text": "Nó tiện cho broadcasting, nhưng vẫn gọi `f` lần lượt cho từng phần tử."
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T07-B06",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Xét hàm đệ quy sau (giả sử $n$ nhỏ, không chạm giới hạn đệ quy):\n\n```python\ndef f(n):\n    if n == 0:\n        return 1\n    return f(n - 1) + f(n - 1)\n```\n\nTổng số lần gọi `f` khi tính `f(n)` tăng theo bậc nào?",
+   "explanation": "Số lần gọi $C(n) = 1 + 2C(n-1)$, $C(0) = 1$ nên $C(n) = 2^{n+1} - 1$, tức $O(2^n)$. Cây đệ quy là cây nhị phân đầy đủ độ sâu $n$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nĐếm chi phí đệ quy bằng **cây đệ quy**: mỗi lời gọi là một nút, mỗi nút `f(n)` có hai con `f(n - 1)`. Cây nhị phân đầy đủ độ sâu $n$ có $2^{n+1} - 1$ nút.\n\n#### Từng bước\nHệ thức số lần gọi: $C(0) = 1$, $C(n) = 1 + 2C(n-1)$.\n\n| $n$ | $C(n)$ | $2^{n+1} - 1$ |\n|---|---|---|\n| 0 | 1 | 1 |\n| 1 | 3 | 3 |\n| 2 | 7 | 7 |\n| 3 | 15 | 15 |\n| 10 | 2047 | 2047 |\n\n```mermaid\nflowchart TB\n  R[\"f(2)\"] --> A[\"f(1)\"]\n  R --> B[\"f(1)\"]\n  A --> A1[\"f(0)\"]\n  A --> A2[\"f(0)\"]\n  B --> B1[\"f(0)\"]\n  B --> B2[\"f(0)\"]\n```\nVới $n = 2$: 7 lời gọi. Mỗi tầng gấp đôi tầng trên.\n\n```python\ncalls = 0\ndef f(n):\n    global calls; calls += 1\n    return 1 if n == 0 else f(n - 1) + f(n - 1)\nf(10); print(calls)   # 2047\n```\n\nSửa thành `return 2 * f(n - 1)` thì chỉ còn một nhánh: $n + 1$ lời gọi, $O(n)$. Độ sâu ngăn xếp (bộ nhớ) ở cả hai bản đều là $O(n)$.\n\n#### Bẫy thường gặp\n- Nhìn độ sâu $n$ mà kết luận $O(n)$.\n- Nhầm với chia để trị $T(n) = 2T(n/2) + O(n)$ (merge sort, $O(n\\log n)$): ở đây bài toán con chỉ nhỏ đi 1.\n\n#### Đọc thêm\n- [Recursion (computer science) — Wikipedia](https://en.wikipedia.org/wiki/Recursion_%28computer_science%29)\n- [Master theorem — Wikipedia](https://en.wikipedia.org/wiki/Master_theorem_%28analysis_of_algorithms%29)\n",
+   "distractors": {
+    "B": "Chỉ nhìn độ sâu đệ quy ($n$ tầng) mà quên mỗi lần gọi sinh **hai** lời gọi con. Nếu viết `2 * f(n - 1)` thì mới là $O(n)$.",
+    "C": "Coi hai lời gọi như hai vòng lặp lồng nhau. Số lời gọi nhân đôi theo từng tầng chứ không cộng dồn kiểu $n \\cdot n$.",
+    "D": "Nhầm với chia để trị $T(n) = 2T(n/2) + O(n)$; ở đây bài toán con chỉ giảm 1 chứ không chia đôi."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$O(2^n)$"
+    },
+    {
+     "key": "B",
+     "text": "$O(n)$"
+    },
+    {
+     "key": "C",
+     "text": "$O(n^2)$"
+    },
+    {
+     "key": "D",
+     "text": "$O(n \\log n)$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T07-B07",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Dict `users` ánh xạ `user_id` sang email cho $n$ người dùng. Khi nhập $m$ email đăng ký mới, code kiểm tra trùng bằng `if email in users.values(): ...` cho từng email. Đánh giá nào đúng?",
+   "explanation": "`in users.values()` quét $n$ giá trị nên $m$ lần là $O(mn)$. Dựng set một lần tốn $O(n)$, mỗi lần tra trung bình $O(1)$: tổng $O(n + m)$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nDict băm **khóa**, không băm giá trị. `key in d` là $O(1)$ trung bình, nhưng `v in d.values()` phải duyệt từng giá trị: $O(n)$. Lặp lại $m$ lần thành $O(mn)$. Cách sửa chuẩn là dựng một **chỉ mục ngược** (set hoặc dict theo email) một lần rồi tra.\n\n#### Từng bước\n| Cách kiểm tra | Mỗi lần tra | Tổng cho $m$ email |\n|---|---|---|\n| `email in users.values()` | $O(n)$ | $O(mn)$ |\n| `email in sorted(users.values())` | $O(n\\log n) + O(n)$ | $O(m\\,n\\log n)$, còn tệ hơn |\n| `emails = set(users.values())` rồi `email in emails` | $O(1)$ | $O(n + m)$ |\n\nVới $n = 10^6$ người dùng và $m = 10^4$ email mới: cách đầu khoảng $10^{10}$ phép so sánh, cách dùng set khoảng $10^6 + 10^4$ thao tác băm.\n\n```python\nusers = {1: \"an@x.vn\", 2: \"binh@x.vn\"}\nemails = set(users.values())          # dựng một lần, O(n)\nfor e in [\"binh@x.vn\", \"chi@x.vn\"]:\n    print(e, e in emails)             # O(1) mỗi lần\n```\nNhớ cập nhật `emails` khi thêm người dùng mới để chỉ mục không lệch với `users`.\n\n#### Bẫy thường gặp\n- \"Tra dict luôn $O(1)$\": chỉ đúng khi tra theo **khóa**.\n- Nghĩ dict được sắp xếp: dict giữ thứ tự chèn, không sắp.\n- Nghĩ `in` trên list đã sắp sẽ tự tìm nhị phân: phải gọi `bisect` mới có $O(\\log n)$.\n\n#### Đọc thêm\n- [TimeComplexity — Python Wiki](https://wiki.python.org/moin/TimeComplexity)\n- [Hash table — Wikipedia](https://en.wikipedia.org/wiki/Hash_table)\n",
+   "distractors": {
+    "A": "Chỉ **khóa** được băm. `users.values()` là một view tuần tự, `in` phải duyệt từng giá trị: $O(n)$ mỗi lần.",
+    "C": "Dict của Python là bảng băm, giữ thứ tự **chèn** chứ không sắp xếp, và không có tìm kiếm nhị phân.",
+    "D": "Toán tử `in` trên list (dù đã sắp) vẫn quét tuyến tính, lại tốn thêm $O(n\\log n)$ để sắp mỗi lần gọi."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Tổng $O(m)$ vì tra cứu trong dict luôn chỉ tốn $O(1)$."
+    },
+    {
+     "key": "B",
+     "text": "Tổng $O(m \\cdot n)$; nên dựng `set(users.values())` một lần rồi tra, tổng $O(n + m)$."
+    },
+    {
+     "key": "C",
+     "text": "Tổng $O(m \\log n)$ vì dict lưu các khóa theo thứ tự đã sắp."
+    },
+    {
+     "key": "D",
+     "text": "Tổng $O(m \\cdot n)$; nên đổi sang `email in sorted(users.values())`."
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T07-B08",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Luồng điểm số từ mô hình xếp hạng đi qua đoạn code giữ lại 3 điểm bằng `heapq`. Đoạn code in ra gì?\n\n```python\nimport heapq\nh = []\nfor x in [5, 1, 8, 3, 9, 2]:\n    heapq.heappush(h, x)\n    if len(h) > 3:\n        heapq.heappop(h)\nprint(sorted(h), h[0])\n```",
+   "explanation": "Min-heap kích thước 3: mỗi khi vượt 3 thì bỏ phần tử nhỏ nhất, nên cuối cùng còn top-3 lớn nhất $\\{5, 8, 9\\}$; `h[0]` là nhỏ nhất trong đó, bằng 5.",
+   "section": "b-np",
+   "long": "#### Ý chính\n`heapq` cài **min-heap** trên list: `h[0]` luôn là phần tử nhỏ nhất, `heappush` và `heappop` tốn $O(\\log k)$. Giữ heap kích thước $k$ và bỏ phần tử nhỏ nhất mỗi khi vượt $k$ là cách lấy **top-k lớn nhất** trên luồng dữ liệu.\n\n#### Từng bước\n| Bước | `x` | Heap sau push (tập) | Vượt 3? Bỏ | Heap còn lại |\n|---|---|---|---|---|\n| 1 | 5 | {5} | không | {5} |\n| 2 | 1 | {1, 5} | không | {1, 5} |\n| 3 | 8 | {1, 5, 8} | không | {1, 5, 8} |\n| 4 | 3 | {1, 3, 5, 8} | bỏ 1 | {3, 5, 8} |\n| 5 | 9 | {3, 5, 8, 9} | bỏ 3 | {5, 8, 9} |\n| 6 | 2 | {2, 5, 8, 9} | bỏ 2 | {5, 8, 9} |\n\n`sorted(h)` là `[5, 8, 9]`, `h[0]` là 5 (nhỏ nhất trong heap). Kết quả in: `[5, 8, 9] 5`.\n\nChi phí: mỗi phần tử một lần push và tối đa một lần pop trên heap $\\le k + 1$ phần tử, tổng $O(n\\log k)$ thời gian và $O(k)$ bộ nhớ, rất hợp với luồng dữ liệu không biết trước độ dài.\n\n#### Bẫy thường gặp\n- Tưởng `heapq` là max-heap (`h[0]` là lớn nhất).\n- Tưởng `heappop` bỏ phần tử vừa thêm; nó luôn bỏ phần tử **nhỏ nhất**.\n- In thẳng `h` thay vì `sorted(h)`: thứ tự bên trong list heap không phải thứ tự tăng dần.\n\n#### Đọc thêm\n- [heapq — Python docs](https://docs.python.org/3/library/heapq.html)\n- [Heap (data structure) — Wikipedia](https://en.wikipedia.org/wiki/Heap_%28data_structure%29)\n",
+   "mistakes": [
+    {
+     "value": "[1, 2, 3] 1",
+     "why": "Tưởng heap giữ 3 số nhỏ nhất. `heappop` luôn bỏ phần tử **nhỏ nhất**, nên cái còn lại là 3 số lớn nhất."
+    },
+    {
+     "value": "[5, 8, 9] 9",
+     "why": "Tưởng `heapq` là max-heap. `heapq` là **min-heap**: `h[0]` luôn là phần tử nhỏ nhất trong heap."
+    },
+    {
+     "value": "[3, 8, 9] 3",
+     "why": "Lần theo sai ở bước cuối: khi đẩy 2 vào, heap tạm có $\\{2, 5, 8, 9\\}$ và phần tử bị bỏ là 2, không phải 5."
+    }
+   ],
+   "answer": "[5, 8, 9] 5",
+   "accept": [
+    "[5, 8, 9] 5",
+    "[5,8,9] 5"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T07-B09",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Bộ xếp hạng trả về list Python `scores` gồm $n = 10^7$ điểm; cần lấy 10 tài liệu điểm cao nhất bằng `heapq.nlargest(10, scores)`. Gọi $k = 10$. Độ phức tạp thời gian của cách này là gì?",
+   "explanation": "`nlargest` giữ một min-heap $k$ phần tử: mỗi phần tử mới so với đỉnh heap $O(1)$, nếu lớn hơn thì thay đỉnh $O(\\log k)$. Tổng $O(n\\log k)$, với $k = 10$ gần như tuyến tính.",
+   "section": "b-np",
+   "long": "#### Ý chính\n`heapq.nlargest(k, iterable)` duy trì một min-heap $k$ phần tử. Phần tử mới chỉ được đưa vào khi lớn hơn đỉnh heap (phần tử nhỏ nhất trong top-k hiện tại), và mỗi lần thay tốn $O(\\log k)$. Tổng $O(n\\log k)$; với $k \\ll n$ gần như tuyến tính.\n\n#### Từng bước\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 170\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"10\" y=\"22\" font-size=\"13\" fill=\"currentColor\">Luồng n điểm</text>\n<g fill=\"none\" stroke=\"currentColor\">\n<rect x=\"10\" y=\"35\" width=\"26\" height=\"26\"/><rect x=\"40\" y=\"35\" width=\"26\" height=\"26\"/><rect x=\"70\" y=\"35\" width=\"26\" height=\"26\"/><rect x=\"100\" y=\"35\" width=\"26\" height=\"26\"/><rect x=\"130\" y=\"35\" width=\"26\" height=\"26\"/>\n</g>\n<text x=\"165\" y=\"54\" font-size=\"14\" fill=\"currentColor\">…</text>\n<line x1=\"190\" y1=\"48\" x2=\"250\" y2=\"48\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<polygon points=\"250,42 250,54 262,48\" fill=\"currentColor\"/>\n<rect x=\"270\" y=\"30\" width=\"110\" height=\"36\" rx=\"6\" fill=\"#f59e0b\" fill-opacity=\"0.25\" stroke=\"#f59e0b\"/>\n<text x=\"325\" y=\"53\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">x &gt; h[0] ?</text>\n<line x1=\"380\" y1=\"48\" x2=\"420\" y2=\"48\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<polygon points=\"420,42 420,54 432,48\" fill=\"#10b981\"/>\n<rect x=\"440\" y=\"25\" width=\"90\" height=\"46\" rx=\"6\" fill=\"#10b981\" fill-opacity=\"0.2\" stroke=\"#10b981\"/>\n<text x=\"485\" y=\"45\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">min-heap k</text>\n<text x=\"485\" y=\"62\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">O(log k)</text>\n<line x1=\"325\" y1=\"66\" x2=\"325\" y2=\"100\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<polygon points=\"319,100 331,100 325,112\" fill=\"#ef4444\"/>\n<text x=\"325\" y=\"130\" text-anchor=\"middle\" font-size=\"12\" fill=\"#ef4444\">không: bỏ qua, O(1)</text>\n<text x=\"10\" y=\"160\" font-size=\"13\" fill=\"currentColor\">Tổng: n lần so sánh O(1) + tối đa n lần thay đỉnh O(log k) = O(n log k)</text>\n</svg>\n\n| Cách lấy top-$k$ | Thời gian | Ghi chú |\n|---|---|---|\n| `sorted(scores, reverse=True)[:k]` | $O(n\\log n)$ | sắp toàn bộ |\n| `heapq.nlargest(k, scores)` | $O(n\\log k)$ | bộ nhớ $O(k)$, hợp với luồng |\n| `heapify` rồi pop $k$ lần (max-heap) | $O(n + k\\log n)$ | bộ nhớ $O(n)$ |\n| `np.argpartition` (mảng NumPy) | $O(n)$ trung bình | thứ tự trong top-k chưa sắp |\n\nVới $n = 10^7$, $k = 10$: $\\log_2 n \\approx 23{,}3$ còn $\\log_2 k \\approx 3{,}3$.\n\n#### Bẫy thường gặp\n- Quên chi phí đọc hết $n$ phần tử: không thuật toán nào nhanh hơn $O(n)$ trên dữ liệu chưa sắp.\n- Nghĩ heap phải so với cả $k$ phần tử: chỉ so với đỉnh.\n\n#### Đọc thêm\n- [heapq.nlargest — Python docs](https://docs.python.org/3/library/heapq.html)\n- [Partial sorting — Wikipedia](https://en.wikipedia.org/wiki/Partial_sorting)\n",
+   "distractors": {
+    "B": "Đó là chi phí `sorted(scores, reverse=True)[:10]`, sắp toàn bộ rồi mới cắt.",
+    "C": "Bỏ qua việc phải đọc hết $n$ phần tử ít nhất một lần; mọi thuật toán top-k trên dữ liệu chưa sắp đều tốn ít nhất $O(n)$.",
+    "D": "Tưởng mỗi phần tử phải so với cả $k$ phần tử đang giữ (như chèn vào list đã sắp); heap chỉ cần $O(\\log k)$ mỗi lần cập nhật."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$O(n \\log k)$"
+    },
+    {
+     "key": "B",
+     "text": "$O(n \\log n)$"
+    },
+    {
+     "key": "C",
+     "text": "$O(k \\log n)$"
+    },
+    {
+     "key": "D",
+     "text": "$O(n \\cdot k)$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T07-B10",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Danh sách `ids` gồm $n$ mã tài liệu (chuỗi) bị trùng do crawler chạy lặp. Cần khử trùng lặp nhưng **giữ thứ tự xuất hiện đầu tiên**, thời gian trung bình $O(n)$. Biểu thức nào đáp ứng cả hai yêu cầu?",
+   "explanation": "Từ Python 3.7, dict giữ thứ tự chèn; `dict.fromkeys` chèn lần lượt, khóa trùng bị bỏ qua, mỗi lần chèn trung bình $O(1)$ nên tổng $O(n)$ và giữ thứ tự xuất hiện đầu tiên.",
+   "section": "b-np",
+   "long": "#### Ý chính\nKhử trùng lặp cần một cấu trúc tra \"đã gặp chưa\" trong $O(1)$, tức bảng băm. Từ Python 3.7, dict **giữ thứ tự chèn** (đảm bảo trong đặc tả ngôn ngữ), nên `dict.fromkeys(ids)` vừa bỏ trùng vừa giữ thứ tự lần xuất hiện đầu tiên.\n\n#### Từng bước\nVới `ids = ['d3', 'd1', 'd3', 'd2', 'd1']`:\n\n| Cách | Kết quả | Giữ thứ tự? | Thời gian |\n|---|---|---|---|\n| `list(dict.fromkeys(ids))` | `['d3', 'd1', 'd2']` | có | $O(n)$ |\n| `list(set(ids))` | thứ tự tùy băm | **không** | $O(n)$ |\n| `sorted(set(ids))` | `['d1', 'd2', 'd3']` | không (thứ tự từ điển) | $O(n\\log n)$ |\n| list comprehension với `ids[:i]` | `['d3', 'd1', 'd2']` | có | $O(n^2)$ |\n\nCách tường minh tương đương (dễ mở rộng, ví dụ khử trùng theo khóa đã chuẩn hoá):\n```python\nseen, out = set(), []\nfor x in ids:\n    key = x.strip().lower()     # khóa chuẩn hoá tùy nghiệp vụ\n    if key not in seen:          # O(1) trung bình\n        seen.add(key); out.append(x)\n```\n\n#### Bẫy thường gặp\n- `list(set(...))` với chuỗi cho thứ tự **khác nhau giữa các lần chạy** (băm chuỗi được ngẫu nhiên hoá), gây kết quả không tái lập.\n- Viết `x not in ids[:i]`: cắt lát $O(i)$ và quét $O(i)$, tổng $O(n^2)$, với $10^6$ mã là quá chậm.\n- Khử trùng trên chuỗi thô mà quên chuẩn hoá (khoảng trắng, hoa thường).\n\n#### Đọc thêm\n- [Mapping types — dict (Python docs)](https://docs.python.org/3/library/stdtypes.html)\n- [TimeComplexity — Python Wiki](https://wiki.python.org/moin/TimeComplexity)\n",
+   "distractors": {
+    "A": "Đúng $O(n)$ nhưng set **không** giữ thứ tự; với chuỗi, thứ tự còn đổi giữa các lần chạy do băm ngẫu nhiên.",
+    "B": "Kết quả theo thứ tự từ điển chứ không theo thứ tự xuất hiện, và tốn $O(n\\log n)$ để sắp.",
+    "D": "Giữ đúng thứ tự nhưng mỗi phần tử cắt lát và quét tuyến tính phần trước nó, tổng $O(n^2)$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`list(set(ids))`"
+    },
+    {
+     "key": "B",
+     "text": "`sorted(set(ids))`"
+    },
+    {
+     "key": "C",
+     "text": "`list(dict.fromkeys(ids))`"
+    },
+    {
+     "key": "D",
+     "text": "`[x for i, x in enumerate(ids) if x not in ids[:i]]`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T07-C01",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "`Q` có shape `(8, 384)` (8 câu hỏi) và `D` có shape `(1000, 384)` (1000 đoạn văn); cả hai đã chuẩn hoá L2 theo hàng nên `S = Q @ D.T` là ma trận cosine. Để lấy **chỉ số** đoạn văn giống nhất cho **từng câu hỏi**, dùng biểu thức nào và kết quả có shape gì?",
+   "explanation": "`S` có shape $(8, 384) \\times (384, 1000) = (8, 1000)$: hàng là câu hỏi, cột là đoạn văn. Gộp theo trục cột (`axis=1`) cho mỗi hàng một chỉ số, shape $(8,)$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nKhi các vector đã chuẩn hoá L2, cosine chính là tích vô hướng, nên cả bảng cosine giữa $m$ câu hỏi và $n$ đoạn văn là một phép nhân ma trận:\n$$S = Q D^\\top, \\quad S_{ij} = \\cos(\\mathbf{q}_i, \\mathbf{d}_j).$$\nShape: $(8, 384) \\times (384, 1000) = (8, 1000)$. Hàng là câu hỏi, cột là đoạn văn.\n\n#### Từng bước\n1. Muốn \"cho từng câu hỏi\" thì xử lý **từng hàng**, tức gộp trục cột: `axis=1`.\n2. Muốn **chỉ số** thì dùng `argmax`, không dùng `max`.\n3. Kết quả `S.argmax(axis=1)` có shape $(8,)$: phần tử $i$ là chỉ số đoạn văn tốt nhất cho câu hỏi $i$.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 200\" width=\"100%\" style=\"max-width:560px\">\n<rect x=\"60\" y=\"40\" width=\"360\" height=\"120\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<g stroke=\"currentColor\" stroke-opacity=\"0.25\">\n<line x1=\"60\" y1=\"55\" x2=\"420\" y2=\"55\"/><line x1=\"60\" y1=\"70\" x2=\"420\" y2=\"70\"/><line x1=\"60\" y1=\"85\" x2=\"420\" y2=\"85\"/><line x1=\"60\" y1=\"100\" x2=\"420\" y2=\"100\"/><line x1=\"60\" y1=\"115\" x2=\"420\" y2=\"115\"/><line x1=\"60\" y1=\"130\" x2=\"420\" y2=\"130\"/><line x1=\"60\" y1=\"145\" x2=\"420\" y2=\"145\"/>\n</g>\n<rect x=\"60\" y=\"40\" width=\"360\" height=\"15\" fill=\"#3b82f6\" fill-opacity=\"0.25\"/>\n<rect x=\"270\" y=\"40\" width=\"10\" height=\"15\" fill=\"#10b981\"/>\n<text x=\"240\" y=\"30\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">1000 cột = đoạn văn (trục 1)</text>\n<text x=\"35\" y=\"100\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\" transform=\"rotate(-90 35 100)\">8 hàng = câu hỏi</text>\n<line x1=\"425\" y1=\"48\" x2=\"460\" y2=\"48\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<polygon points=\"460,42 460,54 472,48\" fill=\"#10b981\"/>\n<text x=\"476\" y=\"52\" font-size=\"12\" fill=\"#10b981\">argmax hàng 0</text>\n<text x=\"240\" y=\"185\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">S.argmax(axis=1): mỗi hàng 1 chỉ số → shape (8,)</text>\n</svg>\n\n| Biểu thức | Shape | Ý nghĩa |\n|---|---|---|\n| `S.argmax(axis=1)` | `(8,)` | đoạn văn tốt nhất cho mỗi câu hỏi |\n| `S.max(axis=1)` | `(8,)` | điểm cosine tốt nhất của mỗi câu hỏi |\n| `S.argmax(axis=0)` | `(1000,)` | câu hỏi gần nhất của mỗi đoạn văn |\n| `S.argmax()` | `()` | một chỉ số phẳng trong 8000 ô |\n\n#### Bẫy thường gặp\n- Chọn trục theo \"thứ muốn giữ\" thay vì \"thứ bị gộp\".\n- Dùng `S.argmax()` không có `axis` rồi dùng nhầm như chỉ số cột; nếu cần đổi lại thì dùng `np.unravel_index`.\n\n#### Đọc thêm\n- [numpy.matmul — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.matmul.html)\n- [Cosine similarity — Wikipedia](https://en.wikipedia.org/wiki/Cosine_similarity)\n",
+   "distractors": {
+    "A": "`axis=0` gộp trục câu hỏi: cho mỗi đoạn văn biết câu hỏi nào gần nó nhất, ngược với yêu cầu.",
+    "B": "Đúng trục nhưng `max` trả **giá trị** cosine lớn nhất, không phải chỉ số đoạn văn.",
+    "C": "Không truyền `axis` thì NumPy làm phẳng `S` và trả **một** chỉ số trong 8000 phần tử (shape `()`)."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`S.argmax(axis=0)`, shape `(1000,)`"
+    },
+    {
+     "key": "B",
+     "text": "`S.max(axis=1)`, shape `(8,)`"
+    },
+    {
+     "key": "C",
+     "text": "`S.argmax()`, shape `(8,)`"
+    },
+    {
+     "key": "D",
+     "text": "`S.argmax(axis=1)`, shape `(8,)`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T07-C02",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Batch ảnh `X` đọc bằng OpenCV có shape `(N, H, W, C) = (16, 224, 224, 3)` (kênh màu ở cuối). Mô hình cần đầu vào dạng `(N, C, H, W)` và mỗi ảnh phải **giữ nguyên nội dung** (không bị xoay, lật hay xáo pixel). Biểu thức nào đúng?",
+   "explanation": "`transpose(axes)` đặt trục cũ `axes[i]` vào vị trí $i$: $(0, 3, 1, 2)$ cho $(N, C, H, W)$, tức `Y[n, c, h, w] == X[n, h, w, c]`, đổi thứ tự trục mà không xáo dữ liệu.",
+   "section": "b-np",
+   "long": "#### Ý chính\nĐổi bố cục kênh (NHWC sang NCHW) là **hoán vị trục**, không phải đổi shape. `X.transpose(axes)` đặt trục cũ `axes[i]` vào vị trí $i$ và giữ nguyên quan hệ `Y[n, c, h, w] == X[n, h, w, c]`. `reshape` thì chỉ đọc lại dãy phần tử theo thứ tự lưu trữ, nên làm xáo dữ liệu.\n\n#### Từng bước\n| Vị trí mới | 0 | 1 | 2 | 3 |\n|---|---|---|---|---|\n| Trục cần có | N | C | H | W |\n| Trục cũ tương ứng | 0 (N) | 3 (C) | 1 (H) | 2 (W) |\n\nVậy `axes = (0, 3, 1, 2)`.\n\n```mermaid\nflowchart LR\n  subgraph Cu[\"X: (N, H, W, C)\"]\n    a0[\"0: N\"]\n    a1[\"1: H\"]\n    a2[\"2: W\"]\n    a3[\"3: C\"]\n  end\n  subgraph Moi[\"Y: (N, C, H, W)\"]\n    b0[\"0: N\"]\n    b1[\"1: C\"]\n    b2[\"2: H\"]\n    b3[\"3: W\"]\n  end\n  a0 --> b0\n  a3 --> b1\n  a1 --> b2\n  a2 --> b3\n```\n\n| Biểu thức | Shape | Nội dung ảnh |\n|---|---|---|\n| `X.transpose(0, 3, 1, 2)` | (16, 3, 224, 224) | đúng |\n| `np.swapaxes(X, 1, 3)` | (16, 3, 224, 224) | bị chuyển vị H với W |\n| `X.reshape(16, 3, 224, 224)` | (16, 3, 224, 224) | pixel bị xáo |\n| `X.transpose(0, 2, 3, 1)` | (16, 224, 3, 224) | sai shape |\n\nBa biểu thức đầu có **cùng shape**; chỉ kiểm tra shape sẽ không phát hiện lỗi. Kiểm thử bằng ảnh có $H \\ne W$ hoặc so với `np.einsum('nhwc->nchw', X)`.\n\n#### Bẫy thường gặp\n- Dùng `reshape` để \"đổi thứ tự trục\".\n- Tin vào shape khi ảnh vuông.\n- `transpose` trả view không liên tục; một số thư viện cần `np.ascontiguousarray(Y)`.\n\n#### Đọc thêm\n- [numpy.transpose — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.transpose.html)\n- [numpy.swapaxes — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.swapaxes.html)\n",
+   "distractors": {
+    "A": "Shape trông đúng nhưng `reshape` chỉ đọc lại dãy phần tử theo thứ tự C, nên pixel của các kênh bị xáo trộn.",
+    "B": "Đổi chỗ trục 1 (H) và trục 3 (C) cho $(N, C, W, H)$; vì $H = W$ nên shape trông đúng nhưng mỗi ảnh bị chuyển vị (lật qua đường chéo).",
+    "D": "Đọc sai ý nghĩa tham số: trục mới thứ $i$ lấy trục cũ `axes[i]`, nên kết quả là $(N, W, C, H) = (16, 224, 3, 224)$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`X.reshape(16, 3, 224, 224)`"
+    },
+    {
+     "key": "B",
+     "text": "`np.swapaxes(X, 1, 3)`"
+    },
+    {
+     "key": "C",
+     "text": "`X.transpose(0, 3, 1, 2)`"
+    },
+    {
+     "key": "D",
+     "text": "`X.transpose(0, 2, 3, 1)`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T07-C03",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Mảng `req` là số request mỗi phút của một API. Đoạn code tính tổng theo cửa sổ trượt 3 phút **không dùng vòng lặp** bằng tổng tiền tố (prefix sum). Đoạn code in ra gì?\n\n```python\nimport numpy as np\nreq = np.array([4, 2, 6, 1, 3, 7])\nc = np.concatenate(([0], np.cumsum(req)))\nw = c[3:] - c[:-3]\nprint(w.tolist(), int(w.argmax()))\n```",
+   "explanation": "$c = [0, 4, 6, 12, 13, 16, 23]$; tổng cửa sổ $w_i = c_{i+3} - c_i$: $12 - 0, 13 - 4, 16 - 6, 23 - 12 = [12, 9, 10, 11]$; lớn nhất ở chỉ số 0.",
+   "section": "b-np",
+   "long": "#### Ý chính\nTổng tiền tố $c_j = x_0 + \\dots + x_{j-1}$ (với $c_0 = 0$) cho phép tính tổng mọi đoạn bằng **một phép trừ**:\n$$\\sum_{t=i}^{i+w-1} x_t = c_{i+w} - c_i.$$\nTính $c$ tốn $O(n)$; sau đó tất cả các cửa sổ được tính vector hoá bằng `c[w:] - c[:-w]`, không cần vòng lặp lồng $O(nw)$.\n\n#### Từng bước\n| Chỉ số | 0 | 1 | 2 | 3 | 4 | 5 | 6 |\n|---|---|---|---|---|---|---|---|\n| `req` | 4 | 2 | 6 | 1 | 3 | 7 | |\n| `c` | 0 | 4 | 6 | 12 | 13 | 16 | 23 |\n\n| Cửa sổ | `c[i+3] - c[i]` | Kiểm tra trực tiếp |\n|---|---|---|\n| phút 0–2 | $12 - 0 = 12$ | $4 + 2 + 6$ |\n| phút 1–3 | $13 - 4 = 9$ | $2 + 6 + 1$ |\n| phút 2–4 | $16 - 6 = 10$ | $6 + 1 + 3$ |\n| phút 3–5 | $23 - 12 = 11$ | $1 + 3 + 7$ |\n\n`w.tolist()` là `[12, 9, 10, 11]`, `int(w.argmax())` là 0. Kết quả in: `[12, 9, 10, 11] 0`.\n\n```python\nimport numpy as np\nreq = np.array([4, 2, 6, 1, 3, 7])\nprint(np.convolve(req, np.ones(3, dtype=int), mode=\"valid\").tolist())  # cùng kết quả\n```\n\n#### Bẫy thường gặp\n- Quên chèn 0 ở đầu: mất cửa sổ đầu tiên.\n- Nhầm `argmax` với `max`.\n- Với số thực rất dài, tổng tiền tố tích luỹ sai số làm tròn; khi cần chính xác cao nên dùng `float64`.\n\n#### Đọc thêm\n- [numpy.cumsum — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html)\n- [Prefix sum — Wikipedia](https://en.wikipedia.org/wiki/Prefix_sum)\n",
+   "mistakes": [
+    {
+     "value": "[9, 10, 11] 2",
+     "why": "Tính như thể không có số 0 chèn ở đầu (`np.cumsum(req)[3:] - np.cumsum(req)[:-3]`), làm mất cửa sổ đầu tiên $4 + 2 + 6$."
+    },
+    {
+     "value": "[12, 9, 10, 11] 12",
+     "why": "Nhầm `argmax` trả giá trị lớn nhất; nó trả **vị trí** của giá trị lớn nhất (cửa sổ đầu tiên, chỉ số 0)."
+    },
+    {
+     "value": "[12, 13, 16, 23] 3",
+     "why": "Chỉ in `c[3:]` (tổng tiền tố) mà quên trừ `c[:-3]`."
+    }
+   ],
+   "answer": "[12, 9, 10, 11] 0",
+   "accept": [
+    "[12, 9, 10, 11] 0",
+    "[12,9,10,11] 0"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T07-C04",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Một bạn tính khoảng cách Euclid bình phương giữa 2000 vector truy vấn `Q` (shape `(2000, 128)`) và 5000 vector trong kho `K` (shape `(5000, 128)`), cả hai kiểu `float32`, bằng broadcasting:\n\n```python\ndiff = Q[:, None, :] - K[None, :, :]\nD2 = (diff ** 2).sum(axis=2)\n```\n\nRiêng mảng trung gian `diff` chiếm bao nhiêu GB? (Quy ước 1 GB $= 10^9$ byte; **làm tròn 2 chữ số thập phân**, chỉ nhập số.)",
+   "explanation": "`diff` có shape $(2000, 5000, 128)$, tức $1{,}28 \\times 10^9$ phần tử, mỗi phần tử 4 byte: $5{,}12 \\times 10^9$ byte $= 5{,}12$ GB. Dùng $\\lVert q - k\\rVert^2 = \\lVert q\\rVert^2 + \\lVert k\\rVert^2 - 2\\,q \\cdot k$ thì chỉ cần mảng $(2000, 5000)$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nBroadcasting không tốn bộ nhớ cho phép \"kéo giãn\" đầu vào, nhưng **kết quả** của phép toán thì được cấp phát đầy đủ. `Q[:, None, :] - K[None, :, :]` có shape $(2000, 5000, 128)$, một khối 3 chiều rất lớn, dù kết quả cuối `D2` chỉ là ma trận $(2000, 5000)$.\n\n#### Từng bước\n1. Số phần tử của `diff`: $2000 \\times 5000 \\times 128 = 1{,}28 \\times 10^9$.\n2. Mỗi phần tử `float32` 4 byte: $5{,}12 \\times 10^9$ byte $= 5{,}12$ GB.\n3. `diff ** 2` còn tạo thêm một mảng cùng cỡ nữa (đỉnh khoảng 10 GB).\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 210\" width=\"100%\" style=\"max-width:560px\">\n<polygon points=\"40,70 200,70 240,40 80,40\" fill=\"#ef4444\" fill-opacity=\"0.2\" stroke=\"#ef4444\"/>\n<polygon points=\"200,70 240,40 240,150 200,180\" fill=\"#ef4444\" fill-opacity=\"0.3\" stroke=\"#ef4444\"/>\n<rect x=\"40\" y=\"70\" width=\"160\" height=\"110\" fill=\"#ef4444\" fill-opacity=\"0.15\" stroke=\"#ef4444\"/>\n<text x=\"120\" y=\"130\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">diff</text>\n<text x=\"120\" y=\"148\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">2000 × 5000 × 128</text>\n<text x=\"120\" y=\"200\" text-anchor=\"middle\" font-size=\"13\" fill=\"#ef4444\">5,12 GB</text>\n<rect x=\"330\" y=\"70\" width=\"160\" height=\"110\" fill=\"#10b981\" fill-opacity=\"0.2\" stroke=\"#10b981\"/>\n<text x=\"410\" y=\"130\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">D2</text>\n<text x=\"410\" y=\"148\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">2000 × 5000</text>\n<text x=\"410\" y=\"200\" text-anchor=\"middle\" font-size=\"13\" fill=\"#10b981\">0,04 GB</text>\n<line x1=\"255\" y1=\"125\" x2=\"315\" y2=\"125\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<polygon points=\"315,119 315,131 327,125\" fill=\"currentColor\"/>\n<text x=\"285\" y=\"112\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">sum(axis=2)</text>\n</svg>\n\n**Cách tiết kiệm.** Khai triển $\\lVert q - k\\rVert^2 = \\lVert q\\rVert^2 + \\lVert k\\rVert^2 - 2\\,q \\cdot k$:\n```python\nq2 = (Q**2).sum(axis=1)[:, None]      # (2000, 1)\nk2 = (K**2).sum(axis=1)[None, :]      # (1, 5000)\nD2 = q2 + k2 - 2 * (Q @ K.T)          # (2000, 5000), chỉ khoảng 0,04 GB mỗi mảng\nD2 = np.maximum(D2, 0)                # chặn số âm rất nhỏ do làm tròn\n```\nPhép `Q @ K.T` còn chạy bằng BLAS nên thường nhanh hơn nhiều. Nếu vẫn quá lớn thì chia `Q` thành từng khối hàng.\n\n#### Bẫy thường gặp\n- Chỉ tính bộ nhớ của kết quả cuối, quên mảng trung gian.\n- Nghĩ broadcasting luôn \"miễn phí\".\n- Dùng `float64` mặc định làm bộ nhớ gấp đôi (10,24 GB).\n\n#### Đọc thêm\n- [Broadcasting — NumPy docs](https://numpy.org/doc/stable/user/basics.broadcasting.html)\n- [Euclidean distance matrix — Wikipedia](https://en.wikipedia.org/wiki/Euclidean_distance_matrix)\n",
+   "mistakes": [
+    {
+     "value": 10.24,
+     "why": "Dùng 8 byte mỗi phần tử (`float64`); hai mảng đầu vào là `float32` nên `diff` cũng là `float32` (4 byte)."
+    },
+    {
+     "value": 0.04,
+     "why": "Chỉ tính ma trận kết quả `D2` shape $(2000, 5000)$; mảng trung gian `diff` còn thêm trục 128 chiều."
+    },
+    {
+     "value": 4.77,
+     "why": "Chia cho $2^{30}$ (GiB) thay vì $10^9$ như quy ước của đề."
+    }
+   ],
+   "answer": 5.12,
+   "tol": 0.0051
+  },
+  {
+   "id": "T07-C05",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Độ phức tạp thời gian của hàm sau theo $n$ là gì?\n\n```python\ndef dem(n):\n    c = 0\n    for i in range(1, n + 1):\n        for j in range(0, n, i):\n            c += 1\n    return c\n```",
+   "explanation": "Với mỗi $i$, vòng trong chạy $\\lceil n/i\\rceil$ lần. Tổng $\\sum_{i=1}^{n}\\lceil n/i\\rceil \\approx n H_n \\approx n\\ln n$ ($H_n$ là số điều hòa), nên là $O(n\\log n)$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nKhông đánh giá vòng lặp lồng bằng cách \"đếm số tầng\". Phải cộng số lần chạy thật của vòng trong. Ở đây `range(0, n, i)` nhảy bước `i` nên chạy $\\lceil n/i \\rceil$ lần, rất ít khi $i$ lớn.\n\n#### Từng bước\n$$\\sum_{i=1}^{n} \\left\\lceil \\frac{n}{i} \\right\\rceil \\approx n\\left(1 + \\frac{1}{2} + \\dots + \\frac{1}{n}\\right) = n H_n \\approx n\\ln n.$$\n\nVí dụ $n = 12$:\n\n| $i$ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| $\\lceil 12/i \\rceil$ | 12 | 6 | 4 | 3 | 3 | 2 | 2 | 2 | 2 | 2 | 2 | 1 |\n\nTổng 41, so với $n^2 = 144$ và $n\\ln n \\approx 29{,}8$.\n\n| $n$ | Số lần lặp | $n\\ln n$ | Tỉ số | $n^2$ |\n|---|---|---|---|---|\n| $10^3$ | 8053 | 6908 | 1,17 | $10^6$ |\n| $10^5$ | 1266714 | 1151293 | 1,10 | $10^{10}$ |\n\nTỉ số với $n\\ln n$ tiến về hằng số, nên độ phức tạp là $O(n\\log n)$ (cơ số log chỉ đổi hằng số).\n\n```python\nimport math\ndef dem(n): return sum(len(range(0, n, i)) for i in range(1, n + 1))\nprint(dem(1000), round(1000 * math.log(1000)))   # 8053 6908\n```\n\nMẫu này xuất hiện trong sàng Eratosthenes và khi duyệt bội số của mọi $i$.\n\n#### Bẫy thường gặp\n- Thấy hai vòng `for` là kết luận $O(n^2)$.\n- Nghĩ vòng trong \"trung bình hằng số\" nên $O(n)$: chuỗi điều hòa phân kỳ, tăng như $\\ln n$.\n\n#### Đọc thêm\n- [Harmonic series — Wikipedia](https://en.wikipedia.org/wiki/Harmonic_series_%28mathematics%29)\n- [Big O notation — Wikipedia](https://en.wikipedia.org/wiki/Big_O_notation)\n",
+   "distractors": {
+    "A": "Thấy hai vòng lặp lồng nhau là kết luận $n^2$, bỏ qua bước nhảy `i` của vòng trong làm số lần lặp giảm dần.",
+    "C": "Tưởng vòng trong trung bình chạy hằng số lần. Tổng $\\sum_i n/i$ lớn hơn $n$ một thừa số $\\ln n$.",
+    "D": "Nhầm với mẫu vòng lặp chạy tới $\\sqrt{n}$ (như kiểm tra số nguyên tố); ở đây vòng trong chạy $\\lceil n/i\\rceil$ lần."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$O(n^2)$"
+    },
+    {
+     "key": "B",
+     "text": "$O(n \\log n)$"
+    },
+    {
+     "key": "C",
+     "text": "$O(n)$"
+    },
+    {
+     "key": "D",
+     "text": "$O(n\\sqrt{n})$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T07-C06",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Dịch vụ giám sát nhận $n$ bản ghi log liên tục và cần danh sách `recent` với bản ghi **mới nhất ở đầu**. Code hiện tại:\n\n```python\nrecent = []\nfor r in stream:\n    recent.insert(0, r)\n```\n\nĐộ phức tạp tổng và cách sửa nào đúng?",
+   "explanation": "Lần chèn thứ $i$ dịch $i - 1$ phần tử: tổng $\\sum_{i=1}^{n}(i-1) = \\frac{n(n-1)}{2} = O(n^2)$. `deque.appendleft` là $O(1)$ nên tổng $O(n)$ (hoặc `append` rồi đảo một lần ở cuối).",
+   "section": "b-np",
+   "long": "#### Ý chính\n`list.insert(0, x)` phải dịch mọi phần tử hiện có sang phải một ô. Lặp $n$ lần thì tổng số phần tử bị dịch là $0 + 1 + \\dots + (n-1) = \\frac{n(n-1)}{2}$, tức $O(n^2)$. `collections.deque` là danh sách liên kết các khối, thêm hoặc bớt ở **cả hai đầu** đều $O(1)$.\n\n#### Từng bước\n| Cách | Mỗi lần thêm | Tổng $n$ lần | Ghi chú |\n|---|---|---|---|\n| `recent.insert(0, r)` | $O(i)$ | $O(n^2)$ | code hiện tại |\n| `recent = [r] + recent` | $O(i)$ | $O(n^2)$ | tạo list mới mỗi lần |\n| `heapq.heappush` | $O(\\log i)$ | $O(n\\log n)$ | sắp theo giá trị, sai yêu cầu |\n| `dq.appendleft(r)` | $O(1)$ | $O(n)$ | đúng yêu cầu |\n| `append` rồi `reverse()` một lần | $O(1)$ | $O(n)$ | chỉ hợp khi đọc sau khi nhận xong |\n\n```mermaid\nflowchart LR\n  subgraph LST[\"list: insert(0, r)\"]\n    L1[\"r mới\"] --> L2[\"dịch x1 … xi sang phải\"] --> L3[\"O(i) mỗi lần\"]\n  end\n  subgraph DQ[\"deque: appendleft(r)\"]\n    D1[\"r mới\"] --> D2[\"gắn vào khối đầu\"] --> D3[\"O(1) mỗi lần\"]\n  end\n```\n\nVới giám sát chỉ cần giữ $N$ bản ghi mới nhất, dùng `deque(maxlen=N)`: phần tử cũ ở đầu kia tự rơi ra, bộ nhớ cố định.\n\n```python\nfrom collections import deque\nrecent = deque(maxlen=1000)\nfor r in range(5000):\n    recent.appendleft(r)\nprint(recent[0], len(recent))   # 4999 1000\n```\n\n#### Bẫy thường gặp\n- Tưởng mọi kiểu chèn vào list đều $O(1)$.\n- Dùng heap để \"luôn có phần tử mới ở đầu\".\n- Truy cập ngẫu nhiên `dq[i]` ở giữa deque là $O(n)$; deque chỉ nhanh ở hai đầu.\n\n#### Đọc thêm\n- [collections.deque — Python docs](https://docs.python.org/3/library/collections.html)\n- [TimeComplexity — Python Wiki](https://wiki.python.org/moin/TimeComplexity)\n",
+   "distractors": {
+    "A": "Chỉ `append` (chèn cuối) mới là $O(1)$ khấu hao; `insert(0, r)` phải dịch toàn bộ phần tử hiện có.",
+    "B": "Heap sắp theo **giá trị** chứ không theo thời điểm đến; phần tử đầu là nhỏ nhất, không phải mới nhất.",
+    "C": "Đúng chẩn đoán nhưng cách sửa vẫn tạo list mới và sao chép toàn bộ mỗi lần, vẫn $O(n^2)$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$O(n)$; giữ nguyên vì chèn vào list luôn tốn $O(1)$."
+    },
+    {
+     "key": "B",
+     "text": "$O(n\\log n)$; thay bằng `heapq.heappush` để bản ghi mới lên đầu."
+    },
+    {
+     "key": "C",
+     "text": "$O(n^2)$; viết lại thành `recent = [r] + recent` cho gọn."
+    },
+    {
+     "key": "D",
+     "text": "$O(n^2)$; dùng `collections.deque` với `appendleft`, mỗi lần $O(1)$."
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T07-C07",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Với list `a` có $n$ phần tử ($n$ đủ nhỏ để không vượt giới hạn đệ quy), độ phức tạp thời gian của `tong(a)` là gì?\n\n```python\ndef tong(a):\n    if not a:\n        return 0\n    return a[0] + tong(a[1:])\n```",
+   "explanation": "Có $n + 1$ lời gọi; lời gọi với list độ dài $L$ sao chép $L - 1$ phần tử. Tổng $\\sum_{L=1}^{n}(L-1) = \\frac{n(n-1)}{2} = O(n^2)$. Truyền chỉ số `i` thay vì cắt lát sẽ còn $O(n)$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nChi phí một lời gọi đệ quy không chỉ là \"1\": phải cộng mọi công việc trong lời gọi đó. Ở đây `a[1:]` tạo **list mới** và sao chép $L - 1$ phần tử, nên tổng chi phí là tổng các lần sao chép.\n\n#### Từng bước\n| Lời gọi | Độ dài list | Phần tử bị sao chép bởi `a[1:]` |\n|---|---|---|\n| 1 | $n$ | $n - 1$ |\n| 2 | $n - 1$ | $n - 2$ |\n| ⋮ | ⋮ | ⋮ |\n| $n$ | 1 | 0 |\n| $n + 1$ | 0 | (dừng) |\n\n$$\\sum_{L=1}^{n}(L - 1) = \\frac{n(n-1)}{2} = O(n^2).$$\nVới $n = 100$: $4950$ phần tử bị sao chép, khớp với kết quả đo bằng code trong phần `check`.\n\nBộ nhớ đỉnh cũng là $O(n^2)$, vì các list cắt lát của mọi tầng đệ quy còn sống cùng lúc trên ngăn xếp.\n\n**Sửa:** truyền chỉ số thay vì cắt lát.\n```python\ndef tong(a, i=0):\n    return 0 if i == len(a) else a[i] + tong(a, i + 1)   # O(n) thời gian\n```\nTrong Python thực tế dùng `sum(a)` (vòng lặp C, $O(n)$) vì đệ quy sâu quá khoảng 1000 tầng sẽ gặp `RecursionError` (`sys.getrecursionlimit()`).\n\n#### Bẫy thường gặp\n- Đếm số lời gọi ($n$) mà quên chi phí trong mỗi lời gọi.\n- Tưởng cắt lát list là $O(1)$ như view của NumPy; với list Python, cắt lát $k$ phần tử tốn $O(k)$.\n\n#### Đọc thêm\n- [TimeComplexity (Get Slice O(k)) — Python Wiki](https://wiki.python.org/moin/TimeComplexity)\n- [sys.getrecursionlimit — Python docs](https://docs.python.org/3/library/sys.html)\n",
+   "distractors": {
+    "B": "Chỉ đếm $n$ lần gọi đệ quy mà quên mỗi lần `a[1:]` **sao chép** $n-1, n-2, \\dots$ phần tử sang list mới.",
+    "C": "Nhầm với chia đôi (như merge sort); ở đây mỗi bước chỉ bớt 1 phần tử.",
+    "D": "Mỗi lần chỉ gọi đệ quy **một** nhánh, không có hai lời gọi con nên không bùng nổ theo hàm mũ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$O(n^2)$"
+    },
+    {
+     "key": "B",
+     "text": "$O(n)$"
+    },
+    {
+     "key": "C",
+     "text": "$O(n\\log n)$"
+    },
+    {
+     "key": "D",
+     "text": "$O(2^n)$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T07-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Thực đơn có giá các món (chục nghìn đồng) đã sắp tăng dần. Hàm sau tìm hai món có tổng đúng bằng ngân sách `k` bằng kỹ thuật hai con trỏ. Dòng cuối in ra gì?\n\n```python\ndef tim_cap(a, k):\n    l, r, buoc = 0, len(a) - 1, 0\n    while l < r:\n        buoc += 1\n        s = a[l] + a[r]\n        if s == k:\n            return (a[l], a[r]), buoc\n        if s < k:\n            l += 1\n        else:\n            r -= 1\n    return None, buoc\n\nprint(tim_cap([1, 3, 4, 6, 8, 11], 10))\n```",
+   "explanation": "Các vòng: $1 + 11 = 12 > 10$ (giảm `r`), $1 + 8 = 9 < 10$ (tăng `l`), $3 + 8 = 11$ (giảm `r`), $3 + 6 = 9$ (tăng `l`), $4 + 6 = 10$: tìm thấy ở vòng 5.",
+   "section": "b-np",
+   "long": "#### Ý chính\nTrên mảng **đã sắp tăng**, hai con trỏ `l` (đầu) và `r` (cuối) tìm cặp tổng `k` trong $O(n)$: tổng nhỏ quá thì tăng `l` (lấy số lớn hơn), tổng lớn quá thì giảm `r`. Mỗi vòng loại bỏ một phần tử nên có tối đa $n - 1$ vòng.\n\n#### Từng bước\n| Vòng (`buoc`) | `l` | `r` | `a[l] + a[r]` | So với 10 | Hành động |\n|---|---|---|---|---|---|\n| 1 | 0 (1) | 5 (11) | 12 | lớn hơn | `r -= 1` |\n| 2 | 0 (1) | 4 (8) | 9 | nhỏ hơn | `l += 1` |\n| 3 | 1 (3) | 4 (8) | 11 | lớn hơn | `r -= 1` |\n| 4 | 1 (3) | 3 (6) | 9 | nhỏ hơn | `l += 1` |\n| 5 | 2 (4) | 3 (6) | 10 | bằng | trả về |\n\nKết quả in: `((4, 6), 5)`.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 520 150\" width=\"100%\" style=\"max-width:560px\">\n<g font-size=\"15\" text-anchor=\"middle\" fill=\"currentColor\">\n<rect x=\"40\" y=\"50\" width=\"60\" height=\"36\" fill=\"none\" stroke=\"currentColor\"/><text x=\"70\" y=\"74\">1</text>\n<rect x=\"100\" y=\"50\" width=\"60\" height=\"36\" fill=\"none\" stroke=\"currentColor\"/><text x=\"130\" y=\"74\">3</text>\n<rect x=\"160\" y=\"50\" width=\"60\" height=\"36\" fill=\"#10b981\" fill-opacity=\"0.3\" stroke=\"currentColor\"/><text x=\"190\" y=\"74\">4</text>\n<rect x=\"220\" y=\"50\" width=\"60\" height=\"36\" fill=\"#10b981\" fill-opacity=\"0.3\" stroke=\"currentColor\"/><text x=\"250\" y=\"74\">6</text>\n<rect x=\"280\" y=\"50\" width=\"60\" height=\"36\" fill=\"none\" stroke=\"currentColor\"/><text x=\"310\" y=\"74\">8</text>\n<rect x=\"340\" y=\"50\" width=\"60\" height=\"36\" fill=\"none\" stroke=\"currentColor\"/><text x=\"370\" y=\"74\">11</text>\n</g>\n<text x=\"70\" y=\"40\" text-anchor=\"middle\" font-size=\"12\" fill=\"#3b82f6\">l bắt đầu</text>\n<text x=\"370\" y=\"40\" text-anchor=\"middle\" font-size=\"12\" fill=\"#f59e0b\">r bắt đầu</text>\n<path d=\"M70 92 q30 22 60 0 q30 22 60 0\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<path d=\"M370 92 q-30 22 -60 0 q-30 22 -60 0\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n<text x=\"220\" y=\"135\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">l tiến 2 bước, r lùi 2 bước, gặp cặp (4, 6) ở vòng 5</text>\n<text x=\"460\" y=\"74\" text-anchor=\"middle\" font-size=\"13\" fill=\"#10b981\">4 + 6 = 10</text>\n</svg>\n\n**Vì sao không bỏ sót?** Khi `a[l] + a[r] < k`, mọi cặp `(l, j)` với `j <= r` cũng nhỏ hơn `k` nên có thể bỏ `l` an toàn; lập luận đối xứng cho `r`.\n\n#### Bẫy thường gặp\n- Đếm số lần dịch con trỏ (4) thay vì số vòng (5).\n- Dịch ngược hướng làm bỏ lỡ cặp.\n- Dùng trên mảng **chưa sắp**: thuật toán sai. Khi đó dùng bảng băm $O(n)$ hoặc sắp trước $O(n\\log n)$.\n\n#### Đọc thêm\n- [Sorting algorithm — Wikipedia](https://en.wikipedia.org/wiki/Sorting_algorithm)\n- [Subset sum problem — Wikipedia](https://en.wikipedia.org/wiki/Subset_sum_problem)\n",
+   "distractors": {
+    "A": "Đếm số lần **dịch con trỏ** (4 lần) thay vì số vòng lặp; `buoc` tăng ở đầu mỗi vòng, kể cả vòng tìm thấy.",
+    "B": "Dịch nhầm hướng (tổng nhỏ thì giảm `r`, tổng lớn thì tăng `l`), làm bỏ lỡ cặp đúng.",
+    "C": "Tưởng vòng lặp chạy đủ $n = 6$ lần như tìm tuyến tính; hàm trả về ngay khi gặp tổng bằng `k`."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`((4, 6), 4)`"
+    },
+    {
+     "key": "B",
+     "text": "`(None, 5)`"
+    },
+    {
+     "key": "C",
+     "text": "`((4, 6), 6)`"
+    },
+    {
+     "key": "D",
+     "text": "`((4, 6), 5)`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T07-C09",
+   "module": "C",
+   "type": "code",
+   "points": 6,
+   "level": "van-dung",
+   "prompt": "**Bối cảnh.** Sàn thương mại điện tử muốn gợi ý combo 2 sản phẩm có tổng giá **đúng bằng** ngân sách `k` (nghìn đồng). Viết hàm Python `cap_tong_k(gia, k)`:\n\n- `gia`: list số nguyên dương (có thể trùng giá), độ dài $n$ có thể tới $10^6$.\n- Trả về list các cặp **giá trị** `(a, b)` với `a <= b` và `a + b == k`, hai phần tử lấy từ **hai vị trí khác nhau** trong `gia`; mỗi cặp giá trị xuất hiện đúng một lần; list sắp tăng dần theo `a`.\n- Ví dụ: `cap_tong_k([3, 5, 2, 5, 8, 7], 10)` trả `[(2, 8), (3, 7), (5, 5)]`; `cap_tong_k([5, 1], 10)` trả `[]`.\n\nYêu cầu: không dùng hai vòng lặp lồng nhau trên toàn danh sách; ghi rõ độ phức tạp thời gian và bộ nhớ của lời giải (trong docstring hoặc chú thích).",
+   "explanation": "Đếm tần suất bằng `Counter` ($O(n)$), duyệt từng giá trị khác nhau $a$ và tra $k - a$ trong bảng băm $O(1)$ trung bình; điều kiện `a < b` tránh lặp cặp, `a == b` cần tần suất $\\ge 2$. Tổng $O(n)$ thời gian và bộ nhớ.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nBài \"tìm cặp có tổng bằng $k$\" có ba lời giải điển hình:\n\n| Cách | Thời gian | Bộ nhớ | Ghi chú |\n|---|---|---|---|\n| Hai vòng lặp lồng | $O(n^2)$ | $O(1)$ | $n = 10^6$ cần khoảng $5 \\times 10^{11}$ phép thử, quá chậm |\n| Sắp xếp + hai con trỏ | $O(n\\log n)$ | $O(n)$ hoặc tại chỗ | phải bỏ qua giá trị trùng |\n| Bảng băm (`Counter`) | $O(n)$ trung bình | $O(n)$ | lời giải mẫu |\n\n#### Từng bước (lời giải mẫu)\n1. `dem = Counter(gia)`: đếm tần suất mỗi giá, $O(n)$.\n2. Với mỗi giá trị khác nhau `a`, tính `b = k - a` và tra `b in dem` trong $O(1)$ trung bình.\n3. Chỉ nhận khi `a < b` (tránh cặp đảo ngược và trùng), hoặc `a == b` với `dem[a] >= 2` (cần hai vị trí khác nhau).\n4. Sắp $p$ cặp kết quả: $O(p\\log p)$, với $p \\le n/2$.\n\nVí dụ `gia = [3, 5, 2, 5, 8, 7]`, `k = 10`:\n\n| `a` | `b = 10 - a` | Điều kiện | Nhận? |\n|---|---|---|---|\n| 3 | 7 | 3 < 7, có 7 | (3, 7) |\n| 5 | 5 | bằng nhau, `dem[5] = 2` | (5, 5) |\n| 2 | 8 | 2 < 8, có 8 | (2, 8) |\n| 8 | 2 | 8 > 2 | bỏ (đã có) |\n| 7 | 3 | 7 > 3 | bỏ (đã có) |\n\nSau khi sắp: `[(2, 8), (3, 7), (5, 5)]`.\n\n```mermaid\nflowchart LR\n  A[\"gia\"] --> B[\"Counter: giá → số lần\"]\n  B --> C{\"với mỗi a: b = k − a\"}\n  C -->|\"a nhỏ hơn b và b có trong bảng\"| D[\"thêm (a, b)\"]\n  C -->|\"a bằng b và đếm ≥ 2\"| D\n  C -->|\"còn lại\"| E[\"bỏ qua\"]\n  D --> F[\"sorted → kết quả\"]\n```\n\n#### Bẫy thường gặp\n- Nhận `(5, 5)` khi giá 5 chỉ xuất hiện một lần.\n- Trả cả `(2, 8)` và `(8, 2)`, hoặc lặp cặp khi giá bị trùng.\n- Dùng `list` làm cấu trúc \"đã gặp\" (`b in list` là $O(n)$), vô tình quay lại $O(n^2)$.\n\n#### Đọc thêm\n- [collections.Counter — Python docs](https://docs.python.org/3/library/collections.html)\n- [Hash table — Wikipedia](https://en.wikipedia.org/wiki/Hash_table)\n",
+   "modelAnswer": "```python\nfrom collections import Counter\n\ndef cap_tong_k(gia, k):\n    \"\"\"Trả các cặp giá trị (a, b), a <= b, a + b == k, lấy từ hai vị trí khác nhau.\n\n    Thời gian: O(n) trung bình để đếm và duyệt các giá trị khác nhau,\n    cộng O(p log p) để sắp p cặp kết quả (p <= n/2). Bộ nhớ: O(n) cho Counter.\n    \"\"\"\n    dem = Counter(gia)              # giá trị -> số lần xuất hiện, O(n)\n    kq = []\n    for a in dem:                   # duyệt mỗi giá trị khác nhau đúng 1 lần\n        b = k - a\n        if a < b and b in dem:      # tra băm O(1) trung bình\n            kq.append((a, b))\n        elif a == b and dem[a] >= 2:  # cặp (a, a) cần 2 vị trí khác nhau\n            kq.append((a, a))\n    return sorted(kq)\n\n\nassert cap_tong_k([3, 5, 2, 5, 8, 7], 10) == [(2, 8), (3, 7), (5, 5)]\nassert cap_tong_k([5, 1], 10) == []\n```\n\n- Chỉ xét `a < b` (hoặc `a == b`) nên mỗi cặp giá trị được thêm đúng một lần, không cần set phụ để khử trùng.\n- Cách khác đạt $O(n\\log n)$: sắp `gia` rồi dùng hai con trỏ, bỏ qua các giá trị trùng liên tiếp.\n- Cách lồng hai vòng `for i`, `for j` là $O(n^2)$: với $n = 10^6$ là khoảng $5 \\times 10^{11}$ phép so sánh, không chấp nhận được.",
+   "rubric": [
+    {
+     "criterion": "Trả đúng các cặp theo ví dụ: không trùng cặp, `a <= b`, sắp tăng theo `a`, trả `[]` khi không có cặp",
+     "points": 2
+    },
+    {
+     "criterion": "Xử lý đúng cặp `(a, a)`: chỉ hợp lệ khi giá `a` xuất hiện ít nhất 2 lần",
+     "points": 1.5
+    },
+    {
+     "criterion": "Dùng bảng băm (set/dict/Counter) hoặc sắp xếp + hai con trỏ; không lồng hai vòng lặp $O(n^2)$",
+     "points": 1.5
+    },
+    {
+     "criterion": "Nêu đúng độ phức tạp: thời gian $O(n)$ trung bình (hoặc $O(n\\log n)$ nếu sắp xếp), bộ nhớ $O(n)$",
+     "points": 1
+    }
+   ]
+  },
+  {
+   "id": "T07-D01",
+   "module": "D",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung-cao",
+   "prompt": "Một buffer tự viết để gom embedding hoạt động như mảng động: dung lượng ban đầu là 1; khi append mà buffer **đã đầy**, nó cấp vùng nhớ mới **gấp đôi** dung lượng, **sao chép toàn bộ phần tử cũ** sang, rồi mới ghi phần tử mới. Bắt đầu từ buffer rỗng, append liên tiếp 100 phần tử. Tổng số lần sao chép phần tử cũ (không tính 100 lần ghi phần tử mới) là bao nhiêu? **Nhập số nguyên.**",
+   "explanation": "Mở rộng xảy ra khi append phần tử thứ 2, 3, 5, 9, 17, 33, 65 với số phần tử phải chép $1, 2, 4, 8, 16, 32, 64$; tổng $2^7 - 1 = 127 < 2 \\cdot 100$, nên chi phí khấu hao mỗi lần append là $O(1)$.",
+   "section": "b-np",
+   "long": "#### Ý chính\nMảng động nhân đôi dung lượng khi đầy: thỉnh thoảng một lần append rất đắt (sao chép cả mảng), nhưng **tổng** chi phí cho $n$ lần append vẫn là $O(n)$, tức **khấu hao** $O(1)$ mỗi lần. Đây là cách `list.append` của Python và `std::vector` hoạt động (Python dùng hệ số tăng nhỏ hơn 2 nhưng cùng ý tưởng).\n\n#### Từng bước\nMở rộng xảy ra khi append vào buffer đầy, tức khi số phần tử hiện có bằng dung lượng:\n\n| Append phần tử thứ | Dung lượng trước | Sao chép | Dung lượng sau |\n|---|---|---|---|\n| 2 | 1 | 1 | 2 |\n| 3 | 2 | 2 | 4 |\n| 5 | 4 | 4 | 8 |\n| 9 | 8 | 8 | 16 |\n| 17 | 16 | 16 | 32 |\n| 33 | 32 | 32 | 64 |\n| 65 | 64 | 64 | 128 |\n\n$$1 + 2 + 4 + \\dots + 64 = 2^7 - 1 = 127.$$\nSau phần tử thứ 100, dung lượng là 128, chưa đầy nên không có lần mở rộng nào nữa.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 540 200\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"40\" y1=\"170\" x2=\"520\" y2=\"170\" stroke=\"currentColor\"/>\n<g fill=\"#3b82f6\" fill-opacity=\"0.6\">\n<rect x=\"60\" y=\"168\" width=\"40\" height=\"2\"/>\n<rect x=\"120\" y=\"166\" width=\"40\" height=\"4\"/>\n<rect x=\"180\" y=\"162\" width=\"40\" height=\"8\"/>\n<rect x=\"240\" y=\"154\" width=\"40\" height=\"16\"/>\n<rect x=\"300\" y=\"138\" width=\"40\" height=\"32\"/>\n<rect x=\"360\" y=\"106\" width=\"40\" height=\"64\"/>\n<rect x=\"420\" y=\"42\" width=\"40\" height=\"128\"/>\n</g>\n<g font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">\n<text x=\"80\" y=\"188\">#2</text><text x=\"140\" y=\"188\">#3</text><text x=\"200\" y=\"188\">#5</text><text x=\"260\" y=\"188\">#9</text><text x=\"320\" y=\"188\">#17</text><text x=\"380\" y=\"188\">#33</text><text x=\"440\" y=\"188\">#65</text>\n<text x=\"380\" y=\"100\">32</text><text x=\"440\" y=\"36\">64</text><text x=\"320\" y=\"132\">16</text>\n</g>\n<text x=\"40\" y=\"24\" font-size=\"13\" fill=\"currentColor\">Số phần tử sao chép ở mỗi lần mở rộng (cột), tổng = 127 &lt; 2 · 100</text>\n</svg>\n\n**Lập luận tổng quát:** với $n$ lần append, các lần sao chép là $1 + 2 + \\dots + 2^{\\lfloor\\log_2(n-1)\\rfloor} < 2n$, nên tổng chi phí $< n + 2n = 3n = O(n)$.\n\n```python\ncap, size, copies = 1, 0, 0\nfor _ in range(100):\n    if size == cap:\n        copies += size; cap *= 2\n    size += 1\nprint(copies, cap)   # 127 128\n```\n\nNếu mỗi lần chỉ tăng thêm **1 ô**, tổng sao chép là $1 + 2 + \\dots + 99 = 4950$: $O(n^2)$. Hệ số nhân (không phải hằng số cộng) mới cho khấu hao $O(1)$.\n\n#### Bẫy thường gặp\n- Tính thêm lần mở rộng không xảy ra (ra 255).\n- Bỏ sót lần mở rộng ở phần tử thứ 65 (ra 63).\n\n#### Đọc thêm\n- [Dynamic array — Wikipedia](https://en.wikipedia.org/wiki/Dynamic_array)\n- [Amortized analysis — Wikipedia](https://en.wikipedia.org/wiki/Amortized_analysis)\n",
+   "mistakes": [
+    {
+     "value": 4950,
+     "why": "Mô phỏng chiến lược tăng thêm **1 ô** mỗi lần đầy (sao chép $1 + 2 + \\dots + 99$); đề cho chiến lược nhân đôi."
+    },
+    {
+     "value": 255,
+     "why": "Tính thêm một lần mở rộng lên 256 ô (chép 128 phần tử); sau phần tử thứ 100 buffer dung lượng 128 vẫn chưa đầy."
+    },
+    {
+     "value": 63,
+     "why": "Bỏ sót lần mở rộng từ 64 lên 128 ô xảy ra khi append phần tử thứ 65 (chép 64 phần tử)."
+    }
+   ],
+   "answer": 127,
+   "tol": 0
+  },
+  {
+   "id": "T07-D02",
+   "module": "D",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung-cao",
+   "prompt": "Trang danh mục cần hiển thị sản phẩm theo **danh mục tăng dần**, trong cùng danh mục thì **giá giảm dần**; sản phẩm cùng danh mục và cùng giá giữ thứ tự gốc. Một lập trình viên dùng hai lần sắp xếp:\n\n```python\nrows = [(\"ao\", \"A\", 200), (\"but\", \"B\", 50), (\"mu\", \"A\", 150),\n        (\"tui\", \"B\", 180), (\"giay\", \"A\", 200), (\"vi\", \"B\", 50)]\nrows.sort(key=lambda r: r[2], reverse=True)\nrows.sort(key=lambda r: r[1])\nprint([r[0] for r in rows])\n```\n\nDòng `print` in ra gì?",
+   "explanation": "Lần 1 (giá giảm, ổn định): ao, giay, tui, mu, but, vi. Lần 2 (danh mục, ổn định) giữ thứ tự đó trong mỗi nhóm: A gồm ao, giay, mu; B gồm tui, but, vi.",
+   "section": "b-np",
+   "long": "#### Ý chính\n`list.sort` và `sorted` của Python (Timsort) là **ổn định**: các phần tử có khóa bằng nhau giữ nguyên thứ tự tương đối như trước khi sắp. Nhờ vậy có thể sắp theo nhiều khóa bằng cách sắp **nhiều lần, từ khóa phụ đến khóa chính**. Tài liệu Python cũng nói rõ `reverse=True` vẫn giữ tính ổn định (phần tử bằng nhau không bị đảo).\n\n#### Từng bước\n**Lần 1:** sắp theo giá giảm dần (khóa phụ), ổn định.\n\n| Thứ tự | Tên | Danh mục | Giá |\n|---|---|---|---|\n| 1 | ao | A | 200 |\n| 2 | giay | A | 200 |\n| 3 | tui | B | 180 |\n| 4 | mu | A | 150 |\n| 5 | but | B | 50 |\n| 6 | vi | B | 50 |\n\n`ao` đứng trước `giay` (cùng 200) và `but` trước `vi` (cùng 50) vì đó là thứ tự gốc.\n\n**Lần 2:** sắp theo danh mục (khóa chính), ổn định, nên trong mỗi danh mục vẫn giữ thứ tự giá của lần 1:\n\n| Danh mục A | Danh mục B |\n|---|---|\n| ao (200), giay (200), mu (150) | tui (180), but (50), vi (50) |\n\nKết quả: `['ao', 'giay', 'mu', 'tui', 'but', 'vi']`.\n\nMột lần sắp tương đương: `rows.sort(key=lambda r: (r[1], -r[2]))`; mẹo đổi dấu chỉ dùng được với khóa số. Hai lần sắp ổn định thì áp dụng cho mọi kiểu khóa, độ phức tạp vẫn $O(n\\log n)$.\n\n#### Bẫy thường gặp\n- Sắp khóa chính **trước** rồi khóa phụ sau: khóa phụ thành khóa chính.\n- Nghĩ `reverse=True` tương đương sắp tăng rồi đảo list: cách đó đảo cả các phần tử bằng nhau, còn `reverse=True` thì không.\n- Mang giả định \"sắp xếp không ổn định\" từ thuật toán khác (quicksort, heapsort) sang Python.\n\n#### Đọc thêm\n- [Sorting Techniques — Python docs](https://docs.python.org/3/howto/sorting.html)\n- [Sorting algorithm (Stability) — Wikipedia](https://en.wikipedia.org/wiki/Sorting_algorithm)\n",
+   "distractors": {
+    "A": "Tưởng `reverse=True` đảo luôn thứ tự các phần tử bằng nhau. Python đảm bảo `reverse=True` vẫn ổn định: phần tử bằng khóa giữ thứ tự gốc.",
+    "B": "Đảo vai trò hai lần sắp: lần sắp **cuối** mới là khóa chính (danh mục), lần đầu chỉ là khóa phụ (giá).",
+    "D": "Tưởng lần sắp thứ hai xếp lại từ thứ tự gốc, làm mất kết quả lần một. Sắp xếp của Python ổn định nên giữ thứ tự giá đã có trong mỗi danh mục."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`['giay', 'ao', 'mu', 'tui', 'vi', 'but']`"
+    },
+    {
+     "key": "B",
+     "text": "`['ao', 'giay', 'tui', 'mu', 'but', 'vi']`"
+    },
+    {
+     "key": "C",
+     "text": "`['ao', 'giay', 'mu', 'tui', 'but', 'vi']`"
+    },
+    {
+     "key": "D",
+     "text": "`['ao', 'mu', 'giay', 'but', 'tui', 'vi']`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T07-D03",
+   "module": "D",
+   "type": "code",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "**Bối cảnh.** Hệ thống tìm kiếm ngữ nghĩa có ma trận embedding câu hỏi `Q` shape `(m, d)` và kho đoạn văn `D` shape `(n, d)` (số thực). Viết hàm NumPy `topk_cosine(Q, D, k)` trả về mảng số nguyên shape `(m, min(k, n))`: hàng $i$ là chỉ số các đoạn văn có cosine similarity với `Q[i]` lớn nhất, **xếp giảm dần** theo cosine, với\n\n$$\\cos(\\mathbf{q}, \\mathbf{x}) = \\frac{\\mathbf{q} \\cdot \\mathbf{x}}{\\lVert \\mathbf{q} \\rVert \\, \\lVert \\mathbf{x} \\rVert}.$$\n\nYêu cầu:\n- Không dùng vòng lặp Python theo $m$ hoặc $n$ (dùng broadcasting và phép nhân ma trận `@`).\n- Vector có chuẩn bằng 0 thì coi cosine của nó với mọi vector là 0 (không được sinh `nan`).\n- Không sắp xếp toàn bộ mỗi hàng: dùng `np.argpartition` để chọn $k$ phần tử, rồi chỉ sắp $k$ phần tử đó.\n- Ghi rõ độ phức tạp thời gian và bộ nhớ theo $m, n, d, k$.\n\nCó thể giả định trong cùng một hàng không có hai cosine bằng nhau (trừ các cosine bằng 0 do vector 0).",
+   "explanation": "Chuẩn hoá từng hàng (broadcast $(m, d) / (m, 1)$), $S = \\hat{Q}\\hat{D}^\\top$ shape $(m, n)$, `argpartition` chọn $k$ cột lớn nhất mỗi hàng trong $O(n)$, rồi `argsort` chỉ trên $k$ phần tử. Tổng $O(mnd + mk\\log k)$ thời gian, $O(mn)$ bộ nhớ.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nTruy hồi top-k theo cosine cho cả batch gồm ba bước vector hoá:\n1. **Chuẩn hoá** từng hàng: $\\hat{\\mathbf{q}} = \\mathbf{q} / \\lVert \\mathbf{q} \\rVert$ (broadcast $(m, d) / (m, 1)$).\n2. **Ma trận cosine** bằng một phép nhân: $S = \\hat{Q}\\hat{D}^\\top$, shape $(m, n)$.\n3. **Chọn top-k** mỗi hàng bằng `argpartition` ($O(n)$ mỗi hàng), rồi chỉ sắp $k$ phần tử được chọn.\n\n```mermaid\nflowchart LR\n  Q[\"Q (m, d)\"] --> NQ[\"chia chuẩn hàng, keepdims, chặn chuẩn 0\"]\n  D[\"D (n, d)\"] --> ND[\"chia chuẩn hàng, keepdims, chặn chuẩn 0\"]\n  NQ --> S[\"S = Qn @ Dn.T (m, n)\"]\n  ND --> S\n  S --> P[\"argpartition(-S, k-1, axis=1)[:, :k]\"]\n  P --> T[\"argsort trong k phần tử + take_along_axis\"]\n  T --> R[\"chỉ số (m, k) giảm dần\"]\n```\n\n#### Từng bước\n| Bước | Shape | Thời gian | Bộ nhớ thêm |\n|---|---|---|---|\n| Chuẩn hoá Q, D | $(m, d)$, $(n, d)$ | $O((m + n)d)$ | $O((m + n)d)$ |\n| `S = Qu @ Du.T` | $(m, n)$ | $O(mnd)$ | $O(mn)$ |\n| `argpartition` | $(m, k)$ | $O(mn)$ trung bình | $O(mn)$ |\n| Sắp trong $k$ | $(m, k)$ | $O(mk\\log k)$ | $O(mk)$ |\n\nSo với `np.argsort(-S, axis=1)[:, :k]` ($O(mn\\log n)$), cách này đỡ một thừa số $\\log n$ ở bước chọn.\n\n**Chi tiết dễ sai:**\n- `np.argpartition(-S, k - 1, axis=1)` bảo đảm $k$ cột đầu là $k$ giá trị nhỏ nhất của `-S` (lớn nhất của `S`) nhưng **chưa theo thứ tự**, nên phải sắp lại.\n- `np.take_along_axis(idx, order, axis=1)` sắp lại chỉ số theo từng hàng; viết `idx[order]` sẽ sai vì chỉ mục theo trục 0.\n- Khi $k \\ge n$ phải dùng `min(k, n)`, nếu không `argpartition` báo lỗi `kth` ngoài phạm vi.\n- `np.divide(Q, qn, out=np.zeros_like(Q), where=qn > 0)` tránh `0/0 = nan`; `nan` sẽ làm hỏng thứ tự sắp.\n\n**Ví dụ nhỏ:** `q = (1, 0)`, kho `[(0, 0), (2, 0.1), (-1, 0), (0.5, 0.5)]` có cosine $[0;\\ 0{,}9988;\\ -1;\\ 0{,}7071]$, top-2 là chỉ số `[1, 3]`.\n\n**Khi $n$ rất lớn** (hàng triệu đoạn văn), ma trận $(m, n)$ có thể không vừa RAM: chia `D` thành từng khối, lấy top-k mỗi khối rồi gộp, hoặc chuyển sang chỉ mục ANN (ví dụ HNSW).\n\n#### Bẫy thường gặp\n- Chuẩn hoá theo `axis=0` (theo cột) thay vì theo hàng.\n- Dùng `argpartition` rồi trả luôn, quên sắp lại.\n\n#### Đọc thêm\n- [numpy.argpartition — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.argpartition.html)\n- [numpy.take_along_axis — NumPy docs](https://numpy.org/doc/stable/reference/generated/numpy.take_along_axis.html)\n- [Cosine similarity — Wikipedia](https://en.wikipedia.org/wiki/Cosine_similarity)\n",
+   "modelAnswer": "```python\nimport numpy as np\n\ndef topk_cosine(Q, D, k):\n    \"\"\"Chỉ số top-k đoạn văn theo cosine cho từng câu hỏi, shape (m, min(k, n)).\n\n    Thời gian: O(m*n*d) cho phép nhân ma trận + O(m*n) cho argpartition\n               + O(m*k*log k) để sắp k phần tử mỗi hàng.\n    Bộ nhớ:    O(m*n) cho ma trận S (cộng O((m+n)*d) cho bản chuẩn hoá).\n    \"\"\"\n    Q = np.asarray(Q, dtype=np.float64)\n    D = np.asarray(D, dtype=np.float64)\n    qn = np.linalg.norm(Q, axis=1, keepdims=True)          # (m, 1)\n    dn = np.linalg.norm(D, axis=1, keepdims=True)          # (n, 1)\n    Qu = np.divide(Q, qn, out=np.zeros_like(Q), where=qn > 0)   # vector 0 giữ nguyên 0\n    Du = np.divide(D, dn, out=np.zeros_like(D), where=dn > 0)\n    S = Qu @ Du.T                                          # (m, n) cosine\n    k = min(k, S.shape[1])\n    idx = np.argpartition(-S, k - 1, axis=1)[:, :k]        # k lớn nhất, chưa theo thứ tự\n    part = np.take_along_axis(S, idx, axis=1)              # (m, k) giá trị tương ứng\n    order = np.argsort(-part, axis=1)                      # chỉ sắp k phần tử\n    return np.take_along_axis(idx, order, axis=1)\n```\n\n- `keepdims=True` giữ chuẩn ở dạng cột $(m, 1)$ để broadcast chia từng hàng.\n- `np.divide(..., where=qn > 0)` tránh chia cho 0: hàng có chuẩn 0 thành vector 0, cosine bằng 0 thay vì `nan`.\n- `argpartition` với `kth = k - 1` đặt $k$ giá trị nhỏ nhất của `-S` (tức lớn nhất của `S`) vào $k$ cột đầu trong $O(n)$ mỗi hàng; sau đó chỉ sắp $k$ phần tử.",
+   "rubric": [
+    {
+     "criterion": "Chuẩn hoá L2 theo hàng đúng (`axis=1`, `keepdims=True` hoặc `[:, None]`) và xử lý vector chuẩn 0 không sinh `nan`",
+     "points": 1.5
+    },
+    {
+     "criterion": "Tính ma trận cosine $(m, n)$ bằng một phép `@`, không có vòng lặp Python theo $m$ hoặc $n$",
+     "points": 1.5
+    },
+    {
+     "criterion": "Dùng `argpartition` chọn top-k rồi sắp lại trong $k$ phần tử (`take_along_axis` hoặc chỉ mục tương đương), trả đúng thứ tự giảm dần, xử lý $k \\ge n$",
+     "points": 2
+    },
+    {
+     "criterion": "Nêu đúng độ phức tạp: thời gian $O(mnd + mn + mk\\log k)$, bộ nhớ $O(mn)$",
+     "points": 1
+    }
+   ]
+  }
+ ]
+}

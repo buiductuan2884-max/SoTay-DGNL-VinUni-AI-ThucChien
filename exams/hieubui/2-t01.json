@@ -1,0 +1,975 @@
+{
+ "title": "CĐ-01 · Đại số tuyến tính",
+ "description": "Vector, tích vô hướng, chuẩn, cosine — 20% · Ma trận: nhân, chuyển vị, hạng, định thức, nghịch đảo — 30% · Hệ phương trình, độc lập tuyến tính — 15% · Trị riêng, vector riêng, chéo hóa — 20% · SVD, PCA, xấp xỉ hạng thấp — 15%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T01-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Cho hai vector $\\mathbf{u} = (2, -1, 3)$ và $\\mathbf{v} = (4, 5, -1)$ trong $\\mathbb{R}^3$. Tích vô hướng $\\mathbf{u} \\cdot \\mathbf{v}$ bằng bao nhiêu?",
+   "explanation": "$\\mathbf{u} \\cdot \\mathbf{v} = 2 \\cdot 4 + (-1) \\cdot 5 + 3 \\cdot (-1) = 8 - 5 - 3 = 0$. Tích vô hướng bằng 0 nên hai vector trực giao ($\\mathbf{u} \\perp \\mathbf{v}$).",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nTích vô hướng (dot product) của hai vector cùng số chiều là **tổng các tích từng cặp thành phần cùng vị trí**: $\\mathbf{u} \\cdot \\mathbf{v} = \\sum_i u_i v_i$. Kết quả là một **số**. Nếu tích vô hướng bằng 0 (và hai vector khác 0) thì hai vector **trực giao**, tức góc giữa chúng là $90^\\circ$.\n\n#### Từng bước\n| Vị trí $i$ | $u_i$ | $v_i$ | $u_i v_i$ |\n|---|---|---|---|\n| 1 | 2 | 4 | 8 |\n| 2 | −1 | 5 | −5 |\n| 3 | 3 | −1 | −3 |\n| **Tổng** | | | **0** |\n\nVậy $\\mathbf{u} \\cdot \\mathbf{v} = 0$ và $\\cos\\theta = 0 \\Rightarrow \\theta = 90^\\circ$.\n\n```python\nimport numpy as np\nu = np.array([2, -1, 3]); v = np.array([4, 5, -1])\nprint(u @ v)        # 0\nprint(u * v)        # [ 8 -5 -3]  <- tích từng phần tử, CHƯA phải tích vô hướng\n```\n\n#### Bẫy thường gặp\n- Nhầm tích vô hướng với tích từng phần tử (Hadamard, `u * v` trong NumPy): kết quả phải là một số.\n- Bỏ dấu âm khi nhân: $(-1) \\cdot 5 = -5$, $3 \\cdot (-1) = -3$.\n- Trong AI, hai embedding trực giao nghĩa là \"không liên quan\" theo thước đo cosine; tích vô hướng âm nghĩa là ngược hướng.\n\n#### Đọc thêm\n- [Wikipedia: Dot product](https://en.wikipedia.org/wiki/Dot_product)\n- [3Blue1Brown: Dot products and duality](https://www.3blue1brown.com/lessons/dot-products)",
+   "distractors": {
+    "A": "Lấy trị tuyệt đối từng tích ($8 + 5 + 3 = 16$), làm mất dấu âm của $(-1) \\cdot 5$ và $3 \\cdot (-1)$.",
+    "C": "Đây là tích từng phần tử (Hadamard), còn thiếu bước cộng lại; tích vô hướng là **một số**, không phải vector.",
+    "D": "Sai dấu ở tích cuối: $3 \\cdot (-1) = -3$ chứ không phải $+3$, nên $8 - 5 + 3 = 6$ là sai."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$16$"
+    },
+    {
+     "key": "B",
+     "text": "$0$"
+    },
+    {
+     "key": "C",
+     "text": "$(8, -5, -3)$"
+    },
+    {
+     "key": "D",
+     "text": "$6$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T01-A02",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Trong hồi quy Lasso, số hạng phạt là $\\lambda \\lVert \\mathbf{w} \\rVert_1$. Với vector trọng số $\\mathbf{w} = (3, -4, 0, 12)$, chuẩn $\\lVert \\mathbf{w} \\rVert_1$ bằng bao nhiêu?",
+   "explanation": "$\\lVert \\mathbf{w} \\rVert_1 = \\sum_i \\lvert w_i \\rvert = 3 + 4 + 0 + 12 = 19$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nBa chuẩn hay gặp của vector $\\mathbf{w} \\in \\mathbb{R}^n$:\n- $\\lVert \\mathbf{w} \\rVert_1 = \\sum_i \\lvert w_i \\rvert$ (Lasso, phạt L1),\n- $\\lVert \\mathbf{w} \\rVert_2 = \\sqrt{\\sum_i w_i^2}$ (Ridge dùng bình phương của chuẩn này),\n- $\\lVert \\mathbf{w} \\rVert_\\infty = \\max_i \\lvert w_i \\rvert$.\n\n#### Từng bước\n| Chuẩn | Công thức với $\\mathbf{w} = (3, -4, 0, 12)$ | Kết quả |\n|---|---|---|\n| $L_1$ | $3 + 4 + 0 + 12$ | **19** |\n| $L_2$ | $\\sqrt{9 + 16 + 0 + 144} = \\sqrt{169}$ | 13 |\n| $L_\\infty$ | $\\max(3, 4, 0, 12)$ | 12 |\n| (sai) tổng có dấu | $3 - 4 + 0 + 12$ | 11 |\n\n```python\nimport numpy as np\nw = np.array([3, -4, 0, 12])\nprint(np.linalg.norm(w, 1), np.linalg.norm(w), np.linalg.norm(w, np.inf))  # 19.0 13.0 12.0\n```\n\n#### Hình minh hoạ\nTập các vector có chuẩn bằng 1 trong mặt phẳng có hình dạng khác nhau theo từng chuẩn. Hình thoi của $L_1$ có \"góc nhọn\" nằm trên các trục, nên khi tối ưu có phạt L1, nghiệm hay rơi vào góc, tức một số trọng số bằng đúng 0 (tính thưa của Lasso).\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Hình cầu đơn vị theo chuẩn L1, L2 và L vô cùng trong mặt phẳng\">\n<line x1=\"10\" y1=\"115\" x2=\"190\" y2=\"115\" stroke=\"currentColor\" stroke-opacity=\"0.4\"/>\n<line x1=\"100\" y1=\"25\" x2=\"100\" y2=\"205\" stroke=\"currentColor\" stroke-opacity=\"0.4\"/>\n<text x=\"100.0\" y=\"232.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">‖w‖₁ = 1 (hình thoi)</text>\n<line x1=\"190\" y1=\"115\" x2=\"370\" y2=\"115\" stroke=\"currentColor\" stroke-opacity=\"0.4\"/>\n<line x1=\"280\" y1=\"25\" x2=\"280\" y2=\"205\" stroke=\"currentColor\" stroke-opacity=\"0.4\"/>\n<text x=\"280.0\" y=\"232.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">‖w‖₂ = 1 (đường tròn)</text>\n<line x1=\"370\" y1=\"115\" x2=\"550\" y2=\"115\" stroke=\"currentColor\" stroke-opacity=\"0.4\"/>\n<line x1=\"460\" y1=\"25\" x2=\"460\" y2=\"205\" stroke=\"currentColor\" stroke-opacity=\"0.4\"/>\n<text x=\"460.0\" y=\"232.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">‖w‖∞ = 1 (hình vuông)</text>\n<polygon points=\"100,45 170,115 100,185 30,115\" fill=\"#10b981\" fill-opacity=\"0.15\" stroke=\"#10b981\" stroke-width=\"2.5\"/>\n<circle cx=\"280\" cy=\"115\" r=\"70\" fill=\"#3b82f6\" fill-opacity=\"0.15\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<rect x=\"390\" y=\"45\" width=\"140\" height=\"140\" fill=\"#f59e0b\" fill-opacity=\"0.15\" stroke=\"#f59e0b\" stroke-width=\"2.5\"/>\n<text x=\"280.0\" y=\"20.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"#10b981\">hình thoi L1 có góc nhọn nằm trên trục → Lasso đẩy nhiều trọng số về đúng 0</text>\n</svg>\n\n#### Bẫy thường gặp\n- Quên trị tuyệt đối: chuẩn luôn $\\ge 0$ và chỉ bằng 0 khi vector bằng 0.\n- Nhầm $L_1$ với $L_2$: phạt L2 làm trọng số nhỏ đều, phạt L1 làm trọng số **thưa**.\n\n#### Đọc thêm\n- [Wikipedia: Norm (mathematics)](https://en.wikipedia.org/wiki/Norm_%28mathematics%29)\n- [Wikipedia: Lasso (statistics)](https://en.wikipedia.org/wiki/Lasso_%28statistics%29)",
+   "distractors": {
+    "A": "Đây là chuẩn $L_2$: $\\sqrt{9 + 16 + 0 + 144} = \\sqrt{169} = 13$, không phải $L_1$.",
+    "B": "Cộng thẳng các thành phần $3 - 4 + 0 + 12 = 11$, quên lấy trị tuyệt đối.",
+    "D": "Đây là chuẩn $L_\\infty$ (trị tuyệt đối lớn nhất), không phải tổng trị tuyệt đối."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$13$"
+    },
+    {
+     "key": "B",
+     "text": "$11$"
+    },
+    {
+     "key": "C",
+     "text": "$19$"
+    },
+    {
+     "key": "D",
+     "text": "$12$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T01-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Lớp tuyến tính PyTorch `nn.Linear(768, 512)` lưu ma trận trọng số $W \\in \\mathbb{R}^{512 \\times 768}$ và tính $Y = XW^\\top + \\mathbf{b}$. Đầu vào là một batch $X \\in \\mathbb{R}^{32 \\times 768}$ (32 câu, mỗi câu là một embedding 768 chiều). Kích thước của $Y$ là gì?",
+   "explanation": "$(32 \\times 768) \\cdot (768 \\times 512) = 32 \\times 512$: số hàng lấy từ $X$, số cột lấy từ $W^\\top$; chiều trong (768) phải khớp và biến mất sau phép nhân.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nQuy tắc kích thước khi nhân ma trận: $(m \\times n) \\cdot (n \\times p) = m \\times p$. Chiều \"trong\" $n$ phải khớp và biến mất; chiều \"ngoài\" quyết định kích thước kết quả. PyTorch lưu trọng số của `nn.Linear(in, out)` với dạng `(out, in)` nên phải chuyển vị khi nhân bên phải.\n\n#### Từng bước\n1. $X$: $32 \\times 768$ (batch × chiều vào).\n2. $W$: $512 \\times 768$ nên $W^\\top$: $768 \\times 512$.\n3. $XW^\\top$: $(32 \\times 768)(768 \\times 512) = 32 \\times 512$.\n4. Bias $\\mathbf{b} \\in \\mathbb{R}^{512}$ được broadcast cộng vào từng hàng, không đổi kích thước.\n\n```mermaid\nflowchart LR\n  X[\"X: 32 × 768\"] --> M[\"nhân với W chuyển vị: 768 × 512\"]\n  M --> Y[\"Y: 32 × 512\"]\n  B[\"bias b: 512, cộng vào mỗi hàng\"] --> Y\n```\n\n| Biểu thức | Kích thước | Ghi chú |\n|---|---|---|\n| $XW^\\top$ | $32 \\times 512$ | đúng, mỗi hàng là đầu ra của một câu |\n| $WX^\\top$ | $512 \\times 32$ | là $Y^\\top$ |\n| $W^\\top$ | $768 \\times 512$ | trọng số, không phải đầu ra |\n\n```python\nimport torch\nlin = torch.nn.Linear(768, 512)\nprint(lin.weight.shape, lin(torch.zeros(32, 768)).shape)  # (512, 768) (32, 512)\n```\n\n#### Bẫy thường gặp\n- Nghĩ lớp tuyến tính giữ nguyên số chiều: số chiều đầu ra do `out_features` quyết định.\n- Số tham số của lớp này là $768 \\cdot 512 + 512$ (trọng số + bias).\n\n#### Đọc thêm\n- [PyTorch docs: torch.nn.Linear](https://pytorch.org/docs/stable/generated/torch.nn.Linear.html)\n- [Wikipedia: Matrix multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication)",
+   "distractors": {
+    "B": "Nghĩ lớp tuyến tính giữ nguyên số chiều đầu vào; thật ra số cột của $Y$ là số chiều đầu ra (512).",
+    "C": "Đây là kích thước của $WX^\\top$, tức $Y^\\top$ (đặt trọng số bên trái), không phải $Y$.",
+    "D": "Đây là kích thước của $W^\\top$; nhầm ma trận trọng số với đầu ra."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$32 \\times 512$"
+    },
+    {
+     "key": "B",
+     "text": "$32 \\times 768$"
+    },
+    {
+     "key": "C",
+     "text": "$512 \\times 32$"
+    },
+    {
+     "key": "D",
+     "text": "$768 \\times 512$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T01-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Cho $A \\in \\mathbb{R}^{2 \\times 3}$ và $B \\in \\mathbb{R}^{3 \\times 4}$. Ma trận $(AB)^\\top$ bằng biểu thức nào và có kích thước bao nhiêu?",
+   "explanation": "$(AB)^\\top = B^\\top A^\\top$ (đảo thứ tự). $AB$ có kích thước $2 \\times 4$ nên $(AB)^\\top$ là $4 \\times 2$; kiểm: $B^\\top$ là $4 \\times 3$, $A^\\top$ là $3 \\times 2$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nChuyển vị của một tích **đảo thứ tự**: $(AB)^\\top = B^\\top A^\\top$. Lý do: phần tử $(i, j)$ của $(AB)^\\top$ là phần tử $(j, i)$ của $AB$, tức hàng $j$ của $A$ nhân cột $i$ của $B$, cũng chính là hàng $i$ của $B^\\top$ nhân cột $j$ của $A^\\top$.\n\n#### Từng bước\n| Ma trận | Kích thước |\n|---|---|\n| $A$ | $2 \\times 3$ |\n| $B$ | $3 \\times 4$ |\n| $AB$ | $2 \\times 4$ |\n| $(AB)^\\top$ | $4 \\times 2$ |\n| $B^\\top A^\\top$ | $(4 \\times 3)(3 \\times 2) = 4 \\times 2$ ✓ |\n| $A^\\top B^\\top$ | $(3 \\times 2)(4 \\times 3)$: không nhân được ✗ |\n\nChỉ riêng việc kiểm kích thước cũng đủ loại $A^\\top B^\\top$.\n\n```python\nimport numpy as np\nrng = np.random.default_rng(0)\nA = rng.integers(-3, 4, (2, 3)); B = rng.integers(-3, 4, (3, 4))\nprint(np.array_equal((A @ B).T, B.T @ A.T), (A @ B).T.shape)  # True (4, 2)\n```\n\n#### Bẫy thường gặp\n- Giữ nguyên thứ tự như với số thực; với ma trận, phép nhân không giao hoán.\n- Quên rằng chuyển vị đổi kích thước $m \\times n$ thành $n \\times m$.\n- Ứng dụng: gradient của lớp tuyến tính $Y = XW^\\top$ theo $X$ là $\\frac{\\partial L}{\\partial Y} W$, có được nhờ đúng quy tắc này.\n\n#### Đọc thêm\n- [Wikipedia: Transpose](https://en.wikipedia.org/wiki/Transpose)\n- [mml-book, chương 2 (Linear Algebra)](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "A": "Giữ nguyên thứ tự và nghĩ chuyển vị không đổi kích thước; $A^\\top B^\\top$ là $(3 \\times 2)(4 \\times 3)$, không nhân được.",
+    "B": "Biểu thức đúng nhưng quên rằng chuyển vị đổi kích thước $2 \\times 4$ thành $4 \\times 2$.",
+    "C": "Kích thước đúng nhưng giữ thứ tự $A^\\top B^\\top$; tích này không xác định vì số cột của $A^\\top$ (2) khác số hàng của $B^\\top$ (4)."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$A^\\top B^\\top$, kích thước $2 \\times 4$"
+    },
+    {
+     "key": "B",
+     "text": "$B^\\top A^\\top$, kích thước $2 \\times 4$"
+    },
+    {
+     "key": "C",
+     "text": "$A^\\top B^\\top$, kích thước $4 \\times 2$"
+    },
+    {
+     "key": "D",
+     "text": "$B^\\top A^\\top$, kích thước $4 \\times 2$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T01-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Tập vector nào dưới đây **phụ thuộc tuyến tính**?",
+   "explanation": "$(5, 5, 0) = 2 \\cdot (1, 2, -1) + 1 \\cdot (3, 1, 2)$, tức $2\\mathbf{v}_1 + \\mathbf{v}_2 - \\mathbf{v}_3 = \\mathbf{0}$ với hệ số không đồng thời bằng 0. Không có hai vector nào cùng phương, nhưng cả ba vẫn phụ thuộc.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nTập $\\{\\mathbf{v}_1, \\dots, \\mathbf{v}_k\\}$ **phụ thuộc tuyến tính** nếu có hệ số $c_1, \\dots, c_k$ **không đồng thời bằng 0** sao cho $c_1\\mathbf{v}_1 + \\dots + c_k\\mathbf{v}_k = \\mathbf{0}$; tương đương: hạng của ma trận ghép các vector nhỏ hơn $k$. Với $k$ vector trong $\\mathbb{R}^k$ có thể dùng định thức: $\\det = 0 \\iff$ phụ thuộc.\n\n#### Từng bước\n| Tập | Kiểm | Kết luận |\n|---|---|---|\n| $(1,1,0), (0,1,1), (1,0,1)$ | $\\det = 1(1 - 0) - 1(0 - 1) + 0 = 2$ | độc lập |\n| $(2,0,0), (0,0,3)$ | không cùng phương, hạng 2 | độc lập |\n| $(1,2,-1), (3,1,2), (5,5,0)$ | $2\\mathbf{v}_1 + \\mathbf{v}_2 = (5, 5, 0) = \\mathbf{v}_3$ | **phụ thuộc** |\n| $(1,-1), (-2,3)$ | $\\det = 3 - 2 = 1$ | độc lập |\n\nVới tập thứ ba: $\\det\\begin{bmatrix} 1 & 2 & -1 \\\\ 3 & 1 & 2 \\\\ 5 & 5 & 0 \\end{bmatrix} = 1(0 - 10) - 2(0 - 10) + (-1)(15 - 5) = -10 + 20 - 10 = 0$.\n\n```python\nimport numpy as np\nS = np.array([[1, 2, -1], [3, 1, 2], [5, 5, 0]])\nprint(np.linalg.matrix_rank(S), round(np.linalg.det(S), 9))  # 2 0.0\n```\n\n#### Bẫy thường gặp\n- \"Không có hai vector nào cùng phương\" **không** đủ để kết luận độc lập khi có từ 3 vector trở lên.\n- Số 0 trong thành phần không làm vector \"thừa\".\n- Trong dữ liệu, một cột là tổ hợp tuyến tính của các cột khác gây đa cộng tuyến (xem câu về hạng).\n\n#### Đọc thêm\n- [Wikipedia: Linear independence](https://en.wikipedia.org/wiki/Linear_independence)\n- [3Blue1Brown: Linear combinations, span, and basis vectors](https://www.3blue1brown.com/lessons/span)",
+   "distractors": {
+    "A": "Thấy ba vector có cùng 'mẫu' 0/1 xoay vòng nên đoán phụ thuộc; thật ra định thức ma trận ghép bằng $2 \\ne 0$ nên độc lập.",
+    "B": "Nghĩ vector có nhiều số 0 là 'thừa'; hai vector khác 0 và không cùng phương thì luôn độc lập.",
+    "D": "Thấy dấu ngược nhau nên tưởng vector này là bội của vector kia; nhưng $(-2, 3) \\ne k(1, -1)$ với mọi $k$ (định thức $= 1$)."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\{(1, 1, 0),\\ (0, 1, 1),\\ (1, 0, 1)\\}$"
+    },
+    {
+     "key": "B",
+     "text": "$\\{(2, 0, 0),\\ (0, 0, 3)\\}$"
+    },
+    {
+     "key": "C",
+     "text": "$\\{(1, 2, -1),\\ (3, 1, 2),\\ (5, 5, 0)\\}$"
+    },
+    {
+     "key": "D",
+     "text": "$\\{(1, -1),\\ (-2, 3)\\}$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T01-A06",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Cho $A = \\begin{bmatrix} 5 & 2 \\\\ 2 & 2 \\end{bmatrix}$. Vector nào dưới đây là một vector riêng của $A$?",
+   "explanation": "$A(2, 1)^\\top = (12, 6)^\\top = 6 \\cdot (2, 1)^\\top$, nên $(2, 1)$ là vector riêng ứng với trị riêng $\\lambda = 6$. Kiểm vector riêng: nhân $A\\mathbf{v}$ rồi xem kết quả có cùng phương với $\\mathbf{v}$ không.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\n$\\mathbf{v} \\ne \\mathbf{0}$ là vector riêng của $A$ nếu $A\\mathbf{v} = \\lambda\\mathbf{v}$: phép biến đổi chỉ **co giãn** $\\mathbf{v}$, không đổi phương. Muốn kiểm một vector cho sẵn, chỉ cần nhân $A\\mathbf{v}$ rồi xem có tỉ lệ với $\\mathbf{v}$ không, không cần giải đa thức đặc trưng.\n\n#### Từng bước\n| $\\mathbf{v}$ | $A\\mathbf{v}$ | Cùng phương? |\n|---|---|---|\n| $(2, 1)$ | $(10 + 2,\\ 4 + 2) = (12, 6)$ | có, $= 6\\mathbf{v}$ ✓ |\n| $(1, 2)$ | $(5 + 4,\\ 2 + 4) = (9, 6)$ | không |\n| $(1, 1)$ | $(7, 4)$ | không |\n| $(2, -1)$ | $(10 - 2,\\ 4 - 2) = (8, 2)$ | không |\n\nĐối chiếu: $\\operatorname{tr} A = 7$, $\\det A = 6$, nên $\\lambda^2 - 7\\lambda + 6 = 0$, trị riêng $6$ và $1$. Vector riêng của $\\lambda = 1$ là $(1, -2)$, vuông góc với $(2, 1)$ vì $A$ đối xứng.\n\n```python\nimport numpy as np\nw, V = np.linalg.eigh(np.array([[5., 2.], [2., 2.]]))\nprint(w)            # [1. 6.]\nprint(V[:, 1] / V[1, 1])   # [2. 1.]  -> cùng phương với (2, 1)\n```\n\n#### Bẫy thường gặp\n- Đảo thứ tự thành phần: $(1, 2)$ khác phương với $(2, 1)$.\n- Nhớ máy móc \"$(1, 1)$ luôn là vector riêng\": chỉ đúng khi tổng mỗi hàng bằng nhau.\n- NumPy trả vector riêng đã chuẩn hoá độ dài 1 (có thể đổi dấu); mọi bội khác 0 vẫn là vector riêng.\n\n#### Đọc thêm\n- [Wikipedia: Eigenvalues and eigenvectors](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors)\n- [3Blue1Brown: Eigenvectors and eigenvalues](https://www.3blue1brown.com/lessons/eigenvalues)",
+   "distractors": {
+    "B": "$A(1, 2)^\\top = (9, 6)^\\top$, không cùng phương với $(1, 2)$; đảo thứ tự hai thành phần làm mất tính chất vector riêng.",
+    "C": "$(1, 1)$ là vector riêng của ma trận dạng $\\begin{bmatrix} a & b \\\\ b & a \\end{bmatrix}$ (hai phần tử đường chéo bằng nhau); ở đây $A(1, 1)^\\top = (7, 4)^\\top$.",
+    "D": "Vector riêng còn lại là $(1, -2)$ (vuông góc với $(2, 1)$); còn $A(2, -1)^\\top = (8, 2)^\\top$, không cùng phương."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$(2, 1)$"
+    },
+    {
+     "key": "B",
+     "text": "$(1, 2)$"
+    },
+    {
+     "key": "C",
+     "text": "$(1, 1)$"
+    },
+    {
+     "key": "D",
+     "text": "$(2, -1)$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T01-A07",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Ma trận $A \\in \\mathbb{R}^{3 \\times 3}$ có ba trị riêng $2$, $3$ và $-1$. Định thức và vết (trace) của $A$ là:",
+   "explanation": "$\\det A = \\prod_i \\lambda_i = 2 \\cdot 3 \\cdot (-1) = -6$ và $\\operatorname{tr} A = \\sum_i \\lambda_i = 2 + 3 + (-1) = 4$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nVới ma trận vuông $A$ cấp $n$ có trị riêng $\\lambda_1, \\dots, \\lambda_n$ (đếm cả bội, kể cả phức):\n$$\\det A = \\prod_{i=1}^n \\lambda_i, \\qquad \\operatorname{tr} A = \\sum_{i=1}^n \\lambda_i.$$\nĐây là hai cách kiểm nhanh khi tính trị riêng bằng tay.\n\n#### Từng bước\n| Đại lượng | Tính | Kết quả |\n|---|---|---|\n| $\\det A$ | $2 \\cdot 3 \\cdot (-1)$ | $-6$ |\n| $\\operatorname{tr} A$ | $2 + 3 + (-1)$ | $4$ |\n\nVí dụ cụ thể: $A = \\operatorname{diag}(2, 3, -1)$ hoặc bất kỳ $PDP^{-1}$ nào với $D = \\operatorname{diag}(2, 3, -1)$ đều cho cùng $\\det$ và $\\operatorname{tr}$, vì hai đại lượng này bất biến qua phép đồng dạng.\n\n```python\nimport numpy as np\nP = np.random.default_rng(1).normal(size=(3, 3))\nA = P @ np.diag([2, 3, -1]) @ np.linalg.inv(P)\nprint(round(np.linalg.det(A), 6), round(np.trace(A), 6))   # -6.0 4.0\n```\n\n#### Bẫy thường gặp\n- Đảo \"tích\" và \"tổng\".\n- Bỏ dấu âm: một trị riêng âm làm định thức đổi dấu, nghĩa là phép biến đổi đảo hướng không gian.\n- Định thức bằng 0 $\\iff$ có trị riêng 0 $\\iff$ ma trận không khả nghịch.\n\n#### Đọc thêm\n- [Wikipedia: Trace (linear algebra)](https://en.wikipedia.org/wiki/Trace_%28linear_algebra%29)\n- [Wikipedia: Determinant](https://en.wikipedia.org/wiki/Determinant)",
+   "distractors": {
+    "A": "Đảo hai công thức: định thức là **tích** trị riêng, vết là **tổng** trị riêng.",
+    "B": "Bỏ dấu âm của trị riêng $-1$ khi nhân; tích có một thừa số âm nên âm.",
+    "C": "Cộng trị tuyệt đối $2 + 3 + 1 = 6$; vết là tổng có dấu của các trị riêng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\det A = 4,\\ \\operatorname{tr} A = -6$"
+    },
+    {
+     "key": "B",
+     "text": "$\\det A = 6,\\ \\operatorname{tr} A = 4$"
+    },
+    {
+     "key": "C",
+     "text": "$\\det A = -6,\\ \\operatorname{tr} A = 6$"
+    },
+    {
+     "key": "D",
+     "text": "$\\det A = -6,\\ \\operatorname{tr} A = 4$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T01-A08",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "LoRA tinh chỉnh một ma trận trọng số $W_0 \\in \\mathbb{R}^{1024 \\times 1024}$ bằng cách đóng băng $W_0$ và chỉ học thêm $\\Delta W = BA$, với $B \\in \\mathbb{R}^{1024 \\times 8}$ và $A \\in \\mathbb{R}^{8 \\times 1024}$ (hạng $r = 8$). Số tham số cần huấn luyện cho ma trận này là bao nhiêu?",
+   "explanation": "Số tham số $= 1024 \\cdot 8 + 8 \\cdot 1024 = r(d + k) = 8 \\cdot 2048 = 16\\,384$, chỉ khoảng $1{,}6\\%$ của $1024^2 = 1\\,048\\,576$ tham số khi tinh chỉnh toàn bộ; $\\Delta W$ có hạng tối đa $8$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nLoRA (Low-Rank Adaptation) giữ nguyên $W_0 \\in \\mathbb{R}^{d \\times k}$ và học một cập nhật hạng thấp $\\Delta W = BA$, với $B \\in \\mathbb{R}^{d \\times r}$, $A \\in \\mathbb{R}^{r \\times k}$, $r \\ll \\min(d, k)$. Số tham số học được là $r(d + k)$ thay vì $dk$. Giả thuyết đằng sau: cập nhật khi tinh chỉnh có \"hạng nội tại\" thấp.\n\n#### Từng bước\n| Cách tinh chỉnh | Số tham số | Tỉ lệ |\n|---|---|---|\n| Toàn bộ $W_0$ | $1024 \\cdot 1024 = 1\\,048\\,576$ | 100% |\n| LoRA $r = 8$ | $1024 \\cdot 8 + 8 \\cdot 1024 = 16\\,384$ | $\\approx 1{,}56\\%$ |\n| LoRA $r = 16$ | $32\\,768$ | $\\approx 3{,}1\\%$ |\n\nKhi suy luận có thể gộp $W = W_0 + BA$ nên không tốn thêm độ trễ. $\\operatorname{rank}(BA) \\le r = 8$.\n\n```mermaid\nflowchart LR\n  x[\"x: 1024 chiều\"] --> W0[\"W0: 1024 × 1024, đóng băng\"]\n  x --> A[\"A: 8 × 1024, học\"]\n  A --> Bm[\"B: 1024 × 8, học\"]\n  W0 --> S((\"cộng\"))\n  Bm --> S\n  S --> h[\"h = W0 x + B A x\"]\n```\n\n```python\nd = k = 1024; r = 8\nprint(r * (d + k), d * k, round(r * (d + k) / (d * k) * 100, 2))  # 16384 1048576 1.56\n```\n\n#### Bẫy thường gặp\n- Chỉ đếm một ma trận ($B$ hoặc $A$).\n- Nghĩ LoRA \"nén\" $W_0$: thật ra $W_0$ vẫn nguyên, LoRA chỉ nén **phần cập nhật**.\n\n#### Đọc thêm\n- [Hu et al. (2021), LoRA (arXiv:2106.09685)](https://arxiv.org/abs/2106.09685)\n- [Hugging Face PEFT: LoRA conceptual guide](https://huggingface.co/docs/peft/main/en/conceptual_guides/lora)",
+   "distractors": {
+    "A": "Đây là số phần tử của $W_0$ (tinh chỉnh toàn bộ), trong khi LoRA đóng băng $W_0$.",
+    "C": "Chỉ đếm một trong hai ma trận ($B$ hoặc $A$, mỗi ma trận $8 \\cdot 1024$ phần tử); cả hai đều được huấn luyện.",
+    "D": "Nhân $r \\cdot d \\cdot k$ như thể có 8 bản sao đầy đủ của $W_0$; LoRA dùng tích của hai ma trận 'mỏng'."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$1\\,048\\,576$"
+    },
+    {
+     "key": "B",
+     "text": "$16\\,384$"
+    },
+    {
+     "key": "C",
+     "text": "$8\\,192$"
+    },
+    {
+     "key": "D",
+     "text": "$8\\,388\\,608$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T01-B01",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Một hệ tìm kiếm ngữ nghĩa so khớp truy vấn với đoạn văn bằng embedding (rút gọn còn 4 chiều để tính tay). Truy vấn có vector $\\mathbf{q} = (2, 1, 0, 2)$, một đoạn văn có vector $\\mathbf{d} = (4, 0, 4, 2)$. Tính cosine similarity $\\cos(\\mathbf{q}, \\mathbf{d})$. **Làm tròn 3 chữ số thập phân.**",
+   "explanation": "$\\cos(\\mathbf{q}, \\mathbf{d}) = \\dfrac{\\mathbf{q} \\cdot \\mathbf{d}}{\\lVert \\mathbf{q} \\rVert \\lVert \\mathbf{d} \\rVert} = \\dfrac{8 + 0 + 0 + 4}{\\sqrt{9} \\cdot \\sqrt{36}} = \\dfrac{12}{18} \\approx 0{,}667$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nCosine similarity đo **góc** giữa hai vector, bỏ qua độ dài:\n$$\\cos(\\mathbf{q}, \\mathbf{d}) = \\frac{\\mathbf{q} \\cdot \\mathbf{d}}{\\lVert \\mathbf{q} \\rVert_2 \\lVert \\mathbf{d} \\rVert_2} \\in [-1, 1].$$\nĐây là thước đo mặc định khi so khớp embedding trong tìm kiếm ngữ nghĩa và RAG.\n\n#### Từng bước\n1. Tích vô hướng: $2 \\cdot 4 + 1 \\cdot 0 + 0 \\cdot 4 + 2 \\cdot 2 = 12$.\n2. Chuẩn: $\\lVert \\mathbf{q} \\rVert = \\sqrt{4 + 1 + 0 + 4} = 3$; $\\lVert \\mathbf{d} \\rVert = \\sqrt{16 + 0 + 16 + 4} = 6$.\n3. $\\cos = 12/18 = 2/3 \\approx 0{,}667$, tương ứng góc $\\approx 48{,}2^\\circ$.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 230\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Góc giữa vector truy vấn q và vector đoạn văn d\">\n<defs><marker id=\"ahB01\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs>\n<line x1=\"70.0\" y1=\"200.0\" x2=\"267.0\" y2=\"165.3\" stroke=\"#3b82f6\" stroke-width=\"2.5\" marker-end=\"url(#ahB01)\"/>\n<line x1=\"70.0\" y1=\"200.0\" x2=\"175.4\" y2=\"30.0\" stroke=\"#10b981\" stroke-width=\"2.5\" marker-end=\"url(#ahB01)\"/>\n<path d=\"M124.2 190.4 A55 55 0 0 0 99.0 153.3\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"2\"/>\n<text x=\"132.1\" y=\"158.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#f59e0b\">θ ≈ 48,2°</text>\n<text x=\"261.0\" y=\"189.3\" font-size=\"13\" text-anchor=\"end\" fill=\"#3b82f6\">q = (2, 1, 0, 2)</text>\n<text x=\"183.4\" y=\"30.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#10b981\">d = (4, 0, 4, 2)</text>\n<text x=\"340.0\" y=\"120.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">q · d = 8 + 0 + 0 + 4 = 12</text>\n<text x=\"340.0\" y=\"144.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">‖q‖ = √9 = 3</text>\n<text x=\"340.0\" y=\"168.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">‖d‖ = √36 = 6</text>\n<text x=\"340.0\" y=\"192.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\" font-weight=\"bold\">cos θ = 12 / (3 · 6) ≈ 0,667</text>\n<text x=\"340.0\" y=\"220.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">(sơ đồ trong mặt phẳng chứa q và d)</text>\n</svg>\n\n| Cách tính | Kết quả | Vấn đề |\n|---|---|---|\n| $12/(3 \\cdot 6)$ | 0,667 | đúng |\n| chỉ $\\mathbf{q} \\cdot \\mathbf{d}$ | 12 | chưa chuẩn hoá |\n| $12/(9 \\cdot 36)$ | 0,037 | quên lấy căn |\n| $12/(5 \\cdot 10)$ | 0,24 | dùng chuẩn $L_1$ |\n\n```python\nimport numpy as np\nq = np.array([2, 1, 0, 2]); d = np.array([4, 0, 4, 2])\nprint(round(q @ d / np.linalg.norm(q) / np.linalg.norm(d), 3))   # 0.667\n```\n\n#### Bẫy thường gặp\n- Nếu embedding đã được chuẩn hoá độ dài 1 thì cosine chính là tích vô hướng; nếu chưa, phải chia.\n- Cosine không phải \"xác suất liên quan\"; ngưỡng tốt phụ thuộc mô hình embedding.\n\n#### Đọc thêm\n- [Wikipedia: Cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity)\n- [PyTorch docs: torch.nn.functional.cosine_similarity](https://pytorch.org/docs/stable/generated/torch.nn.functional.cosine_similarity.html)",
+   "mistakes": [
+    {
+     "value": 12,
+     "why": "Mới tính tích vô hướng $\\mathbf{q} \\cdot \\mathbf{d} = 12$, chưa chia cho $\\lVert \\mathbf{q} \\rVert \\lVert \\mathbf{d} \\rVert = 18$."
+    },
+    {
+     "value": 0.037,
+     "why": "Chia cho $\\lVert \\mathbf{q} \\rVert^2 \\lVert \\mathbf{d} \\rVert^2 = 9 \\cdot 36$ (quên lấy căn bậc hai của tổng bình phương)."
+    },
+    {
+     "value": 0.24,
+     "why": "Dùng chuẩn $L_1$ ($5$ và $10$) thay cho chuẩn $L_2$ ($3$ và $6$): $12/50 = 0{,}24$."
+    }
+   ],
+   "answer": 0.667,
+   "tol": 0.0011
+  },
+  {
+   "id": "T01-B02",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Một hệ tìm kiếm biểu diễn văn bản bằng vector đếm từ. Văn bản $D_2$ là văn bản $D_1$ được dán nối tiếp 2 lần, nên $\\mathbf{d}_2 = 2\\mathbf{d}_1$. Với cùng truy vấn $\\mathbf{q}$ (giả sử $\\mathbf{q} \\cdot \\mathbf{d}_1 > 0$), so với $D_1$ thì điểm của $D_2$ thay đổi thế nào?",
+   "explanation": "$\\mathbf{q} \\cdot (2\\mathbf{d}_1) = 2(\\mathbf{q} \\cdot \\mathbf{d}_1)$, còn $\\cos(\\mathbf{q}, 2\\mathbf{d}_1) = \\dfrac{2\\,\\mathbf{q} \\cdot \\mathbf{d}_1}{\\lVert \\mathbf{q} \\rVert \\cdot 2\\lVert \\mathbf{d}_1 \\rVert} = \\cos(\\mathbf{q}, \\mathbf{d}_1)$: cosine chỉ phụ thuộc hướng, không phụ thuộc độ dài.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nNhân một vector với số dương $c$ thì **độ dài** nhân $c$ nhưng **hướng** giữ nguyên. Tích vô hướng tuyến tính theo từng vector nên cũng nhân $c$; cosine chia cho tích hai chuẩn nên hệ số $c$ triệt tiêu.\n\n#### Từng bước\n$$\\mathbf{q} \\cdot (2\\mathbf{d}_1) = 2\\,(\\mathbf{q} \\cdot \\mathbf{d}_1), \\qquad \\cos(\\mathbf{q}, 2\\mathbf{d}_1) = \\frac{2\\,\\mathbf{q} \\cdot \\mathbf{d}_1}{\\lVert \\mathbf{q} \\rVert \\cdot 2\\lVert \\mathbf{d}_1 \\rVert} = \\cos(\\mathbf{q}, \\mathbf{d}_1).$$\n\nVí dụ số với $\\mathbf{q} = (1, 1, 0)$, $\\mathbf{d}_1 = (2, 1, 1)$:\n\n| | $\\mathbf{d}_1 = (2, 1, 1)$ | $\\mathbf{d}_2 = (4, 2, 2)$ |\n|---|---|---|\n| Tích vô hướng | $3$ | $6$ (gấp đôi) |\n| Chuẩn | $\\sqrt{6}$ | $2\\sqrt{6}$ |\n| Cosine | $3/(\\sqrt{2}\\sqrt{6}) \\approx 0{,}866$ | $6/(\\sqrt{2} \\cdot 2\\sqrt{6}) \\approx 0{,}866$ |\n\n```python\nimport numpy as np\nq = np.array([1, 1, 0]); d1 = np.array([2, 1, 1]); d2 = 2 * d1\ncos = lambda a, b: a @ b / np.linalg.norm(a) / np.linalg.norm(b)\nprint(q @ d1, q @ d2, round(cos(q, d1), 3), round(cos(q, d2), 3))  # 3 6 0.866 0.866\n```\n\n#### Ý nghĩa thực tế\n- Xếp hạng bằng tích vô hướng chưa chuẩn hoá ưu ái văn bản dài, lặp từ (hoặc item phổ biến có vector lớn).\n- Cosine (hoặc chuẩn hoá vector về độ dài 1 trước khi lưu vào vector DB) loại bỏ ảnh hưởng của độ dài.\n\n#### Bẫy thường gặp\n- Quên rằng mẫu số của cosine cũng phụ thuộc $\\mathbf{d}$.\n- Nếu nhân với số **âm**, cosine đổi dấu (hướng ngược lại).\n\n#### Đọc thêm\n- [Wikipedia: Cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity)\n- [Wikipedia: Dot product](https://en.wikipedia.org/wiki/Dot_product)",
+   "distractors": {
+    "A": "Quên rằng mẫu số $\\lVert 2\\mathbf{d}_1 \\rVert = 2\\lVert \\mathbf{d}_1 \\rVert$ cũng gấp đôi và triệt tiêu với tử số.",
+    "B": "Nghĩ nội dung giống nhau thì mọi điểm đều giống; tích vô hướng nhạy với độ dài vector nên tăng theo.",
+    "C": "Đảo vai trò: chính tích vô hướng mới tỉ lệ với độ dài, còn cosine bất biến khi nhân vector với số dương."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Cả tích vô hướng lẫn cosine đều tăng gấp đôi"
+    },
+    {
+     "key": "B",
+     "text": "Cả tích vô hướng lẫn cosine đều giữ nguyên"
+    },
+    {
+     "key": "C",
+     "text": "Tích vô hướng giữ nguyên, cosine tăng gấp đôi"
+    },
+    {
+     "key": "D",
+     "text": "Tích vô hướng tăng gấp đôi, cosine giữ nguyên"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T01-B03",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Cho $A = \\begin{bmatrix} 1 & 2 \\\\ 0 & 1 \\\\ 3 & -1 \\end{bmatrix}$ và $B = \\begin{bmatrix} 2 & 0 & 1 \\\\ 1 & 1 & 0 \\end{bmatrix}$. Tích $BA$ bằng:",
+   "explanation": "$B$ là $2 \\times 3$, $A$ là $3 \\times 2$ nên $BA$ là $2 \\times 2$. Phần tử $(i, j)$ = hàng $i$ của $B$ nhân cột $j$ của $A$: $(BA)_{11} = 2 + 0 + 3 = 5$, $(BA)_{12} = 4 + 0 - 1 = 3$, $(BA)_{21} = 1 + 0 + 0 = 1$, $(BA)_{22} = 2 + 1 + 0 = 3$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\n$BA$ xác định khi **số cột của $B$ bằng số hàng của $A$**. Phần tử $(i, j)$ của $BA$ là tích vô hướng giữa hàng $i$ của $B$ và cột $j$ của $A$. Phép nhân ma trận **không giao hoán**: ở đây $AB$ là $3 \\times 3$ còn $BA$ là $2 \\times 2$.\n\n#### Từng bước\n| Phần tử | Hàng của $B$ · cột của $A$ | Giá trị |\n|---|---|---|\n| $(1, 1)$ | $(2, 0, 1) \\cdot (1, 0, 3) = 2 + 0 + 3$ | 5 |\n| $(1, 2)$ | $(2, 0, 1) \\cdot (2, 1, -1) = 4 + 0 - 1$ | 3 |\n| $(2, 1)$ | $(1, 1, 0) \\cdot (1, 0, 3) = 1 + 0 + 0$ | 1 |\n| $(2, 2)$ | $(1, 1, 0) \\cdot (2, 1, -1) = 2 + 1 + 0$ | 3 |\n\n$$BA = \\begin{bmatrix} 5 & 3 \\\\ 1 & 3 \\end{bmatrix}, \\qquad AB = \\begin{bmatrix} 4 & 2 & 1 \\\\ 1 & 1 & 0 \\\\ 5 & -1 & 3 \\end{bmatrix}.$$\n\n```python\nimport numpy as np\nA = np.array([[1, 2], [0, 1], [3, -1]]); B = np.array([[2, 0, 1], [1, 1, 0]])\nprint(B @ A)   # [[5 3] [1 3]]\nprint(A @ B)   # ma trận 3 x 3 khác hẳn\n```\n\n#### Bẫy thường gặp\n- Ghi kết quả theo cột (ra chuyển vị).\n- So \"số hàng với số hàng\": điều kiện là cột của ma trận **trái** khớp hàng của ma trận **phải**.\n- Thứ tự quan trọng: trong mạng nơ-ron, $W_2(W_1\\mathbf{x}) \\ne W_1(W_2\\mathbf{x})$.\n\n#### Đọc thêm\n- [Wikipedia: Matrix multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication)\n- [3Blue1Brown: Matrix multiplication as composition](https://www.3blue1brown.com/lessons/matrix-multiplication)",
+   "distractors": {
+    "B": "Ghi kết quả theo cột thay vì theo hàng, ra $(BA)^\\top$.",
+    "C": "Đây là $AB$ (kích thước $3 \\times 3$); phép nhân ma trận không giao hoán nên $AB \\ne BA$.",
+    "D": "Điều kiện nhân là số **cột** của ma trận trái ($B$ có 3 cột) bằng số **hàng** của ma trận phải ($A$ có 3 hàng), không so số hàng của hai ma trận."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\begin{bmatrix} 5 & 3 \\\\ 1 & 3 \\end{bmatrix}$"
+    },
+    {
+     "key": "B",
+     "text": "$\\begin{bmatrix} 5 & 1 \\\\ 3 & 3 \\end{bmatrix}$"
+    },
+    {
+     "key": "C",
+     "text": "$\\begin{bmatrix} 4 & 2 & 1 \\\\ 1 & 1 & 0 \\\\ 5 & -1 & 3 \\end{bmatrix}$"
+    },
+    {
+     "key": "D",
+     "text": "Không xác định vì $A$ có 3 hàng còn $B$ có 2 hàng"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T01-B04",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "RoPE (rotary position embedding) trong nhiều LLM xoay từng cặp tọa độ của vector query/key bằng ma trận $R(\\theta) = \\begin{bmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{bmatrix}$. Ma trận nghịch đảo $R(\\theta)^{-1}$ là gì?",
+   "explanation": "$R(\\theta)$ là ma trận trực giao: $R^\\top R = I$ (vì $\\cos^2\\theta + \\sin^2\\theta = 1$), nên $R^{-1} = R^\\top = R(-\\theta)$. Về hình học, phép ngược của xoay góc $\\theta$ là xoay góc $-\\theta$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nMa trận xoay $R(\\theta)$ có hai cột là hai vector đơn vị vuông góc với nhau, nên nó là **ma trận trực giao**: $R^\\top R = I$. Do đó $R^{-1} = R^\\top$, và về hình học $R^\\top = R(-\\theta)$ (xoay ngược lại). RoPE dùng đúng tính chất này: tích vô hướng giữa query xoay góc $m\\theta$ và key xoay góc $n\\theta$ chỉ phụ thuộc vào hiệu $m - n$, vì $R(m\\theta)^\\top R(n\\theta) = R((n - m)\\theta)$.\n\n#### Từng bước\n$$R^\\top R = \\begin{bmatrix} \\cos\\theta & \\sin\\theta \\\\ -\\sin\\theta & \\cos\\theta \\end{bmatrix}\\begin{bmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{bmatrix} = \\begin{bmatrix} \\cos^2\\theta + \\sin^2\\theta & 0 \\\\ 0 & \\sin^2\\theta + \\cos^2\\theta \\end{bmatrix} = I.$$\n\nDùng công thức nghịch đảo $2 \\times 2$ cũng ra kết quả này: $\\det R = 1$, đổi chỗ đường chéo và đổi dấu ngoài đường chéo được $\\begin{bmatrix} \\cos\\theta & \\sin\\theta \\\\ -\\sin\\theta & \\cos\\theta \\end{bmatrix} = R^\\top$.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Phép xoay góc theta và phép xoay ngược góc âm theta\">\n<defs><marker id=\"ahB04\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs>\n<defs><marker id=\"ahB04o\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"#f59e0b\"/></marker></defs>\n<circle cx=\"150\" cy=\"140\" r=\"95\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\"0.3\"/>\n<line x1=\"150.0\" y1=\"140.0\" x2=\"241.8\" y2=\"115.4\" stroke=\"currentColor\" stroke-width=\"2.5\" marker-end=\"url(#ahB04)\"/>\n<line x1=\"150.0\" y1=\"140.0\" x2=\"182.5\" y2=\"50.7\" stroke=\"#3b82f6\" stroke-width=\"2.5\" marker-end=\"url(#ahB04)\"/>\n<path d=\"M207.1 121.5 A60 60 0 0 0 173.4 84.8\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2\" marker-end=\"url(#ahB04)\"/>\n<path d=\"M180.5 68.2 A78 78 0 0 1 224.2 115.9\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"2\" stroke-dasharray=\"5 3\" marker-end=\"url(#ahB04o)\"/>\n<text x=\"247.8\" y=\"119.4\" font-size=\"14\" text-anchor=\"start\" fill=\"currentColor\" font-weight=\"bold\">v</text>\n<text x=\"188.5\" y=\"50.7\" font-size=\"13\" text-anchor=\"start\" fill=\"#3b82f6\" font-weight=\"bold\">R(θ) v</text>\n<text x=\"183.4\" y=\"109.9\" font-size=\"12\" text-anchor=\"start\" fill=\"#10b981\">+θ</text>\n<text x=\"224.3\" y=\"73.1\" font-size=\"12\" text-anchor=\"start\" fill=\"#f59e0b\">−θ</text>\n<text x=\"300.0\" y=\"95.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">RᵀR = I (cột trực chuẩn)</text>\n<text x=\"300.0\" y=\"121.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\" font-weight=\"bold\">R(θ)⁻¹ = R(θ)ᵀ = R(−θ)</text>\n<text x=\"300.0\" y=\"147.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">det R(θ) = cos²θ + sin²θ = 1</text>\n<text x=\"300.0\" y=\"173.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">giữ độ dài: ‖R v‖ = ‖v‖</text>\n</svg>\n\n```python\nimport numpy as np\nt = 0.7\nR = np.array([[np.cos(t), -np.sin(t)], [np.sin(t), np.cos(t)]])\nprint(np.allclose(np.linalg.inv(R), R.T))   # True\n```\n\n#### Bẫy thường gặp\n- \"$\\det = 1$ nên $R^{-1} = R$\": sai, $\\det = 1$ chỉ nói giữ diện tích.\n- Lấy nghịch đảo từng phần tử: không bao giờ là nghịch đảo ma trận.\n\n#### Đọc thêm\n- [Wikipedia: Rotation matrix](https://en.wikipedia.org/wiki/Rotation_matrix)\n- [Su et al. (2021), RoFormer (arXiv:2104.09864)](https://arxiv.org/abs/2104.09864)\n- [Wikipedia: Orthogonal matrix](https://en.wikipedia.org/wiki/Orthogonal_matrix)",
+   "distractors": {
+    "A": "$-R(\\theta) = R(\\theta + 180^\\circ)$; ghép với $R(\\theta)$ cho phép xoay $2\\theta + 180^\\circ$, nói chung không về $I$.",
+    "B": "$\\det = 1$ chỉ nói phép xoay giữ diện tích; nó không làm ma trận thành nghịch đảo của chính nó, vì $R(\\theta)^2 = R(2\\theta) \\ne I$ nói chung.",
+    "D": "Nghịch đảo ma trận không phải nghịch đảo từng phần tử; hơn nữa $1/\\sin\\theta$ không xác định khi $\\theta = 0$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$-R(\\theta)$, tức xoay thêm $180^\\circ$"
+    },
+    {
+     "key": "B",
+     "text": "$R(\\theta)$, vì $\\det R(\\theta) = 1$"
+    },
+    {
+     "key": "C",
+     "text": "$R(\\theta)^\\top$, tức xoay một góc $-\\theta$"
+    },
+    {
+     "key": "D",
+     "text": "Ma trận lấy nghịch đảo từng phần tử, như $1/\\cos\\theta$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T01-B05",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Ma trận $A = \\begin{bmatrix} 4 & 7 \\\\ 2 & 4 \\end{bmatrix}$ có nghịch đảo $A^{-1}$ là:",
+   "explanation": "$\\det A = 4 \\cdot 4 - 7 \\cdot 2 = 2$. Với ma trận $2 \\times 2$: $A^{-1} = \\dfrac{1}{\\det A}\\begin{bmatrix} d & -b \\\\ -c & a \\end{bmatrix} = \\dfrac{1}{2}\\begin{bmatrix} 4 & -7 \\\\ -2 & 4 \\end{bmatrix} = \\begin{bmatrix} 2 & -3{,}5 \\\\ -1 & 2 \\end{bmatrix}$. Kiểm: $AA^{-1} = I$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nVới $A = \\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}$ và $\\det A = ad - bc \\ne 0$:\n$$A^{-1} = \\frac{1}{ad - bc}\\begin{bmatrix} d & -b \\\\ -c & a \\end{bmatrix}.$$\nBa thao tác: **đổi chỗ** hai phần tử đường chéo chính, **đổi dấu** hai phần tử ngoài đường chéo (giữ vị trí), **chia** cho định thức.\n\n#### Từng bước\n1. $\\det A = 4 \\cdot 4 - 7 \\cdot 2 = 16 - 14 = 2$.\n2. Phụ hợp: $\\begin{bmatrix} 4 & -7 \\\\ -2 & 4 \\end{bmatrix}$.\n3. Chia 2: $A^{-1} = \\begin{bmatrix} 2 & -3{,}5 \\\\ -1 & 2 \\end{bmatrix}$.\n4. Kiểm: $AA^{-1} = \\begin{bmatrix} 8 - 7 & -14 + 14 \\\\ 4 - 4 & -7 + 8 \\end{bmatrix} = I$.\n\n| Phương án sai | Lỗi |\n|---|---|\n| $\\begin{bmatrix} 4 & -7 \\\\ -2 & 4 \\end{bmatrix}$ | quên chia $\\det$ (tích với $A$ ra $2I$) |\n| $\\begin{bmatrix} 2 & 3{,}5 \\\\ 1 & 2 \\end{bmatrix}$ | quên đổi dấu |\n| $\\begin{bmatrix} 2 & -1 \\\\ -3{,}5 & 2 \\end{bmatrix}$ | đổi vị trí ngoài đường chéo (ra chuyển vị) |\n\n```python\nimport numpy as np\nA = np.array([[4, 7], [2, 4]])\nprint(np.linalg.inv(A))          # [[ 2.  -3.5] [-1.   2. ]]\nprint(A @ np.linalg.inv(A))      # ma trận đơn vị\n```\n\n#### Bẫy thường gặp\n- Luôn kiểm lại bằng $AA^{-1} = I$, mất 20 giây nhưng bắt được hầu hết lỗi.\n- Trong thực tế số học, tránh tính $A^{-1}$ tường minh; dùng `np.linalg.solve(A, b)` để giải $A\\mathbf{x} = \\mathbf{b}$ ổn định hơn.\n\n#### Đọc thêm\n- [Wikipedia: Invertible matrix](https://en.wikipedia.org/wiki/Invertible_matrix)\n- [NumPy docs: numpy.linalg.inv](https://numpy.org/doc/stable/reference/generated/numpy.linalg.inv.html)",
+   "distractors": {
+    "A": "Đây là ma trận phụ hợp $\\operatorname{adj}(A)$; quên chia cho $\\det A = 2$.",
+    "C": "Đổi chỗ hai phần tử đường chéo chính đúng nhưng quên đổi dấu hai phần tử ngoài đường chéo.",
+    "D": "Đặt $-3{,}5$ và $-1$ sai vị trí (ra chuyển vị của $A^{-1}$); hai phần tử ngoài đường chéo giữ vị trí, chỉ đổi dấu."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\begin{bmatrix} 4 & -7 \\\\ -2 & 4 \\end{bmatrix}$"
+    },
+    {
+     "key": "B",
+     "text": "$\\begin{bmatrix} 2 & -3{,}5 \\\\ -1 & 2 \\end{bmatrix}$"
+    },
+    {
+     "key": "C",
+     "text": "$\\begin{bmatrix} 2 & 3{,}5 \\\\ 1 & 2 \\end{bmatrix}$"
+    },
+    {
+     "key": "D",
+     "text": "$\\begin{bmatrix} 2 & -1 \\\\ -3{,}5 & 2 \\end{bmatrix}$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T01-B06",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Ma trận $A \\in \\mathbb{R}^{3 \\times 3}$ có $\\det A = 5$. Giá trị $\\det(2A^\\top)$ bằng bao nhiêu?",
+   "explanation": "$\\det(A^\\top) = \\det A$ và $\\det(cA) = c^n \\det A$ với $A$ cấp $n$. Vậy $\\det(2A^\\top) = 2^3 \\cdot 5 = 40$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nHai tính chất của định thức với ma trận cấp $n$:\n- $\\det(A^\\top) = \\det A$;\n- $\\det(cA) = c^n \\det A$, vì nhân ma trận với $c$ là nhân **từng hàng** với $c$, mỗi hàng góp một thừa số $c$.\n\n#### Từng bước\n$$\\det(2A^\\top) = 2^3 \\det(A^\\top) = 8 \\cdot 5 = 40.$$\n\n| Phép biến đổi trên $A$ ($n = 3$) | Định thức mới |\n|---|---|\n| Chuyển vị $A^\\top$ | $\\det A = 5$ |\n| Nhân một hàng với 2 | $2 \\cdot 5 = 10$ |\n| Nhân cả ma trận với 2 | $2^3 \\cdot 5 = 40$ |\n| Đổi chỗ hai hàng | $-5$ |\n| Nghịch đảo $A^{-1}$ | $1/5$ |\n\nÝ nghĩa hình học: định thức là hệ số phóng đại thể tích. Phóng mỗi chiều lên 2 lần trong không gian 3 chiều thì thể tích tăng $2^3 = 8$ lần.\n\n```python\nimport numpy as np\nA = np.random.default_rng(3).normal(size=(3, 3))\nA = A / np.cbrt(np.linalg.det(A)) * np.cbrt(5)       # ép det A = 5\nprint(round(np.linalg.det(A), 6), round(np.linalg.det(2 * A.T), 6))   # 5.0 40.0\n```\n\n#### Bẫy thường gặp\n- Lấy $2 \\cdot \\det A$: chỉ đúng khi nhân **một hàng**.\n- Nghĩ chuyển vị đổi dấu.\n\n#### Đọc thêm\n- [Wikipedia: Determinant](https://en.wikipedia.org/wiki/Determinant)\n- [3Blue1Brown: The determinant](https://www.3blue1brown.com/lessons/determinant)",
+   "distractors": {
+    "B": "Đưa hệ số 2 ra ngoài một lần; nhân $A$ với 2 là nhân cả 3 hàng, mỗi hàng đóng góp một thừa số 2, nên ra $2^3$.",
+    "C": "Nghĩ chuyển vị đổi dấu định thức; thật ra $\\det(A^\\top) = \\det A$ (đổi chỗ hai hàng mới đổi dấu).",
+    "D": "Dùng $2^2$ như với ma trận $2 \\times 2$; ở đây $n = 3$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$40$"
+    },
+    {
+     "key": "B",
+     "text": "$10$"
+    },
+    {
+     "key": "C",
+     "text": "$-40$"
+    },
+    {
+     "key": "D",
+     "text": "$20$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T01-B07",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Tính định thức của ma trận $M = \\begin{bmatrix} 2 & 0 & 1 \\\\ 1 & 3 & 2 \\\\ 0 & 1 & 4 \\end{bmatrix}$. **Nhập số nguyên.**",
+   "explanation": "Khai triển theo hàng 1: $\\det M = 2\\begin{vmatrix} 3 & 2 \\\\ 1 & 4 \\end{vmatrix} - 0 + 1\\begin{vmatrix} 1 & 3 \\\\ 0 & 1 \\end{vmatrix} = 2 \\cdot 10 + 1 \\cdot 1 = 21$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nKhai triển Laplace theo một hàng: $\\det M = \\sum_j (-1)^{i+j} m_{ij} \\det M_{ij}$, với $M_{ij}$ là ma trận con bỏ hàng $i$, cột $j$. Dấu theo bàn cờ $\\begin{bmatrix} + & - & + \\\\ - & + & - \\\\ + & - & + \\end{bmatrix}$. Chọn hàng có nhiều số 0 để tính nhanh.\n\n#### Từng bước (khai triển theo hàng 1)\n| $j$ | $m_{1j}$ | Dấu | Định thức con | Đóng góp |\n|---|---|---|---|---|\n| 1 | 2 | $+$ | $3 \\cdot 4 - 2 \\cdot 1 = 10$ | $+20$ |\n| 2 | 0 | $-$ | (bỏ qua) | $0$ |\n| 3 | 1 | $+$ | $1 \\cdot 1 - 3 \\cdot 0 = 1$ | $+1$ |\n| | | | **Tổng** | **21** |\n\nKiểm bằng quy tắc Sarrus: ba đường chéo xuôi $2 \\cdot 3 \\cdot 4 + 0 \\cdot 2 \\cdot 0 + 1 \\cdot 1 \\cdot 1 = 25$; ba đường chéo ngược $1 \\cdot 3 \\cdot 0 + 2 \\cdot 2 \\cdot 1 + 0 \\cdot 1 \\cdot 4 = 4$; hiệu $25 - 4 = 21$.\n\n```python\nimport numpy as np\nM = np.array([[2, 0, 1], [1, 3, 2], [0, 1, 4]])\nprint(round(np.linalg.det(M)))   # 21\n```\n\n#### Bẫy thường gặp\n- Sai dấu bàn cờ (ra 19).\n- Sarrus chỉ cộng mà quên trừ (25) hoặc cộng cả hai nhóm (29).\n- Sarrus chỉ dùng cho ma trận $3 \\times 3$; ma trận lớn hơn dùng khử Gauss.\n\n#### Đọc thêm\n- [Wikipedia: Laplace expansion](https://en.wikipedia.org/wiki/Laplace_expansion)\n- [Wikipedia: Rule of Sarrus](https://en.wikipedia.org/wiki/Rule_of_Sarrus)",
+   "mistakes": [
+    {
+     "value": 19,
+     "why": "Sai dấu phần bù ở vị trí $(1, 3)$: dấu của phần bù đại số là $(-1)^{1+3} = +1$, nên số hạng cuối là $+1 \\cdot 1$, không phải $-1$."
+    },
+    {
+     "value": 25,
+     "why": "Dùng quy tắc Sarrus nhưng chỉ cộng ba đường chéo xuôi ($24 + 0 + 1$), quên trừ ba đường chéo ngược ($0 + 4 + 0$)."
+    },
+    {
+     "value": 29,
+     "why": "Dùng quy tắc Sarrus nhưng **cộng** cả ba đường chéo ngược thay vì trừ: $25 + 4$."
+    }
+   ],
+   "answer": 21,
+   "tol": 0
+  },
+  {
+   "id": "T01-B08",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Hệ phương trình $\\begin{cases} x + y + z = 1 \\\\ 2x + 2y + 2z = 3 \\\\ x - y = 0 \\end{cases}$ có bao nhiêu nghiệm?",
+   "explanation": "Nhân phương trình 1 với 2 được $2x + 2y + 2z = 2 \\ne 3$: hai phương trình đầu mâu thuẫn. Theo Rouché–Capelli, $\\operatorname{rank} A = 2 < \\operatorname{rank}[A \\mid \\mathbf{b}] = 3$ nên hệ vô nghiệm.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nĐịnh lý Rouché–Capelli cho hệ $A\\mathbf{x} = \\mathbf{b}$ với $n$ ẩn:\n- $\\operatorname{rank} A < \\operatorname{rank}[A \\mid \\mathbf{b}]$: **vô nghiệm**;\n- $\\operatorname{rank} A = \\operatorname{rank}[A \\mid \\mathbf{b}] = n$: nghiệm duy nhất;\n- $\\operatorname{rank} A = \\operatorname{rank}[A \\mid \\mathbf{b}] < n$: vô số nghiệm.\n\n```mermaid\nflowchart TD\n  S[\"Hệ A x = b, n ẩn\"] --> C1{\"rank A bằng rank ma trận mở rộng?\"}\n  C1 -->|Không| V0[\"Vô nghiệm\"]\n  C1 -->|Có| C2{\"rank A = n?\"}\n  C2 -->|Có| V1[\"Nghiệm duy nhất\"]\n  C2 -->|Không| V2[\"Vô số nghiệm\"]\n```\n\n#### Từng bước\nMa trận mở rộng và khử Gauss (lấy hàng 2 trừ 2 lần hàng 1):\n$$\\left[\\begin{array}{ccc|c} 1 & 1 & 1 & 1 \\\\ 2 & 2 & 2 & 3 \\\\ 1 & -1 & 0 & 0 \\end{array}\\right] \\to \\left[\\begin{array}{ccc|c} 1 & 1 & 1 & 1 \\\\ 0 & 0 & 0 & 1 \\\\ 1 & -1 & 0 & 0 \\end{array}\\right].$$\nHàng thứ hai nói $0 = 1$: mâu thuẫn. $\\operatorname{rank} A = 2$, $\\operatorname{rank}[A \\mid \\mathbf{b}] = 3$ nên vô nghiệm.\n\n| Nếu vế phải phương trình 2 là | Kết luận |\n|---|---|\n| $3$ (đề bài) | vô nghiệm |\n| $2$ | vô số nghiệm (một tham số tự do) |\n\n```python\nimport numpy as np\nA = np.array([[1, 1, 1], [2, 2, 2], [1, -1, 0]]); b = np.array([1, 3, 0])\nprint(np.linalg.matrix_rank(A), np.linalg.matrix_rank(np.c_[A, b]))   # 2 3\n```\n\n#### Bẫy thường gặp\n- Đếm \"3 phương trình, 3 ẩn\" rồi kết luận nghiệm duy nhất.\n- Thấy $\\operatorname{rank} A < n$ liền kết luận vô số nghiệm mà quên kiểm vế phải.\n\n#### Đọc thêm\n- [Wikipedia: Rouché–Capelli theorem](https://en.wikipedia.org/wiki/Rouch%C3%A9%E2%80%93Capelli_theorem)\n- [Wikipedia: Gaussian elimination](https://en.wikipedia.org/wiki/Gaussian_elimination)",
+   "distractors": {
+    "A": "Đúng là $\\operatorname{rank} A = 2$, nhưng vô số nghiệm chỉ xảy ra khi hệ tương thích, tức $\\operatorname{rank}[A \\mid \\mathbf{b}] = \\operatorname{rank} A$; vế phải ở đây phá vỡ điều đó.",
+    "B": "Đếm số phương trình là không đủ, phải xét hạng: hàng 2 của $A$ là bội của hàng 1 nên $A$ suy biến.",
+    "C": "$x = y = z = \\tfrac{1}{3}$ thỏa phương trình 1 và 3, nhưng vế trái phương trình 2 bằng $2 \\ne 3$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Vô số nghiệm, vì chỉ có 2 phương trình độc lập cho 3 ẩn"
+    },
+    {
+     "key": "B",
+     "text": "Nghiệm duy nhất, vì có 3 phương trình cho 3 ẩn"
+    },
+    {
+     "key": "C",
+     "text": "Nghiệm duy nhất $x = y = z = \\tfrac{1}{3}$"
+    },
+    {
+     "key": "D",
+     "text": "Vô nghiệm, vì hai phương trình đầu mâu thuẫn nhau"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T01-B09",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Cho ma trận đối xứng $A = \\begin{bmatrix} 3 & 2 \\\\ 2 & 0 \\end{bmatrix}$. Tìm trị riêng **lớn nhất** của $A$. **Nhập số nguyên.**",
+   "explanation": "$\\det(A - \\lambda I) = (3 - \\lambda)(0 - \\lambda) - 4 = \\lambda^2 - 3\\lambda - 4 = (\\lambda - 4)(\\lambda + 1)$, nên $\\lambda \\in \\{4, -1\\}$. Kiểm: tổng $= 3 = \\operatorname{tr} A$, tích $= -4 = \\det A$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nTrị riêng là nghiệm của đa thức đặc trưng $\\det(A - \\lambda I) = 0$. Với ma trận $2 \\times 2$: $\\lambda^2 - (\\operatorname{tr} A)\\lambda + \\det A = 0$. Ma trận đối xứng thực luôn có trị riêng thực.\n\n#### Từng bước\n1. $\\operatorname{tr} A = 3 + 0 = 3$, $\\det A = 3 \\cdot 0 - 2 \\cdot 2 = -4$.\n2. $\\lambda^2 - 3\\lambda - 4 = 0 \\Rightarrow \\lambda = \\dfrac{3 \\pm \\sqrt{9 + 16}}{2} = \\dfrac{3 \\pm 5}{2}$.\n3. $\\lambda_1 = 4$, $\\lambda_2 = -1$.\n\n| Kiểm | Giá trị |\n|---|---|\n| $\\lambda_1 + \\lambda_2$ | $3 = \\operatorname{tr} A$ ✓ |\n| $\\lambda_1 \\lambda_2$ | $-4 = \\det A$ ✓ |\n| Vector riêng của $\\lambda = 4$ | $(2, 1)$: $A(2, 1)^\\top = (8, 4)^\\top$ ✓ |\n\nMột trị riêng dương, một trị riêng âm: nếu $A$ là Hessian của hàm mất mát tại điểm dừng thì đó là **điểm yên ngựa**.\n\n```python\nimport numpy as np\nprint(np.linalg.eigvalsh(np.array([[3., 2.], [2., 0.]])))   # [-1.  4.]\n```\n\n#### Bẫy thường gặp\n- Đọc trị riêng từ đường chéo: chỉ đúng với ma trận tam giác/đường chéo.\n- Sai dấu hệ số $-\\operatorname{tr} A$ trong đa thức đặc trưng.\n\n#### Đọc thêm\n- [Wikipedia: Characteristic polynomial](https://en.wikipedia.org/wiki/Characteristic_polynomial)\n- [Wikipedia: Eigenvalues and eigenvectors](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors)",
+   "mistakes": [
+    {
+     "value": 3,
+     "why": "Lấy phần tử lớn nhất trên đường chéo; điều đó chỉ đúng với ma trận tam giác hoặc đường chéo."
+    },
+    {
+     "value": -1,
+     "why": "Đây là trị riêng nhỏ hơn; đề hỏi trị riêng lớn nhất."
+    },
+    {
+     "value": 1,
+     "why": "Sai dấu trong đa thức đặc trưng, viết $\\lambda^2 + 3\\lambda - 4 = 0$ (nghiệm $1$ và $-4$); đúng phải là $\\lambda^2 - 3\\lambda - 4 = 0$."
+    }
+   ],
+   "answer": 4,
+   "tol": 0
+  },
+  {
+   "id": "T01-B10",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Ma trận dữ liệu $X \\in \\mathbb{R}^{4 \\times 3}$ có $X^\\top X$ với các trị riêng $16$, $9$, $0$. Các giá trị kỳ dị (singular values) của $X$ và hạng của $X$ là:",
+   "explanation": "Giá trị kỳ dị là căn bậc hai của trị riêng $X^\\top X$: $\\sigma_i = \\sqrt{\\lambda_i} = 4, 3, 0$. Hạng bằng số giá trị kỳ dị khác 0, nên $\\operatorname{rank} X = 2$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nSVD: $X = U\\Sigma V^\\top$. Khi đó $X^\\top X = V\\Sigma^\\top\\Sigma V^\\top$, nên trị riêng của $X^\\top X$ là $\\sigma_i^2$ và vector riêng là các cột của $V$. Vậy $\\sigma_i = \\sqrt{\\lambda_i(X^\\top X)}$, và **hạng của $X$ = số giá trị kỳ dị khác 0**.\n\n#### Từng bước\n| $\\lambda_i(X^\\top X)$ | $\\sigma_i = \\sqrt{\\lambda_i}$ | Đóng góp vào hạng |\n|---|---|---|\n| 16 | 4 | có |\n| 9 | 3 | có |\n| 0 | 0 | không |\n\nVậy $\\sigma = (4, 3, 0)$, $\\operatorname{rank} X = 2$, và $\\lVert X \\rVert_F^2 = 16 + 9 = 25$.\n\n```python\nimport numpy as np\nrng = np.random.default_rng(4)\nU, _ = np.linalg.qr(rng.normal(size=(4, 4))); V, _ = np.linalg.qr(rng.normal(size=(3, 3)))\nS = np.zeros((4, 3)); S[0, 0], S[1, 1] = 4, 3\nX = U @ S @ V.T\nprint(np.round(np.linalg.svd(X, compute_uv=False), 6), np.linalg.matrix_rank(X))   # [4. 3. 0.] 2\n```\n\n#### Liên hệ thực tế\n`np.linalg.matrix_rank` tính hạng bằng cách đếm giá trị kỳ dị lớn hơn một ngưỡng nhỏ (do sai số dấu phẩy động, $\\sigma$ \"bằng 0\" thường ra cỡ $10^{-16}$).\n\n#### Bẫy thường gặp\n- Quên lấy căn (nhầm $\\sigma^2$ với $\\sigma$).\n- Đếm cả $\\sigma = 0$ vào hạng.\n\n#### Đọc thêm\n- [Wikipedia: Singular value decomposition](https://en.wikipedia.org/wiki/Singular_value_decomposition)\n- [NumPy docs: numpy.linalg.matrix_rank](https://numpy.org/doc/stable/reference/generated/numpy.linalg.matrix_rank.html)",
+   "distractors": {
+    "A": "Đếm cả $\\sigma = 0$ vào hạng; hạng chỉ đếm các giá trị kỳ dị dương.",
+    "B": "Quên lấy căn: trị riêng của $X^\\top X$ là $\\sigma_i^2$, không phải $\\sigma_i$.",
+    "D": "Bình phương trị riêng thay vì lấy căn bậc hai."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$4,\\ 3,\\ 0$; hạng $3$"
+    },
+    {
+     "key": "B",
+     "text": "$16,\\ 9,\\ 0$; hạng $2$"
+    },
+    {
+     "key": "C",
+     "text": "$4,\\ 3,\\ 0$; hạng $2$"
+    },
+    {
+     "key": "D",
+     "text": "$256,\\ 81,\\ 0$; hạng $2$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T01-C01",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Một nhóm giảm thiên lệch giới tính trong word embedding bằng cách loại bỏ thành phần của vector từ theo một 'hướng giới tính' (ý tưởng *hard debiasing*). Cho hướng $\\mathbf{g} = (1, 2, 2)$ và embedding của một từ chỉ nghề nghiệp $\\mathbf{w} = (3, 0, 3)$. Vector sau khi loại bỏ, $\\mathbf{w}_\\perp = \\mathbf{w} - \\operatorname{proj}_{\\mathbf{g}} \\mathbf{w}$, là:",
+   "explanation": "$\\operatorname{proj}_{\\mathbf{g}} \\mathbf{w} = \\dfrac{\\mathbf{w} \\cdot \\mathbf{g}}{\\lVert \\mathbf{g} \\rVert^2}\\mathbf{g} = \\dfrac{9}{9}(1, 2, 2) = (1, 2, 2)$, nên $\\mathbf{w}_\\perp = (3, 0, 3) - (1, 2, 2) = (2, -2, 1)$. Kiểm: $\\mathbf{w}_\\perp \\cdot \\mathbf{g} = 2 - 4 + 2 = 0$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nHình chiếu của $\\mathbf{w}$ lên hướng $\\mathbf{g}$:\n$$\\operatorname{proj}_{\\mathbf{g}}\\mathbf{w} = \\frac{\\mathbf{w} \\cdot \\mathbf{g}}{\\lVert \\mathbf{g} \\rVert^2}\\,\\mathbf{g}.$$\nPhần dư $\\mathbf{w}_\\perp = \\mathbf{w} - \\operatorname{proj}_{\\mathbf{g}}\\mathbf{w}$ luôn vuông góc với $\\mathbf{g}$. \"Hard debiasing\" (Bolukbasi và cộng sự, 2016) dùng đúng phép này để triệt tiêu thành phần giới tính của các từ trung tính như tên nghề nghiệp.\n\n#### Từng bước\n1. $\\mathbf{w} \\cdot \\mathbf{g} = 3 + 0 + 6 = 9$; $\\lVert \\mathbf{g} \\rVert^2 = 1 + 4 + 4 = 9$.\n2. $\\operatorname{proj} = \\tfrac{9}{9}(1, 2, 2) = (1, 2, 2)$.\n3. $\\mathbf{w}_\\perp = (3, 0, 3) - (1, 2, 2) = (2, -2, 1)$.\n4. Kiểm: $\\mathbf{w}_\\perp \\cdot \\mathbf{g} = 2 - 4 + 2 = 0$ ✓.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 240\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Phép chiếu w lên hướng g và phần dư vuông góc\">\n<defs><marker id=\"ahC01\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs>\n<line x1=\"40\" y1=\"200\" x2=\"400\" y2=\"200\" stroke=\"currentColor\" stroke-opacity=\"0.35\" stroke-dasharray=\"5 4\"/>\n<line x1=\"80.0\" y1=\"200.0\" x2=\"200.0\" y2=\"200.0\" stroke=\"#3b82f6\" stroke-width=\"3\" marker-end=\"url(#ahC01)\"/>\n<line x1=\"80.0\" y1=\"200.0\" x2=\"200.0\" y2=\"80.0\" stroke=\"currentColor\" stroke-width=\"2.5\" marker-end=\"url(#ahC01)\"/>\n<line x1=\"200.0\" y1=\"200.0\" x2=\"200.0\" y2=\"80.0\" stroke=\"#10b981\" stroke-width=\"3\" marker-end=\"url(#ahC01)\"/>\n<path d=\"M188 200 L188 188 L200 188\" fill=\"none\" stroke=\"currentColor\"/>\n<text x=\"82.0\" y=\"222.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#3b82f6\">g = hình chiếu = (1, 2, 2)</text>\n<text x=\"120.0\" y=\"125.0\" font-size=\"13\" text-anchor=\"end\" fill=\"currentColor\">w = (3, 0, 3)</text>\n<text x=\"208.0\" y=\"140.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#10b981\" font-weight=\"bold\">w⊥ = (2, −2, 1)</text>\n<text x=\"330.0\" y=\"40.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">w · g = 3 + 0 + 6 = 9</text>\n<text x=\"330.0\" y=\"64.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">‖g‖² = 1 + 4 + 4 = 9</text>\n<text x=\"330.0\" y=\"88.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">proj = (9/9) · g = (1, 2, 2)</text>\n<text x=\"330.0\" y=\"112.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">w⊥ = w − proj = (2, −2, 1)</text>\n<text x=\"330.0\" y=\"136.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#10b981\">kiểm: w⊥ · g = 2 − 4 + 2 = 0</text>\n<text x=\"330.0\" y=\"232.0\" font-size=\"11\" text-anchor=\"start\" fill=\"currentColor\">(vẽ trong mặt phẳng chứa g và w; góc 45°)</text>\n</svg>\n\n| Lỗi | Hình chiếu tính ra | Kết quả cuối |\n|---|---|---|\n| chia $\\lVert \\mathbf{g} \\rVert$ | $(3, 6, 6)$ | $(0, -6, -3)$ |\n| chia $\\lVert \\mathbf{w} \\rVert^2$ | $(0{,}5;\\ 1;\\ 1)$ | $(2{,}5;\\ -1;\\ 2)$ |\n| lấy nhầm phần chiếu | | $(1, 2, 2)$ |\n\n```python\nimport numpy as np\ng = np.array([1, 2, 2]); w = np.array([3, 0, 3])\nw_perp = w - (w @ g) / (g @ g) * g\nprint(w_perp, w_perp @ g)   # [ 2. -2.  1.] 0.0\n```\n\n#### Bẫy thường gặp\n- Nếu $\\mathbf{g}$ đã chuẩn hoá ($\\lVert \\mathbf{g} \\rVert = 1$) thì công thức gọn thành $(\\mathbf{w} \\cdot \\mathbf{g})\\mathbf{g}$; với $\\mathbf{g}$ chưa chuẩn hoá phải chia $\\lVert \\mathbf{g} \\rVert^2$.\n- Các nghiên cứu sau cho thấy debiasing bằng phép chiếu chỉ \"che\" thiên lệch một phần; đây là ví dụ minh hoạ phép chiếu, không phải giải pháp hoàn chỉnh.\n\n#### Đọc thêm\n- [Wikipedia: Vector projection](https://en.wikipedia.org/wiki/Vector_projection)\n- [Bolukbasi et al. (2016), arXiv:1607.06520](https://arxiv.org/abs/1607.06520)",
+   "distractors": {
+    "A": "Chia cho $\\lVert \\mathbf{g} \\rVert = 3$ thay vì $\\lVert \\mathbf{g} \\rVert^2 = 9$, được hình chiếu $(3, 6, 6)$ dài gấp 3 lần.",
+    "C": "Đây là chính hình chiếu $\\operatorname{proj}_{\\mathbf{g}}\\mathbf{w}$ (phần bị loại bỏ), không phải phần còn lại.",
+    "D": "Chia cho $\\lVert \\mathbf{w} \\rVert^2 = 18$ thay vì $\\lVert \\mathbf{g} \\rVert^2$, được hình chiếu $(0{,}5;\\ 1;\\ 1)$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$(0;\\ -6;\\ -3)$"
+    },
+    {
+     "key": "B",
+     "text": "$(2;\\ -2;\\ 1)$"
+    },
+    {
+     "key": "C",
+     "text": "$(1;\\ 2;\\ 2)$"
+    },
+    {
+     "key": "D",
+     "text": "$(2{,}5;\\ -1;\\ 2)$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T01-C02",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Một vector database lưu các embedding **đã chuẩn hóa về độ dài 1** và xếp hạng kết quả theo khoảng cách Euclid (L2). Truy vấn $\\mathbf{q}$ và tài liệu gần nhất $\\mathbf{d}$ có khoảng cách $\\lVert \\mathbf{q} - \\mathbf{d} \\rVert_2 = 0{,}6$. Cosine similarity giữa $\\mathbf{q}$ và $\\mathbf{d}$ là bao nhiêu? **Làm tròn 2 chữ số thập phân.**",
+   "explanation": "Với $\\lVert \\mathbf{q} \\rVert = \\lVert \\mathbf{d} \\rVert = 1$: $\\lVert \\mathbf{q} - \\mathbf{d} \\rVert^2 = 1 + 1 - 2\\,\\mathbf{q} \\cdot \\mathbf{d} = 2 - 2\\cos\\theta$. Suy ra $\\cos\\theta = 1 - \\dfrac{0{,}6^2}{2} = 1 - 0{,}18 = 0{,}82$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nVới hai vector đơn vị, khoảng cách Euclid và cosine liên hệ chặt chẽ:\n$$\\lVert \\mathbf{q} - \\mathbf{d} \\rVert^2 = \\lVert \\mathbf{q} \\rVert^2 + \\lVert \\mathbf{d} \\rVert^2 - 2\\,\\mathbf{q} \\cdot \\mathbf{d} = 2 - 2\\cos\\theta.$$\nVì vậy trên embedding đã chuẩn hoá, xếp hạng theo khoảng cách L2 tăng dần **trùng** với xếp hạng theo cosine giảm dần. Đó là lý do nhiều hệ thống chuẩn hoá vector rồi dùng index L2 hoặc inner product.\n\n#### Từng bước\n1. $d^2 = 0{,}6^2 = 0{,}36$.\n2. $0{,}36 = 2 - 2\\cos\\theta \\Rightarrow \\cos\\theta = 1 - 0{,}18 = 0{,}82$.\n3. Góc $\\theta = \\arccos 0{,}82 \\approx 34{,}9^\\circ$.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Hai vector đơn vị trên đường tròn đơn vị và dây cung khoảng cách 0,6\">\n<defs><marker id=\"ahC02\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"currentColor\"/></marker></defs>\n<circle cx=\"150\" cy=\"140\" r=\"100\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\"0.35\"/>\n<line x1=\"150.0\" y1=\"140.0\" x2=\"250.0\" y2=\"140.0\" stroke=\"#3b82f6\" stroke-width=\"2.5\" marker-end=\"url(#ahC02)\"/>\n<line x1=\"150.0\" y1=\"140.0\" x2=\"232.0\" y2=\"82.8\" stroke=\"#10b981\" stroke-width=\"2.5\" marker-end=\"url(#ahC02)\"/>\n<line x1=\"250\" y1=\"140\" x2=\"232.0\" y2=\"82.8\" stroke=\"#ef4444\" stroke-width=\"3\"/>\n<text x=\"258.0\" y=\"144.0\" font-size=\"14\" text-anchor=\"start\" fill=\"#3b82f6\" font-weight=\"bold\">q</text>\n<text x=\"238.0\" y=\"78.8\" font-size=\"14\" text-anchor=\"start\" fill=\"#10b981\" font-weight=\"bold\">d</text>\n<text x=\"251.0\" y=\"115.4\" font-size=\"13\" text-anchor=\"start\" fill=\"#ef4444\" font-weight=\"bold\">0,6</text>\n<text x=\"190.0\" y=\"132.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#f59e0b\">θ ≈ 34,9°</text>\n<text x=\"300.0\" y=\"90.0\" font-size=\"14\" text-anchor=\"start\" fill=\"currentColor\">‖q‖ = ‖d‖ = 1</text>\n<text x=\"300.0\" y=\"116.0\" font-size=\"14\" text-anchor=\"start\" fill=\"currentColor\">‖q − d‖² = 2 − 2 cos θ</text>\n<text x=\"300.0\" y=\"142.0\" font-size=\"14\" text-anchor=\"start\" fill=\"currentColor\">0,36 = 2 − 2 cos θ</text>\n<text x=\"300.0\" y=\"168.0\" font-size=\"14\" text-anchor=\"start\" fill=\"currentColor\" font-weight=\"bold\">cos θ = 1 − 0,18 = 0,82</text>\n</svg>\n\n| Khoảng cách L2 | Cosine $= 1 - d^2/2$ |\n|---|---|\n| 0 | 1 (trùng nhau) |\n| 0,6 | 0,82 |\n| $\\sqrt{2} \\approx 1{,}414$ | 0 (vuông góc) |\n| 2 | −1 (ngược hướng) |\n\n```python\nimport numpy as np\nc = 1 - 0.6**2 / 2\nq = np.array([1.0, 0.0]); d = np.array([c, np.sqrt(1 - c**2)])\nprint(round(np.linalg.norm(q - d), 6), round(q @ d, 2))   # 0.6 0.82\n```\n\n#### Bẫy thường gặp\n- Lưu ý FAISS `IndexFlatL2` trả về **bình phương** khoảng cách L2; nếu thấy giá trị 0,36 thì $\\cos = 1 - 0{,}36/2$.\n- Công thức chỉ đúng khi cả hai vector có độ dài 1.\n\n#### Đọc thêm\n- [FAISS wiki: MetricType and distances](https://github.com/facebookresearch/faiss/wiki/MetricType-and-distances)\n- [Wikipedia: Cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity)",
+   "mistakes": [
+    {
+     "value": 0.4,
+     "why": "Lấy $1 - 0{,}6$, coi khoảng cách như phần bù tuyến tính của cosine; quan hệ thật đi qua **bình phương** khoảng cách."
+    },
+    {
+     "value": 0.64,
+     "why": "Lấy $1 - d^2 = 1 - 0{,}36$, quên hệ số 2 trong $\\lVert \\mathbf{q} - \\mathbf{d} \\rVert^2 = 2 - 2\\cos\\theta$."
+    },
+    {
+     "value": 0.7,
+     "why": "Lấy $1 - d/2$, quên bình phương khoảng cách."
+    }
+   ],
+   "answer": 0.82,
+   "tol": 0.0051
+  },
+  {
+   "id": "T01-C03",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Bảng đặc trưng của 4 học viên có 3 cột: số giờ xem video ($f_1$), số bài tập đã nộp ($f_2$) và 'điểm hoạt động' ($f_3$) do dashboard tự tính từ hai cột đầu:\n\n$$X = \\begin{bmatrix} 1 & 0 & 1 \\\\ 2 & 1 & 4 \\\\ 0 & 3 & 6 \\\\ 1 & 1 & 3 \\end{bmatrix}$$\n\nHạng (rank) của $X$ bằng bao nhiêu? **Nhập số nguyên.**",
+   "explanation": "Cột 3 $= f_1 + 2f_2$ (kiểm từng hàng: $1 + 0 = 1$, $2 + 2 = 4$, $0 + 6 = 6$, $1 + 2 = 3$), còn hai cột đầu không cùng phương nên $\\operatorname{rank} X = 2$. Hệ quả: $X^\\top X$ suy biến, hồi quy tuyến tính trên ba cột này không có nghiệm duy nhất (đa cộng tuyến hoàn hảo).",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nHạng (rank) của ma trận = số cột (hoặc số hàng) độc lập tuyến tính tối đa = số chiều của không gian cột. Một cột được tính từ các cột khác bằng công thức tuyến tính không làm tăng hạng.\n\n#### Từng bước\n1. Đoán quan hệ: thử $f_3 = af_1 + bf_2$. Hàng 1: $1 = a \\cdot 1 + b \\cdot 0 \\Rightarrow a = 1$. Hàng 2: $4 = 2 + b \\Rightarrow b = 2$.\n2. Kiểm hai hàng còn lại:\n\n| Học viên | $f_1$ | $f_2$ | $f_1 + 2f_2$ | $f_3$ |\n|---|---|---|---|---|\n| 1 | 1 | 0 | 1 | 1 ✓ |\n| 2 | 2 | 1 | 4 | 4 ✓ |\n| 3 | 0 | 3 | 6 | 6 ✓ |\n| 4 | 1 | 1 | 3 | 3 ✓ |\n\n3. $f_1 = (1, 2, 0, 1)$ và $f_2 = (0, 1, 3, 1)$ không cùng phương nên độc lập. Vậy $\\operatorname{rank} X = 2$.\n\n```python\nimport numpy as np\nX = np.array([[1, 0, 1], [2, 1, 4], [0, 3, 6], [1, 1, 3]])\nprint(np.linalg.matrix_rank(X), round(np.linalg.det(X.T @ X), 6))   # 2 0.0\n```\n\n#### Hệ quả cho mô hình\n- $X^\\top X$ ($3 \\times 3$) có hạng 2 nên suy biến: phương trình chuẩn của hồi quy tuyến tính có vô số nghiệm, hệ số không diễn giải được (đa cộng tuyến hoàn hảo).\n- Cách xử lý: bỏ cột dư thừa, dùng Ridge (thêm $\\lambda I$ làm $X^\\top X + \\lambda I$ khả nghịch), hoặc PCA.\n\n#### Bẫy thường gặp\n- Nghĩ hạng = số cột hay số hàng; hạng luôn $\\le \\min(m, n)$ và có thể nhỏ hơn.\n\n#### Đọc thêm\n- [Wikipedia: Rank (linear algebra)](https://en.wikipedia.org/wiki/Rank_%28linear_algebra%29)\n- [Wikipedia: Multicollinearity](https://en.wikipedia.org/wiki/Multicollinearity)",
+   "mistakes": [
+    {
+     "value": 3,
+     "why": "Lấy số cột làm hạng; nhưng cột 3 là tổ hợp tuyến tính $f_1 + 2f_2$ của hai cột đầu nên không đóng góp chiều mới."
+    },
+    {
+     "value": 4,
+     "why": "Lấy số hàng làm hạng; hạng không vượt quá $\\min(4, 3) = 3$, và ở đây còn nhỏ hơn."
+    }
+   ],
+   "answer": 2,
+   "tol": 0
+  },
+  {
+   "id": "T01-C04",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Một bước data augmentation áp phép biến đổi tuyến tính $M = \\begin{bmatrix} 1 & 3 \\\\ 2 & 1 \\end{bmatrix}$ lên tọa độ điểm ảnh. Một bounding box hình vuông cạnh 2 (diện tích 4) biến thành một hình bình hành. Phát biểu nào đúng về hình bình hành đó?",
+   "explanation": "$\\det M = 1 \\cdot 1 - 3 \\cdot 2 = -5$. Diện tích ảnh $= \\lvert \\det M \\rvert \\cdot 4 = 20$; dấu âm cho biết phép biến đổi đảo hướng (thứ tự đỉnh ngược chiều kim đồng hồ thành cùng chiều kim đồng hồ).",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nVới phép biến đổi tuyến tính $M$ trong mặt phẳng:\n- $\\lvert \\det M \\rvert$ là **hệ số phóng đại diện tích**: mọi hình có diện tích $S$ biến thành hình có diện tích $\\lvert \\det M \\rvert \\cdot S$;\n- **dấu** của $\\det M$ cho biết hướng: âm nghĩa là có phản xạ (thứ tự các đỉnh đổi chiều quay).\n\n#### Từng bước\n1. $\\det M = 1 \\cdot 1 - 3 \\cdot 2 = -5$.\n2. Diện tích ảnh $= 5 \\cdot 4 = 20$.\n3. Ảnh của các đỉnh $(0,0), (2,0), (2,2), (0,2)$ là $(0,0), (2,4), (8,6), (6,2)$. Công thức shoelace cho diện tích có dấu $-20$: thứ tự đỉnh chuyển từ ngược chiều sang cùng chiều kim đồng hồ.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Hình vuông cạnh 2 và ảnh của nó qua ma trận M là hình bình hành đảo hướng\">\n<polygon points=\"70,200 110,200 110,160 70,160\" fill=\"#3b82f6\" fill-opacity=\"0.2\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<polygon points=\"300,225 340,145 460,105 420,185\" fill=\"#ef4444\" fill-opacity=\"0.15\" stroke=\"#ef4444\" stroke-width=\"2.5\"/>\n<text x=\"56.0\" y=\"216.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#3b82f6\" font-weight=\"bold\">1</text>\n<text x=\"116.0\" y=\"216.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#3b82f6\" font-weight=\"bold\">2</text>\n<text x=\"116.0\" y=\"154.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#3b82f6\" font-weight=\"bold\">3</text>\n<text x=\"56.0\" y=\"154.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#3b82f6\" font-weight=\"bold\">4</text>\n<text x=\"286.0\" y=\"239.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#ef4444\" font-weight=\"bold\">1</text>\n<text x=\"324.0\" y=\"141.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#ef4444\" font-weight=\"bold\">2</text>\n<text x=\"466.0\" y=\"101.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#ef4444\" font-weight=\"bold\">3</text>\n<text x=\"426.0\" y=\"199.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#ef4444\" font-weight=\"bold\">4</text>\n<text x=\"10.0\" y=\"238.0\" font-size=\"11\" text-anchor=\"start\" fill=\"#3b82f6\">diện tích 4; 1→2→3→4 ngược chiều kim đồng hồ</text>\n<text x=\"90.0\" y=\"30.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">trước: hình vuông</text>\n<text x=\"400.0\" y=\"30.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">sau: M · (hình vuông)</text>\n<text x=\"400.0\" y=\"250.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"#ef4444\">diện tích |−5| · 4 = 20, thứ tự đỉnh cùng chiều kim đồng hồ</text>\n<text x=\"230.0\" y=\"135.0\" font-size=\"16\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">M →</text>\n</svg>\n\n| Thông tin | Đọc từ đâu |\n|---|---|\n| Diện tích mới | $\\lvert \\det M \\rvert \\times$ diện tích cũ $= 20$ |\n| Có lật ảnh không | dấu của $\\det M$ (âm: lật) |\n| Có suy biến không | $\\det M = 0$ (ép thành đoạn thẳng) |\n\n```python\nimport numpy as np\nM = np.array([[1, 3], [2, 1]])\nP = np.array([[0, 0], [2, 0], [2, 2], [0, 2]]) @ M.T\nx, y = P[:, 0], P[:, 1]\nprint(0.5 * (x @ np.roll(y, -1) - y @ np.roll(x, -1)))   # -20.0\n```\n\n#### Bẫy thường gặp\n- Viết \"diện tích âm\".\n- Quên nhân diện tích gốc (chỉ ghi $\\lvert \\det M \\rvert = 5$).\n- Trong augmentation, phép lật ngang $\\operatorname{diag}(-1, 1)$ cũng có $\\det = -1$; với ảnh có chữ hoặc biển báo, lật có thể làm sai nhãn.\n\n#### Đọc thêm\n- [3Blue1Brown: The determinant](https://www.3blue1brown.com/lessons/determinant)\n- [Wikipedia: Determinant](https://en.wikipedia.org/wiki/Determinant)",
+   "distractors": {
+    "B": "Diện tích luôn không âm; dấu của định thức mang thông tin về hướng, không phải 'diện tích âm'.",
+    "C": "Độ lớn đúng nhưng bỏ qua dấu âm của $\\det M$: định thức âm nghĩa là phép biến đổi có chứa phản xạ.",
+    "D": "$\\lvert \\det M \\rvert = 5$ là hệ số phóng đại diện tích (ảnh của hình vuông đơn vị); còn phải nhân với diện tích gốc 4, và dấu âm báo đảo hướng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Diện tích $20$; hướng bị lật như soi gương"
+    },
+    {
+     "key": "B",
+     "text": "Diện tích $-20$ vì định thức âm"
+    },
+    {
+     "key": "C",
+     "text": "Diện tích $20$; hướng (chiều đi qua các đỉnh) giữ nguyên"
+    },
+    {
+     "key": "D",
+     "text": "Diện tích $5$; hướng giữ nguyên"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T01-C05",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Cho ba vector $\\mathbf{v}_1 = (1, 2, k)$, $\\mathbf{v}_2 = (2, 1, 0)$, $\\mathbf{v}_3 = (0, 3, 4)$. Tìm $k$ để ba vector **phụ thuộc tuyến tính**. **Nhập số (dạng thập phân hoặc phân số).**",
+   "explanation": "Ba vector trong $\\mathbb{R}^3$ phụ thuộc tuyến tính $\\iff$ định thức ma trận ghép bằng 0: $\\det\\begin{bmatrix} 1 & 2 & k \\\\ 2 & 1 & 0 \\\\ 0 & 3 & 4 \\end{bmatrix} = 1 \\cdot 4 - 2 \\cdot 8 + k \\cdot 6 = 6k - 12 = 0 \\Rightarrow k = 2$. Kiểm: $(1, 2, 2) = \\tfrac{1}{2}\\mathbf{v}_2 + \\tfrac{1}{2}\\mathbf{v}_3$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nBa vector trong $\\mathbb{R}^3$ phụ thuộc tuyến tính khi và chỉ khi ma trận ghép chúng (theo hàng hoặc cột) có định thức bằng 0. Bài toán tìm tham số quy về giải một phương trình bậc nhất theo $k$.\n\n#### Từng bước\nKhai triển theo hàng 1 của $\\begin{bmatrix} 1 & 2 & k \\\\ 2 & 1 & 0 \\\\ 0 & 3 & 4 \\end{bmatrix}$:\n\n| Phần tử | Dấu | Định thức con | Đóng góp |\n|---|---|---|---|\n| $1$ | $+$ | $1 \\cdot 4 - 0 \\cdot 3 = 4$ | $4$ |\n| $2$ | $-$ | $2 \\cdot 4 - 0 \\cdot 0 = 8$ | $-16$ |\n| $k$ | $+$ | $2 \\cdot 3 - 1 \\cdot 0 = 6$ | $6k$ |\n\n$\\det = 6k - 12 = 0 \\Rightarrow k = 2$. Kiểm: $\\tfrac{1}{2}(2, 1, 0) + \\tfrac{1}{2}(0, 3, 4) = (1, 2, 2) = \\mathbf{v}_1$ ✓.\n\n```python\nimport numpy as np\nfor k in (2, -2):\n    print(k, round(np.linalg.det(np.array([[1, 2, k], [2, 1, 0], [0, 3, 4]], float)), 6))\n# 2 0.0   |   -2 -24.0\n```\n\n#### Ý nghĩa\nKhi $k = 2$, $\\mathbf{v}_1$ nằm trong mặt phẳng sinh bởi $\\mathbf{v}_2, \\mathbf{v}_3$: thêm $\\mathbf{v}_1$ không mở rộng không gian. Với đặc trưng của mô hình, đó là một đặc trưng \"thừa\".\n\n#### Bẫy thường gặp\n- Sai dấu bàn cờ ở vị trí $(1, 2)$ hoặc $(1, 3)$ (ra $k = -2$ hoặc $k = -10/3$).\n- Luôn thay ngược $k$ vào để kiểm định thức bằng 0.\n\n#### Đọc thêm\n- [Wikipedia: Linear independence](https://en.wikipedia.org/wiki/Linear_independence)\n- [Wikipedia: Determinant](https://en.wikipedia.org/wiki/Determinant)",
+   "mistakes": [
+    {
+     "value": -2,
+     "why": "Sai dấu phần bù của phần tử $k$ ở vị trí $(1, 3)$, viết $4 - 16 - 6k = 0$; dấu đúng là $(-1)^{1+3} = +1$."
+    },
+    {
+     "value": -3.333,
+     "why": "Quên dấu trừ ở số hạng giữa của khai triển hàng 1, viết $4 + 16 + 6k = 0$; dấu đúng của vị trí $(1, 2)$ là $(-1)^{1+2} = -1$."
+    }
+   ],
+   "answer": 2,
+   "tol": 0.001
+  },
+  {
+   "id": "T01-C06",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Ma trận $A \\in \\mathbb{R}^{2 \\times 2}$ có hai trị riêng $2$ và $-1$ với các vector riêng tương ứng $\\mathbf{v}_1$, $\\mathbf{v}_2$. Xét $B = A^3 - A$. Phát biểu nào đúng?",
+   "explanation": "Nếu $A\\mathbf{v} = \\lambda\\mathbf{v}$ thì $A^3\\mathbf{v} = \\lambda^3\\mathbf{v}$, nên $B\\mathbf{v} = (\\lambda^3 - \\lambda)\\mathbf{v}$: cùng vector riêng, trị riêng $2^3 - 2 = 6$ và $(-1)^3 - (-1) = 0$. Vì có trị riêng 0 nên $B$ suy biến.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nNếu $A\\mathbf{v} = \\lambda\\mathbf{v}$ thì với mọi đa thức $p$: $p(A)\\mathbf{v} = p(\\lambda)\\mathbf{v}$. Nói cách khác, $p(A)$ có **cùng vector riêng** với $A$, trị riêng là $p(\\lambda)$. Nếu $A = SDS^{-1}$ thì $p(A) = S\\,p(D)\\,S^{-1}$.\n\n#### Từng bước\nVới $p(x) = x^3 - x$:\n\n| $\\lambda$ của $A$ | $\\lambda^3$ | $p(\\lambda) = \\lambda^3 - \\lambda$ |\n|---|---|---|\n| $2$ | $8$ | $6$ |\n| $-1$ | $-1$ | $0$ |\n\n$B$ có trị riêng $6$ và $0$, cùng vector riêng $\\mathbf{v}_1, \\mathbf{v}_2$; $\\det B = 0$ nên $B$ không khả nghịch.\n\nVí dụ cụ thể: $A = \\begin{bmatrix} 1 & 1 \\\\ 2 & 0 \\end{bmatrix}$ có $\\operatorname{tr} = 1$, $\\det = -2$, trị riêng $2$ và $-1$.\n\n```python\nimport numpy as np\nA = np.array([[1., 1.], [2., 0.]])\nB = A @ A @ A - A\nprint(np.round(np.linalg.eigvals(A).real, 6), np.round(np.linalg.eigvals(B).real, 6))\n# [ 2. -1.] [6. 0.]\n```\n\n#### Bẫy thường gặp\n- Quên số hạng $-\\lambda$.\n- Sai dấu lũy thừa lẻ của số âm.\n- Nghĩ phải chéo hoá lại: vector riêng giữ nguyên với mọi đa thức (và cả $A^{-1}$ nếu tồn tại, trị riêng $1/\\lambda$).\n\n#### Đọc thêm\n- [Wikipedia: Diagonalizable matrix](https://en.wikipedia.org/wiki/Diagonalizable_matrix)\n- [Wikipedia: Eigenvalues and eigenvectors](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors)",
+   "distractors": {
+    "A": "Chỉ tính $\\lambda^3$ mà quên trừ $\\lambda$.",
+    "B": "Tính sai $(-1)^3 = 1$; lũy thừa lẻ của số âm vẫn âm, nên $(-1)^3 - (-1) = -1 + 1 = 0$.",
+    "D": "Đa thức của $A$ giữ nguyên vector riêng: $p(A)\\mathbf{v} = p(\\lambda)\\mathbf{v}$, nên không cần tính lại."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Trị riêng của $B$ là $8$ và $-1$; vector riêng giữ nguyên"
+    },
+    {
+     "key": "B",
+     "text": "Trị riêng của $B$ là $6$ và $2$; vector riêng giữ nguyên"
+    },
+    {
+     "key": "C",
+     "text": "Trị riêng của $B$ là $6$ và $0$; vector riêng giữ nguyên"
+    },
+    {
+     "key": "D",
+     "text": "Trị riêng của $B$ là $6$ và $0$; vector riêng phải tính lại từ đầu"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T01-C07",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Để phân tích hiện tượng bùng nổ/tiêu biến gradient, một nhóm xét RNN tuyến tính (bỏ hàm kích hoạt) cập nhật trạng thái ẩn $\\mathbf{h}_t = W\\mathbf{h}_{t-1}$ với $W = \\begin{bmatrix} 0{,}9 & 0{,}4 \\\\ 0{,}4 & 0{,}3 \\end{bmatrix}$. Với $\\mathbf{h}_0$ khác 0 khởi tạo ngẫu nhiên, khi $t$ lớn thì $\\lVert \\mathbf{h}_t \\rVert$ diễn biến thế nào?",
+   "explanation": "$\\operatorname{tr} W = 1{,}2$, $\\det W = 0{,}11$ nên $\\lambda^2 - 1{,}2\\lambda + 0{,}11 = 0 \\Rightarrow \\lambda \\in \\{1{,}1;\\ 0{,}1\\}$. Phân tích $\\mathbf{h}_0 = c_1\\mathbf{v}_1 + c_2\\mathbf{v}_2$ thì $\\mathbf{h}_t = c_1 1{,}1^t\\mathbf{v}_1 + c_2 0{,}1^t\\mathbf{v}_2$; thành phần $1{,}1^t$ áp đảo nên trạng thái (và gradient lan ngược qua $W^\\top$) bùng nổ.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nLặp $\\mathbf{h}_t = W^t\\mathbf{h}_0$. Nếu $W$ chéo hoá được với trị riêng $\\lambda_i$ và vector riêng $\\mathbf{v}_i$, viết $\\mathbf{h}_0 = \\sum_i c_i\\mathbf{v}_i$ thì\n$$\\mathbf{h}_t = \\sum_i c_i \\lambda_i^t \\mathbf{v}_i.$$\nHành vi dài hạn do **bán kính phổ** $\\rho(W) = \\max_i \\lvert \\lambda_i \\rvert$ quyết định: $\\rho > 1$ bùng nổ, $\\rho < 1$ tắt dần. Gradient lan ngược qua thời gian nhân lặp với $W^\\top$ (cùng trị riêng) nên gặp đúng hiện tượng đó.\n\n#### Từng bước\n1. $\\operatorname{tr} W = 1{,}2$, $\\det W = 0{,}27 - 0{,}16 = 0{,}11$.\n2. $\\lambda^2 - 1{,}2\\lambda + 0{,}11 = 0 \\Rightarrow \\lambda = \\dfrac{1{,}2 \\pm \\sqrt{1{,}44 - 0{,}44}}{2} = \\dfrac{1{,}2 \\pm 1}{2}$, tức $1{,}1$ và $0{,}1$.\n3. $\\rho(W) = 1{,}1 > 1$: $\\lVert \\mathbf{h}_t \\rVert$ tăng cỡ $1{,}1^t$ (sau 40 bước gấp khoảng 45 lần).\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Chuẩn trạng thái ẩn tăng theo 1,1 mũ t và giảm theo 0,1 mũ t\">\n<line x1=\"60\" y1=\"215\" x2=\"520\" y2=\"215\" stroke=\"currentColor\"/>\n<line x1=\"60\" y1=\"215\" x2=\"60\" y2=\"20\" stroke=\"currentColor\"/>\n<polyline points=\"60.0,211.0 71.0,210.6 82.0,210.2 93.0,209.7 104.0,209.1 115.0,208.6 126.0,207.9 137.0,207.2 148.0,206.4 159.0,205.6 170.0,204.6 181.0,203.6 192.0,202.4 203.0,201.2 214.0,199.8 225.0,198.3 236.0,196.6 247.0,194.8 258.0,192.8 269.0,190.5 280.0,188.1 291.0,185.4 302.0,182.4 313.0,179.2 324.0,175.6 335.0,171.7 346.0,167.3 357.0,162.6 368.0,157.3 379.0,151.5 390.0,145.2 401.0,138.2 412.0,130.5 423.0,122.1 434.0,112.8 445.0,102.6 456.0,91.3 467.0,79.0 478.0,65.4 489.0,50.4 500.0,34.0\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"3\"/>\n<polyline points=\"60.0,211.0 71.0,214.6 82.0,215.0 93.0,215.0 104.0,215.0 115.0,215.0 126.0,215.0 137.0,215.0 148.0,215.0 159.0,215.0 170.0,215.0 181.0,215.0 192.0,215.0 203.0,215.0 214.0,215.0 225.0,215.0 236.0,215.0 247.0,215.0 258.0,215.0 269.0,215.0 280.0,215.0 291.0,215.0 302.0,215.0 313.0,215.0 324.0,215.0 335.0,215.0 346.0,215.0 357.0,215.0 368.0,215.0 379.0,215.0 390.0,215.0 401.0,215.0 412.0,215.0 423.0,215.0 434.0,215.0 445.0,215.0 456.0,215.0 467.0,215.0 478.0,215.0 489.0,215.0 500.0,215.0\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"3\"/>\n<text x=\"60.0\" y=\"232.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"170.0\" y=\"232.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">10</text>\n<text x=\"280.0\" y=\"232.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">20</text>\n<text x=\"390.0\" y=\"232.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">30</text>\n<text x=\"500.0\" y=\"232.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">40</text>\n<text x=\"52.0\" y=\"219.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">0</text>\n<text x=\"52.0\" y=\"179.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">10</text>\n<text x=\"52.0\" y=\"139.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">20</text>\n<text x=\"52.0\" y=\"99.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">30</text>\n<text x=\"52.0\" y=\"59.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">40</text>\n<text x=\"290.0\" y=\"248.0\" font-size=\"12\" text-anchor=\"middle\" fill=\"currentColor\">bước thời gian t</text>\n<text x=\"496.0\" y=\"28.0\" font-size=\"12\" text-anchor=\"end\" fill=\"#ef4444\" font-weight=\"bold\">1,1ᵗ (t = 40: ≈ 45,3)</text>\n<text x=\"280.0\" y=\"207.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">0,1ᵗ → 0 gần như ngay lập tức</text>\n<text x=\"80.0\" y=\"40.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">thành phần theo vector riêng của λ = 1,1 áp đảo</text>\n</svg>\n\n| Chỉ số | Giá trị | Có quyết định ổn định? |\n|---|---|---|\n| Phần tử lớn nhất | 0,9 | không |\n| $\\det W$ | 0,11 | không |\n| $\\rho(W)$ | 1,1 | **có** |\n\n```python\nimport numpy as np\nW = np.array([[0.9, 0.4], [0.4, 0.3]])\nh = np.random.default_rng(5).normal(size=2)\nfor t in range(40): h = W @ h\nprint(np.linalg.eigvalsh(W), np.linalg.norm(h))\n```\n\n#### Bẫy thường gặp\n- Nhìn phần tử hoặc định thức thay vì trị riêng.\n- Đây là lý do LSTM/GRU, gradient clipping và khởi tạo trực giao ra đời.\n\n#### Đọc thêm\n- [d2l.ai: Backpropagation Through Time](https://d2l.ai/chapter_recurrent-neural-networks/bptt.html)\n- [Wikipedia: Spectral radius](https://en.wikipedia.org/wiki/Spectral_radius)",
+   "distractors": {
+    "A": "Phần tử nhỏ hơn 1 không bảo đảm phép nhân co lại; điều quyết định là bán kính phổ (trị riêng lớn nhất về trị tuyệt đối).",
+    "B": "$\\det W$ là tích các trị riêng ($1{,}1 \\cdot 0{,}1$); tích nhỏ vẫn có thể chứa một trị riêng lớn hơn 1.",
+    "C": "Chỉ ma trận trực giao mới giữ nguyên chuẩn; ma trận đối xứng co hoặc giãn theo từng trị riêng của nó."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Tắt dần về 0, vì mọi phần tử của $W$ đều nhỏ hơn 1"
+    },
+    {
+     "key": "B",
+     "text": "Tắt dần về 0, vì $\\det W = 0{,}11 < 1$"
+    },
+    {
+     "key": "C",
+     "text": "Giữ nguyên, vì $W$ là ma trận đối xứng"
+    },
+    {
+     "key": "D",
+     "text": "Tăng theo cỡ $1{,}1^t$, vì trị riêng lớn nhất là $1{,}1$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T01-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Hai chỉ số giám sát mô hình (độ trễ và số token, đã đổi đơn vị) được nén còn 1 chiều bằng PCA. Trung bình $\\boldsymbol{\\mu} = (2, 3)$, thành phần chính thứ nhất $\\mathbf{w}_1 = (0{,}6;\\ 0{,}8)$ (vector đơn vị). Với điểm $\\mathbf{x} = (4, 7)$, tọa độ $z = \\mathbf{w}_1^\\top(\\mathbf{x} - \\boldsymbol{\\mu})$ và sai số tái tạo $\\lVert \\mathbf{x} - (\\boldsymbol{\\mu} + z\\mathbf{w}_1) \\rVert$ lần lượt là:",
+   "explanation": "$\\mathbf{x} - \\boldsymbol{\\mu} = (2, 4)$, $z = 0{,}6 \\cdot 2 + 0{,}8 \\cdot 4 = 4{,}4$. Tái tạo $\\hat{\\mathbf{x}} = (2, 3) + 4{,}4 \\cdot (0{,}6;\\ 0{,}8) = (4{,}64;\\ 6{,}52)$, sai số $= \\lVert (-0{,}64;\\ 0{,}48) \\rVert = 0{,}8$ (cũng bằng $\\sqrt{\\lVert \\mathbf{x} - \\boldsymbol{\\mu} \\rVert^2 - z^2} = \\sqrt{20 - 19{,}36}$).",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nPCA với một thành phần: **căn giữa** rồi chiếu lên vector đơn vị $\\mathbf{w}_1$.\n- Mã hoá: $z = \\mathbf{w}_1^\\top(\\mathbf{x} - \\boldsymbol{\\mu})$.\n- Giải mã (tái tạo): $\\hat{\\mathbf{x}} = \\boldsymbol{\\mu} + z\\,\\mathbf{w}_1$.\n- Sai số tái tạo là phần vuông góc với $\\mathbf{w}_1$: $\\lVert \\mathbf{x} - \\hat{\\mathbf{x}} \\rVert^2 = \\lVert \\mathbf{x} - \\boldsymbol{\\mu} \\rVert^2 - z^2$ (định lý Pythagore).\n\n#### Từng bước\n1. $\\mathbf{x} - \\boldsymbol{\\mu} = (2, 4)$, $\\lVert \\mathbf{x} - \\boldsymbol{\\mu} \\rVert^2 = 20$.\n2. $z = 0{,}6 \\cdot 2 + 0{,}8 \\cdot 4 = 4{,}4$.\n3. $\\hat{\\mathbf{x}} = (2 + 2{,}64;\\ 3 + 3{,}52) = (4{,}64;\\ 6{,}52)$.\n4. Sai số $= \\sqrt{0{,}64^2 + 0{,}48^2} = \\sqrt{0{,}64} = 0{,}8$; kiểm bằng Pythagore: $20 - 4{,}4^2 = 0{,}64$.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Chiếu điểm x lên trục PC1 qua trung bình mu\">\n<defs><marker id=\"ahC08\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"#10b981\"/></marker></defs>\n<line x1=\"47.0\" y1=\"239.0\" x2=\"200.0\" y2=\"35.0\" stroke=\"#3b82f6\" stroke-width=\"2\" stroke-dasharray=\"6 4\"/>\n<line x1=\"110.0\" y1=\"155.0\" x2=\"140.0\" y2=\"115.0\" stroke=\"#10b981\" stroke-width=\"3\" marker-end=\"url(#ahC08)\"/>\n<line x1=\"160.0\" y1=\"55.0\" x2=\"176.0\" y2=\"67.0\" stroke=\"#ef4444\" stroke-width=\"3\"/>\n<circle cx=\"110.0\" cy=\"155.0\" r=\"5\" fill=\"currentColor\"/>\n<circle cx=\"160.0\" cy=\"55.0\" r=\"5\" fill=\"#f59e0b\"/>\n<circle cx=\"176.0\" cy=\"67.0\" r=\"5\" fill=\"#3b82f6\"/>\n<text x=\"118.0\" y=\"169.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">μ = (2, 3)</text>\n<text x=\"152.0\" y=\"49.0\" font-size=\"12\" text-anchor=\"end\" fill=\"#f59e0b\" font-weight=\"bold\">x = (4, 7)</text>\n<text x=\"184.0\" y=\"79.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">x̂ = (4,64; 6,52)</text>\n<text x=\"146.0\" y=\"131.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#10b981\">w₁ = (0,6; 0,8)</text>\n<text x=\"300.0\" y=\"80.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">x − μ = (2, 4)</text>\n<text x=\"300.0\" y=\"106.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">z = 0,6·2 + 0,8·4 = 4,4</text>\n<text x=\"300.0\" y=\"132.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">x̂ = μ + z·w₁ = (4,64; 6,52)</text>\n<text x=\"300.0\" y=\"158.0\" font-size=\"13\" text-anchor=\"start\" fill=\"currentColor\">x − x̂ = (−0,64; 0,48)</text>\n<text x=\"300.0\" y=\"184.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#ef4444\" font-weight=\"bold\">sai số = √(0,4096 + 0,2304) = 0,8</text>\n</svg>\n\n| Lỗi | $z$ | Sai số |\n|---|---|---|\n| đúng | 4,4 | 0,8 |\n| không căn giữa | 8 | 1 |\n| đảo $\\mathbf{w}_1$ thành $(0{,}8;\\ 0{,}6)$ | 4 | 2 |\n| quên căn | 4,4 | 0,64 |\n\n```python\nimport numpy as np\nmu = np.array([2, 3]); w = np.array([0.6, 0.8]); x = np.array([4, 7])\nz = w @ (x - mu); xh = mu + z * w\nprint(z, xh, np.linalg.norm(x - xh))   # 4.4 [4.64 6.52] 0.8\n```\n\n#### Bẫy thường gặp\n- Quên trừ trung bình: `sklearn.decomposition.PCA` tự căn giữa, còn tự cài bằng SVD thì phải nhớ.\n- Sai số tái tạo nhỏ nghĩa là điểm nằm gần trục PC1; dùng làm điểm bất thường (anomaly score) trong giám sát mô hình.\n\n#### Đọc thêm\n- [Wikipedia: Principal component analysis](https://en.wikipedia.org/wiki/Principal_component_analysis)\n- [mml-book, chương 10 (PCA)](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "A": "Quên trừ trung bình: $z = \\mathbf{w}_1^\\top \\mathbf{x} = 2{,}4 + 5{,}6 = 8$; PCA chiếu dữ liệu **đã căn giữa**.",
+    "C": "Đảo thứ tự thành phần của $\\mathbf{w}_1$ thành $(0{,}8;\\ 0{,}6)$, chiếu lên sai hướng nên sai số lớn.",
+    "D": "$0{,}64 = 20 - 19{,}36$ là **bình phương** sai số; quên lấy căn."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$z = 8$; sai số $1$"
+    },
+    {
+     "key": "B",
+     "text": "$z = 4{,}4$; sai số $0{,}8$"
+    },
+    {
+     "key": "C",
+     "text": "$z = 4$; sai số $2$"
+    },
+    {
+     "key": "D",
+     "text": "$z = 4{,}4$; sai số $0{,}64$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T01-C09",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Ma trận đánh giá $R$ (người dùng × phim) của một hệ gợi ý có các giá trị kỳ dị $6$, $3$, $2$. Nhóm dùng SVD cắt cụt để xấp xỉ $R$ bằng ma trận $R_1$ có **hạng 1**. Sai số nhỏ nhất có thể đạt được theo chuẩn Frobenius, $\\lVert R - R_1 \\rVert_F$, là bao nhiêu? **Làm tròn 2 chữ số thập phân.**",
+   "explanation": "Theo định lý Eckart–Young, xấp xỉ hạng 1 tốt nhất giữ $\\sigma_1$ và bỏ $\\sigma_2, \\sigma_3$: $\\lVert R - R_1 \\rVert_F = \\sqrt{\\sigma_2^2 + \\sigma_3^2} = \\sqrt{9 + 4} = \\sqrt{13} \\approx 3{,}61$.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nĐịnh lý Eckart–Young–Mirsky: trong mọi ma trận hạng $\\le k$, SVD cắt cụt $R_k = \\sum_{i \\le k}\\sigma_i\\mathbf{u}_i\\mathbf{v}_i^\\top$ gần $R$ nhất, với sai số\n$$\\lVert R - R_k \\rVert_F = \\sqrt{\\sum_{i > k}\\sigma_i^2}, \\qquad \\lVert R - R_k \\rVert_2 = \\sigma_{k+1}.$$\n\n#### Từng bước\n1. Giữ $\\sigma_1 = 6$, bỏ $\\sigma_2 = 3$, $\\sigma_3 = 2$.\n2. $\\lVert R - R_1 \\rVert_F^2 = 9 + 4 = 13$.\n3. $\\lVert R - R_1 \\rVert_F = \\sqrt{13} \\approx 3{,}61$.\n4. Tỉ lệ \"năng lượng\" giữ lại: $36/49 \\approx 73{,}5\\%$.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 240\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Năng lượng sigma bình phương giữ lại và bỏ đi khi xấp xỉ hạng 1\">\n<rect x=\"80\" y=\"38.0\" width=\"80\" height=\"162.0\" fill=\"#10b981\" fill-opacity=\"0.75\"/>\n<text x=\"120.0\" y=\"30.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">σ₁² = 36 (giữ)</text>\n<rect x=\"210\" y=\"159.5\" width=\"80\" height=\"40.5\" fill=\"#ef4444\" fill-opacity=\"0.75\"/>\n<text x=\"250.0\" y=\"151.5\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">σ₂² = 9 (bỏ)</text>\n<rect x=\"340\" y=\"182.0\" width=\"80\" height=\"18.0\" fill=\"#ef4444\" fill-opacity=\"0.75\"/>\n<text x=\"380.0\" y=\"174.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\">σ₃² = 4 (bỏ)</text>\n<line x1=\"60\" y1=\"200\" x2=\"460\" y2=\"200\" stroke=\"currentColor\"/>\n<text x=\"270.0\" y=\"225.0\" font-size=\"13\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Frobenius: √(9 + 4) = √13 ≈ 3,61   ·   chuẩn phổ: σ₂ = 3</text>\n</svg>\n\n| Chuẩn đo sai số | Công thức | Giá trị |\n|---|---|---|\n| Frobenius | $\\sqrt{\\sigma_2^2 + \\sigma_3^2}$ | $\\approx 3{,}61$ |\n| Phổ (spectral) | $\\sigma_2$ | 3 |\n\n```python\nimport numpy as np\nrng = np.random.default_rng(6)\nU, _ = np.linalg.qr(rng.normal(size=(5, 3))); V, _ = np.linalg.qr(rng.normal(size=(4, 3)))\nR = U @ np.diag([6, 3, 2]) @ V.T\nu, s, vt = np.linalg.svd(R)\nR1 = s[0] * np.outer(u[:, 0], vt[0])\nprint(round(np.linalg.norm(R - R1, 'fro'), 2), round(np.linalg.norm(R - R1, 2), 2))   # 3.61 3.0\n```\n\n#### Bẫy thường gặp\n- Nhầm chuẩn phổ và chuẩn Frobenius.\n- Cộng thẳng $\\sigma$ thay vì cộng bình phương.\n- Trong hệ gợi ý thật, ma trận đánh giá có rất nhiều ô trống nên người ta dùng matrix factorization tối ưu trên các ô đã biết thay vì SVD trực tiếp.\n\n#### Đọc thêm\n- [Wikipedia: Low-rank approximation](https://en.wikipedia.org/wiki/Low-rank_approximation)\n- [Wikipedia: Matrix factorization (recommender systems)](https://en.wikipedia.org/wiki/Matrix_factorization_%28recommender_systems%29)",
+   "mistakes": [
+    {
+     "value": 3,
+     "why": "Đây là sai số theo **chuẩn phổ** ($\\lVert R - R_1 \\rVert_2 = \\sigma_2$), không phải chuẩn Frobenius."
+    },
+    {
+     "value": 5,
+     "why": "Cộng thẳng $\\sigma_2 + \\sigma_3$; chuẩn Frobenius cộng **bình phương** rồi lấy căn."
+    },
+    {
+     "value": 13,
+     "why": "Mới ra $\\lVert R - R_1 \\rVert_F^2 = 9 + 4$, quên lấy căn bậc hai."
+    }
+   ],
+   "answer": 3.61,
+   "tol": 0.0051
+  },
+  {
+   "id": "T01-D01",
+   "module": "D",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung-cao",
+   "prompt": "Đội vận hành đo thời gian phản hồi của một LLM API theo độ dài đầu vào:\n\n| $x$ (nghìn token) | 1 | 2 | 3 | 4 |\n|---|---|---|---|---|\n| $y$ (giây) | 2 | 3 | 5 | 6 |\n\nVới mô hình $y = a + bx$, hệ $A\\boldsymbol{\\beta} = \\mathbf{y}$ (với $\\boldsymbol{\\beta} = (a, b)^\\top$, mỗi hàng của $A$ là $(1, x_i)$) có 4 phương trình, 2 ẩn và không có nghiệm đúng. Giải phương trình chuẩn $A^\\top A \\boldsymbol{\\beta} = A^\\top \\mathbf{y}$ (bình phương tối thiểu), rồi dự báo thời gian phản hồi khi $x = 6$ nghìn token. **Đơn vị: giây, làm tròn 1 chữ số thập phân.**",
+   "explanation": "$A^\\top A = \\begin{bmatrix} 4 & 10 \\\\ 10 & 30 \\end{bmatrix}$, $A^\\top \\mathbf{y} = \\begin{bmatrix} 16 \\\\ 47 \\end{bmatrix}$, $\\det(A^\\top A) = 20$. Suy ra $a = \\dfrac{30 \\cdot 16 - 10 \\cdot 47}{20} = 0{,}5$, $b = \\dfrac{4 \\cdot 47 - 10 \\cdot 16}{20} = 1{,}4$. Dự báo: $0{,}5 + 1{,}4 \\cdot 6 = 8{,}9$ giây.",
+   "section": "a-dstt",
+   "long": "#### Ý chính\nHệ quá xác định $A\\boldsymbol{\\beta} = \\mathbf{y}$ (nhiều phương trình hơn ẩn) thường vô nghiệm. Bình phương tối thiểu tìm $\\boldsymbol{\\beta}$ cực tiểu $\\lVert A\\boldsymbol{\\beta} - \\mathbf{y} \\rVert^2$; nghiệm thoả **phương trình chuẩn** $A^\\top A\\boldsymbol{\\beta} = A^\\top\\mathbf{y}$. Về hình học, $A\\boldsymbol{\\beta}$ là hình chiếu của $\\mathbf{y}$ lên không gian cột của $A$.\n\n#### Từng bước\n$$A = \\begin{bmatrix} 1 & 1 \\\\ 1 & 2 \\\\ 1 & 3 \\\\ 1 & 4 \\end{bmatrix}, \\quad A^\\top A = \\begin{bmatrix} 4 & \\sum x_i \\\\ \\sum x_i & \\sum x_i^2 \\end{bmatrix} = \\begin{bmatrix} 4 & 10 \\\\ 10 & 30 \\end{bmatrix}, \\quad A^\\top\\mathbf{y} = \\begin{bmatrix} \\sum y_i \\\\ \\sum x_i y_i \\end{bmatrix} = \\begin{bmatrix} 16 \\\\ 47 \\end{bmatrix}.$$\n\nGiải bằng nghịch đảo $2 \\times 2$ ($\\det = 120 - 100 = 20$):\n$$\\begin{bmatrix} a \\\\ b \\end{bmatrix} = \\frac{1}{20}\\begin{bmatrix} 30 & -10 \\\\ -10 & 4 \\end{bmatrix}\\begin{bmatrix} 16 \\\\ 47 \\end{bmatrix} = \\frac{1}{20}\\begin{bmatrix} 10 \\\\ 28 \\end{bmatrix} = \\begin{bmatrix} 0{,}5 \\\\ 1{,}4 \\end{bmatrix}.$$\n\nDự báo $x = 6$: $0{,}5 + 1{,}4 \\cdot 6 = 8{,}9$ giây.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Bốn điểm đo, đường bình phương tối thiểu và điểm dự báo tại x bằng 6\">\n<line x1=\"60\" y1=\"230\" x2=\"520\" y2=\"230\" stroke=\"currentColor\"/>\n<line x1=\"60\" y1=\"230\" x2=\"60\" y2=\"20\" stroke=\"currentColor\"/>\n<text x=\"60.0\" y=\"246.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"120.0\" y=\"246.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"180.0\" y=\"246.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"240.0\" y=\"246.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<text x=\"300.0\" y=\"246.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<text x=\"360.0\" y=\"246.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">5</text>\n<text x=\"420.0\" y=\"246.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">6</text>\n<text x=\"480.0\" y=\"246.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">7</text>\n<text x=\"52.0\" y=\"234.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">0</text>\n<text x=\"52.0\" y=\"194.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">2</text>\n<text x=\"52.0\" y=\"154.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">4</text>\n<text x=\"52.0\" y=\"114.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">6</text>\n<text x=\"52.0\" y=\"74.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">8</text>\n<text x=\"52.0\" y=\"34.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">10</text>\n<line x1=\"60.0\" y1=\"220.0\" x2=\"468.0\" y2=\"29.6\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<line x1=\"120.0\" y1=\"190.0\" x2=\"120.0\" y2=\"192.0\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<circle cx=\"120.0\" cy=\"190.0\" r=\"5\" fill=\"currentColor\"/>\n<line x1=\"180.0\" y1=\"170.0\" x2=\"180.0\" y2=\"164.0\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<circle cx=\"180.0\" cy=\"170.0\" r=\"5\" fill=\"currentColor\"/>\n<line x1=\"240.0\" y1=\"130.0\" x2=\"240.0\" y2=\"136.0\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<circle cx=\"240.0\" cy=\"130.0\" r=\"5\" fill=\"currentColor\"/>\n<line x1=\"300.0\" y1=\"110.0\" x2=\"300.0\" y2=\"108.0\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<circle cx=\"300.0\" cy=\"110.0\" r=\"5\" fill=\"currentColor\"/>\n<circle cx=\"420.0\" cy=\"52.0\" r=\"6\" fill=\"#10b981\"/>\n<text x=\"428.0\" y=\"78.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#10b981\" font-weight=\"bold\">dự báo (6; 8,9)</text>\n<text x=\"330.0\" y=\"205.0\" font-size=\"13\" text-anchor=\"start\" fill=\"#3b82f6\" font-weight=\"bold\">y = 0,5 + 1,4x</text>\n<text x=\"80.0\" y=\"28.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\">đoạn đỏ = phần dư; tổng bình phương phần dư nhỏ nhất</text>\n<text x=\"290.0\" y=\"258.0\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">x (nghìn token)</text>\n</svg>\n\n| $x$ | $y$ | $\\hat{y} = 0{,}5 + 1{,}4x$ | phần dư |\n|---|---|---|---|\n| 1 | 2 | 1,9 | 0,1 |\n| 2 | 3 | 3,3 | −0,3 |\n| 3 | 5 | 4,7 | 0,3 |\n| 4 | 6 | 6,1 | −0,1 |\n\nTổng phần dư bằng 0 và phần dư vuông góc với cột $x$: $0{,}1 - 0{,}6 + 0{,}9 - 0{,}4 = 0$, đúng như phương trình chuẩn đòi hỏi.\n\n```python\nimport numpy as np\nx = np.array([1, 2, 3, 4]); y = np.array([2, 3, 5, 6])\nA = np.c_[np.ones(4), x]\nbeta, *_ = np.linalg.lstsq(A, y, rcond=None)\nprint(beta, beta @ [1, 6])   # [0.5 1.4] 8.9\n```\n\n#### Bẫy thường gặp\n- Bỏ hệ số chặn (ra 9,4), nối hai điểm đầu cuối (8,7) hay hai điểm cuối (8).\n- Ngoại suy tới $x = 6$ nằm ngoài vùng dữ liệu $[1, 4]$: con số chỉ đáng tin nếu quan hệ vẫn tuyến tính ở vùng đó.\n\n#### Đọc thêm\n- [Wikipedia: Ordinary least squares](https://en.wikipedia.org/wiki/Ordinary_least_squares)\n- [NumPy docs: numpy.linalg.lstsq](https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html)\n- [d2l.ai: Linear Regression](https://d2l.ai/chapter_linear-regression/linear-regression.html)",
+   "mistakes": [
+    {
+     "value": 8.7,
+     "why": "Vẽ đường thẳng qua điểm đầu $(1, 2)$ và điểm cuối $(4, 6)$ (hệ số góc $4/3$); đường này không cực tiểu tổng bình phương sai số."
+    },
+    {
+     "value": 9.4,
+     "why": "Bỏ hệ số chặn, giải $y = bx$ với $b = \\sum x_i y_i / \\sum x_i^2 = 47/30$; mô hình đề bài có $a$."
+    },
+    {
+     "value": 8,
+     "why": "Ngoại suy theo hai điểm cuối (hệ số góc 1), bỏ qua phần còn lại của dữ liệu."
+    }
+   ],
+   "answer": 8.9,
+   "tol": 0.051,
+   "unit": "giây"
+  },
+  {
+   "id": "T01-D02",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Một ứng dụng học AI có hai nhóm người dùng: gói **Free** và gói **Pro**. Dữ liệu cho thấy mỗi tháng: 80% người dùng Free vẫn ở Free, 20% nâng lên Pro; 70% người dùng Pro giữ Pro, 30% quay về Free. Gọi $\\mathbf{x}_n = (f_n, p_n)^\\top$ là tỉ lệ người dùng ở hai gói sau $n$ tháng; $\\mathbf{x}_{n+1} = M\\mathbf{x}_n$ với\n\n$$M = \\begin{bmatrix} 0{,}8 & 0{,}3 \\\\ 0{,}2 & 0{,}7 \\end{bmatrix}$$\n\n(cột = trạng thái hiện tại, hàng = trạng thái tháng sau). Tháng 0 mọi người dùng ở Free: $\\mathbf{x}_0 = (1, 0)^\\top$.\n\na) Tìm các trị riêng và vector riêng của $M$.\n\nb) Chéo hóa $M = SDS^{-1}$, viết công thức $\\mathbf{x}_n$ theo $n$ và tính tỉ lệ người dùng Pro sau 3 tháng.\n\nc) Khi $n \\to \\infty$, tỉ lệ Pro tiến về bao nhiêu? Trị riêng thứ hai cho biết gì về tốc độ hội tụ?\n\nTrình bày các bước tính tay.",
+   "explanation": "Định hướng chấm: trị riêng $1$ và $0{,}5$, vector riêng $(3, 2)$ và $(1, -1)$ (sai khác hằng số vẫn đúng); $\\mathbf{x}_n = (0{,}6;\\ 0{,}4) + 0{,}4 \\cdot 0{,}5^n(1, -1)$; Pro sau 3 tháng $= 0{,}35$; dài hạn $0{,}4$; $\\lambda_2 = 0{,}5$ điều khiển tốc độ hội tụ.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nMa trận chuyển trạng thái (cột cộng bằng 1) luôn có trị riêng $\\lambda = 1$; vector riêng tương ứng, chuẩn hoá tổng bằng 1, là **phân phối dừng**. Chéo hoá $M = SDS^{-1}$ cho $M^n = SD^nS^{-1}$, biến bài toán \"nhân $n$ lần\" thành \"lũy thừa các trị riêng\".\n\n```mermaid\nflowchart LR\n  F[\"Free\"] -->|0,2| P[\"Pro\"]\n  P -->|0,3| F\n  F -->|0,8| F\n  P -->|0,7| P\n```\n\n#### Từng bước\n1. Đa thức đặc trưng $\\lambda^2 - 1{,}5\\lambda + 0{,}5 = (\\lambda - 1)(\\lambda - 0{,}5)$.\n2. $\\lambda_1 = 1 \\to \\mathbf{v}_1 = (3, 2)$; $\\lambda_2 = 0{,}5 \\to \\mathbf{v}_2 = (1, -1)$.\n3. $\\mathbf{x}_0 = (1, 0) = 0{,}2\\,\\mathbf{v}_1 + 0{,}4\\,\\mathbf{v}_2$.\n4. $\\mathbf{x}_n = 0{,}2\\,\\mathbf{v}_1 + 0{,}4 \\cdot 0{,}5^n\\,\\mathbf{v}_2 = (0{,}6 + 0{,}4 \\cdot 0{,}5^n;\\ 0{,}4 - 0{,}4 \\cdot 0{,}5^n)$.\n\n| Tháng $n$ | Free $f_n$ | Pro $p_n$ | Cách trạng thái dừng |\n|---|---|---|---|\n| 0 | 1 | 0 | 0,4 |\n| 1 | 0,8 | 0,2 | 0,2 |\n| 2 | 0,7 | 0,3 | 0,1 |\n| 3 | 0,65 | 0,35 | 0,05 |\n| $\\infty$ | 0,6 | 0,4 | 0 |\n\nKhoảng cách tới trạng thái dừng giảm theo $0{,}5^n$: trị riêng thứ hai càng nhỏ, hệ càng nhanh ổn định.\n\n```python\nimport numpy as np\nM = np.array([[0.8, 0.3], [0.2, 0.7]])\nfor n in (1, 2, 3, 50):\n    print(n, np.linalg.matrix_power(M, n) @ [1, 0])\n```\n\n#### Bẫy thường gặp\n- Nhầm quy ước hàng/cột: ở đây **cột** là trạng thái hiện tại nên $\\mathbf{x}_{n+1} = M\\mathbf{x}_n$ và mỗi cột cộng bằng 1.\n- Chuẩn hoá vector riêng $(3, 2)$ theo **tổng** (ra $0{,}6;\\ 0{,}4$), không theo độ dài Euclid.\n- Mô hình giả định xác suất chuyển không đổi theo thời gian; thực tế cần kiểm lại theo dữ liệu từng quý.\n\n#### Đọc thêm\n- [Wikipedia: Markov chain](https://en.wikipedia.org/wiki/Markov_chain)\n- [Wikipedia: Diagonalizable matrix](https://en.wikipedia.org/wiki/Diagonalizable_matrix)\n- [Wikipedia: Stochastic matrix](https://en.wikipedia.org/wiki/Stochastic_matrix)",
+   "modelAnswer": "**a) Trị riêng, vector riêng.** Đa thức đặc trưng:\n\n$$\\det(M - \\lambda I) = (0{,}8 - \\lambda)(0{,}7 - \\lambda) - 0{,}06 = \\lambda^2 - 1{,}5\\lambda + 0{,}5 = (\\lambda - 1)(\\lambda - 0{,}5).$$\n\n- $\\lambda_1 = 1$: $(M - I)\\mathbf{v} = \\mathbf{0} \\iff -0{,}2v_1 + 0{,}3v_2 = 0$, chọn $\\mathbf{v}_1 = (3, 2)^\\top$.\n- $\\lambda_2 = 0{,}5$: $(M - 0{,}5I)\\mathbf{v} = \\mathbf{0} \\iff 0{,}3v_1 + 0{,}3v_2 = 0$, chọn $\\mathbf{v}_2 = (1, -1)^\\top$.\n\nKiểm: $\\lambda_1 + \\lambda_2 = 1{,}5 = \\operatorname{tr} M$, $\\lambda_1\\lambda_2 = 0{,}5 = \\det M$.\n\n**b) Chéo hóa.** $S = \\begin{bmatrix} 3 & 1 \\\\ 2 & -1 \\end{bmatrix}$, $D = \\begin{bmatrix} 1 & 0 \\\\ 0 & 0{,}5 \\end{bmatrix}$, $S^{-1} = \\dfrac{1}{-5}\\begin{bmatrix} -1 & -1 \\\\ -2 & 3 \\end{bmatrix} = \\begin{bmatrix} 0{,}2 & 0{,}2 \\\\ 0{,}4 & -0{,}6 \\end{bmatrix}$.\n\nToạ độ của $\\mathbf{x}_0$ theo cơ sở vector riêng: $S^{-1}\\mathbf{x}_0 = (0{,}2;\\ 0{,}4)^\\top$, tức $\\mathbf{x}_0 = 0{,}2\\,\\mathbf{v}_1 + 0{,}4\\,\\mathbf{v}_2$. Do $M^n = SD^nS^{-1}$:\n\n$$\\mathbf{x}_n = 0{,}2 \\cdot 1^n \\begin{bmatrix} 3 \\\\ 2 \\end{bmatrix} + 0{,}4 \\cdot 0{,}5^n \\begin{bmatrix} 1 \\\\ -1 \\end{bmatrix} = \\begin{bmatrix} 0{,}6 + 0{,}4 \\cdot 0{,}5^n \\\\ 0{,}4 - 0{,}4 \\cdot 0{,}5^n \\end{bmatrix}.$$\n\nSau 3 tháng: $p_3 = 0{,}4 - 0{,}4/8 = 0{,}35$ (35% người dùng ở Pro). Kiểm bằng nhân trực tiếp: $\\mathbf{x}_1 = (0{,}8;\\ 0{,}2)$, $\\mathbf{x}_2 = (0{,}7;\\ 0{,}3)$, $\\mathbf{x}_3 = (0{,}65;\\ 0{,}35)$.\n\n**c) Dài hạn.** Vì $0{,}5^n \\to 0$, $\\mathbf{x}_n \\to (0{,}6;\\ 0{,}4)$: tỉ lệ Pro tiến về **40%**, chính là vector riêng của $\\lambda = 1$ đã chuẩn hoá tổng bằng 1 (phân phối dừng). Trị riêng thứ hai $\\lambda_2 = 0{,}5$ quyết định tốc độ: khoảng cách tới trạng thái dừng giảm một nửa mỗi tháng ($0{,}4 \\cdot 0{,}5^n$), sau khoảng 7 tháng còn dưới 0,5 điểm phần trăm. Nếu $\\lvert \\lambda_2 \\rvert$ gần 1, hội tụ sẽ rất chậm.",
+   "rubric": [
+    {
+     "criterion": "a) Lập đúng đa thức đặc trưng $\\lambda^2 - 1{,}5\\lambda + 0{,}5$, ra trị riêng $1$, $0{,}5$ và hai vector riêng tương ứng (1 điểm trị riêng, 1 điểm vector riêng)",
+     "points": 2
+    },
+    {
+     "criterion": "b) Viết $S$, $D$, $S^{-1}$ (hoặc phân tích $\\mathbf{x}_0$ theo vector riêng), ra công thức $\\mathbf{x}_n$ và $p_3 = 0{,}35$ (1 điểm công thức, 1 điểm số)",
+     "points": 2
+    },
+    {
+     "criterion": "c) Giới hạn Pro $= 0{,}4$ với lập luận $0{,}5^n \\to 0$ (1 điểm); giải thích $\\lvert \\lambda_2 \\rvert$ quyết định tốc độ hội tụ (1 điểm)",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "T01-D03",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Đội phân tích log chatbot lấy 4 phiên hội thoại với 2 đặc trưng: $x_1$ = số lượt hỏi, $x_2$ = số lần người dùng bấm 'thử lại'. Dữ liệu (mỗi hàng một phiên): $(1, 2)$, $(4, 2)$, $(7, 2)$, $(8, 6)$. Nhóm muốn giảm còn 1 chiều bằng PCA.\n\na) Căn giữa dữ liệu và lập ma trận hiệp phương sai mẫu $C = \\dfrac{1}{n - 1}X_c^\\top X_c$.\n\nb) Tìm các trị riêng và vector riêng đơn vị của $C$; xác định thành phần chính thứ nhất PC1.\n\nc) Tính tỉ lệ phương sai được PC1 giải thích và tọa độ 1 chiều (score) $z_i = \\mathbf{w}_1^\\top(\\mathbf{x}_i - \\boldsymbol{\\mu})$ của 4 phiên. Nhận xét: có nên giữ 1 chiều không?\n\nTrình bày các bước tính tay.",
+   "explanation": "Định hướng chấm: $\\boldsymbol{\\mu} = (5, 3)$, $C = \\begin{bmatrix} 10 & 4 \\\\ 4 & 4 \\end{bmatrix}$; trị riêng $12$ và $2$; PC1 $= (2, 1)/\\sqrt{5}$; tỉ lệ $6/7 \\approx 85{,}7\\%$; score $\\pm 9/\\sqrt{5}$, $\\pm 3/\\sqrt{5}$ (chấp nhận đổi dấu đồng loạt).",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nPCA tìm các hướng trực chuẩn giữ nhiều phương sai nhất: đó là các vector riêng của ma trận hiệp phương sai $C$ (đối xứng, nửa xác định dương), sắp theo trị riêng giảm dần. Trị riêng $\\lambda_i$ chính là phương sai của dữ liệu khi chiếu lên hướng thứ $i$; tỉ lệ phương sai giải thích là $\\lambda_i / \\sum_j \\lambda_j$.\n\n#### Từng bước\n1. Trung bình $\\boldsymbol{\\mu} = (5, 3)$; dữ liệu căn giữa: $(-4, -1), (-1, -1), (2, -1), (3, 3)$.\n2. $X_c^\\top X_c = \\begin{bmatrix} 30 & 12 \\\\ 12 & 12 \\end{bmatrix}$, $C = \\tfrac{1}{3}X_c^\\top X_c = \\begin{bmatrix} 10 & 4 \\\\ 4 & 4 \\end{bmatrix}$.\n3. $\\lambda^2 - 14\\lambda + 24 = 0 \\Rightarrow \\lambda_1 = 12$, $\\lambda_2 = 2$.\n4. PC1 $\\mathbf{w}_1 = (2, 1)/\\sqrt{5}$, PC2 $\\mathbf{w}_2 = (1, -2)/\\sqrt{5}$.\n5. Tỉ lệ giải thích của PC1: $12/14 \\approx 85{,}7\\%$.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 270\" width=\"100%\" style=\"max-width:560px\" role=\"img\" aria-label=\"Bốn phiên chatbot, trung bình và trục PC1 hướng (2, 1)\">\n<line x1=\"40.0\" y1=\"237.5\" x2=\"390.0\" y2=\"62.5\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<line x1=\"75.0\" y1=\"185.0\" x2=\"89.0\" y2=\"213.0\" stroke=\"#ef4444\" stroke-dasharray=\"4 3\" stroke-width=\"1.8\"/>\n<circle cx=\"89.0\" cy=\"213.0\" r=\"3.5\" fill=\"#3b82f6\"/>\n<circle cx=\"75.0\" cy=\"185.0\" r=\"5.5\" fill=\"#f59e0b\"/>\n<text x=\"83.0\" y=\"200.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">(1, 2)</text>\n<line x1=\"180.0\" y1=\"185.0\" x2=\"173.0\" y2=\"171.0\" stroke=\"#ef4444\" stroke-dasharray=\"4 3\" stroke-width=\"1.8\"/>\n<circle cx=\"173.0\" cy=\"171.0\" r=\"3.5\" fill=\"#3b82f6\"/>\n<circle cx=\"180.0\" cy=\"185.0\" r=\"5.5\" fill=\"#f59e0b\"/>\n<text x=\"188.0\" y=\"200.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">(4, 2)</text>\n<line x1=\"285.0\" y1=\"185.0\" x2=\"257.0\" y2=\"129.0\" stroke=\"#ef4444\" stroke-dasharray=\"4 3\" stroke-width=\"1.8\"/>\n<circle cx=\"257.0\" cy=\"129.0\" r=\"3.5\" fill=\"#3b82f6\"/>\n<circle cx=\"285.0\" cy=\"185.0\" r=\"5.5\" fill=\"#f59e0b\"/>\n<text x=\"293.0\" y=\"200.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">(7, 2)</text>\n<line x1=\"320.0\" y1=\"45.0\" x2=\"341.0\" y2=\"87.0\" stroke=\"#ef4444\" stroke-dasharray=\"4 3\" stroke-width=\"1.8\"/>\n<circle cx=\"341.0\" cy=\"87.0\" r=\"3.5\" fill=\"#3b82f6\"/>\n<circle cx=\"320.0\" cy=\"45.0\" r=\"5.5\" fill=\"#f59e0b\"/>\n<text x=\"328.0\" y=\"60.0\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">(8, 6)</text>\n<circle cx=\"215.0\" cy=\"150.0\" r=\"5\" fill=\"currentColor\"/>\n<text x=\"207.0\" y=\"142.0\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\" font-weight=\"bold\">μ = (5, 3)</text>\n<text x=\"400.0\" y=\"175.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\" font-weight=\"bold\">PC1 ∥ (2, 1), λ₁ = 12</text>\n<text x=\"395.0\" y=\"200.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\">λ₂ = 2 (hướng (1, −2))</text>\n<text x=\"395.0\" y=\"222.0\" font-size=\"12\" text-anchor=\"start\" fill=\"#10b981\" font-weight=\"bold\">PC1 giữ 12/14 ≈ 85,7%</text>\n</svg>\n\n| Phiên | Dữ liệu gốc | Score PC1 | Score PC2 $= \\mathbf{w}_2^\\top(\\mathbf{x} - \\boldsymbol{\\mu})$ |\n|---|---|---|---|\n| 1 | $(1, 2)$ | $-4{,}02$ | $-0{,}89$ |\n| 2 | $(4, 2)$ | $-1{,}34$ | $0{,}45$ |\n| 3 | $(7, 2)$ | $1{,}34$ | $1{,}79$ |\n| 4 | $(8, 6)$ | $4{,}02$ | $-1{,}34$ |\n\nPhương sai mẫu của cột score PC2: $(0{,}8 + 0{,}2 + 3{,}2 + 1{,}8)/3 = 2 = \\lambda_2$ ✓.\n\n```python\nimport numpy as np\nX = np.array([[1, 2], [4, 2], [7, 2], [8, 6]], float)\nXc = X - X.mean(0)\nC = Xc.T @ Xc / 3\nw, V = np.linalg.eigh(C)            # trị riêng tăng dần\nprint(C, w, w[::-1] / w.sum())\nprint(Xc @ V[:, ::-1])               # score PC1, PC2 (dấu có thể đảo)\n```\n\n#### Bẫy thường gặp\n- Quên căn giữa trước khi tính hiệp phương sai.\n- Chia $n$ hay $n - 1$ chỉ đổi tỉ lệ các trị riêng cùng một hệ số; vector riêng và tỉ lệ phương sai giải thích không đổi.\n- Dấu vector riêng tuỳ ý; so sánh kết quả với thư viện phải tính đến việc đổi dấu.\n- Đặc trưng khác đơn vị cần chuẩn hoá trước, nếu không PCA bị chi phối bởi đặc trưng có thang đo lớn.\n\n#### Đọc thêm\n- [Wikipedia: Principal component analysis](https://en.wikipedia.org/wiki/Principal_component_analysis)\n- [Wikipedia: Covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix)\n- [mml-book, chương 10](https://mml-book.github.io/book/mml-book.pdf)",
+   "modelAnswer": "**a) Căn giữa và hiệp phương sai.** Trung bình $\\boldsymbol{\\mu} = \\left(\\dfrac{1 + 4 + 7 + 8}{4}, \\dfrac{2 + 2 + 2 + 6}{4}\\right) = (5, 3)$.\n\n$$X_c = \\begin{bmatrix} -4 & -1 \\\\ -1 & -1 \\\\ 2 & -1 \\\\ 3 & 3 \\end{bmatrix}, \\quad X_c^\\top X_c = \\begin{bmatrix} 16 + 1 + 4 + 9 & 4 + 1 - 2 + 9 \\\\ 12 & 1 + 1 + 1 + 9 \\end{bmatrix} = \\begin{bmatrix} 30 & 12 \\\\ 12 & 12 \\end{bmatrix}, \\quad C = \\frac{1}{3}X_c^\\top X_c = \\begin{bmatrix} 10 & 4 \\\\ 4 & 4 \\end{bmatrix}.$$\n\n**b) Trị riêng, vector riêng.** $\\det(C - \\lambda I) = (10 - \\lambda)(4 - \\lambda) - 16 = \\lambda^2 - 14\\lambda + 24 = (\\lambda - 12)(\\lambda - 2)$.\n\n- $\\lambda_1 = 12$: $-2v_1 + 4v_2 = 0 \\Rightarrow \\mathbf{v} = (2, 1)$, chuẩn hoá $\\mathbf{w}_1 = \\tfrac{1}{\\sqrt{5}}(2, 1) \\approx (0{,}894;\\ 0{,}447)$.\n- $\\lambda_2 = 2$: $8v_1 + 4v_2 = 0 \\Rightarrow \\mathbf{w}_2 = \\tfrac{1}{\\sqrt{5}}(1, -2)$.\n\nPC1 là $\\mathbf{w}_1$ (trị riêng lớn nhất); $\\mathbf{w}_1 \\perp \\mathbf{w}_2$ vì $C$ đối xứng. Dấu của vector riêng tuỳ ý: $-\\mathbf{w}_1$ cũng đúng (khi đó mọi score đổi dấu).\n\n**c) Phương sai giải thích và score.** Tỉ lệ $= \\dfrac{12}{12 + 2} = \\dfrac{6}{7} \\approx 85{,}7\\%$.\n\n| Phiên | $\\mathbf{x}_i - \\boldsymbol{\\mu}$ | $z_i = (2 \\cdot \\Delta x_1 + \\Delta x_2)/\\sqrt{5}$ |\n|---|---|---|\n| 1 | $(-4, -1)$ | $-9/\\sqrt{5} \\approx -4{,}02$ |\n| 2 | $(-1, -1)$ | $-3/\\sqrt{5} \\approx -1{,}34$ |\n| 3 | $(2, -1)$ | $3/\\sqrt{5} \\approx 1{,}34$ |\n| 4 | $(3, 3)$ | $9/\\sqrt{5} \\approx 4{,}02$ |\n\nKiểm: phương sai mẫu của score $= (81 + 9 + 9 + 81)/(5 \\cdot 3) = 12 = \\lambda_1$.\n\n**Nhận xét.** PC1 giữ khoảng 86% phương sai, nên nén còn 1 chiều là hợp lý cho trực quan hoá hay phân cụm thô; 14% còn lại (PC2) chứa phần 'thử lại nhiều bất thường' (ví dụ phiên 4 có $x_2 = 6$ cao). Nếu mục tiêu là phát hiện phiên lỗi thì không nên bỏ PC2. Hai đặc trưng cùng đơn vị đếm nên không bắt buộc chuẩn hoá; nếu khác đơn vị thì phải chuẩn hoá trước khi PCA.",
+   "rubric": [
+    {
+     "criterion": "a) Tính đúng trung bình, ma trận căn giữa $X_c$ và $C = \\begin{bmatrix} 10 & 4 \\\\ 4 & 4 \\end{bmatrix}$ (chia $n - 1 = 3$)",
+     "points": 2
+    },
+    {
+     "criterion": "b) Trị riêng $12$, $2$; vector riêng đơn vị $\\tfrac{1}{\\sqrt{5}}(2, 1)$ và $\\tfrac{1}{\\sqrt{5}}(1, -2)$; chọn đúng PC1",
+     "points": 2
+    },
+    {
+     "criterion": "c) Tỉ lệ $\\approx 85{,}7\\%$ và 4 score đúng (1 điểm); nhận xét có lý về việc giữ 1 chiều và vai trò PC2 (1 điểm)",
+     "points": 2
+    }
+   ]
+  }
+ ]
+}

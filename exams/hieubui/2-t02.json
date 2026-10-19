@@ -1,0 +1,998 @@
+{
+ "title": "CĐ-02 · Giải tích và tối ưu",
+ "description": "Đạo hàm, quy tắc chuỗi — 25% · Đạo hàm riêng, gradient, Jacobian, Hessian — 25% · Gradient descent, learning rate, momentum, Adam — 25% · Hàm mất mát, sigmoid, softmax, lan truyền ngược — 25%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T02-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Hàm $f(x) = \\sqrt{1 + x^2}$ (dạng của pseudo-Huber loss) có đạo hàm $f'(x)$ bằng:",
+   "explanation": "Quy tắc chuỗi với $u = 1 + x^2$: $f'(x) = \\frac{1}{2\\sqrt{u}} \\cdot u' = \\frac{1}{2\\sqrt{1+x^2}} \\cdot 2x = \\frac{x}{\\sqrt{1+x^2}}$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\n$f(x) = \\sqrt{1 + x^2}$ là hàm hợp: hàm ngoài $\\sqrt{u}$, hàm trong $u = 1 + x^2$. Quy tắc chuỗi: **đạo hàm hàm ngoài (tính tại $u$) nhân đạo hàm hàm trong**. Hàm này là lõi của pseudo-Huber loss: gần 0 nó giống $1 + \\frac{x^2}{2}$ (mượt như MSE), xa 0 nó giống $|x|$ (bền với ngoại lai như MAE).\n\n#### Từng bước\n1. $(\\sqrt{u})' = \\frac{1}{2\\sqrt{u}}$.\n2. $u' = (1 + x^2)' = 2x$.\n3. $f'(x) = \\frac{1}{2\\sqrt{1+x^2}} \\cdot 2x = \\frac{x}{\\sqrt{1+x^2}}$.\n\n| $x$ | $f'(x)$ theo công thức | Sai phân trung tâm ($h = 10^{-6}$) |\n|---|---|---|\n| $0$ | $0$ | $0{,}000$ |\n| $1$ | $1/\\sqrt{2} \\approx 0{,}707$ | $0{,}707$ |\n| $2$ | $2/\\sqrt{5} \\approx 0{,}894$ | $0{,}894$ |\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 280\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"48\" y1=\"184.5\" x2=\"544\" y2=\"184.5\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"296.0\" y1=\"16\" x2=\"296.0\" y2=\"244\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"48.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−3</text>\n<text x=\"130.7\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−2</text>\n<text x=\"213.3\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−1</text>\n<text x=\"378.7\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"461.3\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"544.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<text x=\"42\" y=\"238.1\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">−1</text>\n<text x=\"42\" y=\"139.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">1</text>\n<text x=\"42\" y=\"89.4\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">2</text>\n<text x=\"42\" y=\"39.8\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">3</text>\n<text x=\"544\" y=\"276\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">x</text>\n<polyline points=\"48.0,27.8 52.1,30.1 56.3,32.5 60.4,34.8 64.5,37.2 68.7,39.5 72.8,41.8 76.9,44.1 81.1,46.4 85.2,48.8 89.3,51.1 93.5,53.4 97.6,55.7 101.7,57.9 105.9,60.2 110.0,62.5 114.1,64.7 118.3,67.0 122.4,69.2 126.5,71.5 130.7,73.7 134.8,75.9 138.9,78.1 143.1,80.3 147.2,82.5 151.3,84.6 155.5,86.8 159.6,88.9 163.7,91.0 167.9,93.1 172.0,95.2 176.1,97.2 180.3,99.2 184.4,101.3 188.5,103.2 192.7,105.2 196.8,107.1 200.9,109.0 205.1,110.8 209.2,112.7 213.3,114.4 217.5,116.2 221.6,117.8 225.7,119.5 229.9,121.0 234.0,122.6 238.1,124.0 242.3,125.4 246.4,126.7 250.5,128.0 254.7,129.1 258.8,130.2 262.9,131.1 267.1,132.0 271.2,132.8 275.3,133.4 279.5,134.0 283.6,134.4 287.7,134.7 291.9,134.9 296.0,135.0 300.1,134.9 304.3,134.7 308.4,134.4 312.5,134.0 316.7,133.4 320.8,132.8 324.9,132.0 329.1,131.1 333.2,130.2 337.3,129.1 341.5,128.0 345.6,126.7 349.7,125.4 353.9,124.0 358.0,122.6 362.1,121.0 366.3,119.5 370.4,117.8 374.5,116.2 378.7,114.4 382.8,112.7 386.9,110.8 391.1,109.0 395.2,107.1 399.3,105.2 403.5,103.2 407.6,101.3 411.7,99.2 415.9,97.2 420.0,95.2 424.1,93.1 428.3,91.0 432.4,88.9 436.5,86.8 440.7,84.6 444.8,82.5 448.9,80.3 453.1,78.1 457.2,75.9 461.3,73.7 465.5,71.5 469.6,69.2 473.7,67.0 477.9,64.7 482.0,62.5 486.1,60.2 490.3,57.9 494.4,55.7 498.5,53.4 502.7,51.1 506.8,48.8 510.9,46.4 515.1,44.1 519.2,41.8 523.3,39.5 527.5,37.2 531.6,34.8 535.7,32.5 539.9,30.1 544.0,27.8\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<polyline points=\"48.0,231.5 52.1,231.5 56.3,231.4 60.4,231.3 64.5,231.2 68.7,231.1 72.8,231.0 76.9,230.9 81.1,230.8 85.2,230.7 89.3,230.5 93.5,230.4 97.6,230.3 101.7,230.1 105.9,230.0 110.0,229.8 114.1,229.6 118.3,229.5 122.4,229.3 126.5,229.1 130.7,228.9 134.8,228.6 138.9,228.4 143.1,228.1 147.2,227.8 151.3,227.6 155.5,227.2 159.6,226.9 163.7,226.6 167.9,226.2 172.0,225.8 176.1,225.3 180.3,224.9 184.4,224.4 188.5,223.8 192.7,223.2 196.8,222.6 200.9,221.9 205.1,221.2 209.2,220.4 213.3,219.6 217.5,218.7 221.6,217.7 225.7,216.6 229.9,215.5 234.0,214.3 238.1,212.9 242.3,211.5 246.4,210.0 250.5,208.4 254.7,206.7 258.8,204.9 262.9,202.9 267.1,200.9 271.2,198.8 275.3,196.5 279.5,194.2 283.6,191.9 287.7,189.5 291.9,187.0 296.0,184.5 300.1,182.0 304.3,179.6 308.4,177.2 312.5,174.8 316.7,172.5 320.8,170.3 324.9,168.1 329.1,166.1 333.2,164.2 337.3,162.4 341.5,160.6 345.6,159.0 349.7,157.5 353.9,156.1 358.0,154.8 362.1,153.6 366.3,152.4 370.4,151.4 374.5,150.4 378.7,149.5 382.8,148.6 386.9,147.8 391.1,147.1 395.2,146.4 399.3,145.8 403.5,145.2 407.6,144.7 411.7,144.2 415.9,143.7 420.0,143.3 424.1,142.9 428.3,142.5 432.4,142.1 436.5,141.8 440.7,141.5 444.8,141.2 448.9,140.9 453.1,140.7 457.2,140.4 461.3,140.2 465.5,140.0 469.6,139.8 473.7,139.6 477.9,139.4 482.0,139.2 486.1,139.1 490.3,138.9 494.4,138.8 498.5,138.6 502.7,138.5 506.8,138.4 510.9,138.3 515.1,138.1 519.2,138.0 523.3,137.9 527.5,137.8 531.6,137.8 535.7,137.7 539.9,137.6 544.0,137.5\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<polyline points=\"48.0,35.8 52.1,38.3 56.3,40.8 60.4,43.3 64.5,45.7 68.7,48.2 72.8,50.7 76.9,53.2 81.1,55.7 85.2,58.1 89.3,60.6 93.5,63.1 97.6,65.6 101.7,68.0 105.9,70.5 110.0,73.0 114.1,75.5 118.3,78.0 122.4,80.4 126.5,82.9 130.7,85.4 134.8,87.9 138.9,90.3 143.1,92.8 147.2,95.3 151.3,97.8 155.5,100.3 159.6,102.7 163.7,105.2 167.9,107.7 172.0,110.2 176.1,112.7 180.3,115.1 184.4,117.6 188.5,120.1 192.7,122.6 196.8,125.0 200.9,127.5 205.1,130.0 209.2,132.5 213.3,135.0 217.5,137.4 221.6,139.9 225.7,142.4 229.9,144.9 234.0,147.3 238.1,149.8 242.3,152.3 246.4,154.8 250.5,157.3 254.7,159.7 258.8,162.2 262.9,164.7 267.1,167.2 271.2,169.7 275.3,172.1 279.5,174.6 283.6,177.1 287.7,179.6 291.9,182.0 296.0,184.5 300.1,182.0 304.3,179.6 308.4,177.1 312.5,174.6 316.7,172.1 320.8,169.7 324.9,167.2 329.1,164.7 333.2,162.2 337.3,159.7 341.5,157.3 345.6,154.8 349.7,152.3 353.9,149.8 358.0,147.3 362.1,144.9 366.3,142.4 370.4,139.9 374.5,137.4 378.7,135.0 382.8,132.5 386.9,130.0 391.1,127.5 395.2,125.0 399.3,122.6 403.5,120.1 407.6,117.6 411.7,115.1 415.9,112.7 420.0,110.2 424.1,107.7 428.3,105.2 432.4,102.7 436.5,100.3 440.7,97.8 444.8,95.3 448.9,92.8 453.1,90.3 457.2,87.9 461.3,85.4 465.5,82.9 469.6,80.4 473.7,78.0 477.9,75.5 482.0,73.0 486.1,70.5 490.3,68.0 494.4,65.6 498.5,63.1 502.7,60.6 506.8,58.1 510.9,55.7 515.1,53.2 519.2,50.7 523.3,48.2 527.5,45.7 531.6,43.3 535.7,40.8 539.9,38.3 544.0,35.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"4 4\"/>\n<text x=\"453.1\" y=\"48.2\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">f(x) = √(1+x²)</text>\n<text x=\"395.2\" y=\"157.3\" font-size=\"12\" text-anchor=\"start\" fill=\"#10b981\">f′(x) = x/√(1+x²)</text>\n<text x=\"196.8\" y=\"30.9\" font-size=\"12\" text-anchor=\"start\" fill=\"currentColor\">|x| (nét đứt)</text>\n</svg>\n\nĐạo hàm (xanh lá) luôn nằm trong $(-1, 1)$: gradient của pseudo-Huber **bị chặn**, nên một ngoại lai rất lớn không kéo tham số quá mạnh như MSE (có gradient tỉ lệ với sai số).\n\n#### Bẫy thường gặp\n- Quên nhân $2x$ (đạo hàm hàm trong), ra $\\frac{1}{2\\sqrt{1+x^2}}$.\n- Nhân $2x$ nhưng quên hệ số $\\frac{1}{2}$, ra $\\frac{2x}{\\sqrt{1+x^2}}$.\n- Lẫn với đạo hàm của $\\ln(1 + x^2)$.\n\n```python\nimport math\nf = lambda x: math.sqrt(1 + x * x)\nh = 1e-6\nfor x in (0, 1, 2):\n    print(x, (f(x + h) - f(x - h)) / (2 * h), x / math.sqrt(1 + x * x))\n```\n\n#### Đọc thêm\n- [Chain rule (Wikipedia)](https://en.wikipedia.org/wiki/Chain_rule)\n- [Huber loss (Wikipedia)](https://en.wikipedia.org/wiki/Huber_loss)",
+   "distractors": {
+    "B": "Chỉ lấy đạo hàm của hàm ngoài $\\sqrt{u}$ mà quên nhân đạo hàm hàm trong $u' = 2x$.",
+    "C": "Nhân đạo hàm hàm trong $2x$ nhưng quên hệ số $\\frac{1}{2}$ của $(\\sqrt{u})' = \\frac{1}{2\\sqrt{u}}$.",
+    "D": "Nhầm sang đạo hàm của $\\frac{1}{2}\\ln(1+x^2)$; căn bậc hai và logarit có đạo hàm khác nhau."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\dfrac{x}{\\sqrt{1 + x^2}}$"
+    },
+    {
+     "key": "B",
+     "text": "$\\dfrac{1}{2\\sqrt{1 + x^2}}$"
+    },
+    {
+     "key": "C",
+     "text": "$\\dfrac{2x}{\\sqrt{1 + x^2}}$"
+    },
+    {
+     "key": "D",
+     "text": "$\\dfrac{x}{1 + x^2}$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T02-A02",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Trong một đồ thị tính toán, $z = g(x)$ rồi $y = f(z)$, với $f$ và $g$ khả vi. Theo quy tắc chuỗi, $\\dfrac{dy}{dx}$ bằng:",
+   "explanation": "$\\frac{dy}{dx} = \\frac{dy}{dz} \\cdot \\frac{dz}{dx} = f'(z)\\, g'(x) = f'\\big(g(x)\\big)\\, g'(x)$: đạo hàm hàm ngoài **tính tại giá trị hàm trong**, nhân đạo hàm hàm trong.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nQuy tắc chuỗi là nền móng của backprop: khi $y$ phụ thuộc $x$ **qua** biến trung gian $z$, tốc độ thay đổi của $y$ theo $x$ bằng tích các tốc độ thay đổi cục bộ dọc đường đi:\n$$\\frac{dy}{dx} = \\frac{dy}{dz} \\cdot \\frac{dz}{dx} = f'\\big(g(x)\\big)\\, g'(x).$$\nĐiểm hay quên: $f'$ phải được tính **tại $z = g(x)$**, không phải tại $x$.\n\n#### Từng bước (ví dụ $f = \\sin$, $g(x) = x^2$, $x = 0{,}7$)\n| Công thức | Giá trị tại $x = 0{,}7$ | Đúng? |\n|---|---|---|\n| $f'(g(x))\\, g'(x) = \\cos(0{,}49) \\cdot 1{,}4$ | $1{,}239$ | đúng (khớp sai phân) |\n| $f'(x)\\, g'(x) = \\cos(0{,}7) \\cdot 1{,}4$ | $1{,}071$ | sai |\n| $f'(g'(x)) = \\cos(1{,}4)$ | $0{,}170$ | sai |\n| $f(g(x))\\, g'(x) = \\sin(0{,}49) \\cdot 1{,}4$ | $0{,}659$ | sai |\n\n#### Hình minh hoạ: đồ thị tính toán\n```mermaid\nflowchart LR\n  X[\"x\"] -->|\"dz/dx = g'(x)\"| Z[\"z = g(x)\"]\n  Z -->|\"dy/dz = f'(z)\"| Y[\"y = f(z)\"]\n  Y -.->|\"backprop: nhân dồn từ y về x\"| X\n```\nTrong backprop, mỗi nút chỉ cần biết **đạo hàm cục bộ** của nó; gradient từ phía sau được nhân với đạo hàm cục bộ rồi truyền tiếp về trước.\n\n#### Bẫy thường gặp\n- Tính $f'$ tại $x$ thay vì tại $g(x)$.\n- Coi quy tắc chuỗi là \"hợp các đạo hàm\" thay vì **tích**.\n- Bỏ quên đạo hàm hàm ngoài.\n\n```python\nimport math\nx, h = 0.7, 1e-6\ny = lambda x: math.sin(x * x)\nprint((y(x + h) - y(x - h)) / (2 * h), math.cos(x * x) * 2 * x)   # 1.2391...\n```\n\n#### Đọc thêm\n- [Chain rule (Wikipedia)](https://en.wikipedia.org/wiki/Chain_rule)\n- [d2l.ai: Calculus](https://d2l.ai/chapter_preliminaries/calculus.html)",
+   "distractors": {
+    "A": "Tính $f'$ tại $x$ thay vì tại $z = g(x)$. Ví dụ $f = \\sin$, $g(x) = x^2$ cho $\\cos(x) \\cdot 2x$, sai so với $\\cos(x^2) \\cdot 2x$.",
+    "B": "Lồng đạo hàm vào nhau như hợp hàm; quy tắc chuỗi là **tích** của các đạo hàm chứ không phải hợp của chúng.",
+    "D": "Quên lấy đạo hàm hàm ngoài: giữ nguyên $f(g(x))$ rồi chỉ nhân $g'(x)$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$f'(x) \\cdot g'(x)$"
+    },
+    {
+     "key": "B",
+     "text": "$f'\\big(g'(x)\\big)$"
+    },
+    {
+     "key": "C",
+     "text": "$f'\\big(g(x)\\big) \\cdot g'(x)$"
+    },
+    {
+     "key": "D",
+     "text": "$f\\big(g(x)\\big) \\cdot g'(x)$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T02-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Một lớp tuyến tính không bias tính $\\mathbf{y} = W\\mathbf{x}$, với $\\mathbf{x} \\in \\mathbb{R}^4$ và $\\mathbf{y} \\in \\mathbb{R}^2$. Ma trận Jacobian $\\dfrac{\\partial \\mathbf{y}}{\\partial \\mathbf{x}}$ (quy ước: hàng $i$ ứng với $y_i$, cột $j$ ứng với $x_j$) là:",
+   "explanation": "$y_i = \\sum_j W_{ij} x_j$ nên $\\frac{\\partial y_i}{\\partial x_j} = W_{ij}$: Jacobian chính là $W$, kích thước (số đầu ra) $\\times$ (số đầu vào) $= 2 \\times 4$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nJacobian của $\\mathbf{f}: \\mathbb{R}^n \\to \\mathbb{R}^m$ là ma trận $m \\times n$ có phần tử $J_{ij} = \\frac{\\partial f_i}{\\partial x_j}$ (hàng = đầu ra, cột = đầu vào). Với ánh xạ tuyến tính $\\mathbf{y} = W\\mathbf{x}$, mỗi $y_i = \\sum_j W_{ij} x_j$ nên $\\frac{\\partial y_i}{\\partial x_j} = W_{ij}$: **Jacobian chính là $W$**.\n\n#### Từng bước\n| Đại lượng | Kích thước | Ghi chú |\n|---|---|---|\n| $\\mathbf{x}$ | $4$ | đầu vào |\n| $\\mathbf{y} = W\\mathbf{x}$ | $2$ | đầu ra |\n| $W$ | $2 \\times 4$ | để nhân được với $\\mathbf{x}$ |\n| $J = \\frac{\\partial \\mathbf{y}}{\\partial \\mathbf{x}}$ | $2 \\times 4$ | bằng $W$ |\n| $\\frac{\\partial L}{\\partial \\mathbf{x}} = J^\\top \\frac{\\partial L}{\\partial \\mathbf{y}}$ | $4$ | lượt ngược dùng $W^\\top$ |\n\nVí dụ: $W = \\begin{pmatrix} 1 & 0 & 2 & -1 \\\\ 3 & 1 & 0 & 0 \\end{pmatrix}$ thì $\\frac{\\partial y_1}{\\partial x_3} = 2$, $\\frac{\\partial y_2}{\\partial x_1} = 3$, đúng bằng $W_{13}$ và $W_{21}$.\n\n#### Bẫy thường gặp\n- Nhầm Jacobian với ma trận dùng trong lượt ngược ($W^\\top$). Lượt ngược nhân **chuyển vị** của Jacobian với gradient đến từ phía sau.\n- Nhầm đạo hàm theo đầu vào $\\mathbf{x}$ với đạo hàm theo trọng số $W$ (ra $\\mathbf{x}^\\top$).\n- Không kiểm kích thước: Jacobian luôn là (số đầu ra) $\\times$ (số đầu vào) theo quy ước numerator layout.\n\n```python\nimport numpy as np\nrng = np.random.default_rng(0)\nW = rng.normal(size=(2, 4)); x = rng.normal(size=4); h = 1e-6\nJ = np.column_stack([(W @ (x + h * e) - W @ (x - h * e)) / (2 * h) for e in np.eye(4)])\nprint(J.shape, np.allclose(J, W))   # (2, 4) True\n```\n\n#### Đọc thêm\n- [Jacobian matrix and determinant (Wikipedia)](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant)\n- [mml-book, chương 5.3](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "A": "Nhầm quy ước bố cục (layout); $W^\\top$ xuất hiện khi lan truyền ngược gradient $\\frac{\\partial L}{\\partial \\mathbf{x}} = W^\\top \\frac{\\partial L}{\\partial \\mathbf{y}}$, không phải Jacobian theo quy ước đã cho.",
+    "C": "Nhầm với đạo hàm theo **trọng số** của một đầu ra: $\\frac{\\partial y_i}{\\partial W_{i,:}} = \\mathbf{x}^\\top$.",
+    "D": "Nhầm với ma trận $X^\\top X$ hay gặp trong Hessian của bình phương tối thiểu; Jacobian của ánh xạ tuyến tính chỉ là $W$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$W^\\top$, kích thước $4 \\times 2$"
+    },
+    {
+     "key": "B",
+     "text": "$W$, kích thước $2 \\times 4$"
+    },
+    {
+     "key": "C",
+     "text": "$\\mathbf{x}^\\top$, kích thước $1 \\times 4$"
+    },
+    {
+     "key": "D",
+     "text": "$W^\\top W$, kích thước $4 \\times 4$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T02-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Với hàm khả vi $f: \\mathbb{R}^n \\to \\mathbb{R}$ và một điểm $\\mathbf{x}$ có $\\nabla f(\\mathbf{x}) \\neq \\mathbf{0}$, phát biểu nào **đúng** về vector gradient $\\nabla f(\\mathbf{x})$?",
+   "explanation": "Đạo hàm theo hướng đơn vị $\\mathbf{u}$ là $\\nabla f \\cdot \\mathbf{u} = \\lVert \\nabla f \\rVert \\cos\\theta$, lớn nhất khi $\\mathbf{u}$ cùng hướng $\\nabla f$ và giá trị lớn nhất là $\\lVert \\nabla f \\rVert$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nĐạo hàm theo hướng đơn vị $\\mathbf{u}$: $D_{\\mathbf{u}} f = \\nabla f \\cdot \\mathbf{u} = \\lVert \\nabla f \\rVert \\cos\\theta$. Giá trị này lớn nhất khi $\\theta = 0$, tức $\\mathbf{u}$ cùng hướng $\\nabla f$, và khi đó bằng $\\lVert \\nabla f \\rVert$. Vậy gradient chỉ **hướng tăng nhanh nhất**, độ dài là **tốc độ tăng** theo hướng đó; $-\\nabla f$ là hướng giảm nhanh nhất.\n\n#### Từng bước (ví dụ $f(x, y) = x^2 + 4y^2$ tại $(2, 1)$)\n$\\nabla f = (2x, 8y) = (4, 8)$, $\\lVert \\nabla f \\rVert = \\sqrt{80} \\approx 8{,}94$.\n\n| Hướng $\\mathbf{u}$ | $D_{\\mathbf{u}} f$ |\n|---|---|\n| cùng hướng $\\nabla f$: $(4, 8)/\\sqrt{80}$ | $8{,}94$ (lớn nhất) |\n| $(1, 0)$ | $4$ |\n| vuông góc: $(2, -1)/\\sqrt{5}$ | $0$ (đi dọc đường mức) |\n| $-\\nabla f / \\lVert \\nabla f \\rVert$ | $-8{,}94$ (giảm nhanh nhất) |\n\nCực tiểu ở $(0, 0)$, nhưng hướng $-\\nabla f \\propto (-1, -2)$ **không** chỉ thẳng về $(0,0)$ (hướng thẳng là $(-2, -1)$): gradient chỉ là thông tin cục bộ.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 280\" width=\"100%\" style=\"max-width:560px\">\n<ellipse cx=\"280\" cy=\"140\" rx=\"60\" ry=\"30\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\"0.5\" stroke-width=\"1\"/>\n<ellipse cx=\"280\" cy=\"140\" rx=\"120\" ry=\"60\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\"0.5\" stroke-width=\"1\"/>\n<ellipse cx=\"280\" cy=\"140\" rx=\"180\" ry=\"90\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\"0.5\" stroke-width=\"1\"/>\n<ellipse cx=\"280\" cy=\"140\" rx=\"240\" ry=\"120\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\"0.5\" stroke-width=\"1\"/>\n<defs><marker id=\"ag\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"#10b981\"/></marker><marker id=\"ar\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto\"><path d=\"M0,0 L10,5 L0,10 z\" fill=\"#ef4444\"/></marker></defs>\n<line x1=\"417.9\" y1=\"82.1\" x2=\"453.7\" y2=\"22.0\" stroke=\"#10b981\" stroke-width=\"2.5\" marker-end=\"url(#ag)\"/>\n<line x1=\"417.9\" y1=\"82.1\" x2=\"382.1\" y2=\"142.3\" stroke=\"#ef4444\" stroke-width=\"2.5\" marker-end=\"url(#ar)\"/>\n<circle cx=\"417.9\" cy=\"82.1\" r=\"4\" fill=\"#3b82f6\"/>\n<circle cx=\"280\" cy=\"140\" r=\"4\" fill=\"currentColor\"/>\n<text x=\"272\" y=\"130\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">cực tiểu</text>\n<text x=\"445.7\" y=\"18.0\" font-size=\"12\" text-anchor=\"end\" fill=\"#10b981\">∇f: tăng nhanh nhất</text>\n<text x=\"392.1\" y=\"156.3\" font-size=\"12\" fill=\"#ef4444\">−∇f: giảm nhanh nhất</text>\n<text x=\"12\" y=\"20\" font-size=\"12\" fill=\"currentColor\">Đường mức f = hằng số; gradient vuông góc đường mức</text>\n</svg>\n\n#### Bẫy thường gặp\n- Nhầm gradient là hướng giảm (đó là $-\\nabla f$).\n- Tưởng gradient chỉ thẳng tới cực tiểu; với đường mức dẹt (elip), hướng dốc nhất lệch khỏi tâm, gây zig-zag.\n- Tưởng gradient có độ dài 1.\n\n```python\nimport numpy as np\ng = np.array([4., 8.])\nfor u in (g / np.linalg.norm(g), np.array([1., 0.]), np.array([2., -1.]) / np.sqrt(5)):\n    print(round(float(g @ u), 2))   # 8.94, 4.0, 0.0\n```\n\n#### Đọc thêm\n- [Gradient (Wikipedia)](https://en.wikipedia.org/wiki/Gradient)\n- [Directional derivative (Wikipedia)](https://en.wikipedia.org/wiki/Directional_derivative)",
+   "distractors": {
+    "A": "Hướng giảm nhanh nhất là $-\\nabla f$; đó là lý do gradient descent đi **ngược** gradient.",
+    "B": "Gradient chỉ là thông tin **cục bộ** tại $\\mathbf{x}$; với thung lũng hẹp hoặc hàm không lồi, nó có thể lệch xa hướng tới cực tiểu.",
+    "C": "Gradient không được chuẩn hoá; độ dài của nó đo độ dốc và bằng 0 tại điểm dừng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Chỉ hướng làm $f$ giảm nhanh nhất tại $\\mathbf{x}$"
+    },
+    {
+     "key": "B",
+     "text": "Luôn chỉ thẳng tới điểm cực tiểu toàn cục của $f$, bất kể hình dạng của hàm"
+    },
+    {
+     "key": "C",
+     "text": "Luôn có độ dài bằng $1$ vì là vector chỉ hướng"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ hướng làm $f$ tăng nhanh nhất, tốc độ tăng là $\\lVert \\nabla f(\\mathbf{x}) \\rVert$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T02-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Quy tắc cập nhật của gradient descent với learning rate $\\eta > 0$, tham số $\\mathbf{w}$ và hàm mất mát $L$ là:",
+   "explanation": "Đi một bước nhỏ ngược hướng gradient: $\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\eta \\nabla L(\\mathbf{w}_t)$. Với $\\eta$ đủ nhỏ, $L$ giảm vì $L(\\mathbf{w} - \\eta \\mathbf{g}) \\approx L(\\mathbf{w}) - \\eta \\lVert \\mathbf{g} \\rVert^2$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nGradient descent: $\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\eta \\nabla L(\\mathbf{w}_t)$. Lý do dùng dấu trừ: theo xấp xỉ Taylor bậc nhất,\n$$L(\\mathbf{w} - \\eta \\mathbf{g}) \\approx L(\\mathbf{w}) - \\eta \\lVert \\mathbf{g} \\rVert^2 < L(\\mathbf{w})$$\nkhi $\\eta > 0$ đủ nhỏ và $\\mathbf{g} \\neq \\mathbf{0}$. Learning rate $\\eta$ **nhân** với gradient để quyết định độ dài bước.\n\n#### Từng bước (ví dụ $L(w) = (w - 4)^2$, $w_0 = 0$, $\\eta = 0{,}25$)\n$L'(w) = 2(w - 4)$.\n\n| $t$ | $w_t$ | $L'(w_t)$ | $L(w_t)$ |\n|---|---|---|---|\n| 0 | $0$ | $-8$ | $16$ |\n| 1 | $2$ | $-4$ | $4$ |\n| 2 | $3$ | $-2$ | $1$ |\n| 3 | $3{,}5$ | $-1$ | $0{,}25$ |\n\nMỗi bước, khoảng cách tới cực tiểu $w^* = 4$ giảm một nửa vì $w_{t+1} - 4 = (1 - 2\\eta)(w_t - 4) = 0{,}5(w_t - 4)$.\n\n#### So sánh các công thức sai\n| Công thức | Từ $w_0 = 0$ | Hậu quả |\n|---|---|---|\n| $w + \\eta L'$ | $w_1 = -2$, $L = 36$ | loss tăng (gradient ascent) |\n| $w - L'/\\eta$ | $w_1 = 32$ | bước khổng lồ, phân kỳ |\n| $\\eta w - L'$ | $w_1 = 8$ | không còn là bước nhỏ, $\\eta$ mất vai trò |\n\n#### Bẫy thường gặp\n- Sai dấu (đi theo gradient).\n- Chia thay vì nhân learning rate.\n\n```python\nw = 0.0\nfor t in range(3):\n    w = w - 0.25 * 2 * (w - 4)\n    print(t + 1, w, (w - 4) ** 2)\n```\n\n#### Đọc thêm\n- [Gradient descent (Wikipedia)](https://en.wikipedia.org/wiki/Gradient_descent)\n- [d2l.ai: Gradient Descent](https://d2l.ai/chapter_optimization/gd.html)",
+   "distractors": {
+    "A": "Đi **theo** gradient là gradient ascent: làm $L$ tăng (dùng khi cực đại hoá, không phải khi giảm loss).",
+    "C": "Chia cho $\\eta$ khiến learning rate nhỏ lại cho bước **lớn**; $\\eta$ phải nhân với gradient.",
+    "D": "Nhân $\\eta$ vào chính $\\mathbf{w}$ làm co tham số (giống weight decay quá đà) và bỏ mất vai trò bước nhảy của $\\eta$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\mathbf{w} \\leftarrow \\mathbf{w} + \\eta \\nabla L(\\mathbf{w})$"
+    },
+    {
+     "key": "B",
+     "text": "$\\mathbf{w} \\leftarrow \\mathbf{w} - \\eta \\nabla L(\\mathbf{w})$"
+    },
+    {
+     "key": "C",
+     "text": "$\\mathbf{w} \\leftarrow \\mathbf{w} - \\nabla L(\\mathbf{w}) / \\eta$"
+    },
+    {
+     "key": "D",
+     "text": "$\\mathbf{w} \\leftarrow \\eta \\mathbf{w} - \\nabla L(\\mathbf{w})$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T02-A06",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bạn huấn luyện một mô hình phân loại ảnh. Loss theo từng epoch: $2{,}30 \\to 4{,}85 \\to 37{,}2 \\to 1{,}9 \\times 10^4 \\to$ `nan`. Dữ liệu đã chuẩn hoá, hàm loss đã được kiểm đúng. Nguyên nhân khả dĩ nhất là gì?",
+   "explanation": "Loss **tăng theo cấp số nhân** rồi thành `nan` là dấu hiệu kinh điển của bước quá lớn: với loss bậc hai $L = \\frac{\\lambda}{2}w^2$, GD cho $w_{t+1} = (1 - \\eta\\lambda) w_t$, phân kỳ khi $\\eta > 2/\\lambda$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nLoss **tăng theo cấp số nhân** qua từng epoch rồi thành `nan` (tràn số) là dấu hiệu điển hình của learning rate quá lớn. Với loss xấp xỉ bậc hai $L(w) = \\frac{\\lambda}{2}w^2$, GD cho\n$$w_{t+1} = w_t - \\eta \\lambda w_t = (1 - \\eta\\lambda)\\, w_t.$$\nNếu $|1 - \\eta\\lambda| > 1$, tức $\\eta > \\frac{2}{\\lambda}$, thì $|w_t|$ tăng theo cấp số nhân, loss $\\propto w_t^2$ còn tăng nhanh hơn.\n\n#### Từng bước: đọc log\n| Epoch | Loss | Tỉ số với epoch trước |\n|---|---|---|\n| 0 | $2{,}30$ | |\n| 1 | $4{,}85$ | $\\times 2{,}1$ |\n| 2 | $37{,}2$ | $\\times 7{,}7$ |\n| 3 | $1{,}9 \\times 10^4$ | $\\times 510$ |\n| 4 | `nan` | tràn số |\n\nTỉ số **tăng dần** cho thấy quá trình tự khuếch đại, không phải nhiễu ngẫu nhiên.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 280\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"56\" y1=\"244.0\" x2=\"544\" y2=\"244.0\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"56.0\" y1=\"16\" x2=\"56.0\" y2=\"244\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"56.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"169.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"283.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"396.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<text x=\"510.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<text x=\"544\" y=\"276\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">epoch</text>\n<text x=\"60\" y=\"26\" font-size=\"12\" fill=\"currentColor\">loss (thang log)</text>\n<text x=\"46.9\" y=\"224.6\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">1</text>\n<text x=\"46.9\" y=\"181.6\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">10</text>\n<text x=\"46.9\" y=\"138.6\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">100</text>\n<text x=\"46.9\" y=\"52.6\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">10⁴</text>\n<polyline points=\"56.0,206.9 169.5,213.5 283.0,218.9 396.5,223.1 510.0,225.7\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<circle cx=\"56.0\" cy=\"206.9\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"169.5\" cy=\"213.5\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"283.0\" cy=\"218.9\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"396.5\" cy=\"223.1\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"510.0\" cy=\"225.7\" r=\"3.5\" fill=\"#10b981\"/>\n<polyline points=\"56.0,206.9 169.5,193.0 283.0,154.9 396.5,38.4\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<circle cx=\"56.0\" cy=\"206.9\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"169.5\" cy=\"193.0\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"283.0\" cy=\"154.9\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"396.5\" cy=\"38.4\" r=\"3.5\" fill=\"#ef4444\"/>\n<text x=\"407.8\" y=\"31.1\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\">η quá lớn → nan</text>\n<text x=\"351.1\" y=\"211.7\" font-size=\"12\" text-anchor=\"start\" fill=\"#10b981\">η hợp lý</text>\n</svg>\n\n#### Cách xử lý\nGiảm learning rate (thường chia 3 đến 10), thêm warmup, dùng gradient clipping; kiểm lại chuẩn hoá đầu vào.\n\n#### Bẫy thường gặp\n- Đổ cho overfitting: overfitting làm loss **validation** tăng, loss huấn luyện vẫn giảm.\n- Đổ cho learning rate nhỏ: khi đó loss giảm chậm chứ không bùng nổ.\n\n```python\nlam = 4.0                        # L(w) = lam/2 * w^2, ngưỡng 2/lam = 0.5\nfor eta in (0.1, 0.6):\n    w, hist = 1.0, []\n    for _ in range(4):\n        w = (1 - eta * lam) * w\n        hist.append(round(lam / 2 * w * w, 3))\n    print(eta, hist)\n```\n\n#### Đọc thêm\n- [d2l.ai: Gradient Descent (learning rate)](https://d2l.ai/chapter_optimization/gd.html)\n- [Learning rate (Wikipedia)](https://en.wikipedia.org/wiki/Learning_rate)",
+   "distractors": {
+    "B": "Learning rate quá nhỏ làm loss giảm **chậm** hoặc gần như đứng yên, không làm loss tăng vọt.",
+    "C": "Overfitting làm loss trên **validation** tăng trong khi loss huấn luyện vẫn giảm; ở đây chính loss huấn luyện bùng nổ.",
+    "D": "Batch lớn làm gradient ít nhiễu hơn, thường **ổn định** hơn; nó không gây bùng nổ nếu learning rate hợp lý."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Learning rate quá lớn, mỗi bước vượt quá cực tiểu và bị khuếch đại dần"
+    },
+    {
+     "key": "B",
+     "text": "Learning rate quá nhỏ nên mô hình chưa kịp học được gì sau vài epoch"
+    },
+    {
+     "key": "C",
+     "text": "Mô hình đang overfitting, ghi nhớ tập huấn luyện nên loss tăng dần"
+    },
+    {
+     "key": "D",
+     "text": "Batch size quá lớn nên gradient quá chính xác, làm quá trình học mất ổn định"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T02-A07",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Hàm sigmoid $\\sigma(z) = \\dfrac{1}{1 + e^{-z}}$ có đạo hàm $\\sigma'(z)$ bằng:",
+   "explanation": "$\\sigma'(z) = \\frac{e^{-z}}{(1+e^{-z})^2} = \\frac{1}{1+e^{-z}} \\cdot \\frac{e^{-z}}{1+e^{-z}} = \\sigma(z)\\big(1-\\sigma(z)\\big)$; lớn nhất bằng $0{,}25$ tại $z = 0$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\n$\\sigma(z) = (1 + e^{-z})^{-1}$. Đạo hàm bằng quy tắc chuỗi:\n$$\\sigma'(z) = -(1 + e^{-z})^{-2} \\cdot (-e^{-z}) = \\frac{e^{-z}}{(1 + e^{-z})^2} = \\underbrace{\\frac{1}{1 + e^{-z}}}_{\\sigma(z)} \\cdot \\underbrace{\\frac{e^{-z}}{1 + e^{-z}}}_{1 - \\sigma(z)}.$$\nDạng $\\sigma(1 - \\sigma)$ rất tiện: backprop chỉ cần giá trị $\\sigma$ đã tính ở lượt xuôi.\n\n#### Từng bước: vài giá trị\n| $z$ | $\\sigma(z)$ | $\\sigma'(z) = \\sigma(1-\\sigma)$ |\n|---|---|---|\n| $0$ | $0{,}5$ | $0{,}25$ (lớn nhất) |\n| $2$ | $0{,}881$ | $0{,}105$ |\n| $5$ | $0{,}993$ | $0{,}0066$ |\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 280\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"48\" y1=\"233.6\" x2=\"544\" y2=\"233.6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"296.0\" y1=\"16\" x2=\"296.0\" y2=\"244\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"48.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−6</text>\n<text x=\"130.7\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−4</text>\n<text x=\"213.3\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−2</text>\n<text x=\"378.7\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"461.3\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<text x=\"544.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">6</text>\n<text x=\"42\" y=\"185.8\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">0,25</text>\n<text x=\"42\" y=\"134.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">0,5</text>\n<text x=\"42\" y=\"30.4\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">1</text>\n<text x=\"544\" y=\"276\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">z</text>\n<line x1=\"48.0\" y1=\"181.8\" x2=\"544.0\" y2=\"181.8\" stroke=\"#f59e0b\" stroke-dasharray=\"4 4\"/>\n<polyline points=\"48.0,233.1 52.1,233.1 56.3,233.0 60.4,232.9 64.5,232.9 68.7,232.8 72.8,232.7 76.9,232.6 81.1,232.5 85.2,232.4 89.3,232.2 93.5,232.1 97.6,231.9 101.7,231.8 105.9,231.6 110.0,231.4 114.1,231.1 118.3,230.9 122.4,230.6 126.5,230.3 130.7,229.9 134.8,229.5 138.9,229.1 143.1,228.6 147.2,228.1 151.3,227.6 155.5,226.9 159.6,226.3 163.7,225.5 167.9,224.7 172.0,223.8 176.1,222.8 180.3,221.8 184.4,220.6 188.5,219.3 192.7,217.9 196.8,216.4 200.9,214.7 205.1,213.0 209.2,211.0 213.3,208.9 217.5,206.7 221.6,204.2 225.7,201.6 229.9,198.8 234.0,195.8 238.1,192.6 242.3,189.2 246.4,185.7 250.5,181.9 254.7,177.9 258.8,173.7 262.9,169.4 267.1,164.9 271.2,160.2 275.3,155.4 279.5,150.5 283.6,145.4 287.7,140.3 291.9,135.2 296.0,130.0 300.1,124.8 304.3,119.7 308.4,114.6 312.5,109.5 316.7,104.6 320.8,99.8 324.9,95.1 329.1,90.6 333.2,86.3 337.3,82.1 341.5,78.1 345.6,74.3 349.7,70.8 353.9,67.4 358.0,64.2 362.1,61.2 366.3,58.4 370.4,55.8 374.5,53.3 378.7,51.1 382.8,49.0 386.9,47.0 391.1,45.3 395.2,43.6 399.3,42.1 403.5,40.7 407.6,39.4 411.7,38.2 415.9,37.2 420.0,36.2 424.1,35.3 428.3,34.5 432.4,33.7 436.5,33.1 440.7,32.4 444.8,31.9 448.9,31.4 453.1,30.9 457.2,30.5 461.3,30.1 465.5,29.7 469.6,29.4 473.7,29.1 477.9,28.9 482.0,28.6 486.1,28.4 490.3,28.2 494.4,28.1 498.5,27.9 502.7,27.8 506.8,27.6 510.9,27.5 515.1,27.4 519.2,27.3 523.3,27.2 527.5,27.1 531.6,27.1 535.7,27.0 539.9,26.9 544.0,26.9\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<polyline points=\"48.0,233.1 52.1,233.1 56.3,233.0 60.4,232.9 64.5,232.9 68.7,232.8 72.8,232.7 76.9,232.6 81.1,232.5 85.2,232.4 89.3,232.3 93.5,232.1 97.6,232.0 101.7,231.8 105.9,231.6 110.0,231.4 114.1,231.2 118.3,230.9 122.4,230.6 126.5,230.3 130.7,230.0 134.8,229.6 138.9,229.2 143.1,228.8 147.2,228.3 151.3,227.7 155.5,227.2 159.6,226.5 163.7,225.8 167.9,225.1 172.0,224.3 176.1,223.4 180.3,222.4 184.4,221.4 188.5,220.3 192.7,219.1 196.8,217.8 200.9,216.5 205.1,215.0 209.2,213.5 213.3,211.9 217.5,210.2 221.6,208.4 225.7,206.6 229.9,204.7 234.0,202.7 238.1,200.7 242.3,198.8 246.4,196.8 250.5,194.8 254.7,192.9 258.8,191.0 262.9,189.3 267.1,187.7 271.2,186.2 275.3,184.9 279.5,183.8 283.6,183.0 287.7,182.3 291.9,181.9 296.0,181.8 300.1,181.9 304.3,182.3 308.4,183.0 312.5,183.8 316.7,184.9 320.8,186.2 324.9,187.7 329.1,189.3 333.2,191.0 337.3,192.9 341.5,194.8 345.6,196.8 349.7,198.8 353.9,200.7 358.0,202.7 362.1,204.7 366.3,206.6 370.4,208.4 374.5,210.2 378.7,211.9 382.8,213.5 386.9,215.0 391.1,216.5 395.2,217.8 399.3,219.1 403.5,220.3 407.6,221.4 411.7,222.4 415.9,223.4 420.0,224.3 424.1,225.1 428.3,225.8 432.4,226.5 436.5,227.2 440.7,227.7 444.8,228.3 448.9,228.8 453.1,229.2 457.2,229.6 461.3,230.0 465.5,230.3 469.6,230.6 473.7,230.9 477.9,231.2 482.0,231.4 486.1,231.6 490.3,231.8 494.4,232.0 498.5,232.1 502.7,232.3 506.8,232.4 510.9,232.5 515.1,232.6 519.2,232.7 523.3,232.8 527.5,232.9 531.6,232.9 535.7,233.0 539.9,233.1 544.0,233.1\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<text x=\"386.9\" y=\"63.7\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">σ(z)</text>\n<text x=\"349.7\" y=\"171.5\" font-size=\"12\" text-anchor=\"start\" fill=\"#10b981\">σ′(z) = σ(1−σ), đỉnh 0,25</text>\n</svg>\n\nKhi $|z|$ lớn, sigmoid **bão hoà** và $\\sigma'$ gần 0: đây là gốc của hiện tượng gradient tắt dần trong mạng sâu dùng sigmoid.\n\n#### Bẫy thường gặp\n- Nhầm với $\\tanh'(z) = 1 - \\tanh^2(z)$.\n- Quên đạo hàm hàm trong $-e^{-z}$, ra $\\frac{1}{(1+e^{-z})^2} = \\sigma^2$ (sai).\n\n```python\nimport math\ns = lambda z: 1 / (1 + math.exp(-z))\nh = 1e-6\nfor z in (0, 2, 5):\n    print(z, round((s(z + h) - s(z - h)) / (2 * h), 4), round(s(z) * (1 - s(z)), 4))\n```\n\n#### Đọc thêm\n- [Logistic function (Wikipedia)](https://en.wikipedia.org/wiki/Logistic_function)\n- [Sigmoid function (Wikipedia)](https://en.wikipedia.org/wiki/Sigmoid_function)",
+   "distractors": {
+    "A": "Chỉ lấy một thừa số $\\frac{1}{1+e^{-z}}$ hai lần; thừa số thứ hai đúng ra là $\\frac{e^{-z}}{1+e^{-z}} = 1 - \\sigma(z)$.",
+    "B": "Đây là đạo hàm của $\\tanh$: $\\tanh'(z) = 1 - \\tanh^2(z)$, dễ nhầm vì hai hàm cùng dạng chữ S.",
+    "D": "Đạo hàm $(1+e^{-z})^{-1}$ nhưng quên nhân đạo hàm hàm trong $(1 + e^{-z})' = -e^{-z}$ (quy tắc chuỗi)."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\sigma(z)^2$"
+    },
+    {
+     "key": "B",
+     "text": "$1 - \\sigma(z)^2$"
+    },
+    {
+     "key": "C",
+     "text": "$\\sigma(z)\\,\\big(1 - \\sigma(z)\\big)$"
+    },
+    {
+     "key": "D",
+     "text": "$\\dfrac{1}{(1 + e^{-z})^2}$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T02-A08",
+   "module": "A",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "nhan-biet",
+   "prompt": "Một mô hình dự đoán giá căn hộ (đơn vị: tỷ đồng). Trên 3 căn của tập kiểm thử: giá thật $(3, 5, 2)$, giá dự đoán $(2, 7, 2)$. Tính MSE (trung bình bình phương sai số) của mô hình. **Nhập số, làm tròn 2 chữ số thập phân.**",
+   "explanation": "Sai số $(1, -2, 0)$, bình phương $(1, 4, 0)$; $\\text{MSE} = \\frac{1 + 4 + 0}{3} = \\frac{5}{3} \\approx 1{,}67$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nMSE (mean squared error) $= \\frac{1}{n}\\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2$. Bình phương phạt nặng sai số lớn; đơn vị của MSE là **bình phương** đơn vị gốc (ở đây tỷ đồng²), nên người ta hay báo thêm RMSE để đọc theo đơn vị gốc.\n\n#### Từng bước\n| Căn | $y$ | $\\hat{y}$ | $e = y - \\hat{y}$ | $e^2$ | $\\lvert e \\rvert$ |\n|---|---|---|---|---|---|\n| 1 | 3 | 2 | 1 | 1 | 1 |\n| 2 | 5 | 7 | $-2$ | 4 | 2 |\n| 3 | 2 | 2 | 0 | 0 | 0 |\n| Tổng | | | | **5** | 3 |\n\n- $\\text{MSE} = \\frac{5}{3} \\approx 1{,}67$.\n- So sánh: $\\text{MAE} = \\frac{3}{3} = 1$, $\\text{RMSE} = \\sqrt{5/3} \\approx 1{,}29$.\n\nCăn 2 chỉ sai 2 tỷ nhưng đóng góp $\\frac{4}{5} = 80\\%$ MSE: MSE nhạy với sai số lớn hơn MAE.\n\n#### Liên hệ đạo hàm\n$\\frac{\\partial \\text{MSE}}{\\partial \\hat{y}_i} = \\frac{2}{n}(\\hat{y}_i - y_i)$: gradient tỉ lệ với sai số, nên một ngoại lai kéo mô hình rất mạnh. Một số tài liệu dùng $\\frac{1}{2n}\\sum$ để đạo hàm gọn; khi đề hỏi \"MSE\" thì dùng $\\frac{1}{n}$.\n\n#### Bẫy thường gặp\n- Quên chia $n$ (ra 5).\n- Nhầm MAE hoặc RMSE với MSE.\n\n```python\nimport numpy as np\ny = np.array([3, 5, 2.]); yh = np.array([2, 7, 2.])\ne = y - yh\nprint((e**2).mean(), np.abs(e).mean(), np.sqrt((e**2).mean()))   # 1.667 1.0 1.291\n```\n\n#### Đọc thêm\n- [Mean squared error (Wikipedia)](https://en.wikipedia.org/wiki/Mean_squared_error)\n- [d2l.ai: Linear Regression](https://d2l.ai/chapter_linear-regression/linear-regression.html)",
+   "mistakes": [
+    {
+     "value": 5,
+     "why": "Lấy **tổng** bình phương sai số $1 + 4 + 0 = 5$ mà quên chia cho $n = 3$."
+    },
+    {
+     "value": 1,
+     "why": "Tính MAE $\\frac{1 + 2 + 0}{3} = 1$ (trung bình trị tuyệt đối) thay vì trung bình **bình phương**."
+    },
+    {
+     "value": 1.29,
+     "why": "Lấy căn bậc hai: đó là RMSE $\\sqrt{5/3} \\approx 1{,}29$, không phải MSE."
+    },
+    {
+     "value": 0.83,
+     "why": "Dùng quy ước $\\frac{1}{2n}\\sum$ (hay gặp khi viết loss để đạo hàm gọn); đề hỏi MSE chuẩn $\\frac{1}{n}\\sum$."
+    }
+   ],
+   "answer": 1.67,
+   "tol": 0.0051
+  },
+  {
+   "id": "T02-B01",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Một lớp ẩn dùng hàm kích hoạt $f(x) = \\ln(1 + e^{2x})$ (softplus có hệ số 2). Tính $f'(x)$ tại $x = \\frac{\\ln 3}{2}$ (tức là $e^{2x} = 3$). **Nhập dạng thập phân, làm tròn 2 chữ số.**",
+   "explanation": "$f'(x) = \\frac{1}{1 + e^{2x}} \\cdot 2e^{2x} = 2\\sigma(2x)$; với $e^{2x} = 3$: $f' = \\frac{2 \\cdot 3}{1 + 3} = 1{,}5$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nSoftplus $\\ln(1 + e^{x})$ là phiên bản mượt của ReLU, có đạo hàm đúng bằng sigmoid. Với hệ số 2 bên trong, $f(x) = \\ln(1 + e^{2x})$ có **ba tầng** hàm hợp: $x \\to 2x \\to e^{2x} \\to \\ln(1 + \\cdot)$, nên quy tắc chuỗi phải nhân đủ ba đạo hàm.\n\n#### Từng bước\n1. Đặt $u = 1 + e^{2x}$: $f = \\ln u$, $\\frac{df}{du} = \\frac{1}{u}$.\n2. $\\frac{du}{dx} = e^{2x} \\cdot 2$ (đạo hàm của $e^{2x}$ cần nhân thêm $(2x)' = 2$).\n3. $f'(x) = \\frac{2e^{2x}}{1 + e^{2x}} = 2\\sigma(2x)$.\n4. Tại $e^{2x} = 3$: $f' = \\frac{2 \\cdot 3}{1 + 3} = 1{,}5$.\n\n| Tầng | Hàm | Đạo hàm cục bộ tại điểm xét |\n|---|---|---|\n| 1 | $a = 2x$ | $2$ |\n| 2 | $b = e^{a}$ | $e^{a} = 3$ |\n| 3 | $f = \\ln(1 + b)$ | $\\frac{1}{1 + b} = 0{,}25$ |\n| Tích | | $2 \\cdot 3 \\cdot 0{,}25 = 1{,}5$ |\n\n#### Bẫy thường gặp\n- Quên tầng 1 (hệ số 2), ra $0{,}75$.\n- Quên tầng 2, ra $2 \\cdot 0{,}25 = 0{,}5$.\n- Tính giá trị $f = \\ln 4 \\approx 1{,}39$ thay vì đạo hàm.\n\n```python\nimport math\nf = lambda x: math.log(1 + math.exp(2 * x))\nx, h = math.log(3) / 2, 1e-6\nprint((f(x + h) - f(x - h)) / (2 * h))   # 1.5\n```\n\n#### Đọc thêm\n- [Softplus (Wikipedia)](https://en.wikipedia.org/wiki/Softplus)\n- [d2l.ai: Multilayer Perceptrons (activation functions)](https://d2l.ai/chapter_multilayer-perceptrons/mlp.html)",
+   "mistakes": [
+    {
+     "value": 0.75,
+     "why": "Quên nhân đạo hàm hàm trong $(2x)' = 2$: chỉ được $\\frac{e^{2x}}{1 + e^{2x}} = \\frac{3}{4}$."
+    },
+    {
+     "value": 1.39,
+     "why": "Tính giá trị hàm $f = \\ln 4 \\approx 1{,}39$ thay vì đạo hàm."
+    },
+    {
+     "value": 0.5,
+     "why": "Lấy $(\\ln u)' = \\frac{1}{u}$ nhưng quên nhân $u' = 2e^{2x}$, chỉ nhân 2: $\\frac{2}{1 + 3} = 0{,}5$."
+    }
+   ],
+   "answer": 1.5,
+   "tol": 0.0051
+  },
+  {
+   "id": "T02-B02",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Cho $f(x) = x\\,e^{-x^2}$. Đạo hàm $f'(x)$ bằng:",
+   "explanation": "Quy tắc tích và chuỗi: $f' = 1 \\cdot e^{-x^2} + x \\cdot e^{-x^2} \\cdot (-2x) = e^{-x^2}(1 - 2x^2)$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\n$f(x) = x \\cdot e^{-x^2}$ là **tích** của hai hàm, và thừa số thứ hai lại là **hàm hợp**. Cần hai quy tắc:\n- Quy tắc tích: $(uv)' = u'v + uv'$.\n- Quy tắc chuỗi: $(e^{-x^2})' = e^{-x^2} \\cdot (-2x)$.\n\n#### Từng bước\n$$f'(x) = \\underbrace{1 \\cdot e^{-x^2}}_{u'v} + \\underbrace{x \\cdot e^{-x^2}(-2x)}_{uv'} = e^{-x^2}(1 - 2x^2).$$\n\nKiểm số tại $x = 1{,}3$ ($e^{-1{,}69} \\approx 0{,}1845$):\n\n| Công thức | Giá trị | So với sai phân $-0{,}4391$ |\n|---|---|---|\n| $e^{-x^2}(1 - 2x^2)$ | $-0{,}4391$ | khớp |\n| $e^{-x^2}(1 - 2x)$ | $-0{,}2952$ | lệch |\n| $-2x^2 e^{-x^2}$ | $-0{,}6237$ | lệch |\n| $e^{-x^2}(1 + 2x^2)$ | $0{,}8082$ | lệch |\n\nĐiểm dừng: $f'(x) = 0 \\iff x = \\pm\\frac{1}{\\sqrt{2}}$, đây là nơi $f$ đạt cực đại và cực tiểu.\n\n#### Bẫy thường gặp\n- Bỏ một số hạng của quy tắc tích.\n- Lấy đạo hàm của $e^{-x^2}$ là $-2e^{-x^2}$ (quên $x$ trong đạo hàm hàm trong).\n- Sai dấu của $(-x^2)'$.\n\n```python\nimport math\nf = lambda x: x * math.exp(-x * x)\nx, h = 1.3, 1e-6\nprint((f(x + h) - f(x - h)) / (2 * h), math.exp(-x * x) * (1 - 2 * x * x))\n```\n\n#### Đọc thêm\n- [Product rule (Wikipedia)](https://en.wikipedia.org/wiki/Product_rule)\n- [d2l.ai: Single Variable Calculus](https://d2l.ai/chapter_appendix-mathematics-for-deep-learning/single-variable-calculus.html)",
+   "distractors": {
+    "A": "Lấy $(e^{-x^2})' = -2e^{-x^2}$, quên rằng đạo hàm hàm trong là $-2x$ chứ không phải $-2$.",
+    "B": "Chỉ giữ số hạng $x \\cdot (e^{-x^2})'$, bỏ số hạng $x' \\cdot e^{-x^2}$ của quy tắc tích.",
+    "C": "Sai dấu: $(-x^2)' = -2x$, nên số hạng thứ hai mang dấu trừ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$e^{-x^2}(1 - 2x)$"
+    },
+    {
+     "key": "B",
+     "text": "$-2x^2 e^{-x^2}$"
+    },
+    {
+     "key": "C",
+     "text": "$e^{-x^2}(1 + 2x^2)$"
+    },
+    {
+     "key": "D",
+     "text": "$e^{-x^2}(1 - 2x^2)$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T02-B03",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Hồi quy tuyến tính với ma trận dữ liệu $X \\in \\mathbb{R}^{n \\times d}$, nhãn $\\mathbf{y} \\in \\mathbb{R}^n$, tham số $\\mathbf{w} \\in \\mathbb{R}^d$ và loss $L(\\mathbf{w}) = \\lVert X\\mathbf{w} - \\mathbf{y} \\rVert_2^2$. Gradient $\\nabla_{\\mathbf{w}} L$ là:",
+   "explanation": "Đặt $\\mathbf{r} = X\\mathbf{w} - \\mathbf{y}$, $L = \\mathbf{r}^\\top \\mathbf{r}$. Quy tắc chuỗi: $\\nabla_{\\mathbf{w}} L = \\left(\\frac{\\partial \\mathbf{r}}{\\partial \\mathbf{w}}\\right)^\\top 2\\mathbf{r} = 2X^\\top (X\\mathbf{w} - \\mathbf{y}) \\in \\mathbb{R}^d$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nVới $L(\\mathbf{w}) = \\lVert \\mathbf{r} \\rVert^2$ và $\\mathbf{r} = X\\mathbf{w} - \\mathbf{y}$, quy tắc chuỗi dạng vector: gradient theo $\\mathbf{w}$ = (Jacobian của $\\mathbf{r}$ theo $\\mathbf{w}$)$^\\top$ × gradient theo $\\mathbf{r}$:\n$$\\nabla_{\\mathbf{w}} L = X^\\top \\cdot 2\\mathbf{r} = 2X^\\top(X\\mathbf{w} - \\mathbf{y}).$$\nĐặt bằng 0 ra phương trình chuẩn $X^\\top X \\mathbf{w} = X^\\top \\mathbf{y}$ của bình phương tối thiểu.\n\n#### Từng bước: kiểm kích thước\n| Đại lượng | Kích thước |\n|---|---|\n| $X$ | $n \\times d$ |\n| $\\mathbf{r} = X\\mathbf{w} - \\mathbf{y}$ | $n$ |\n| $\\nabla_{\\mathbf{r}} L = 2\\mathbf{r}$ | $n$ |\n| $\\partial \\mathbf{r} / \\partial \\mathbf{w} = X$ | $n \\times d$ |\n| $\\nabla_{\\mathbf{w}} L = X^\\top (2\\mathbf{r})$ | $d$ (khớp với $\\mathbf{w}$) |\n| Hessian $\\nabla^2 L = 2X^\\top X$ | $d \\times d$ |\n\nGradient luôn có **cùng kích thước với tham số**: đây là cách nhanh nhất để loại các phương án sai.\n\n#### Ví dụ nhỏ\n$X = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\\\ 1 & 1 \\end{pmatrix}$, $\\mathbf{y} = (1, 2, 2)$, $\\mathbf{w} = (0, 0)$: $\\mathbf{r} = (-1, -2, -2)$, $\\nabla L = 2X^\\top \\mathbf{r} = 2(-3, -4) = (-6, -8)$.\n\n#### Bẫy thường gặp\n- Quên Jacobian $X$ (ra vector $n$ chiều).\n- Quên chuyển vị (sai kích thước).\n- Nhầm gradient với Hessian.\n\n```python\nimport numpy as np\nX = np.array([[1, 0], [0, 1], [1, 1.]]); y = np.array([1, 2, 2.]); w = np.zeros(2); h = 1e-6\nL = lambda w: np.sum((X @ w - y) ** 2)\nprint([round((L(w + h * e) - L(w - h * e)) / (2 * h), 4) for e in np.eye(2)], 2 * X.T @ (X @ w - y))\n```\n\n#### Đọc thêm\n- [Matrix calculus (Wikipedia)](https://en.wikipedia.org/wiki/Matrix_calculus)\n- [Ordinary least squares (Wikipedia)](https://en.wikipedia.org/wiki/Ordinary_least_squares)",
+   "distractors": {
+    "B": "Sai kích thước: $X$ là $n \\times d$ không nhân được với vector $n$ chiều (trừ khi $n = d$); cần chuyển vị $X^\\top$.",
+    "C": "Đây là gradient theo **phần dư** $\\mathbf{r}$ (vector $n$ chiều), quên nhân Jacobian $\\frac{\\partial \\mathbf{r}}{\\partial \\mathbf{w}} = X$.",
+    "D": "Đây là **Hessian** $\\nabla^2 L = 2X^\\top X$ (đạo hàm cấp hai), không phải gradient."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$2X^\\top (X\\mathbf{w} - \\mathbf{y})$"
+    },
+    {
+     "key": "B",
+     "text": "$2X (X\\mathbf{w} - \\mathbf{y})$"
+    },
+    {
+     "key": "C",
+     "text": "$2(X\\mathbf{w} - \\mathbf{y})$"
+    },
+    {
+     "key": "D",
+     "text": "$2X^\\top X$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T02-B04",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Cho $f(x, y) = 3x^2 + xy - 2y^2$. Tính đạo hàm theo hướng của $f$ tại điểm $(1, 2)$ theo hướng của vector $\\mathbf{v} = (3, 4)$ (dùng vector **đơn vị** cùng hướng với $\\mathbf{v}$). **Nhập dạng thập phân, làm tròn 1 chữ số.**",
+   "explanation": "$\\nabla f = (6x + y,\\ x - 4y) = (8, -7)$ tại $(1, 2)$; $\\mathbf{u} = \\mathbf{v}/\\lVert \\mathbf{v} \\rVert = (0{,}6;\\ 0{,}8)$; $D_{\\mathbf{u}} f = 8 \\cdot 0{,}6 - 7 \\cdot 0{,}8 = -0{,}8$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nĐạo hàm theo hướng $D_{\\mathbf{u}} f = \\nabla f \\cdot \\mathbf{u}$ chỉ đúng nghĩa \"tốc độ thay đổi theo hướng\" khi $\\mathbf{u}$ là vector **đơn vị**. Với $\\mathbf{v}$ bất kỳ, phải chuẩn hoá $\\mathbf{u} = \\mathbf{v} / \\lVert \\mathbf{v} \\rVert$ trước.\n\n#### Từng bước\n1. Đạo hàm riêng: $\\frac{\\partial f}{\\partial x} = 6x + y$, $\\frac{\\partial f}{\\partial y} = x - 4y$.\n2. Tại $(1, 2)$: $\\nabla f = (8, -7)$.\n3. $\\lVert \\mathbf{v} \\rVert = \\sqrt{3^2 + 4^2} = 5$, $\\mathbf{u} = (0{,}6;\\ 0{,}8)$.\n4. $D_{\\mathbf{u}} f = 8 \\cdot 0{,}6 + (-7) \\cdot 0{,}8 = 4{,}8 - 5{,}6 = -0{,}8$.\n\nGiá trị âm: đi theo hướng $(3, 4)$ thì $f$ **giảm** nhẹ.\n\n| Hướng | Đạo hàm theo hướng |\n|---|---|\n| $(0{,}6;\\ 0{,}8)$ (đề hỏi) | $-0{,}8$ |\n| $(1, 0)$ | $8$ |\n| $(0, 1)$ | $-7$ |\n| $\\nabla f / \\lVert \\nabla f \\rVert$ | $\\sqrt{113} \\approx 10{,}63$ (lớn nhất) |\n\n#### Bẫy thường gặp\n- Không chuẩn hoá $\\mathbf{v}$: ra $-4$ (gấp 5 lần).\n- Sai dấu đạo hàm của $-2y^2$.\n- Nhầm với độ dài gradient.\n\n```python\nimport numpy as np\nf = lambda p: 3 * p[0]**2 + p[0] * p[1] - 2 * p[1]**2\np, u, h = np.array([1., 2.]), np.array([3., 4.]) / 5, 1e-6\nprint((f(p + h * u) - f(p - h * u)) / (2 * h))   # -0.8\n```\n\n#### Đọc thêm\n- [Directional derivative (Wikipedia)](https://en.wikipedia.org/wiki/Directional_derivative)\n- [Partial derivative (Wikipedia)](https://en.wikipedia.org/wiki/Partial_derivative)",
+   "mistakes": [
+    {
+     "value": -4,
+     "why": "Không chuẩn hoá $\\mathbf{v}$: tính $\\nabla f \\cdot (3, 4) = -4$ thay vì $\\nabla f \\cdot (0{,}6;\\ 0{,}8)$."
+    },
+    {
+     "value": 12,
+     "why": "Sai dấu khi lấy $\\frac{\\partial}{\\partial y}(-2y^2) = -4y$, ra $\\nabla f = (8, 9)$."
+    },
+    {
+     "value": 10.6,
+     "why": "Nhầm với **độ dài gradient** $\\lVert (8, -7) \\rVert \\approx 10{,}6$, tức tốc độ tăng lớn nhất, không phải theo hướng $\\mathbf{v}$."
+    }
+   ],
+   "answer": -0.8,
+   "tol": 0.051
+  },
+  {
+   "id": "T02-B05",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Loss của một mô hình có dạng thung lũng hẹp và dài: rất dốc theo $w_1$, rất thoải theo $w_2$. GD thuần dao động zig-zag qua lại theo $w_1$ và tiến rất chậm theo $w_2$. Thêm momentum $\\mathbf{v}_t = \\beta \\mathbf{v}_{t-1} + \\nabla L(\\mathbf{w}_{t-1})$, $\\mathbf{w}_t = \\mathbf{w}_{t-1} - \\eta \\mathbf{v}_t$ giúp được vì sao?",
+   "explanation": "$\\mathbf{v}_t = \\sum_{k} \\beta^{k} \\nabla L(\\mathbf{w}_{t-1-k})$ là tổng có trọng số của các gradient cũ: thành phần đổi dấu bị triệt tiêu, thành phần cùng dấu tích luỹ tới cỡ $\\frac{1}{1-\\beta}$ lần.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nMomentum giữ một \"vận tốc\" $\\mathbf{v}_t = \\beta \\mathbf{v}_{t-1} + \\nabla L(\\mathbf{w}_{t-1})$, tức tổng có trọng số giảm dần của các gradient quá khứ: $\\mathbf{v}_t = \\sum_{k \\ge 0} \\beta^k \\mathbf{g}_{t-k}$.\n- Thành phần gradient **đổi dấu** liên tục (hướng dốc của thung lũng) cộng vào thì triệt tiêu nhau, dao động giảm.\n- Thành phần **cùng dấu** (dọc lòng thung lũng) tích luỹ, bước hiệu dụng tới cỡ $\\frac{\\eta}{1 - \\beta}$ (với $\\beta = 0{,}9$ là gấp 10 lần).\n\n#### Từng bước: thử nghiệm $L = 5w_1^2 + 0{,}1 w_2^2$, xuất phát $(w_1, w_2) = (1, -8)$\n| Phương pháp | $w_2$ sau 20 bước | $\\lvert w_1 \\rvert$ sau 20 bước |\n|---|---|---|\n| GD thuần, $\\eta = 0{,}18$ | $-3{,}84$ | $0{,}012$ |\n| Momentum, $\\beta = 0{,}8$, $\\eta = 0{,}08$ | $-1{,}28$ | $0{,}054$ |\n\nGD thuần còn cách cực tiểu xa theo $w_2$; momentum đi xa hơn nhiều dọc lòng thung lũng dù learning rate nhỏ hơn hơn 2 lần. (GD thuần không thể tăng $\\eta$ thêm: theo $w_1$ cần $\\eta < \\frac{2}{10} = 0{,}2$ để không phân kỳ.)\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 280\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"48\" y1=\"133.0\" x2=\"544\" y2=\"133.0\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"483.3\" y1=\"16\" x2=\"483.3\" y2=\"250\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"78.4\" y=\"266\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−8</text>\n<text x=\"179.6\" y=\"266\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−6</text>\n<text x=\"280.8\" y=\"266\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−4</text>\n<text x=\"382.0\" y=\"266\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−2</text>\n<text x=\"483.3\" y=\"266\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"42\" y=\"227.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">−1</text>\n<text x=\"42\" y=\"47.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">1</text>\n<text x=\"544\" y=\"276\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">w₂ (thoải)</text>\n<text x=\"52\" y=\"26\" font-size=\"12\" fill=\"currentColor\">w₁ (dốc)</text>\n<polyline points=\"323.2,133.0 325.1,126.9 326.9,124.4 328.7,122.5 330.6,120.9 332.4,119.6 334.3,118.3 336.1,117.2 337.9,116.1 339.8,115.2 341.6,114.3 343.5,113.4 345.3,112.6 347.1,111.8 349.0,111.1 350.8,110.4 352.7,109.7 354.5,109.1 356.3,108.5 358.2,107.9 360.0,107.3 361.9,106.8 363.7,106.2 365.5,105.7 367.4,105.2 369.2,104.8 371.1,104.3 372.9,103.9 374.7,103.4 376.6,103.0 378.4,102.6 380.3,102.2 382.1,101.8 383.9,101.4 385.8,101.1 387.6,100.7 389.5,100.4 391.3,100.1 393.1,99.7 395.0,99.4 396.8,99.1 398.7,98.8 400.5,98.6 402.3,98.3 404.2,98.0 406.0,97.8 407.8,97.5 409.7,97.3 411.5,97.0 413.4,96.8 415.2,96.6 417.0,96.4 418.9,96.2 420.7,96.0 422.6,95.8 424.4,95.6 426.2,95.4 428.1,95.2 429.9,95.1 431.8,94.9 433.6,94.7 435.4,94.6 437.3,94.4 439.1,94.3 441.0,94.2 442.8,94.1 444.6,93.9 446.5,93.8 448.3,93.7 450.2,93.6 452.0,93.5 453.8,93.4 455.7,93.4 457.5,93.3 459.4,93.2 461.2,93.1 463.0,93.1 464.9,93.0 466.7,93.0 468.6,92.9 470.4,92.9 472.2,92.8 474.1,92.8 475.9,92.8 477.8,92.8 479.6,92.8 481.4,92.8 483.3,92.8 485.1,92.8 487.0,92.8 488.8,92.8 490.6,92.8 492.5,92.8 494.3,92.8 496.2,92.9 498.0,92.9 499.8,93.0 501.7,93.0 503.5,93.1 505.4,93.1 507.2,93.2 509.0,93.3 510.9,93.4 512.7,93.4 514.6,93.5 516.4,93.6 518.2,93.7 520.1,93.8 521.9,93.9 523.8,94.1 525.6,94.2 527.4,94.3 529.3,94.5 531.1,94.6 533.0,94.7 534.8,94.9 536.6,95.1 538.5,95.2 540.3,95.4 542.2,95.6 544.0,95.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"2 4\"/>\n<polyline points=\"323.2,133.0 325.1,139.1 326.9,141.6 328.7,143.5 330.6,145.1 332.4,146.4 334.3,147.7 336.1,148.8 337.9,149.9 339.8,150.8 341.6,151.7 343.5,152.6 345.3,153.4 347.1,154.2 349.0,154.9 350.8,155.6 352.7,156.3 354.5,156.9 356.3,157.5 358.2,158.1 360.0,158.7 361.9,159.2 363.7,159.8 365.5,160.3 367.4,160.8 369.2,161.2 371.1,161.7 372.9,162.1 374.7,162.6 376.6,163.0 378.4,163.4 380.3,163.8 382.1,164.2 383.9,164.6 385.8,164.9 387.6,165.3 389.5,165.6 391.3,165.9 393.1,166.3 395.0,166.6 396.8,166.9 398.7,167.2 400.5,167.4 402.3,167.7 404.2,168.0 406.0,168.2 407.8,168.5 409.7,168.7 411.5,169.0 413.4,169.2 415.2,169.4 417.0,169.6 418.9,169.8 420.7,170.0 422.6,170.2 424.4,170.4 426.2,170.6 428.1,170.8 429.9,170.9 431.8,171.1 433.6,171.3 435.4,171.4 437.3,171.6 439.1,171.7 441.0,171.8 442.8,171.9 444.6,172.1 446.5,172.2 448.3,172.3 450.2,172.4 452.0,172.5 453.8,172.6 455.7,172.6 457.5,172.7 459.4,172.8 461.2,172.9 463.0,172.9 464.9,173.0 466.7,173.0 468.6,173.1 470.4,173.1 472.2,173.2 474.1,173.2 475.9,173.2 477.8,173.2 479.6,173.2 481.4,173.2 483.3,173.2 485.1,173.2 487.0,173.2 488.8,173.2 490.6,173.2 492.5,173.2 494.3,173.2 496.2,173.1 498.0,173.1 499.8,173.0 501.7,173.0 503.5,172.9 505.4,172.9 507.2,172.8 509.0,172.7 510.9,172.6 512.7,172.6 514.6,172.5 516.4,172.4 518.2,172.3 520.1,172.2 521.9,172.1 523.8,171.9 525.6,171.8 527.4,171.7 529.3,171.5 531.1,171.4 533.0,171.3 534.8,171.1 536.6,170.9 538.5,170.8 540.3,170.6 542.2,170.4 544.0,170.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"2 4\"/>\n<polyline points=\"206.1,133.0 208.9,123.1 211.7,119.0 214.5,115.9 217.3,113.3 220.1,111.1 222.9,109.0 225.8,107.2 228.6,105.5 231.4,103.9 234.2,102.4 237.0,101.0 239.8,99.6 242.7,98.4 245.5,97.2 248.3,96.0 251.1,94.9 253.9,93.8 256.7,92.8 259.6,91.8 262.4,90.9 265.2,90.0 268.0,89.1 270.8,88.2 273.6,87.4 276.5,86.6 279.3,85.8 282.1,85.0 284.9,84.3 287.7,83.6 290.5,82.9 293.4,82.2 296.2,81.6 299.0,80.9 301.8,80.3 304.6,79.7 307.4,79.1 310.3,78.5 313.1,78.0 315.9,77.4 318.7,76.9 321.5,76.4 324.3,75.9 327.1,75.4 330.0,74.9 332.8,74.5 335.6,74.0 338.4,73.6 341.2,73.1 344.0,72.7 346.9,72.3 349.7,71.9 352.5,71.5 355.3,71.2 358.1,70.8 360.9,70.4 363.8,70.1 366.6,69.8 369.4,69.4 372.2,69.1 375.0,68.8 377.8,68.5 380.7,68.2 383.5,68.0 386.3,67.7 389.1,67.4 391.9,67.2 394.7,66.9 397.6,66.7 400.4,66.5 403.2,66.3 406.0,66.0 408.8,65.8 411.6,65.7 414.5,65.5 417.3,65.3 420.1,65.1 422.9,65.0 425.7,64.8 428.5,64.7 431.4,64.5 434.2,64.4 437.0,64.3 439.8,64.1 442.6,64.0 445.4,63.9 448.2,63.8 451.1,63.8 453.9,63.7 456.7,63.6 459.5,63.5 462.3,63.5 465.1,63.4 468.0,63.4 470.8,63.4 473.6,63.3 476.4,63.3 479.2,63.3 482.0,63.3 484.9,63.3 487.7,63.3 490.5,63.3 493.3,63.3 496.1,63.4 498.9,63.4 501.8,63.4 504.6,63.5 507.4,63.6 510.2,63.6 513.0,63.7 515.8,63.8 518.7,63.9 521.5,64.0 524.3,64.1 527.1,64.2 529.9,64.3 532.7,64.4 535.6,64.5 538.4,64.7 541.2,64.8 544.0,65.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"2 4\"/>\n<polyline points=\"206.1,133.0 208.9,142.9 211.7,147.0 214.5,150.1 217.3,152.7 220.1,154.9 222.9,157.0 225.8,158.8 228.6,160.5 231.4,162.1 234.2,163.6 237.0,165.0 239.8,166.4 242.7,167.6 245.5,168.8 248.3,170.0 251.1,171.1 253.9,172.2 256.7,173.2 259.6,174.2 262.4,175.1 265.2,176.0 268.0,176.9 270.8,177.8 273.6,178.6 276.5,179.4 279.3,180.2 282.1,181.0 284.9,181.7 287.7,182.4 290.5,183.1 293.4,183.8 296.2,184.4 299.0,185.1 301.8,185.7 304.6,186.3 307.4,186.9 310.3,187.5 313.1,188.0 315.9,188.6 318.7,189.1 321.5,189.6 324.3,190.1 327.1,190.6 330.0,191.1 332.8,191.5 335.6,192.0 338.4,192.4 341.2,192.9 344.0,193.3 346.9,193.7 349.7,194.1 352.5,194.5 355.3,194.8 358.1,195.2 360.9,195.6 363.8,195.9 366.6,196.2 369.4,196.6 372.2,196.9 375.0,197.2 377.8,197.5 380.7,197.8 383.5,198.0 386.3,198.3 389.1,198.6 391.9,198.8 394.7,199.1 397.6,199.3 400.4,199.5 403.2,199.7 406.0,200.0 408.8,200.2 411.6,200.3 414.5,200.5 417.3,200.7 420.1,200.9 422.9,201.0 425.7,201.2 428.5,201.3 431.4,201.5 434.2,201.6 437.0,201.7 439.8,201.9 442.6,202.0 445.4,202.1 448.2,202.2 451.1,202.2 453.9,202.3 456.7,202.4 459.5,202.5 462.3,202.5 465.1,202.6 468.0,202.6 470.8,202.6 473.6,202.7 476.4,202.7 479.2,202.7 482.0,202.7 484.9,202.7 487.7,202.7 490.5,202.7 493.3,202.7 496.1,202.6 498.9,202.6 501.8,202.6 504.6,202.5 507.4,202.4 510.2,202.4 513.0,202.3 515.8,202.2 518.7,202.1 521.5,202.0 524.3,201.9 527.1,201.8 529.9,201.7 532.7,201.6 535.6,201.5 538.4,201.3 541.2,201.2 544.0,201.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"2 4\"/>\n<polyline points=\"91.2,133.0 95.0,119.4 98.8,113.7 102.5,109.5 106.3,105.9 110.1,102.8 113.9,100.0 117.6,97.4 121.4,95.1 125.2,92.9 129.0,90.8 132.7,88.9 136.5,87.0 140.3,85.2 144.0,83.6 147.8,82.0 151.6,80.4 155.4,79.0 159.1,77.5 162.9,76.2 166.7,74.8 170.5,73.6 174.2,72.3 178.0,71.1 181.8,70.0 185.6,68.9 189.3,67.8 193.1,66.7 196.9,65.7 200.6,64.7 204.4,63.7 208.2,62.8 212.0,61.8 215.7,60.9 219.5,60.1 223.3,59.2 227.1,58.4 230.8,57.6 234.6,56.8 238.4,56.0 242.1,55.3 245.9,54.5 249.7,53.8 253.5,53.1 257.2,52.4 261.0,51.8 264.8,51.1 268.6,50.5 272.3,49.9 276.1,49.3 279.9,48.7 283.7,48.1 287.4,47.6 291.2,47.1 295.0,46.5 298.7,46.0 302.5,45.5 306.3,45.0 310.1,44.6 313.8,44.1 317.6,43.6 321.4,43.2 325.2,42.8 328.9,42.4 332.7,42.0 336.5,41.6 340.3,41.2 344.0,40.8 347.8,40.5 351.6,40.1 355.3,39.8 359.1,39.5 362.9,39.2 366.7,38.9 370.4,38.6 374.2,38.3 378.0,38.0 381.8,37.8 385.5,37.5 389.3,37.3 393.1,37.1 396.8,36.8 400.6,36.6 404.4,36.4 408.2,36.2 411.9,36.1 415.7,35.9 419.5,35.7 423.3,35.6 427.0,35.4 430.8,35.3 434.6,35.2 438.4,35.1 442.1,35.0 445.9,34.9 449.7,34.8 453.4,34.7 457.2,34.6 461.0,34.6 464.8,34.5 468.5,34.5 472.3,34.4 476.1,34.4 479.9,34.4 483.6,34.4 487.4,34.4 491.2,34.4 494.9,34.5 498.7,34.5 502.5,34.5 506.3,34.6 510.0,34.6 513.8,34.7 517.6,34.8 521.4,34.9 525.1,35.0 528.9,35.1 532.7,35.2 536.5,35.3 540.2,35.5 544.0,35.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"2 4\"/>\n<polyline points=\"91.2,133.0 95.0,146.6 98.8,152.3 102.5,156.5 106.3,160.1 110.1,163.2 113.9,166.0 117.6,168.6 121.4,170.9 125.2,173.1 129.0,175.2 132.7,177.1 136.5,179.0 140.3,180.8 144.0,182.4 147.8,184.0 151.6,185.6 155.4,187.0 159.1,188.5 162.9,189.8 166.7,191.2 170.5,192.4 174.2,193.7 178.0,194.9 181.8,196.0 185.6,197.1 189.3,198.2 193.1,199.3 196.9,200.3 200.6,201.3 204.4,202.3 208.2,203.2 212.0,204.2 215.7,205.1 219.5,205.9 223.3,206.8 227.1,207.6 230.8,208.4 234.6,209.2 238.4,210.0 242.1,210.7 245.9,211.5 249.7,212.2 253.5,212.9 257.2,213.6 261.0,214.2 264.8,214.9 268.6,215.5 272.3,216.1 276.1,216.7 279.9,217.3 283.7,217.9 287.4,218.4 291.2,218.9 295.0,219.5 298.7,220.0 302.5,220.5 306.3,221.0 310.1,221.4 313.8,221.9 317.6,222.4 321.4,222.8 325.2,223.2 328.9,223.6 332.7,224.0 336.5,224.4 340.3,224.8 344.0,225.2 347.8,225.5 351.6,225.9 355.3,226.2 359.1,226.5 362.9,226.8 366.7,227.1 370.4,227.4 374.2,227.7 378.0,228.0 381.8,228.2 385.5,228.5 389.3,228.7 393.1,228.9 396.8,229.2 400.6,229.4 404.4,229.6 408.2,229.8 411.9,229.9 415.7,230.1 419.5,230.3 423.3,230.4 427.0,230.6 430.8,230.7 434.6,230.8 438.4,230.9 442.1,231.0 445.9,231.1 449.7,231.2 453.4,231.3 457.2,231.4 461.0,231.4 464.8,231.5 468.5,231.5 472.3,231.6 476.1,231.6 479.9,231.6 483.6,231.6 487.4,231.6 491.2,231.6 494.9,231.5 498.7,231.5 502.5,231.5 506.3,231.4 510.0,231.4 513.8,231.3 517.6,231.2 521.4,231.1 525.1,231.0 528.9,230.9 532.7,230.8 536.5,230.7 540.2,230.5 544.0,230.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"2 4\"/>\n<polyline points=\"78.4,43.0 92.9,205.0 107.0,75.4 120.5,179.1 133.6,96.1 146.2,162.5 158.3,109.4 170.0,151.9 181.3,117.9 192.2,145.1 202.6,123.3 212.7,140.7 222.5,126.8 231.9,137.9 240.9,129.0 249.7,136.2 258.1,130.5 266.2,135.0 274.0,131.4 281.5,134.3 288.8,132.0\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"1.5\"/>\n<circle cx=\"78.4\" cy=\"43.0\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"92.9\" cy=\"205.0\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"107.0\" cy=\"75.4\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"120.5\" cy=\"179.1\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"133.6\" cy=\"96.1\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"146.2\" cy=\"162.5\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"158.3\" cy=\"109.4\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"170.0\" cy=\"151.9\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"181.3\" cy=\"117.9\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"192.2\" cy=\"145.1\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"202.6\" cy=\"123.3\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"212.7\" cy=\"140.7\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"222.5\" cy=\"126.8\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"231.9\" cy=\"137.9\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"240.9\" cy=\"129.0\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"249.7\" cy=\"136.2\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"258.1\" cy=\"130.5\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"266.2\" cy=\"135.0\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"274.0\" cy=\"131.4\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"281.5\" cy=\"134.3\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"288.8\" cy=\"132.0\" r=\"3.5\" fill=\"#ef4444\"/>\n<polyline points=\"78.4,43.0 84.8,115.0 96.4,187.0 111.8,201.4 130.1,158.2 150.4,103.5 172.0,83.3 194.2,106.9 216.6,146.7 238.8,167.5 260.4,156.6 281.3,129.0 301.3,110.1 320.2,113.3 337.9,131.6 354.4,147.4 369.6,148.5 383.6,137.0 396.4,124.6 408.1,121.4 418.6,128.1\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"1.5\"/>\n<circle cx=\"78.4\" cy=\"43.0\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"84.8\" cy=\"115.0\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"96.4\" cy=\"187.0\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"111.8\" cy=\"201.4\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"130.1\" cy=\"158.2\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"150.4\" cy=\"103.5\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"172.0\" cy=\"83.3\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"194.2\" cy=\"106.9\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"216.6\" cy=\"146.7\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"238.8\" cy=\"167.5\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"260.4\" cy=\"156.6\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"281.3\" cy=\"129.0\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"301.3\" cy=\"110.1\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"320.2\" cy=\"113.3\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"337.9\" cy=\"131.6\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"354.4\" cy=\"147.4\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"369.6\" cy=\"148.5\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"383.6\" cy=\"137.0\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"396.4\" cy=\"124.6\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"408.1\" cy=\"121.4\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"418.6\" cy=\"128.1\" r=\"3.5\" fill=\"#10b981\"/>\n<text x=\"58.1\" y=\"236.5\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\">GD thuần (η = 0,18): zig-zag, tiến chậm</text>\n<text x=\"220.1\" y=\"26.8\" font-size=\"12\" text-anchor=\"start\" fill=\"#10b981\">Momentum (β = 0,8, η = 0,08)</text>\n</svg>\n\n#### Bẫy thường gặp\n- Tưởng momentum điều chỉnh learning rate theo loss.\n- Tưởng momentum dùng Hessian (nó chỉ dùng gradient).\n- Tưởng momentum đảm bảo cực tiểu toàn cục.\n\n```python\ndef run(beta, eta, n=20):\n    w, v = [-8.0, 1.0], [0.0, 0.0]          # (w2, w1)\n    for _ in range(n):\n        g = [0.2 * w[0], 10 * w[1]]\n        v = [beta * v[i] + g[i] for i in range(2)]\n        w = [w[i] - eta * v[i] for i in range(2)]\n    return w\nprint(run(0.0, 0.18), run(0.8, 0.08))\n```\n\n#### Đọc thêm\n- [d2l.ai: Momentum](https://d2l.ai/chapter_optimization/momentum.html)\n- [Stochastic gradient descent, mục Momentum (Wikipedia)](https://en.wikipedia.org/wiki/Stochastic_gradient_descent)",
+   "distractors": {
+    "A": "Momentum không theo dõi loss và không đổi $\\eta$; điều chỉnh learning rate là việc của scheduler hoặc line search.",
+    "B": "Momentum chỉ dùng gradient (đạo hàm cấp một); nó không tính hay xấp xỉ Hessian như phương pháp Newton.",
+    "D": "Momentum có thể giúp vượt qua vùng phẳng nhỏ nhưng không có đảm bảo cực tiểu toàn cục cho hàm không lồi."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Momentum tự giảm learning rate mỗi khi loss tăng nên hết dao động"
+    },
+    {
+     "key": "B",
+     "text": "Momentum dùng thêm thông tin Hessian nên đi thẳng tới cực tiểu giống phương pháp Newton"
+    },
+    {
+     "key": "C",
+     "text": "Gradient theo $w_1$ đổi dấu nên triệt tiêu trong $\\mathbf{v}$, theo $w_2$ cùng dấu nên cộng dồn"
+    },
+    {
+     "key": "D",
+     "text": "Momentum bảo đảm tìm được cực tiểu toàn cục kể cả khi loss không lồi"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T02-B06",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Cho $L(w_1, w_2) = (w_1 - 3)^2 + 2(w_2 + 1)^2$. Từ điểm $(w_1, w_2) = (0, 0)$, chạy **một bước** gradient descent với $\\eta = 0{,}1$. Điểm mới $(w_1, w_2)$ là:",
+   "explanation": "$\\nabla L = \\big(2(w_1 - 3),\\ 4(w_2 + 1)\\big) = (-6, 4)$ tại $(0,0)$; $\\mathbf{w}_1 = (0, 0) - 0{,}1 \\cdot (-6, 4) = (0{,}6;\\ -0{,}4)$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nMột bước GD bằng tay gồm ba việc: (1) lấy đạo hàm riêng theo từng tham số, (2) thay giá trị hiện tại, (3) trừ $\\eta \\times$ gradient. Với hàm dạng $c(w - a)^2$, đạo hàm là $2c(w - a)$: **hai** hệ số 2 và $c$ đều dễ bị quên.\n\n#### Từng bước\n1. $\\frac{\\partial L}{\\partial w_1} = 2(w_1 - 3)$, $\\frac{\\partial L}{\\partial w_2} = 2 \\cdot 2(w_2 + 1) = 4(w_2 + 1)$.\n2. Tại $(0, 0)$: $\\nabla L = (-6, 4)$.\n3. $\\mathbf{w}_1 = (0, 0) - 0{,}1 \\cdot (-6, 4) = (0{,}6;\\ -0{,}4)$.\n\n| Điểm | $w_1$ | $w_2$ | $L$ |\n|---|---|---|---|\n| Ban đầu | $0$ | $0$ | $9 + 2 = 11$ |\n| Sau 1 bước (đúng) | $0{,}6$ | $-0{,}4$ | $5{,}76 + 0{,}72 = 6{,}48$ |\n| Cộng gradient (sai) | $-0{,}6$ | $0{,}4$ | $12{,}96 + 3{,}92 = 16{,}88$ |\n| Cực tiểu | $3$ | $-1$ | $0$ |\n\nLoss giảm từ 11 xuống 6,48: kiểm nhanh rằng bước đúng hướng. Mỗi tọa độ tiến về cực tiểu theo tỉ lệ riêng: $w_1 - 3$ nhân $0{,}8$, $w_2 + 1$ nhân $0{,}6$ mỗi bước.\n\n#### Bẫy thường gặp\n- Quên hệ số 2 phía trước $(w_2 + 1)^2$.\n- Quên hệ số 2 khi đạo hàm bình phương.\n- Cộng thay vì trừ.\n\n```python\nimport numpy as np\nL = lambda w: (w[0] - 3)**2 + 2 * (w[1] + 1)**2\nw = np.zeros(2)\ng = np.array([2 * (w[0] - 3), 4 * (w[1] + 1)])\nw1 = w - 0.1 * g\nprint(w1, L(w), L(w1))   # [ 0.6 -0.4] 11.0 6.48\n```\n\n#### Đọc thêm\n- [Gradient descent (Wikipedia)](https://en.wikipedia.org/wiki/Gradient_descent)\n- [mml-book, chương 7.1](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "A": "Cộng gradient thay vì trừ (đi ngược quy tắc GD), nên loss tăng từ 11 lên 16,88.",
+    "C": "Quên nhân hệ số 2 phía trước: $\\frac{\\partial}{\\partial w_2} 2(w_2+1)^2 = 4(w_2 + 1)$ chứ không phải $2(w_2 + 1)$.",
+    "D": "Quên đạo hàm của bình phương (hệ số 2 từ quy tắc chuỗi) ở cả hai thành phần: dùng $(w_1 - 3,\\ 2(w_2+1))$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$(-0{,}6;\\ 0{,}4)$"
+    },
+    {
+     "key": "B",
+     "text": "$(0{,}6;\\ -0{,}4)$"
+    },
+    {
+     "key": "C",
+     "text": "$(0{,}6;\\ -0{,}2)$"
+    },
+    {
+     "key": "D",
+     "text": "$(0{,}3;\\ -0{,}2)$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T02-B07",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Trong Adam, $\\mathbf{m}_t = \\beta_1 \\mathbf{m}_{t-1} + (1 - \\beta_1)\\mathbf{g}_t$ với $\\mathbf{m}_0 = \\mathbf{0}$, sau đó dùng $\\hat{\\mathbf{m}}_t = \\mathbf{m}_t / (1 - \\beta_1^t)$. Mục đích của phép chia cho $1 - \\beta_1^t$ là gì?",
+   "explanation": "Với gradient không đổi $g$: $\\mathbf{m}_t = (1 - \\beta_1^t) g$, nhỏ hơn $g$ nhiều khi $t$ nhỏ (ví dụ $\\beta_1 = 0{,}9$, $t = 1$: $m_1 = 0{,}1g$). Chia cho $1 - \\beta_1^t$ trả về đúng $g$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nAdam giữ hai trung bình trượt mũ: $\\mathbf{m}_t$ (trung bình gradient, cho **hướng**) và $\\mathbf{v}_t$ (trung bình bình phương gradient, cho **thang đo**). Cả hai khởi tạo bằng 0 nên ở các bước đầu bị **kéo về 0**. Với gradient không đổi $g$:\n$$\\mathbf{m}_t = (1 - \\beta_1)\\sum_{k=0}^{t-1} \\beta_1^k g = (1 - \\beta_1^t)\\, g.$$\nChia cho $1 - \\beta_1^t$ trả lại đúng $g$. Tương tự $\\hat{\\mathbf{v}}_t = \\mathbf{v}_t / (1 - \\beta_2^t)$.\n\n#### Từng bước: $g = 2$ không đổi, $\\beta_1 = 0{,}9$\n| $t$ | $m_t$ | $1 - \\beta_1^t$ | $\\hat{m}_t$ |\n|---|---|---|---|\n| 1 | $0{,}2000$ | $0{,}1000$ | $2{,}0000$ |\n| 2 | $0{,}3800$ | $0{,}1900$ | $2{,}0000$ |\n| 3 | $0{,}5420$ | $0{,}2710$ | $2{,}0000$ |\n| 4 | $0{,}6878$ | $0{,}3439$ | $2{,}0000$ |\n| 5 | $0{,}8190$ | $0{,}4095$ | $2{,}0000$ |\n\nKhông hiệu chỉnh, $m_1 = 0{,}2$ chỉ bằng 10% gradient thật. Với $\\beta_2 = 0{,}999$, $v_t$ còn lệch lâu hơn nhiều (cần cỡ hàng nghìn bước), nên hiệu chỉnh $\\mathbf{v}$ càng quan trọng.\n\n#### Vai trò từng phần của Adam\n| Thành phần | Vai trò |\n|---|---|\n| $\\mathbf{m}_t$ | momentum: làm mượt hướng |\n| $\\mathbf{v}_t$ | chuẩn hoá độ lớn bước theo từng tham số |\n| chia $1 - \\beta^t$ | bù lệch do khởi tạo 0 |\n\n#### Bẫy thường gặp\n- Tưởng hiệu chỉnh bias là lịch giảm learning rate (thật ra hệ số $\\frac{1}{1 - \\beta^t}$ giảm dần về 1).\n- Lẫn vai trò của $\\mathbf{m}$ và $\\mathbf{v}$.\n\n```python\nm, g, b = 0.0, 2.0, 0.9\nfor t in range(1, 6):\n    m = b * m + (1 - b) * g\n    print(t, round(m, 4), round(m / (1 - b**t), 4))\n```\n\n#### Đọc thêm\n- [d2l.ai: Adam](https://d2l.ai/chapter_optimization/adam.html)\n- [Stochastic gradient descent, mục Adam (Wikipedia)](https://en.wikipedia.org/wiki/Stochastic_gradient_descent)",
+   "distractors": {
+    "A": "Việc cân bằng độ lớn bước giữa các tham số do phép chia cho $\\sqrt{\\hat{\\mathbf{v}}_t}$ đảm nhận, không phải hiệu chỉnh bias của $\\mathbf{m}_t$.",
+    "B": "Hệ số $\\frac{1}{1-\\beta_1^t}$ **giảm dần về 1**, nên nó làm bước đầu lớn lên chứ không phải lịch giảm learning rate.",
+    "C": "$\\hat{\\mathbf{m}}_t$ (hướng, trung bình gradient) và $\\hat{\\mathbf{v}}_t$ (thang đo, trung bình bình phương) có vai trò khác nhau; bỏ $\\mathbf{v}_t$ là thành SGD momentum."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Chuẩn hoá để mọi tham số có cùng độ lớn bước cập nhật"
+    },
+    {
+     "key": "B",
+     "text": "Làm learning rate giảm dần theo thời gian để hội tụ"
+    },
+    {
+     "key": "C",
+     "text": "Thay cho việc chia cho $\\sqrt{\\hat{\\mathbf{v}}_t}$, nên có thể bỏ $\\mathbf{v}_t$"
+    },
+    {
+     "key": "D",
+     "text": "Bù độ lệch về 0 của $\\mathbf{m}_t$ ở các bước đầu do $\\mathbf{m}_0 = \\mathbf{0}$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T02-B08",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Mô hình phân loại $K$ lớp: logits $\\mathbf{z}$, $\\mathbf{p} = \\operatorname{softmax}(\\mathbf{z})$, nhãn one-hot $\\mathbf{y}$, loss cross-entropy $L = -\\sum_k y_k \\ln p_k$. Gradient $\\dfrac{\\partial L}{\\partial \\mathbf{z}}$ là:",
+   "explanation": "$\\frac{\\partial L}{\\partial z_j} = -\\sum_k y_k \\frac{\\partial \\ln p_k}{\\partial z_j} = -\\sum_k y_k(\\delta_{kj} - p_j) = p_j \\sum_k y_k - y_j = p_j - y_j$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nGhép softmax với cross-entropy cho gradient theo logits cực gọn: $\\frac{\\partial L}{\\partial \\mathbf{z}} = \\mathbf{p} - \\mathbf{y}$ (xác suất dự đoán trừ nhãn one-hot). Đây là lý do các framework gộp hai bước thành một hàm (ví dụ `CrossEntropyLoss` nhận logits), vừa gọn vừa ổn định số học.\n\n#### Từng bước\n1. $\\ln p_k = z_k - \\ln \\sum_j e^{z_j}$ nên $\\frac{\\partial \\ln p_k}{\\partial z_j} = \\delta_{kj} - p_j$.\n2. $\\frac{\\partial L}{\\partial z_j} = -\\sum_k y_k (\\delta_{kj} - p_j) = -y_j + p_j \\sum_k y_k = p_j - y_j$ (vì $\\sum_k y_k = 1$).\n\n#### Ví dụ số: $\\mathbf{z} = (1;\\ -0{,}5;\\ 2)$, lớp đúng là lớp 2\n| Lớp | $z$ | $p = \\operatorname{softmax}(z)$ | $y$ | $p - y$ |\n|---|---|---|---|---|\n| 1 | $1$ | $0{,}254$ | 0 | $0{,}254$ |\n| 2 | $-0{,}5$ | $0{,}057$ | 1 | $-0{,}943$ |\n| 3 | $2$ | $0{,}690$ | 0 | $0{,}690$ |\n\nTổng các thành phần gradient bằng 0. GD sẽ **tăng** logit lớp đúng (gradient âm) và giảm logit các lớp sai, mạnh nhất ở lớp sai đang được tin nhiều nhất.\n\n#### Bẫy thường gặp\n- Sai dấu ($\\mathbf{y} - \\mathbf{p}$ là hướng đi của GD, không phải gradient).\n- Dừng ở gradient theo $\\mathbf{p}$ ($-y_k / p_k$) mà quên Jacobian softmax.\n- Chỉ dùng đường chéo Jacobian $p_j(1 - p_j)$.\n\n```python\nimport numpy as np\nz = np.array([1.0, -0.5, 2.0]); y = np.array([0, 1, 0.]); h = 1e-6\nsm = lambda z: np.exp(z) / np.exp(z).sum()\nL = lambda z: -np.sum(y * np.log(sm(z)))\nprint([round((L(z + h * e) - L(z - h * e)) / (2 * h), 4) for e in np.eye(3)], sm(z) - y)\n```\n\n#### Đọc thêm\n- [d2l.ai: Softmax Regression](https://d2l.ai/chapter_linear-classification/softmax-regression.html)\n- [Softmax function (Wikipedia)](https://en.wikipedia.org/wiki/Softmax_function)",
+   "distractors": {
+    "B": "Sai dấu: đây là $-\\nabla L$, tức hướng **giảm** loss mà GD sẽ đi, không phải gradient.",
+    "C": "Đây là gradient theo **xác suất** $\\mathbf{p}$; còn phải nhân Jacobian của softmax mới ra gradient theo logits $\\mathbf{z}$.",
+    "D": "Chỉ lấy đường chéo Jacobian softmax $p_j(1 - p_j)$, bỏ cả các số hạng chéo $-p_k p_j$ lẫn nhãn $\\mathbf{y}$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\mathbf{p} - \\mathbf{y}$"
+    },
+    {
+     "key": "B",
+     "text": "$\\mathbf{y} - \\mathbf{p}$"
+    },
+    {
+     "key": "C",
+     "text": "$-\\mathbf{y} \\oslash \\mathbf{p}$ (chia từng phần tử)"
+    },
+    {
+     "key": "D",
+     "text": "$\\mathbf{p} \\odot (\\mathbf{1} - \\mathbf{p})$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T02-B09",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Mô hình phân loại ảnh 3 lớp (chó, mèo, chim). Trong một batch có 2 ảnh: ảnh 1 nhãn **chó**, xác suất dự đoán (chó, mèo, chim) $= (0{,}7;\\ 0{,}2;\\ 0{,}1)$; ảnh 2 nhãn **chim**, xác suất dự đoán $= (0{,}25;\\ 0{,}5;\\ 0{,}25)$. Tính cross-entropy **trung bình** trên batch, dùng logarit tự nhiên. **Làm tròn 3 chữ số thập phân.**",
+   "explanation": "$L = \\frac{1}{2}\\big(-\\ln 0{,}7 - \\ln 0{,}25\\big) = \\frac{0{,}357 + 1{,}386}{2} \\approx 0{,}871$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nCross-entropy với nhãn one-hot chỉ lấy xác suất của **lớp đúng**: $\\ell_i = -\\ln p_{i, y_i}$. Loss của batch là **trung bình** các $\\ell_i$ (mặc định của hầu hết framework, `reduction=\"mean\"`). Logarit dùng cơ số $e$.\n\n#### Từng bước\n| Ảnh | Nhãn | $p$ của lớp đúng | $\\ell = -\\ln p$ |\n|---|---|---|---|\n| 1 | chó | $0{,}7$ | $0{,}357$ |\n| 2 | chim | $0{,}25$ | $1{,}386$ |\n| **Trung bình** | | | $\\frac{1{,}743}{2} \\approx 0{,}871$ |\n\nẢnh 2 đóng góp gần 80% loss: mô hình đang tin \"mèo\" (0,5) trong khi đáp án là \"chim\". Cross-entropy phạt rất nặng khi xác suất lớp đúng nhỏ: $-\\ln 0{,}01 \\approx 4{,}6$, còn $-\\ln p \\to \\infty$ khi $p \\to 0$.\n\n#### Mốc tham chiếu\n| $p$ lớp đúng | $-\\ln p$ |\n|---|---|\n| $1$ | $0$ |\n| $0{,}5$ | $0{,}693$ |\n| $1/3$ (đoán đều 3 lớp) | $1{,}099$ |\n| $0{,}1$ | $2{,}303$ |\n\nMô hình đoán ngẫu nhiên đều trên 3 lớp có loss $\\ln 3 \\approx 1{,}099$; loss 0,871 tốt hơn mức đó một chút.\n\n#### Bẫy thường gặp\n- Lấy tổng thay vì trung bình.\n- Dùng $\\log_{10}$.\n- Lấy xác suất lớn nhất thay vì xác suất của lớp đúng.\n\n```python\nimport numpy as np\nP = np.array([[0.7, 0.2, 0.1], [0.25, 0.5, 0.25]]); y = [0, 2]\nl = -np.log(P[[0, 1], y])\nprint(l, l.mean())   # [0.357 1.386] 0.871\n```\n\n#### Đọc thêm\n- [Cross-entropy (Wikipedia)](https://en.wikipedia.org/wiki/Cross-entropy)\n- [d2l.ai: Softmax Regression (loss function)](https://d2l.ai/chapter_linear-classification/softmax-regression.html)",
+   "mistakes": [
+    {
+     "value": 1.743,
+     "why": "Lấy **tổng** hai loss $0{,}357 + 1{,}386$ mà quên chia cho kích thước batch 2."
+    },
+    {
+     "value": 0.378,
+     "why": "Dùng $\\log_{10}$ thay vì $\\ln$; cross-entropy trong ML mặc định dùng logarit tự nhiên."
+    },
+    {
+     "value": 0.525,
+     "why": "Lấy xác suất của lớp **được dự đoán cao nhất** ($0{,}7$ và $0{,}5$) thay vì xác suất của lớp đúng."
+    }
+   ],
+   "answer": 0.871,
+   "tol": 0.0011
+  },
+  {
+   "id": "T02-B10",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Một mạng có $10^6$ tham số và loss là một số vô hướng $L$. Vì sao các framework dùng backprop (reverse-mode autodiff: áp quy tắc chuỗi từ $L$ ngược về các tham số) thay cho forward-mode?",
+   "explanation": "Với $f: \\mathbb{R}^n \\to \\mathbb{R}^m$, forward-mode tốn cỡ $n$ lượt, reverse-mode cỡ $m$ lượt. Ở đây $n = 10^6$, $m = 1$ nên reverse-mode rẻ hơn khoảng $10^6$ lần.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nAutodiff tính đạo hàm **chính xác** bằng cách áp quy tắc chuỗi trên đồ thị tính toán. Có hai cách nhân chuỗi Jacobian:\n- **Forward-mode**: đi từ đầu vào ra đầu ra, mỗi lượt cho đạo hàm của mọi đầu ra theo **một** đầu vào.\n- **Reverse-mode** (backprop): đi từ đầu ra về đầu vào, mỗi lượt cho đạo hàm của **một** đầu ra theo mọi đầu vào.\n\nVới $f: \\mathbb{R}^n \\to \\mathbb{R}^m$, chi phí cỡ $n$ lượt (forward) so với $m$ lượt (reverse). Huấn luyện mạng có $n = 10^6$ tham số, $m = 1$ (loss vô hướng): reverse-mode thắng áp đảo.\n\n#### So sánh\n| Tiêu chí | Forward-mode | Reverse-mode |\n|---|---|---|\n| Số lượt để có $\\nabla L$ ($10^6$ tham số) | khoảng $10^6$ | 1 (cộng 1 lượt xuôi) |\n| Độ chính xác | chính xác | chính xác |\n| Bộ nhớ | thấp | phải lưu activation lượt xuôi |\n| Hợp với | ít đầu vào, nhiều đầu ra | nhiều đầu vào, một đầu ra |\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  W[\"10^6 tham số w\"] --> F[\"lượt xuôi: tính và lưu activation\"]\n  F --> L[\"loss L vô hướng\"]\n  L -->|\"lượt ngược duy nhất\"| G[\"toàn bộ dL/dw\"]\n```\n\n#### Bẫy thường gặp\n- Nhầm autodiff với sai phân hữu hạn (sai phân là xấp xỉ, cần $2n$ lần đánh giá $L$).\n- Tưởng backprop tiết kiệm bộ nhớ; thật ra bộ nhớ activation là chi phí chính của huấn luyện (vì vậy có kỹ thuật gradient checkpointing).\n- Tưởng thứ tự nhân ảnh hưởng kết quả; nó chỉ ảnh hưởng chi phí.\n\n```python\n# Đếm số lần đánh giá L nếu dùng sai phân trung tâm thay cho backprop\nn_params = 10**6\nprint(\"sai phân:\", 2 * n_params, \"lần tính L; backprop: 1 lượt xuôi + 1 lượt ngược\")\n```\n\n#### Đọc thêm\n- [Automatic differentiation (Wikipedia)](https://en.wikipedia.org/wiki/Automatic_differentiation)\n- [d2l.ai: Automatic Differentiation](https://d2l.ai/chapter_preliminaries/autograd.html)",
+   "distractors": {
+    "A": "Cả hai chế độ autodiff đều cho đạo hàm **chính xác** (tới sai số dấu phẩy động); sai phân hữu hạn là kỹ thuật khác.",
+    "C": "Ngược lại: reverse-mode phải **lưu** các activation của lượt xuôi để dùng khi đi ngược, đó là lý do huấn luyện tốn bộ nhớ.",
+    "D": "Phép nhân ma trận Jacobian có tính kết hợp nên thứ tự nào cũng cho cùng kết quả; thứ tự chỉ ảnh hưởng **chi phí**."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Reverse-mode cho kết quả chính xác, còn forward-mode chỉ xấp xỉ bằng sai phân hữu hạn"
+    },
+    {
+     "key": "B",
+     "text": "Một lượt ngược cho đủ $10^6$ đạo hàm $\\partial L / \\partial w_i$; forward-mode cần cỡ một lượt cho mỗi tham số"
+    },
+    {
+     "key": "C",
+     "text": "Reverse-mode không cần lưu giá trị trung gian của lượt xuôi nên tiết kiệm bộ nhớ"
+    },
+    {
+     "key": "D",
+     "text": "Quy tắc chuỗi chỉ đúng khi nhân các đạo hàm theo thứ tự từ đầu ra về đầu vào"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T02-C01",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Một mô hình hồi quy một tham số dùng loss bền vững với ngoại lai $\\rho(r) = \\ln(1 + r^2)$, trong đó phần dư $r = wx - y$. Với một mẫu $x = 2$, $y = 1$ và tham số hiện tại $w = 1$, tính $\\dfrac{d\\rho}{dw}$. **Nhập số, làm tròn 2 chữ số thập phân.**",
+   "explanation": "$r = 2 \\cdot 1 - 1 = 1$. $\\frac{d\\rho}{dw} = \\frac{d\\rho}{dr} \\cdot \\frac{dr}{dw} = \\frac{2r}{1 + r^2} \\cdot x = \\frac{2}{2} \\cdot 2 = 2$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nLoss $\\rho(r) = \\ln(1 + r^2)$ (dạng Cauchy/Lorentzian) dùng khi dữ liệu có ngoại lai: gradient theo phần dư $\\frac{2r}{1 + r^2}$ **tiến về 0** khi $|r|$ lớn, nên điểm ngoại lai ít ảnh hưởng. Muốn đạo hàm theo tham số $w$ thì phải đi qua phần dư $r = wx - y$.\n\n#### Từng bước\n1. Lượt xuôi: $r = 1 \\cdot 2 - 1 = 1$, $\\rho = \\ln 2 \\approx 0{,}693$.\n2. $\\frac{d\\rho}{dr} = \\frac{2r}{1 + r^2} = \\frac{2}{2} = 1$.\n3. $\\frac{dr}{dw} = x = 2$.\n4. $\\frac{d\\rho}{dw} = 1 \\cdot 2 = 2$.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  W[\"w = 1\"] -->|\"dr/dw = x = 2\"| R[\"r = wx - y = 1\"]\n  R -->|\"dρ/dr = 2r/(1+r²) = 1\"| P[\"ρ = ln(1+r²)\"]\n```\n\n#### So sánh với MSE\n| Phần dư $r$ | $\\frac{d}{dr} r^2 = 2r$ | $\\frac{d}{dr}\\ln(1 + r^2)$ |\n|---|---|---|\n| 1 | 2 | 1 |\n| 3 | 6 | 0,6 |\n| 10 | 20 | 0,198 |\n\nVới MSE, ngoại lai $r = 10$ đẩy tham số mạnh gấp 10 lần điểm $r = 1$; với loss logarit thì yếu hơn.\n\n#### Bẫy thường gặp\n- Dừng ở $\\frac{d\\rho}{dr}$, quên nhân $x$.\n- Dùng đạo hàm của $r^2$.\n- Báo giá trị loss thay vì đạo hàm.\n\n```python\nimport math\nrho = lambda w: math.log(1 + (w * 2 - 1) ** 2)\nh = 1e-6\nprint((rho(1 + h) - rho(1 - h)) / (2 * h))   # 2.0\n```\n\n#### Đọc thêm\n- [Chain rule (Wikipedia)](https://en.wikipedia.org/wiki/Chain_rule)\n- [Loss function (Wikipedia)](https://en.wikipedia.org/wiki/Loss_function)",
+   "mistakes": [
+    {
+     "value": 1,
+     "why": "Dừng ở $\\frac{d\\rho}{dr} = \\frac{2r}{1+r^2} = 1$, quên nhân $\\frac{dr}{dw} = x = 2$."
+    },
+    {
+     "value": 0.69,
+     "why": "Tính giá trị loss $\\rho = \\ln 2 \\approx 0{,}69$ thay vì đạo hàm."
+    },
+    {
+     "value": 4,
+     "why": "Dùng đạo hàm của loss bình phương $r^2$ là $2r \\cdot x = 4$, quên thừa số $\\frac{1}{1 + r^2}$ của logarit."
+    }
+   ],
+   "answer": 2,
+   "tol": 0.0051
+  },
+  {
+   "id": "T02-C02",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Để kiểm code backprop tự viết, bạn so đạo hàm giải tích với sai phân hữu hạn. Thử trên $f(x) = x^3$ tại $x = 1$ với $h = 0{,}1$. Sai phân tiến $\\dfrac{f(x+h) - f(x)}{h}$ và sai phân trung tâm $\\dfrac{f(x+h) - f(x-h)}{2h}$ lần lượt bằng:",
+   "explanation": "$f(1{,}1) = 1{,}331$, $f(0{,}9) = 0{,}729$. Tiến: $\\frac{0{,}331}{0{,}1} = 3{,}31$ (sai số $\\approx 3h$, bậc $O(h)$). Trung tâm: $\\frac{0{,}602}{0{,}2} = 3{,}01$ (sai số $h^2$, bậc $O(h^2)$).",
+   "section": "a-gt",
+   "long": "#### Ý chính\nGradient checking so đạo hàm giải tích (backprop) với sai phân hữu hạn. Hai công thức phổ biến:\n- Sai phân tiến $\\frac{f(x+h) - f(x)}{h}$: sai số $O(h)$.\n- Sai phân trung tâm $\\frac{f(x+h) - f(x-h)}{2h}$: sai số $O(h^2)$, chính xác hơn nhiều với cùng $h$.\n\n#### Từng bước ($f = x^3$, $x = 1$, $h = 0{,}1$)\n- $f(1{,}1) = 1{,}331$, $f(1) = 1$, $f(0{,}9) = 0{,}729$.\n- Tiến: $\\frac{0{,}331}{0{,}1} = 3{,}31$. Khai triển: $\\frac{(1+h)^3 - 1}{h} = 3 + 3h + h^2$, sai số $0{,}31$.\n- Trung tâm: $\\frac{1{,}331 - 0{,}729}{0{,}2} = 3{,}01$. Khai triển: $3 + h^2$, sai số $0{,}01$.\n\n#### Bảng sai số theo $h$\n| $h$ | Tiến | Sai số tiến | Trung tâm | Sai số trung tâm |\n|---|---|---|---|---|\n| $0{,}1$ | $3{,}310000$ | $0{,}310000$ | $3{,}010000$ | $0{,}010000$ |\n| $0{,}01$ | $3{,}030100$ | $0{,}030100$ | $3{,}000100$ | $0{,}000100$ |\n| $0{,}001$ | $3{,}003001$ | $0{,}003001$ | $3{,}000001$ | $0{,}000001$ |\n\nGiảm $h$ đi 10 lần: sai số tiến giảm khoảng 10 lần, sai số trung tâm giảm 100 lần. Trong thực tế dùng $h \\approx 10^{-5}$ với float64; $h$ quá nhỏ lại bị sai số làm tròn.\n\n#### Bẫy thường gặp\n- Tưởng sai phân trung tâm đúng tuyệt đối (chỉ đúng cho đa thức bậc $\\le 2$).\n- Nhầm sai phân lùi với sai phân tiến.\n- Kiểm gradient bằng float32 với $h$ quá nhỏ.\n\n```python\nf = lambda x: x**3\nfor h in (0.1, 0.01, 0.001):\n    print(h, (f(1 + h) - f(1)) / h, (f(1 + h) - f(1 - h)) / (2 * h))\n```\n\n#### Đọc thêm\n- [Numerical differentiation (Wikipedia)](https://en.wikipedia.org/wiki/Numerical_differentiation)\n- [Finite difference (Wikipedia)](https://en.wikipedia.org/wiki/Finite_difference)",
+   "distractors": {
+    "A": "Đảo thứ tự hai công thức; sai phân trung tâm mới là cái gần $f'(1) = 3$ hơn.",
+    "B": "Tưởng sai phân trung tâm cho kết quả **đúng tuyệt đối**; nó chỉ chính xác cho đa thức bậc $\\le 2$, với $x^3$ còn sai số $h^2 = 0{,}01$.",
+    "D": "Dùng sai phân **lùi** $\\frac{f(x) - f(x-h)}{h} = 2{,}71$ thay cho sai phân tiến."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$3{,}01$ và $3{,}31$"
+    },
+    {
+     "key": "B",
+     "text": "$3{,}31$ và $3{,}00$"
+    },
+    {
+     "key": "C",
+     "text": "$3{,}31$ và $3{,}01$"
+    },
+    {
+     "key": "D",
+     "text": "$2{,}71$ và $3{,}01$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T02-C03",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Khi huấn luyện, loss gần như đứng yên quanh một điểm có gradient bằng 0. Xấp xỉ cục bộ của loss quanh điểm này là $f(x, y) = x^2 + 4xy + y^2$ tại $(0, 0)$. Kết luận nào đúng?",
+   "explanation": "$H = \\begin{pmatrix} 2 & 4 \\\\ 4 & 2 \\end{pmatrix}$, trị riêng $2 \\pm 4$ tức $6$ và $-2$. Trị riêng trái dấu (tương đương $\\det H = -12 < 0$) nên $(0,0)$ là điểm yên ngựa: theo hướng $(1,-1)$ loss **giảm** ($f(t,-t) = -2t^2$).",
+   "section": "a-gt",
+   "long": "#### Ý chính\nTại điểm dừng ($\\nabla f = \\mathbf{0}$), loại điểm do **trị riêng của Hessian** quyết định:\n- mọi trị riêng $> 0$: cực tiểu địa phương;\n- mọi trị riêng $< 0$: cực đại địa phương;\n- có cả dương lẫn âm: **điểm yên ngựa**.\n\nTrong mạng nơ-ron nhiều chiều, điểm yên ngựa phổ biến hơn cực tiểu xấu rất nhiều; quanh chúng gradient nhỏ nên loss \"đứng yên\" một thời gian.\n\n#### Từng bước\n1. $f_x = 2x + 4y$, $f_y = 4x + 2y$: bằng 0 tại $(0, 0)$.\n2. $H = \\begin{pmatrix} 2 & 4 \\\\ 4 & 2 \\end{pmatrix}$, $\\det(H - \\lambda I) = (2 - \\lambda)^2 - 16 = 0 \\Rightarrow \\lambda = 6$ hoặc $\\lambda = -2$.\n3. Trị riêng trái dấu, $\\det H = 4 - 16 = -12 < 0$: điểm yên ngựa.\n\n| Hướng (vector riêng) | Trị riêng | $f$ dọc hướng đó |\n|---|---|---|\n| $(1, 1)/\\sqrt{2}$ | $6$ | $f(t, t) = 6t^2$ (lên) |\n| $(1, -1)/\\sqrt{2}$ | $-2$ | $f(t, -t) = -2t^2$ (xuống) |\n\n#### Hình minh hoạ (hai lát cắt qua gốc)\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 280\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"48\" y1=\"154.4\" x2=\"544\" y2=\"154.4\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"296.0\" y1=\"16\" x2=\"296.0\" y2=\"244\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"63.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−1,5</text>\n<text x=\"141.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−1</text>\n<text x=\"218.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−0,5</text>\n<text x=\"373.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0,5</text>\n<text x=\"451.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"528.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1,5</text>\n<text x=\"42\" y=\"223.6\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">−4</text>\n<text x=\"42\" y=\"93.3\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">4</text>\n<text x=\"42\" y=\"28.1\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">8</text>\n<text x=\"544\" y=\"276\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">t</text>\n<polyline points=\"48.0,-95.7 52.1,-87.5 56.3,-79.3 60.4,-71.3 64.5,-63.5 68.7,-55.8 72.8,-48.2 76.9,-40.8 81.1,-33.5 85.2,-26.3 89.3,-19.3 93.5,-12.4 97.6,-5.7 101.7,0.9 105.9,7.4 110.0,13.7 114.1,19.9 118.3,25.9 122.4,31.9 126.5,37.6 130.7,43.3 134.8,48.7 138.9,54.1 143.1,59.3 147.2,64.4 151.3,69.3 155.5,74.1 159.6,78.8 163.7,83.3 167.9,87.7 172.0,91.9 176.1,96.0 180.3,100.0 184.4,103.8 188.5,107.5 192.7,111.0 196.8,114.4 200.9,117.7 205.1,120.8 209.2,123.8 213.3,126.6 217.5,129.3 221.6,131.9 225.7,134.3 229.9,136.6 234.0,138.8 238.1,140.8 242.3,142.7 246.4,144.4 250.5,146.0 254.7,147.5 258.8,148.8 262.9,150.0 267.1,151.0 271.2,151.9 275.3,152.7 279.5,153.3 283.6,153.8 287.7,154.2 291.9,154.4 296.0,154.4 300.1,154.4 304.3,154.2 308.4,153.8 312.5,153.3 316.7,152.7 320.8,151.9 324.9,151.0 329.1,150.0 333.2,148.8 337.3,147.5 341.5,146.0 345.6,144.4 349.7,142.7 353.9,140.8 358.0,138.8 362.1,136.6 366.3,134.3 370.4,131.9 374.5,129.3 378.7,126.6 382.8,123.8 386.9,120.8 391.1,117.7 395.2,114.4 399.3,111.0 403.5,107.5 407.6,103.8 411.7,100.0 415.9,96.0 420.0,91.9 424.1,87.7 428.3,83.3 432.4,78.8 436.5,74.1 440.7,69.3 444.8,64.4 448.9,59.3 453.1,54.1 457.2,48.7 461.3,43.3 465.5,37.6 469.6,31.9 473.7,25.9 477.9,19.9 482.0,13.7 486.1,7.4 490.3,0.9 494.4,-5.7 498.5,-12.4 502.7,-19.3 506.8,-26.3 510.9,-33.5 515.1,-40.8 519.2,-48.2 523.3,-55.8 527.5,-63.5 531.6,-71.3 535.7,-79.3 539.9,-87.5 544.0,-95.7\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<polyline points=\"48.0,237.8 52.1,235.1 56.3,232.3 60.4,229.7 64.5,227.1 68.7,224.5 72.8,222.0 76.9,219.5 81.1,217.1 85.2,214.7 89.3,212.3 93.5,210.0 97.6,207.8 101.7,205.6 105.9,203.4 110.0,201.3 114.1,199.3 118.3,197.3 122.4,195.3 126.5,193.4 130.7,191.5 134.8,189.7 138.9,187.9 143.1,186.1 147.2,184.4 151.3,182.8 155.5,181.2 159.6,179.7 163.7,178.1 167.9,176.7 172.0,175.3 176.1,173.9 180.3,172.6 184.4,171.3 188.5,170.1 192.7,168.9 196.8,167.8 200.9,166.7 205.1,165.6 209.2,164.6 213.3,163.7 217.5,162.8 221.6,161.9 225.7,161.1 229.9,160.4 234.0,159.6 238.1,159.0 242.3,158.3 246.4,157.8 250.5,157.2 254.7,156.7 258.8,156.3 262.9,155.9 267.1,155.6 271.2,155.3 275.3,155.0 279.5,154.8 283.6,154.6 287.7,154.5 291.9,154.5 296.0,154.4 300.1,154.5 304.3,154.5 308.4,154.6 312.5,154.8 316.7,155.0 320.8,155.3 324.9,155.6 329.1,155.9 333.2,156.3 337.3,156.7 341.5,157.2 345.6,157.8 349.7,158.3 353.9,159.0 358.0,159.6 362.1,160.4 366.3,161.1 370.4,161.9 374.5,162.8 378.7,163.7 382.8,164.6 386.9,165.6 391.1,166.7 395.2,167.8 399.3,168.9 403.5,170.1 407.6,171.3 411.7,172.6 415.9,173.9 420.0,175.3 424.1,176.7 428.3,178.1 432.4,179.7 436.5,181.2 440.7,182.8 444.8,184.4 448.9,186.1 453.1,187.9 457.2,189.7 461.3,191.5 465.5,193.4 469.6,195.3 473.7,197.3 477.9,199.3 482.0,201.3 486.1,203.4 490.3,205.6 494.4,207.8 498.5,210.0 502.7,212.3 506.8,214.7 510.9,217.1 515.1,219.5 519.2,222.0 523.3,224.5 527.5,227.1 531.6,229.7 535.7,232.3 539.9,235.1 544.0,237.8\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<circle cx=\"296.0\" cy=\"154.4\" r=\"4.5\" fill=\"#f59e0b\"/>\n<text x=\"381.3\" y=\"37.2\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\">dọc (1, 1): f = 6t², đi lên</text>\n<text x=\"350.2\" y=\"229.3\" font-size=\"12\" text-anchor=\"start\" fill=\"#3b82f6\">dọc (1, −1): f = −2t², đi xuống</text>\n<text x=\"280.5\" y=\"134.9\" font-size=\"12\" text-anchor=\"end\" fill=\"#f59e0b\">điểm yên ngựa</text>\n</svg>\n\n#### Bẫy thường gặp\n- Nhìn đường chéo dương rồi kết luận cực tiểu; số hạng chéo $4xy$ đủ lớn để đổi dấu.\n- Nhầm định thức âm với cực đại.\n- Tưởng cần Hessian đường chéo mới kết luận được.\n\n```python\nimport numpy as np\nH = np.array([[2., 4.], [4., 2.]])\nprint(np.linalg.eigh(H))   # trị riêng [-2, 6]\nf = lambda x, y: x*x + 4*x*y + y*y\nprint(f(0.1, 0.1), f(0.1, -0.1))   # 0.06  -0.02\n```\n\n#### Đọc thêm\n- [Saddle point (Wikipedia)](https://en.wikipedia.org/wiki/Saddle_point)\n- [Second partial derivative test (Wikipedia)](https://en.wikipedia.org/wiki/Second_partial_derivative_test)\n- [d2l.ai: Optimization and Deep Learning (saddle points)](https://d2l.ai/chapter_optimization/optimization-intro.html)",
+   "distractors": {
+    "A": "Đường chéo dương **chưa đủ** để $H$ xác định dương; phải xét mọi trị riêng (hoặc $\\det H > 0$). Ở đây số hạng chéo $4xy$ lấn át.",
+    "B": "Định thức âm nghĩa là hai trị riêng **trái dấu** (yên ngựa); cực đại cần cả hai trị riêng âm, tức $\\det H > 0$ và vết âm.",
+    "C": "Hessian không cần là ma trận đường chéo; chỉ cần tính trị riêng (hoặc dùng phép thử đạo hàm cấp hai) là kết luận được."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Cực tiểu địa phương, vì các phần tử đường chéo của Hessian đều dương"
+    },
+    {
+     "key": "B",
+     "text": "Cực đại địa phương, vì định thức của Hessian âm"
+    },
+    {
+     "key": "C",
+     "text": "Không kết luận được, vì Hessian không phải ma trận đường chéo"
+    },
+    {
+     "key": "D",
+     "text": "Điểm yên ngựa, vì Hessian có trị riêng $6$ và $-2$ trái dấu"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T02-C04",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Một optimizer bậc hai cần dự đoán loss sau một bước trước khi chấp nhận bước đó. Tại $\\mathbf{w}_0$: $L(\\mathbf{w}_0) = 5$, $\\nabla L(\\mathbf{w}_0) = \\begin{pmatrix} 2 \\\\ -1 \\end{pmatrix}$, Hessian $H = \\begin{pmatrix} 4 & 1 \\\\ 1 & 2 \\end{pmatrix}$. Dùng khai triển Taylor bậc hai, ước lượng $L(\\mathbf{w}_0 + \\boldsymbol{\\Delta})$ với $\\boldsymbol{\\Delta} = \\begin{pmatrix} -0{,}5 \\\\ 0{,}5 \\end{pmatrix}$. **Nhập số, làm tròn 2 chữ số thập phân.**",
+   "explanation": "$\\nabla L^\\top \\boldsymbol{\\Delta} = 2(-0{,}5) + (-1)(0{,}5) = -1{,}5$; $H\\boldsymbol{\\Delta} = (-1{,}5;\\ 0{,}5)$, $\\boldsymbol{\\Delta}^\\top H \\boldsymbol{\\Delta} = 0{,}75 + 0{,}25 = 1$. Vậy $L \\approx 5 - 1{,}5 + \\frac{1}{2} \\cdot 1 = 4$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nKhai triển Taylor bậc hai của loss quanh $\\mathbf{w}_0$:\n$$L(\\mathbf{w}_0 + \\boldsymbol{\\Delta}) \\approx L(\\mathbf{w}_0) + \\nabla L^\\top \\boldsymbol{\\Delta} + \\tfrac{1}{2}\\boldsymbol{\\Delta}^\\top H \\boldsymbol{\\Delta}.$$\nSố hạng bậc nhất cho độ dốc, số hạng bậc hai cho độ cong. Các optimizer kiểu trust-region dùng đúng công thức này để dự đoán loss rồi so với loss thật trước khi chấp nhận bước.\n\n#### Từng bước\n| Thành phần | Tính | Giá trị |\n|---|---|---|\n| $L(\\mathbf{w}_0)$ | cho sẵn | $5$ |\n| $\\nabla L^\\top \\boldsymbol{\\Delta}$ | $2 \\cdot (-0{,}5) + (-1) \\cdot 0{,}5$ | $-1{,}5$ |\n| $H\\boldsymbol{\\Delta}$ | $(4 \\cdot (-0{,}5) + 1 \\cdot 0{,}5;\\ 1 \\cdot (-0{,}5) + 2 \\cdot 0{,}5)$ | $(-1{,}5;\\ 0{,}5)$ |\n| $\\boldsymbol{\\Delta}^\\top H\\boldsymbol{\\Delta}$ | $(-0{,}5)(-1{,}5) + 0{,}5 \\cdot 0{,}5$ | $1$ |\n| $\\tfrac{1}{2}\\boldsymbol{\\Delta}^\\top H\\boldsymbol{\\Delta}$ | | $0{,}5$ |\n| **Ước lượng** | $5 - 1{,}5 + 0{,}5$ | $4$ |\n\nXấp xỉ bậc nhất hứa hẹn giảm 1,5 nhưng độ cong \"trả lại\" 0,5: bước càng dài thì số hạng bậc hai (tỉ lệ $\\lVert \\boldsymbol{\\Delta} \\rVert^2$) càng lấn át, đó là lý do learning rate lớn có thể làm loss tăng.\n\n#### Bẫy thường gặp\n- Bỏ số hạng bậc hai (ra 3,5).\n- Quên hệ số $\\frac{1}{2}$ (ra 4,5).\n- Sai dấu tích vô hướng.\n\n```python\nimport numpy as np\ng = np.array([2., -1.]); H = np.array([[4., 1.], [1., 2.]]); d = np.array([-0.5, 0.5])\nprint(5 + g @ d, 5 + g @ d + 0.5 * d @ H @ d)   # 3.5 4.0\n```\n\n#### Đọc thêm\n- [Taylor's theorem (Wikipedia)](https://en.wikipedia.org/wiki/Taylor%27s_theorem)\n- [mml-book, chương 5.8](https://mml-book.github.io/book/mml-book.pdf)",
+   "mistakes": [
+    {
+     "value": 3.5,
+     "why": "Chỉ dùng xấp xỉ bậc nhất $5 + \\nabla L^\\top \\boldsymbol{\\Delta} = 3{,}5$, bỏ số hạng Hessian."
+    },
+    {
+     "value": 4.5,
+     "why": "Quên hệ số $\\frac{1}{2}$ trong $\\frac{1}{2}\\boldsymbol{\\Delta}^\\top H \\boldsymbol{\\Delta}$: $5 - 1{,}5 + 1 = 4{,}5$."
+    },
+    {
+     "value": 7,
+     "why": "Sai dấu số hạng bậc nhất: $5 + 1{,}5 + 0{,}5 = 7$ (tính $\\nabla L^\\top \\boldsymbol{\\Delta}$ thành $+1{,}5$)."
+    }
+   ],
+   "answer": 4,
+   "tol": 0.0051
+  },
+  {
+   "id": "T02-C05",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Tối ưu $L(w) = w^2$ bằng GD có momentum: $v_t = \\beta v_{t-1} + L'(w_{t-1})$, $w_t = w_{t-1} - \\eta v_t$, với $w_0 = 1$, $v_0 = 0$, $\\eta = 0{,}1$, $\\beta = 0{,}9$. Tính $w_2$ (sau 2 bước). **Làm tròn 2 chữ số thập phân.**",
+   "explanation": "Bước 1: $L'(1) = 2$, $v_1 = 2$, $w_1 = 1 - 0{,}2 = 0{,}8$. Bước 2: $L'(0{,}8) = 1{,}6$, $v_2 = 0{,}9 \\cdot 2 + 1{,}6 = 3{,}4$, $w_2 = 0{,}8 - 0{,}34 = 0{,}46$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nGD có momentum (dạng \"heavy ball\" như trong đề): $v_t = \\beta v_{t-1} + L'(w_{t-1})$, $w_t = w_{t-1} - \\eta v_t$. Gradient phải được tính **tại tham số hiện tại** ở mỗi bước, còn $v$ mang theo quán tính từ các bước trước.\n\n#### Từng bước ($L' = 2w$, $\\eta = 0{,}1$, $\\beta = 0{,}9$)\n1. Bước 1: $L'(1) = 2$; $v_1 = 0 + 2 = 2$; $w_1 = 1 - 0{,}2 = 0{,}8$.\n2. Bước 2: $L'(0{,}8) = 1{,}6$; $v_2 = 0{,}9 \\cdot 2 + 1{,}6 = 3{,}4$; $w_2 = 0{,}8 - 0{,}34 = 0{,}46$.\n\n#### Bảng vài bước đầu\n| $t$ | $L'(w_{t-1})$ | $v_t$ | $w_t$ (momentum) | $w_t$ (GD thuần) |\n|---|---|---|---|---|\n| 0 | | $0$ | $1$ | $1$ |\n| 1 | $2$ | $2$ | $0{,}8$ | $0{,}8$ |\n| 2 | $1{,}6$ | $3{,}4$ | $0{,}46$ | $0{,}64$ |\n| 3 | $0{,}92$ | $3{,}98$ | $0{,}062$ | $0{,}512$ |\n| 4 | $0{,}124$ | $3{,}706$ | $-0{,}3086$ | $0{,}4096$ |\n\nMomentum đi nhanh hơn GD thuần ở các bước đầu (0,46 so với 0,64), rồi **vượt quá** 0 sang phía âm vì quán tính: đó là đặc trưng dao động tắt dần của heavy ball.\n\n#### Bẫy thường gặp\n- Dùng lại gradient cũ ở bước 2.\n- Nhầm công thức với dạng trung bình mũ $v_t = \\beta v_{t-1} + (1 - \\beta) g_t$ (cho kết quả khác nếu không đổi $\\eta$).\n- Dừng sau 1 bước.\n\n```python\nw, v, wg = 1.0, 0.0, 1.0\nfor t in range(1, 5):\n    v = 0.9 * v + 2 * w\n    w = w - 0.1 * v\n    wg = wg - 0.1 * 2 * wg\n    print(t, round(w, 4), round(wg, 4))\n```\n\n#### Đọc thêm\n- [d2l.ai: Momentum](https://d2l.ai/chapter_optimization/momentum.html)\n- [mml-book, chương 7.1.2](https://mml-book.github.io/book/mml-book.pdf)",
+   "mistakes": [
+    {
+     "value": 0.64,
+     "why": "Bỏ momentum (GD thuần): $w_1 = 0{,}8$, $w_2 = 0{,}8 - 0{,}1 \\cdot 1{,}6 = 0{,}64$."
+    },
+    {
+     "value": 0.8,
+     "why": "Chỉ tính một bước $w_1 = 0{,}8$."
+    },
+    {
+     "value": 0.42,
+     "why": "Bước 2 dùng lại gradient cũ $L'(w_0) = 2$ thay vì $L'(w_1) = 1{,}6$: $v_2 = 3{,}8$."
+    },
+    {
+     "value": 0.94,
+     "why": "Dùng dạng trung bình mũ $v_t = \\beta v_{t-1} + (1 - \\beta) L'$ khác với công thức đề cho ($w_2 \\approx 0{,}942$)."
+    }
+   ],
+   "answer": 0.46,
+   "tol": 0.0051
+  },
+  {
+   "id": "T02-C06",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Để huấn luyện nhanh hơn, một bạn tăng learning rate. Bài toán thu gọn: $L(w) = 2w^2$, $w_0 = 1$, $\\eta = 0{,}6$. Sau 3 bước GD, $w_3$ bằng bao nhiêu và quá trình diễn ra thế nào?",
+   "explanation": "$L'(w) = 4w$ nên $w_{t+1} = (1 - 4\\eta) w_t = -1{,}4\\, w_t$; $w_3 = (-1{,}4)^3 = -2{,}744$. Phân kỳ khi $|1 - 4\\eta| > 1 \\iff \\eta > 0{,}5$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nVới loss bậc hai $L(w) = \\frac{\\lambda}{2}w^2$ (ở đây $\\lambda = 4$), mỗi bước GD nhân $w$ với cùng một hệ số $q = 1 - \\eta\\lambda$:\n- $0 < q < 1$: hội tụ đơn điệu;\n- $-1 < q < 0$: hội tụ nhưng dao động (đổi dấu);\n- $q < -1$: **phân kỳ dao động**, $|w|$ tăng theo cấp số nhân.\n\nNgưỡng ổn định: $\\eta < \\frac{2}{\\lambda} = 0{,}5$. Learning rate tối ưu cho hàm này là $\\eta = \\frac{1}{\\lambda} = 0{,}25$ (về 0 sau đúng 1 bước).\n\n#### Từng bước ($\\eta = 0{,}6$, $q = 1 - 2{,}4 = -1{,}4$)\n| $t$ | $w_t$ | $L(w_t) = 2w_t^2$ |\n|---|---|---|\n| 0 | $1$ | $2$ |\n| 1 | $-1{,}4$ | $3{,}92$ |\n| 2 | $1{,}96$ | $7{,}68$ |\n| 3 | $-2{,}744$ | $15{,}06$ |\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 280\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"48\" y1=\"231.3\" x2=\"544\" y2=\"231.3\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"296.0\" y1=\"16\" x2=\"296.0\" y2=\"244\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"63.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−3</text>\n<text x=\"141.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−2</text>\n<text x=\"218.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">−1</text>\n<text x=\"373.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"451.0\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"528.5\" y=\"260\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<text x=\"42\" y=\"172.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">5</text>\n<text x=\"42\" y=\"108.7\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">10</text>\n<text x=\"42\" y=\"45.3\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">15</text>\n<text x=\"544\" y=\"276\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">w</text>\n<text x=\"52\" y=\"26\" font-size=\"12\" fill=\"currentColor\">L(w) = 2w²</text>\n<polyline points=\"48.0,-28.1 52.1,-19.5 56.3,-11.1 60.4,-2.8 64.5,5.4 68.7,13.4 72.8,21.2 76.9,28.9 81.1,36.5 85.2,43.9 89.3,51.2 93.5,58.3 97.6,65.3 101.7,72.2 105.9,78.9 110.0,85.4 114.1,91.8 118.3,98.1 122.4,104.2 126.5,110.2 130.7,116.0 134.8,121.7 138.9,127.3 143.1,132.7 147.2,137.9 151.3,143.1 155.5,148.0 159.6,152.9 163.7,157.5 167.9,162.1 172.0,166.5 176.1,170.7 180.3,174.8 184.4,178.8 188.5,182.6 192.7,186.3 196.8,189.8 200.9,193.2 205.1,196.5 209.2,199.6 213.3,202.5 217.5,205.3 221.6,208.0 225.7,210.5 229.9,212.9 234.0,215.1 238.1,217.2 242.3,219.2 246.4,221.0 250.5,222.6 254.7,224.1 258.8,225.5 262.9,226.7 267.1,227.8 271.2,228.7 275.3,229.5 279.5,230.2 283.6,230.7 287.7,231.0 291.9,231.3 296.0,231.3 300.1,231.3 304.3,231.0 308.4,230.7 312.5,230.2 316.7,229.5 320.8,228.7 324.9,227.8 329.1,226.7 333.2,225.5 337.3,224.1 341.5,222.6 345.6,221.0 349.7,219.2 353.9,217.2 358.0,215.1 362.1,212.9 366.3,210.5 370.4,208.0 374.5,205.3 378.7,202.5 382.8,199.6 386.9,196.5 391.1,193.2 395.2,189.8 399.3,186.3 403.5,182.6 407.6,178.8 411.7,174.8 415.9,170.7 420.0,166.5 424.1,162.1 428.3,157.5 432.4,152.9 436.5,148.0 440.7,143.1 444.8,137.9 448.9,132.7 453.1,127.3 457.2,121.7 461.3,116.0 465.5,110.2 469.6,104.2 473.7,98.1 477.9,91.8 482.0,85.4 486.1,78.9 490.3,72.2 494.4,65.3 498.5,58.3 502.7,51.2 506.8,43.9 510.9,36.5 515.1,28.9 519.2,21.2 523.3,13.4 527.5,5.4 531.6,-2.8 535.7,-11.1 539.9,-19.5 544.0,-28.1\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<polyline points=\"373.5,206.0 187.5,181.7 447.9,134.0 83.3,40.6\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"1.5\"/>\n<circle cx=\"373.5\" cy=\"206.0\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"187.5\" cy=\"181.7\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"447.9\" cy=\"134.0\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"83.3\" cy=\"40.6\" r=\"3.5\" fill=\"#ef4444\"/>\n<text x=\"382.8\" y=\"198.4\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\">w₀</text>\n<text x=\"178.2\" y=\"174.1\" font-size=\"12\" text-anchor=\"end\" fill=\"#ef4444\">w₁</text>\n<text x=\"457.2\" y=\"126.4\" font-size=\"12\" text-anchor=\"start\" fill=\"#ef4444\">w₂</text>\n<text x=\"74.0\" y=\"33.0\" font-size=\"12\" text-anchor=\"end\" fill=\"#ef4444\">w₃</text>\n</svg>\n\n#### Bảng ngưỡng\n| $\\eta$ | $q = 1 - 4\\eta$ | Hành vi |\n|---|---|---|\n| $0{,}1$ | $0{,}6$ | hội tụ đơn điệu |\n| $0{,}25$ | $0$ | tới 0 sau 1 bước |\n| $0{,}4$ | $-0{,}6$ | hội tụ dao động |\n| $0{,}6$ | $-1{,}4$ | phân kỳ dao động |\n\n#### Bẫy thường gặp\n- Quên dấu âm của $q$ nên không thấy dao động.\n- Lấy $L' = 2w$ (quên hệ số 2 của $2w^2$).\n\n```python\nfor eta in (0.1, 0.25, 0.4, 0.6):\n    w = 1.0\n    for _ in range(3):\n        w -= eta * 4 * w\n    print(eta, round(w, 4))\n```\n\n#### Đọc thêm\n- [d2l.ai: Gradient Descent](https://d2l.ai/chapter_optimization/gd.html)\n- [Learning rate (Wikipedia)](https://en.wikipedia.org/wiki/Learning_rate)",
+   "distractors": {
+    "B": "Bỏ dấu âm của hệ số $1 - 4\\eta = -1{,}4$; hệ số âm làm $w$ **đổi dấu** mỗi bước.",
+    "C": "Lấy nhầm $L'(w) = 2w$ (quên hệ số 2 của $2w^2$), ra hệ số $1 - 1{,}2 = -0{,}2$ nên tưởng là hội tụ.",
+    "D": "Cộng gradient thay vì trừ: $w_{t+1} = (1 + 4\\eta) w_t = 3{,}4\\, w_t$, tức gradient ascent."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$w_3 = -2{,}744$; $w$ đổi dấu mỗi bước và $|w|$ tăng dần (phân kỳ dao động)"
+    },
+    {
+     "key": "B",
+     "text": "$w_3 = 2{,}744$; $w$ tăng đều về một phía (phân kỳ đơn điệu)"
+    },
+    {
+     "key": "C",
+     "text": "$w_3 = -0{,}008$; $w$ đổi dấu nhưng $|w|$ giảm (hội tụ dao động)"
+    },
+    {
+     "key": "D",
+     "text": "$w_3 = 39{,}304$; $w$ tăng rất nhanh vì đi theo hướng gradient"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T02-C07",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Một mô hình có hai tham số với gradient ở bước đầu tiên là $g_a = 0{,}001$ và $g_b = 100$. Dùng Adam với $\\eta = 0{,}01$, $\\beta_1 = 0{,}9$, $\\beta_2 = 0{,}999$, $\\epsilon = 10^{-8}$, $m_0 = v_0 = 0$, **có** hiệu chỉnh bias. Độ lớn bước cập nhật ở bước 1 của hai tham số xấp xỉ là:",
+   "explanation": "$\\hat{m}_1 = \\frac{0{,}1 g}{0{,}1} = g$, $\\hat{v}_1 = \\frac{0{,}001 g^2}{0{,}001} = g^2$; bước $= \\eta \\frac{\\hat{m}_1}{\\sqrt{\\hat{v}_1} + \\epsilon} \\approx \\eta \\cdot \\operatorname{sign}(g)$, độ lớn $0{,}01$ bất kể thang đo của gradient.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nAdam chia trung bình gradient cho căn của trung bình bình phương gradient: bước cập nhật $\\eta \\frac{\\hat{m}}{\\sqrt{\\hat{v}} + \\epsilon}$ **không phụ thuộc thang đo** của gradient. Ở bước đầu tiên, sau hiệu chỉnh bias, $\\hat{m}_1 = g$ và $\\hat{v}_1 = g^2$, nên bước $\\approx \\eta \\cdot \\operatorname{sign}(g)$.\n\n#### Từng bước (với mỗi tham số)\n1. $m_1 = 0{,}1g$, $v_1 = 0{,}001g^2$.\n2. $\\hat{m}_1 = m_1 / (1 - 0{,}9) = g$, $\\hat{v}_1 = v_1 / (1 - 0{,}999) = g^2$.\n3. Bước $= 0{,}01 \\cdot \\frac{g}{|g| + 10^{-8}} \\approx 0{,}01 \\cdot \\operatorname{sign}(g)$.\n\n| Phương pháp | Bước cho $g_a = 0{,}001$ | Bước cho $g_b = 100$ |\n|---|---|---|\n| SGD ($\\eta g$) | $10^{-5}$ | $1$ |\n| Adam có hiệu chỉnh bias | $\\approx 0{,}01$ | $\\approx 0{,}01$ |\n| Adam bỏ hiệu chỉnh cả hai | $\\approx 0{,}0316$ | $\\approx 0{,}0316$ |\n| Chỉ hiệu chỉnh $m$ | $\\approx 0{,}316$ | $\\approx 0{,}316$ |\n\nSGD chênh nhau $10^5$ lần giữa hai tham số; Adam cân bằng lại. Đây là lý do Adam ít nhạy với thang đo đặc trưng, nhưng cũng là lý do learning rate của Adam xấp xỉ \"độ dài bước tối đa\" cho mỗi tham số.\n\n#### Bẫy thường gặp\n- Áp tư duy SGD (bước tỉ lệ với gradient).\n- Quên hiệu chỉnh bias của $v$: vì $\\beta_2 = 0{,}999$, $v_1$ bị kéo nhỏ 1000 lần, bước bị phóng to.\n\n```python\nimport math\nfor g in (0.001, 100.0):\n    m, v = 0.1 * g, 0.001 * g * g\n    print(g, 0.01 * (m / 0.1) / (math.sqrt(v / 0.001) + 1e-8), 0.01 * m / math.sqrt(v))\n```\n\n#### Đọc thêm\n- [d2l.ai: Adam](https://d2l.ai/chapter_optimization/adam.html)\n- [Stochastic gradient descent, mục Adam (Wikipedia)](https://en.wikipedia.org/wiki/Stochastic_gradient_descent)",
+   "distractors": {
+    "A": "Đây là bước của SGD thuần $\\eta |g|$; Adam chia cho $\\sqrt{\\hat{v}}$ nên độ lớn bước không tỉ lệ với $|g|$.",
+    "C": "Bỏ hiệu chỉnh bias: $\\frac{m_1}{\\sqrt{v_1}} = \\frac{0{,}1}{\\sqrt{0{,}001}} \\approx 3{,}16$, nhân $\\eta$ được $0{,}0316$.",
+    "D": "Chỉ hiệu chỉnh $m$ mà quên hiệu chỉnh $v$: $\\frac{g}{\\sqrt{0{,}001}\\,|g|} \\approx 31{,}6$, nhân $\\eta$ được $0{,}316$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$10^{-5}$ và $1$"
+    },
+    {
+     "key": "B",
+     "text": "$0{,}01$ cho cả hai"
+    },
+    {
+     "key": "C",
+     "text": "$0{,}0316$ cho cả hai"
+    },
+    {
+     "key": "D",
+     "text": "$0{,}316$ cho cả hai"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T02-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Mạng nhỏ: $h = \\operatorname{ReLU}(w_1 x)$, $\\hat{y} = w_2 h$, loss $L = \\frac{1}{2}(\\hat{y} - y)^2$. Với $x = 2$, $y = 1$, $w_1 = 0{,}5$, $w_2 = -1$, cặp gradient $\\left(\\dfrac{\\partial L}{\\partial w_1}, \\dfrac{\\partial L}{\\partial w_2}\\right)$ là:",
+   "explanation": "Xuôi: $w_1 x = 1$, $h = 1$, $\\hat{y} = -1$, $\\delta = \\hat{y} - y = -2$. Ngược: $\\frac{\\partial L}{\\partial w_2} = \\delta h = -2$; $\\frac{\\partial L}{\\partial w_1} = \\delta \\cdot w_2 \\cdot \\operatorname{ReLU}'(1) \\cdot x = (-2)(-1)(1)(2) = 4$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nBackprop = lượt xuôi lưu giá trị trung gian, rồi lượt ngược nhân đạo hàm cục bộ từ loss về từng trọng số. Gọi $\\delta = \\frac{\\partial L}{\\partial \\hat{y}} = \\hat{y} - y$ (đạo hàm của $\\frac{1}{2}(\\hat{y} - y)^2$).\n\n#### Từng bước\n| Lượt | Phép tính | Giá trị |\n|---|---|---|\n| xuôi | $a = w_1 x = 0{,}5 \\cdot 2$ | $1$ |\n| xuôi | $h = \\operatorname{ReLU}(a)$ | $1$ |\n| xuôi | $\\hat{y} = w_2 h$ | $-1$ |\n| xuôi | $L = \\frac{1}{2}(-1 - 1)^2$ | $2$ |\n| ngược | $\\delta = \\hat{y} - y$ | $-2$ |\n| ngược | $\\frac{\\partial L}{\\partial w_2} = \\delta \\cdot h$ | $-2$ |\n| ngược | $\\frac{\\partial L}{\\partial h} = \\delta \\cdot w_2$ | $2$ |\n| ngược | $\\frac{\\partial L}{\\partial a} = 2 \\cdot \\operatorname{ReLU}'(1) = 2 \\cdot 1$ | $2$ |\n| ngược | $\\frac{\\partial L}{\\partial w_1} = \\frac{\\partial L}{\\partial a} \\cdot x$ | $4$ |\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  X[\"x = 2\"] --> A[\"a = w1·x = 1\"]\n  A --> H[\"h = ReLU(a) = 1\"]\n  H --> Y[\"ŷ = w2·h = -1\"]\n  Y --> L[\"L = 2\"]\n  L -.->|\"δ = -2\"| Y\n  Y -.->|\"dL/dh = δ·w2 = 2\"| H\n  H -.->|\"dL/da = 2\"| A\n  A -.->|\"dL/dw1 = 2·x = 4\"| X\n```\n\nKiểm trực giác: $\\hat{y} = -1$ thấp hơn $y = 1$. Bước GD $w_2 \\leftarrow w_2 + 2\\eta$ làm $w_2$ bớt âm, $w_1 \\leftarrow w_1 - 4\\eta$ làm $h$ nhỏ đi (giảm tác động của $w_2$ âm): cả hai đều đẩy $\\hat{y}$ lên.\n\n#### Bẫy thường gặp\n- Đảo thứ tự hai gradient.\n- Quên nhân $x$ ở bước cuối.\n- Sai dấu $\\delta$.\n\n```python\nx, y, w1, w2, h = 2., 1., 0.5, -1., 1e-6\nL = lambda a, b: 0.5 * (b * max(0., a * x) - y) ** 2\nprint((L(w1 + h, w2) - L(w1 - h, w2)) / (2 * h), (L(w1, w2 + h) - L(w1, w2 - h)) / (2 * h))   # 4 -2\n```\n\n#### Đọc thêm\n- [d2l.ai: Forward Propagation, Backward Propagation, and Computational Graphs](https://d2l.ai/chapter_multilayer-perceptrons/backprop.html)\n- [Backpropagation (Wikipedia)](https://en.wikipedia.org/wiki/Backpropagation)",
+   "distractors": {
+    "A": "Đúng giá trị nhưng **đảo thứ tự**: gán gradient của $w_2$ cho $w_1$ và ngược lại.",
+    "B": "Quên nhân $x = 2$ ở bước cuối khi tính $\\frac{\\partial (w_1 x)}{\\partial w_1} = x$.",
+    "C": "Dùng $\\delta = y - \\hat{y} = 2$ (đạo hàm sai dấu của $\\frac{1}{2}(\\hat{y} - y)^2$ theo $\\hat{y}$), làm cả hai gradient đổi dấu."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$(-2;\\ 4)$"
+    },
+    {
+     "key": "B",
+     "text": "$(2;\\ -2)$"
+    },
+    {
+     "key": "C",
+     "text": "$(-4;\\ 2)$"
+    },
+    {
+     "key": "D",
+     "text": "$(4;\\ -2)$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T02-C09",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Bộ lọc spam dùng hồi quy logistic $p = \\sigma(\\mathbf{w}^\\top \\mathbf{x} + b)$ với loss binary cross-entropy $L = -[y \\ln p + (1-y)\\ln(1-p)]$. Khởi tạo $\\mathbf{w} = (0, 0)$, $b = 0$. Một email có $\\mathbf{x} = (1, 2)$, nhãn $y = 1$ (spam). Sau **một bước** GD trên mẫu này với $\\eta = 0{,}1$, $\\mathbf{w}$ mới là:",
+   "explanation": "$p = \\sigma(0) = 0{,}5$; $\\nabla_{\\mathbf{w}} L = (p - y)\\mathbf{x} = -0{,}5 \\cdot (1, 2) = (-0{,}5;\\ -1)$; $\\mathbf{w} \\leftarrow \\mathbf{0} - 0{,}1 \\cdot (-0{,}5;\\ -1) = (0{,}05;\\ 0{,}1)$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nHồi quy logistic với binary cross-entropy có gradient rất gọn:\n$$\\frac{\\partial L}{\\partial z} = p - y,\\qquad \\nabla_{\\mathbf{w}} L = (p - y)\\,\\mathbf{x},\\qquad \\frac{\\partial L}{\\partial b} = p - y.$$\nThừa số $\\sigma'(z) = p(1 - p)$ xuất hiện khi đạo hàm $\\ln p$ đã **triệt tiêu** với mẫu số $p(1-p)$, nên gradient không bị tắt khi sigmoid bão hoà (khác với dùng MSE cho sigmoid).\n\n#### Từng bước\n1. $z = \\mathbf{w}^\\top \\mathbf{x} + b = 0$, $p = \\sigma(0) = 0{,}5$.\n2. $p - y = -0{,}5$.\n3. $\\nabla_{\\mathbf{w}} L = -0{,}5 \\cdot (1, 2) = (-0{,}5;\\ -1)$, $\\frac{\\partial L}{\\partial b} = -0{,}5$.\n4. $\\mathbf{w} \\leftarrow (0, 0) - 0{,}1 \\cdot (-0{,}5;\\ -1) = (0{,}05;\\ 0{,}1)$; $b \\leftarrow 0{,}05$.\n\n| | Trước | Sau 1 bước |\n|---|---|---|\n| $z$ | $0$ | $0{,}05 + 0{,}2 + 0{,}05 = 0{,}3$ |\n| $p$ (spam) | $0{,}5$ | $\\sigma(0{,}3) \\approx 0{,}574$ |\n| $L = -\\ln p$ | $0{,}693$ | $0{,}554$ |\n\nXác suất spam tăng, loss giảm: bước đúng hướng.\n\n#### So sánh gradient theo $z$\n| Loss | $\\partial L / \\partial z$ tại $p = 0{,}5$, $y = 1$ |\n|---|---|\n| BCE | $p - y = -0{,}5$ |\n| $\\frac{1}{2}(p - y)^2$ | $(p - y)\\,p(1-p) = -0{,}125$ |\n\n#### Bẫy thường gặp\n- Sai dấu (dùng $y - p$ rồi vẫn trừ).\n- Nhân thêm $\\sigma'$ như với MSE.\n- Bỏ $p$, coi gradient là $-y\\mathbf{x}$.\n\n```python\nimport numpy as np\nx, y = np.array([1., 2.]), 1.0\nw, b = np.zeros(2), 0.0\np = 1 / (1 + np.exp(-(w @ x + b)))\nw, b = w - 0.1 * (p - y) * x, b - 0.1 * (p - y)\np2 = 1 / (1 + np.exp(-(w @ x + b)))\nprint(w, b, p2, -np.log(p2))   # [0.05 0.1] 0.05 0.574 0.554\n```\n\n#### Đọc thêm\n- [Logistic regression (Wikipedia)](https://en.wikipedia.org/wiki/Logistic_regression)\n- [Cross-entropy (Wikipedia)](https://en.wikipedia.org/wiki/Cross-entropy)",
+   "distractors": {
+    "A": "Cộng gradient thay vì trừ (hoặc dùng $y - p$ làm gradient): trọng số đi ngược hướng, đẩy email spam về phía không spam.",
+    "B": "Nhân thêm $\\sigma'(0) = 0{,}25$ như khi dùng MSE với sigmoid; với BCE, thừa số $\\sigma'$ đã triệt tiêu nên gradient chỉ là $(p - y)\\mathbf{x}$.",
+    "D": "Dùng gradient $-y\\mathbf{x}$, bỏ mất số hạng $p\\mathbf{x}$ (quên rằng $p = 0{,}5$ chứ không phải 0)."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$(-0{,}05;\\ -0{,}1)$"
+    },
+    {
+     "key": "B",
+     "text": "$(0{,}0125;\\ 0{,}025)$"
+    },
+    {
+     "key": "C",
+     "text": "$(0{,}05;\\ 0{,}1)$"
+    },
+    {
+     "key": "D",
+     "text": "$(0{,}1;\\ 0{,}2)$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T02-D01",
+   "module": "D",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung-cao",
+   "prompt": "Cho loss bậc hai $L(w_1, w_2) = w_1^2 + w_1 w_2 + w_2^2 - 3w_1$. Xuất phát từ $\\mathbf{w}_0 = (0, 0)$, so sánh hai cách đi một bước: (i) **Newton**: $\\mathbf{w}_N = \\mathbf{w}_0 - H^{-1} \\nabla L(\\mathbf{w}_0)$, với $H$ là Hessian; (ii) **GD**: $\\mathbf{w}_G = \\mathbf{w}_0 - \\eta \\nabla L(\\mathbf{w}_0)$ với $\\eta = 0{,}5$. Tính $L(\\mathbf{w}_G) - L(\\mathbf{w}_N)$. **Nhập dạng thập phân, làm tròn 2 chữ số.**",
+   "explanation": "$\\nabla L = (2w_1 + w_2 - 3,\\ w_1 + 2w_2) = (-3, 0)$ tại gốc, $H = \\begin{pmatrix} 2 & 1 \\\\ 1 & 2 \\end{pmatrix}$. Newton: $\\mathbf{w}_N = -H^{-1}(-3, 0) = (2, -1)$, $L = -3$ (đúng cực tiểu). GD: $\\mathbf{w}_G = (1{,}5;\\ 0)$, $L = -2{,}25$. Hiệu $= 0{,}75$.",
+   "section": "a-gt",
+   "long": "#### Ý chính\nVới loss **bậc hai** $L(\\mathbf{w}) = \\frac{1}{2}\\mathbf{w}^\\top H \\mathbf{w} - \\mathbf{c}^\\top \\mathbf{w}$, xấp xỉ Taylor bậc hai là chính xác, nên **một bước Newton** $\\mathbf{w} - H^{-1}\\nabla L$ nhảy thẳng tới cực tiểu. GD chỉ đi theo $-\\nabla L$, hướng này lệch khỏi hướng tới cực tiểu khi đường mức là elip nghiêng.\n\n#### Từng bước\n1. $\\nabla L = (2w_1 + w_2 - 3,\\ w_1 + 2w_2)$; tại $(0,0)$: $(-3, 0)$.\n2. $H = \\begin{pmatrix} 2 & 1 \\\\ 1 & 2 \\end{pmatrix}$, $\\det H = 3$, $H^{-1} = \\frac{1}{3}\\begin{pmatrix} 2 & -1 \\\\ -1 & 2 \\end{pmatrix}$.\n3. Newton: $H^{-1}(-3, 0) = (-2, 1)$, nên $\\mathbf{w}_N = (0,0) - (-2, 1) = (2, -1)$; $L(\\mathbf{w}_N) = 4 - 2 + 1 - 6 = -3$. Kiểm: $\\nabla L(2, -1) = (0, 0)$.\n4. GD: $\\mathbf{w}_G = (0,0) - 0{,}5(-3, 0) = (1{,}5;\\ 0)$; $L(\\mathbf{w}_G) = 2{,}25 - 4{,}5 = -2{,}25$.\n5. Hiệu: $-2{,}25 - (-3) = 0{,}75$.\n\n| Phương pháp | Điểm mới | $L$ | Chi phí mỗi bước |\n|---|---|---|---|\n| Newton | $(2, -1)$ | $-3$ (cực tiểu) | giải hệ $d \\times d$, cỡ $O(d^3)$ |\n| GD, $\\eta = 0{,}5$ | $(1{,}5;\\ 0)$ | $-2{,}25$ | $O(d)$ |\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 300\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"48\" y1=\"104.6\" x2=\"544\" y2=\"104.6\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<line x1=\"118.9\" y1=\"16\" x2=\"118.9\" y2=\"264\" stroke=\"currentColor\" stroke-width=\"1\"/>\n<text x=\"118.9\" y=\"280\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"260.6\" y=\"280\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"402.3\" y=\"280\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"544.0\" y=\"280\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<text x=\"42\" y=\"241.4\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">−1,5</text>\n<text x=\"42\" y=\"197.1\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">−1</text>\n<text x=\"42\" y=\"152.9\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">−0,5</text>\n<text x=\"42\" y=\"64.3\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">0,5</text>\n<text x=\"544\" y=\"296\" font-size=\"12\" text-anchor=\"end\" fill=\"currentColor\">w₁</text>\n<text x=\"52\" y=\"26\" font-size=\"12\" fill=\"currentColor\">w₂</text>\n<polyline points=\"473.1,193.1 471.3,190.9 469.4,188.7 467.4,186.7 465.5,184.7 463.5,182.9 461.5,181.1 459.5,179.4 457.6,177.8 455.6,176.2 453.5,174.6 451.5,173.2 449.5,171.7 447.4,170.3 445.3,168.9 443.2,167.6 441.0,166.2 438.8,164.9 436.6,163.6 434.3,162.4 431.9,161.1 429.4,159.8 426.9,158.6 424.3,157.4 421.5,156.1 418.7,154.9 415.7,153.7 412.6,152.4 409.3,151.2 405.9,150.0 402.3,148.9 398.5,147.7 394.5,146.6 390.2,145.6 385.8,144.6 381.1,143.7 376.2,143.0 371.2,142.5 365.9,142.1 360.6,142.0 355.2,142.2 349.9,142.8 344.8,143.7 339.9,145.0 335.4,146.7 331.4,148.9 328.0,151.3 325.2,154.2 323.1,157.2 321.7,160.4 320.8,163.7 320.5,167.1 320.6,170.4 321.2,173.7 322.1,176.9 323.3,179.9 324.6,182.8 326.2,185.6 327.8,188.3 329.6,190.8 331.4,193.1 333.3,195.4 335.2,197.5 337.2,199.6 339.1,201.5 341.1,203.4 343.0,205.2 345.0,206.9 347.0,208.5 349.0,210.1 351.0,211.6 353.1,213.1 355.1,214.6 357.2,216.0 359.3,217.4 361.4,218.7 363.5,220.0 365.7,221.3 368.0,222.6 370.3,223.9 372.7,225.2 375.1,226.4 377.7,227.7 380.3,228.9 383.0,230.2 385.9,231.4 388.9,232.6 392.0,233.9 395.2,235.1 398.7,236.3 402.3,237.4 406.1,238.6 410.1,239.7 414.3,240.7 418.8,241.7 423.5,242.5 428.3,243.3 433.4,243.8 438.6,244.2 444.0,244.3 449.3,244.1 454.6,243.5 459.8,242.6 464.7,241.3 469.2,239.6 473.1,237.4 476.6,234.9 479.3,232.1 481.4,229.1 482.9,225.9 483.8,222.5 484.1,219.2 483.9,215.9 483.4,212.6 482.5,209.4 481.3,206.4 479.9,203.5 478.4,200.7 476.7,198.0 475.0,195.5 473.1,193.1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 3\"/>\n<polyline points=\"525.0,193.1 521.8,189.2 518.5,185.5 515.1,182.0 511.7,178.6 508.3,175.4 504.9,172.3 501.5,169.3 498.0,166.5 494.6,163.8 491.1,161.1 487.6,158.5 484.0,156.0 480.4,153.6 476.8,151.2 473.1,148.9 469.4,146.6 465.6,144.3 461.7,142.1 457.7,139.8 453.5,137.7 449.3,135.5 444.9,133.3 440.4,131.2 435.6,129.0 430.7,126.9 425.5,124.7 420.2,122.6 414.5,120.5 408.5,118.5 402.3,116.4 395.7,114.5 388.7,112.6 381.4,110.7 373.7,109.1 365.6,107.6 357.2,106.3 348.4,105.4 339.3,104.7 330.1,104.6 320.8,104.9 311.6,105.9 302.7,107.5 294.2,109.7 286.5,112.7 279.6,116.4 273.7,120.8 268.9,125.6 265.2,130.9 262.6,136.5 261.1,142.2 260.6,148.0 260.9,153.8 261.8,159.4 263.4,164.9 265.4,170.2 267.8,175.3 270.5,180.1 273.3,184.7 276.4,189.0 279.6,193.1 282.8,197.1 286.1,200.8 289.5,204.3 292.9,207.7 296.3,210.9 299.7,214.0 303.1,216.9 306.6,219.8 310.0,222.5 313.5,225.2 317.0,227.8 320.5,230.3 324.1,232.7 327.7,235.1 331.4,237.4 335.2,239.7 339.0,242.0 342.9,244.2 346.9,246.4 351.0,248.6 355.3,250.8 359.7,253.0 364.2,255.1 368.9,257.3 373.9,259.4 379.0,261.5 384.4,263.7 390.1,265.7 396.0,267.8 402.3,269.8 408.9,271.8 415.8,273.7 423.2,275.5 430.9,277.2 439.0,278.7 447.4,280.0 456.2,280.9 465.3,281.5 474.5,281.7 483.8,281.4 493.0,280.4 501.9,278.8 510.3,276.5 518.1,273.5 525.0,269.8 530.9,265.5 535.7,260.7 539.4,255.4 541.9,249.8 543.4,244.1 544.0,238.3 543.7,232.5 542.7,226.8 541.2,221.4 539.2,216.1 536.8,211.0 534.1,206.2 531.2,201.6 528.2,197.3 525.0,193.1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 3\"/>\n<polyline points=\"575.8,193.1 571.3,187.6 566.6,182.4 561.8,177.3 557.0,172.6 552.2,168.0 547.4,163.7 542.5,159.5 537.7,155.5 532.8,151.6 527.8,147.8 522.9,144.2 517.9,140.7 512.8,137.2 507.7,133.8 502.5,130.5 497.2,127.3 491.8,124.1 486.3,120.9 480.6,117.8 474.8,114.7 468.8,111.6 462.6,108.5 456.1,105.5 449.4,102.4 442.5,99.4 435.2,96.4 427.6,93.4 419.6,90.5 411.1,87.5 402.3,84.7 393.0,81.9 383.1,79.2 372.8,76.6 361.9,74.3 350.4,72.2 338.5,70.4 326.0,69.0 313.2,68.1 300.2,67.9 287.0,68.4 274.0,69.7 261.4,72.0 249.5,75.2 238.5,79.4 228.7,84.7 220.4,90.8 213.6,97.6 208.4,105.1 204.8,113.0 202.7,121.1 201.9,129.3 202.3,137.5 203.6,145.5 205.8,153.3 208.7,160.7 212.1,167.9 215.9,174.7 219.9,181.2 224.2,187.3 228.7,193.1 233.3,198.7 238.0,203.9 242.7,208.9 247.5,213.7 252.3,218.3 257.2,222.6 262.0,226.8 266.9,230.8 271.8,234.7 276.7,238.5 281.7,242.1 286.7,245.6 291.7,249.1 296.9,252.5 302.1,255.8 307.4,259.0 312.8,262.2 318.3,265.4 324.0,268.5 329.8,271.6 335.8,274.7 342.0,277.8 348.4,280.8 355.1,283.8 362.1,286.9 369.4,289.9 377.0,292.9 385.0,295.8 393.4,298.7 402.3,301.6 411.6,304.4 421.5,307.1 431.8,309.7 442.7,312.0 454.2,314.1 466.1,315.9 478.5,317.3 491.3,318.2 504.4,318.4 517.5,317.9 530.5,316.6 543.2,314.3 555.1,311.1 566.1,306.8 575.8,301.6 584.2,295.5 591.0,288.6 596.2,281.2 599.8,273.3 601.9,265.2 602.7,257.0 602.3,248.8 600.9,240.8 598.7,233.0 595.9,225.6 592.5,218.4 588.7,211.6 584.6,205.1 580.3,199.0 575.8,193.1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 3\"/>\n<polyline points=\"647.7,193.1 641.2,185.3 634.6,177.9 627.9,170.8 621.2,164.1 614.3,157.6 607.5,151.5 600.6,145.6 593.8,139.9 586.8,134.4 579.9,129.1 572.8,123.9 565.8,118.9 558.6,114.0 551.4,109.3 544.0,104.6 536.5,100.0 528.9,95.4 521.1,91.0 513.0,86.5 504.8,82.2 496.3,77.8 487.5,73.5 478.4,69.2 469.0,64.9 459.1,60.6 448.8,56.4 438.0,52.1 426.7,47.9 414.8,43.8 402.3,39.7 389.1,35.8 375.2,32.0 360.5,28.4 345.1,25.0 328.9,22.0 312.0,19.5 294.5,17.6 276.3,16.4 257.9,16.0 239.3,16.7 220.9,18.6 203.1,21.8 186.2,26.3 170.6,32.4 156.8,39.7 145.0,48.4 135.4,58.1 128.1,68.6 123.0,79.8 120.0,91.3 118.9,102.9 119.4,114.4 121.4,125.7 124.5,136.7 128.5,147.3 133.3,157.4 138.6,167.0 144.4,176.2 150.5,184.9 156.8,193.1 163.3,201.0 170.0,208.4 176.7,215.5 183.4,222.2 190.2,228.7 197.1,234.8 203.9,240.7 210.8,246.4 217.7,251.9 224.7,257.2 231.7,262.4 238.8,267.4 246.0,272.3 253.2,277.0 260.6,281.7 268.1,286.3 275.7,290.8 283.5,295.3 291.5,299.7 299.8,304.1 308.3,308.5 317.0,312.8 326.1,317.1 335.6,321.4 345.5,325.7 355.8,329.9 366.5,334.2 377.9,338.4 389.8,342.5 402.3,346.6 415.5,350.5 429.4,354.3 444.0,357.9 459.5,361.3 475.6,364.2 492.6,366.8 510.1,368.7 528.2,369.9 546.7,370.3 565.3,369.6 583.7,367.7 601.5,364.5 618.4,359.9 633.9,353.9 647.7,346.6 659.5,337.9 669.2,328.2 676.5,317.7 681.6,306.5 684.6,295.0 685.7,283.4 685.1,271.9 683.2,260.5 680.1,249.6 676.1,239.0 671.3,228.9 665.9,219.2 660.2,210.1 654.1,201.4 647.7,193.1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 3\"/>\n<polyline points=\"118.9,104.6 402.3,193.1\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<circle cx=\"118.9\" cy=\"104.6\" r=\"3.5\" fill=\"#10b981\"/>\n<circle cx=\"402.3\" cy=\"193.1\" r=\"3.5\" fill=\"#10b981\"/>\n<polyline points=\"118.9,104.6 331.4,104.6\" fill=\"none\" stroke=\"#ef4444\" stroke-width=\"2\"/>\n<circle cx=\"118.9\" cy=\"104.6\" r=\"3.5\" fill=\"#ef4444\"/>\n<circle cx=\"331.4\" cy=\"104.6\" r=\"3.5\" fill=\"#ef4444\"/>\n<text x=\"395.2\" y=\"215.3\" font-size=\"11\" text-anchor=\"end\" fill=\"#10b981\">Newton: tới cực tiểu (2, −1)</text>\n<text x=\"338.5\" y=\"93.9\" font-size=\"11\" text-anchor=\"start\" fill=\"#ef4444\">GD: (1,5; 0)</text>\n</svg>\n\nVới mạng có hàng triệu tham số, Hessian $d \\times d$ quá lớn để lưu và nghịch đảo, nên thực tế dùng GD và các biến thể (momentum, Adam) hoặc xấp xỉ bậc hai (L-BFGS). Newton thuần còn bị **hút về điểm yên ngựa** vì nó tìm điểm dừng bất kỳ.\n\n#### Bẫy thường gặp\n- Nhân $H$ thay vì $H^{-1}$.\n- Quên trừ $L(\\mathbf{w}_N)$ hoặc trừ ngược.\n\n```python\nimport numpy as np\nL = lambda w: w[0]**2 + w[0]*w[1] + w[1]**2 - 3*w[0]\nH = np.array([[2., 1.], [1., 2.]]); g = np.array([-3., 0.])\nwN = -np.linalg.solve(H, g); wG = -0.5 * g\nprint(wN, L(wN), wG, L(wG), L(wG) - L(wN))   # [2 -1] -3 [1.5 0] -2.25 0.75\n```\n\n#### Đọc thêm\n- [Newton's method in optimization (Wikipedia)](https://en.wikipedia.org/wiki/Newton%27s_method_in_optimization)\n- [Hessian matrix (Wikipedia)](https://en.wikipedia.org/wiki/Hessian_matrix)",
+   "mistakes": [
+    {
+     "value": -0.75,
+     "why": "Trừ ngược thứ tự: tính $L(\\mathbf{w}_N) - L(\\mathbf{w}_G)$."
+    },
+    {
+     "value": -2.25,
+     "why": "Chỉ tính $L(\\mathbf{w}_G) = -2{,}25$, quên trừ $L(\\mathbf{w}_N) = -3$."
+    },
+    {
+     "value": -47.25,
+     "why": "Nhân với $H$ thay vì $H^{-1}$ ở bước Newton: $\\mathbf{w} = -H \\nabla L = (6, 3)$, $L = 45$, hiệu $= -2{,}25 - 45 = -47{,}25$. Bước Newton cần **nghịch đảo** Hessian."
+    }
+   ],
+   "answer": 0.75,
+   "tol": 0.0051
+  },
+  {
+   "id": "T02-D02",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Nhóm bạn xây mạng nhỏ dự đoán khách hàng có gia hạn gói dịch vụ hay không ($y = 1$: gia hạn). Một khách hàng có đặc trưng $\\mathbf{x} = \\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$ và nhãn $y = 1$. Mạng:\n$$\\mathbf{a} = W^{(1)}\\mathbf{x} + \\mathbf{b}^{(1)},\\quad \\mathbf{h} = \\operatorname{ReLU}(\\mathbf{a}),\\quad z = \\mathbf{w}^{(2)\\top}\\mathbf{h} + b^{(2)},\\quad p = \\sigma(z),\\quad L = -\\big[y\\ln p + (1-y)\\ln(1-p)\\big]$$\nvới $W^{(1)} = \\begin{pmatrix} 1 & -1 \\\\ 0{,}5 & 0{,}5 \\end{pmatrix}$, $\\mathbf{b}^{(1)} = \\mathbf{0}$, $\\mathbf{w}^{(2)} = \\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$, $b^{(2)} = -1{,}5$.\n\n\n(a) Tính lượt xuôi: $\\mathbf{a}$, $\\mathbf{h}$, $z$, $p$ và $L$.\n\n(b) Lan truyền ngược: tính $\\frac{\\partial L}{\\partial z}$, $\\frac{\\partial L}{\\partial \\mathbf{w}^{(2)}}$, $\\frac{\\partial L}{\\partial b^{(2)}}$, $\\frac{\\partial L}{\\partial \\mathbf{h}}$, $\\frac{\\partial L}{\\partial \\mathbf{a}}$, $\\frac{\\partial L}{\\partial W^{(1)}}$, $\\frac{\\partial L}{\\partial \\mathbf{b}^{(1)}}$. Giải thích vì sao một hàng của $\\frac{\\partial L}{\\partial W^{(1)}}$ bằng 0.\n\n(c) Cập nhật mọi tham số bằng **một bước** GD với $\\eta = 0{,}5$, rồi chạy lại lượt xuôi để chứng tỏ loss đã giảm (cho biết $\\sigma(2{,}875) \\approx 0{,}947$).\n\n(d) Nêu cách kiểm một phần tử gradient bằng sai phân hữu hạn và một rủi ro khi kiểm gradient qua ReLU.",
+   "explanation": "Định hướng chấm: lượt xuôi đúng (đặc biệt $h_1 = 0$, $z = 0$, $p = 0{,}5$, $L = \\ln 2$); dùng đúng $\\frac{\\partial L}{\\partial z} = p - y$; nhân mặt nạ ReLU; cập nhật đúng dấu và kiểm loss giảm; nêu được gradient checking và điểm gãy của ReLU.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nBài này đi trọn một vòng huấn luyện trên mạng 2 lớp: lượt xuôi, backprop qua sigmoid + BCE và ReLU, một bước GD, kiểm loss giảm. Ba công thức chốt:\n- $\\frac{\\partial L}{\\partial z} = p - y$ (sigmoid ghép BCE);\n- lớp tuyến tính: $\\frac{\\partial L}{\\partial W} = \\boldsymbol{\\delta}\\,\\mathbf{x}^\\top$, $\\frac{\\partial L}{\\partial \\mathbf{x}} = W^\\top \\boldsymbol{\\delta}$;\n- ReLU: nhân với mặt nạ $\\mathbb{1}[\\mathbf{a} > 0]$.\n\n#### Từng bước\n| Đại lượng | Giá trị |\n|---|---|\n| $\\mathbf{a} = W^{(1)}\\mathbf{x}$ | $(-1;\\ 1{,}5)$ |\n| $\\mathbf{h}$ | $(0;\\ 1{,}5)$ |\n| $z$, $p$, $L$ | $0$, $0{,}5$, $0{,}693$ |\n| $\\partial L / \\partial z$ | $-0{,}5$ |\n| $\\partial L / \\partial \\mathbf{w}^{(2)}$ | $(0;\\ -0{,}75)$ |\n| $\\partial L / \\partial \\mathbf{h}$ | $(-1;\\ -0{,}5)$ |\n| $\\partial L / \\partial \\mathbf{a}$ (sau mặt nạ ReLU) | $(0;\\ -0{,}5)$ |\n| $\\partial L / \\partial W^{(1)}$ | hàng 1: $(0, 0)$; hàng 2: $(-0{,}5;\\ -1)$ |\n| Sau 1 bước ($\\eta = 0{,}5$): $z$, $p$, $L$ | $2{,}875$, $0{,}947$, $0{,}055$ |\n\n#### Hình minh hoạ: mạng và dòng gradient\n```mermaid\nflowchart LR\n  X1[\"x1 = 1\"] --> A1[\"a1 = -1, ReLU tắt\"]\n  X2[\"x2 = 2\"] --> A1\n  X1 --> A2[\"a2 = 1,5, h2 = 1,5\"]\n  X2 --> A2\n  A1 -->|\"w = 2\"| Z[\"z = 0, p = 0,5\"]\n  A2 -->|\"w = 1\"| Z\n  Z --> LOSS[\"L = ln 2\"]\n  LOSS -.->|\"dL/dz = -0,5\"| Z\n  Z -.->|\"dL/dh2 = -0,5\"| A2\n  Z -.->|\"bị chặn bởi ReLU\"| A1\n```\n\nNơ-ron 1 \"chết\" ở mẫu này: không gradient nào tới trọng số của nó. Nếu nó chết với **mọi** mẫu (dying ReLU), nó không bao giờ học lại được; cách giảm: khởi tạo hợp lý, learning rate vừa phải, hoặc dùng Leaky ReLU.\n\n#### Bẫy thường gặp\n- Nhân thêm $\\sigma'(z)$ sau khi đã dùng $p - y$ (đếm hai lần).\n- Quên mặt nạ ReLU, cập nhật cả hàng 1 của $W^{(1)}$.\n- Cộng gradient thay vì trừ, làm loss tăng.\n\n```python\nimport numpy as np\nx = np.array([1., 2.]); y = 1.0\nW1 = np.array([[1., -1.], [0.5, 0.5]]); b1 = np.zeros(2); w2 = np.array([2., 1.]); b2 = -1.5\na = W1 @ x + b1; h = np.maximum(a, 0); z = w2 @ h + b2; p = 1 / (1 + np.exp(-z))\ndz = p - y; dw2 = dz * h; da = dz * w2 * (a > 0); dW1 = np.outer(da, x)\nW1, b1, w2, b2 = W1 - 0.5 * dW1, b1 - 0.5 * da, w2 - 0.5 * dw2, b2 - 0.5 * dz\nh = np.maximum(W1 @ x + b1, 0); p = 1 / (1 + np.exp(-(w2 @ h + b2)))\nprint(dW1, -np.log(p))   # loss mới ~0.055\n```\n\n#### Đọc thêm\n- [d2l.ai: Forward Propagation, Backward Propagation, and Computational Graphs](https://d2l.ai/chapter_multilayer-perceptrons/backprop.html)\n- [Backpropagation (Wikipedia)](https://en.wikipedia.org/wiki/Backpropagation)\n- [mml-book, chương 5.6](https://mml-book.github.io/book/mml-book.pdf)",
+   "modelAnswer": "**(a) Lượt xuôi**\n- $\\mathbf{a} = W^{(1)}\\mathbf{x} = \\begin{pmatrix} 1 \\cdot 1 - 1 \\cdot 2 \\\\ 0{,}5 \\cdot 1 + 0{,}5 \\cdot 2 \\end{pmatrix} = \\begin{pmatrix} -1 \\\\ 1{,}5 \\end{pmatrix}$, $\\mathbf{h} = \\operatorname{ReLU}(\\mathbf{a}) = \\begin{pmatrix} 0 \\\\ 1{,}5 \\end{pmatrix}$.\n- $z = 2 \\cdot 0 + 1 \\cdot 1{,}5 - 1{,}5 = 0$, $p = \\sigma(0) = 0{,}5$, $L = -\\ln 0{,}5 = \\ln 2 \\approx 0{,}693$.\n\n**(b) Lan truyền ngược**\n- Sigmoid + BCE: $\\frac{\\partial L}{\\partial z} = p - y = -0{,}5$.\n- $\\frac{\\partial L}{\\partial \\mathbf{w}^{(2)}} = \\frac{\\partial L}{\\partial z}\\,\\mathbf{h} = (0;\\ -0{,}75)$, $\\frac{\\partial L}{\\partial b^{(2)}} = -0{,}5$.\n- $\\frac{\\partial L}{\\partial \\mathbf{h}} = \\frac{\\partial L}{\\partial z}\\,\\mathbf{w}^{(2)} = (-1;\\ -0{,}5)$.\n- Mặt nạ ReLU $\\mathbb{1}[\\mathbf{a} > 0] = (0, 1)$: $\\frac{\\partial L}{\\partial \\mathbf{a}} = (0;\\ -0{,}5)$.\n- $\\frac{\\partial L}{\\partial W^{(1)}} = \\frac{\\partial L}{\\partial \\mathbf{a}}\\,\\mathbf{x}^\\top = \\begin{pmatrix} 0 & 0 \\\\ -0{,}5 & -1 \\end{pmatrix}$, $\\frac{\\partial L}{\\partial \\mathbf{b}^{(1)}} = (0;\\ -0{,}5)$.\n- Hàng 1 bằng 0 vì nơ-ron ẩn 1 có $a_1 = -1 < 0$: ReLU \"tắt\", đạo hàm bằng 0 nên không gradient nào chảy về các trọng số của nó ở mẫu này.\n\n**(c) Một bước GD, $\\eta = 0{,}5$** (tham số mới = cũ $- 0{,}5 \\times$ gradient)\n- $\\mathbf{w}^{(2)} = (2;\\ 1{,}375)$, $b^{(2)} = -1{,}25$, $W^{(1)} = \\begin{pmatrix} 1 & -1 \\\\ 0{,}75 & 1 \\end{pmatrix}$, $\\mathbf{b}^{(1)} = (0;\\ 0{,}25)$.\n- Lượt xuôi lại: $\\mathbf{a} = (-1;\\ 3)$, $\\mathbf{h} = (0;\\ 3)$, $z = 1{,}375 \\cdot 3 - 1{,}25 = 2{,}875$, $p \\approx 0{,}947$, $L = -\\ln 0{,}947 \\approx 0{,}055$. Loss giảm từ $0{,}693$ xuống $0{,}055$.\n\n**(d) Kiểm gradient**\n- Với từng tham số $\\theta$: $\\frac{L(\\theta + h) - L(\\theta - h)}{2h}$, $h \\approx 10^{-5}$ (dùng float64), so với gradient giải tích bằng sai số tương đối $\\frac{|g_{\\text{num}} - g_{\\text{ana}}|}{\\max(|g_{\\text{num}}|, |g_{\\text{ana}}|)}$, mong đợi cỡ $10^{-7}$.\n- Rủi ro: ReLU không khả vi tại 0. Nếu một $a_i$ rất gần 0, $\\theta \\pm h$ có thể nằm ở hai phía điểm gãy và sai phân lệch hẳn khỏi gradient giải tích dù code đúng; nên chọn điểm kiểm sao cho $|a_i|$ không quá nhỏ.\n\n```python\nimport numpy as np\nx = np.array([1., 2.]); y = 1.0\ndef loss(W1, b1, w2, b2):\n    h = np.maximum(W1 @ x + b1, 0)\n    p = 1 / (1 + np.exp(-(w2 @ h + b2)))\n    return -(y * np.log(p) + (1 - y) * np.log(1 - p))\nW1 = np.array([[1., -1.], [0.5, 0.5]]); b1 = np.zeros(2); w2 = np.array([2., 1.]); b2 = -1.5\nprint(loss(W1, b1, w2, b2))                    # 0.693\nE = np.zeros((2, 2)); E[1, 1] = 1e-5\nprint((loss(W1 + E, b1, w2, b2) - loss(W1 - E, b1, w2, b2)) / 2e-5)   # -1.0\n```",
+   "rubric": [
+    {
+     "criterion": "(a) Lượt xuôi đúng: $\\mathbf{a} = (-1;\\ 1{,}5)$, $\\mathbf{h} = (0;\\ 1{,}5)$, $z = 0$, $p = 0{,}5$, $L = \\ln 2 \\approx 0{,}693$",
+     "points": 1.5
+    },
+    {
+     "criterion": "(b) Gradient đúng: $\\frac{\\partial L}{\\partial z} = -0{,}5$; $\\frac{\\partial L}{\\partial \\mathbf{w}^{(2)}} = (0;\\ -0{,}75)$; $\\frac{\\partial L}{\\partial b^{(2)}} = -0{,}5$; $\\frac{\\partial L}{\\partial \\mathbf{a}} = (0;\\ -0{,}5)$; $\\frac{\\partial L}{\\partial W^{(1)}}$ có hàng 1 bằng 0, hàng 2 bằng $(-0{,}5;\\ -1)$; giải thích đúng nơ-ron ReLU tắt ($a_1 < 0$)",
+     "points": 2
+    },
+    {
+     "criterion": "(c) Cập nhật đúng dấu ($\\mathbf{w}^{(2)} = (2;\\ 1{,}375)$, $b^{(2)} = -1{,}25$, hàng 2 của $W^{(1)}$ thành $(0{,}75;\\ 1)$, $\\mathbf{b}^{(1)} = (0;\\ 0{,}25)$), tính lại $z = 2{,}875$ và $L \\approx 0{,}055 < 0{,}693$",
+     "points": 1.5
+    },
+    {
+     "criterion": "(d) Nêu đúng sai phân trung tâm $\\frac{L(\\theta + h) - L(\\theta - h)}{2h}$ so với gradient giải tích (sai số tương đối nhỏ) và rủi ro khi $a_i$ gần 0 (ReLU không khả vi tại 0, sai phân có thể vắt qua điểm gãy)",
+     "points": 1
+    }
+   ]
+  },
+  {
+   "id": "T02-D03",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Trong đồ án môn học, nhóm bạn tự viết một thư viện autograd nhỏ (kiểu micrograd). Để kiểm thử, nhóm dùng biểu thức\n$$u = w\\,x,\\qquad t = 3u,\\qquad v = u^2,\\qquad L = v + t,$$\nvới $w = 1$, $x = 2$. Thư viện chạy lượt ngược như sau: đặt `L.grad = 1`, rồi gọi hàm `backward` của từng nút **đúng theo thứ tự $L \\to t \\to v \\to u$**; hàm `backward` của một nút nhân gradient của chính nó với đạo hàm cục bộ rồi ghi vào `.grad` của các nút đầu vào. Một bạn cài phép ghi này bằng cách **gán đè** `a.grad = ...` thay vì **cộng dồn** `a.grad += ...`.\n\n(a) Vẽ (hoặc mô tả) đồ thị tính toán, tính giá trị các nút và chỉ ra nút nào có nhiều hơn một nhánh đi ra.\n\n(b) Dùng quy tắc chuỗi nhiều biến để tính đúng $\\frac{\\partial L}{\\partial u}$ và $\\frac{\\partial L}{\\partial w}$. Kiểm lại bằng cách viết $L$ trực tiếp theo $w$ rồi đạo hàm.\n\n(c) Với cách cài **gán đè** và thứ tự $L \\to t \\to v \\to u$ ở trên, lần lượt ghi giá trị `u.grad` sau mỗi lệnh ghi, rồi cho biết thư viện trả ra `w.grad` bằng bao nhiêu. Giải thích vì sao sai và đề xuất một test tự động bắt được lỗi này.\n\n(d) Liên hệ: trong khối residual $\\mathbf{y} = \\mathbf{x} + F(\\mathbf{x})$ của ResNet, cũng có một nút \"rẽ nhánh\". Dùng đúng nguyên tắc ở câu (b), giải thích vì sao khối này giúp gradient đi qua mạng sâu dễ hơn.",
+   "explanation": "Định hướng chấm: tính đúng giá trị nút; cộng gradient theo mọi đường đi ($\\frac{\\partial L}{\\partial u} = 3 + 2u = 7$, $\\frac{\\partial L}{\\partial w} = 14$); với thứ tự $L \\to t \\to v \\to u$ và gán đè, `u.grad` đi $3 \\to 4$ nên `w.grad` $= 8$ (đáp số duy nhất); test bằng sai phân trên biểu thức có nút dùng lại; giải thích được số hạng đồng nhất $I$ trong Jacobian của khối residual.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nQuy tắc chuỗi nhiều biến: nếu $L$ phụ thuộc $u$ qua nhiều đường, thì\n$$\\frac{\\partial L}{\\partial u} = \\sum_{\\text{mọi nút con } c \\text{ của } u} \\frac{\\partial L}{\\partial c}\\,\\frac{\\partial c}{\\partial u}.$$\nTrong code autograd, điều này được cài bằng cách **cộng dồn** `u.grad += ...` từ mỗi nút con. Gán đè thì nút con chạy `backward` **sau cùng** xoá mất đóng góp của các nút con chạy trước.\n\n#### Từng bước (cài đúng)\n| Nút | Giá trị xuôi | Gradient ngược |\n|---|---|---|\n| $L = v + t$ | $10$ | $1$ |\n| $t = 3u$ | $6$ | $\\frac{\\partial L}{\\partial t} = 1$ |\n| $v = u^2$ | $4$ | $\\frac{\\partial L}{\\partial v} = 1$ |\n| $u = wx$ | $2$ | $1 \\cdot 3 + 1 \\cdot 2u = 3 + 4 = 7$ |\n| $w$ | $1$ | $7 \\cdot x = 14$ |\n| $x$ | $2$ | $7 \\cdot w = 7$ |\n\nKiểm: $L(w) = 4w^2 + 6w$, $L'(1) = 8 + 6 = 14$.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  W[\"w = 1\"] --> U[\"u = w·x = 2\"]\n  X[\"x = 2\"] --> U\n  U -->|\"dt/du = 3\"| T[\"t = 3u = 6\"]\n  U -->|\"dv/du = 2u = 4\"| V[\"v = u² = 4\"]\n  T -->|\"dL/dt = 1\"| L[\"L = v + t = 10\"]\n  V -->|\"dL/dv = 1\"| L\n```\n\n#### Lỗi gán đè với thứ tự $L \\to t \\to v \\to u$\n| Lệnh `backward` | Cộng dồn: `u.grad` | Gán đè: `u.grad` |\n|---|---|---|\n| của $L$ (ghi `t.grad`, `v.grad` $= 1$) | $0$ | $0$ |\n| của $t$ (ghi $3 \\cdot 1$ vào `u.grad`) | $3$ | $3$ |\n| của $v$ (ghi $2u \\cdot 1 = 4$ vào `u.grad`) | $3 + 4 = 7$ | $4$ (xoá mất $3$) |\n| của $u$: `w.grad` $= x \\cdot$ `u.grad` | $14$ | $8$ |\n\nVới thứ tự đề cho, đáp số của bản lỗi là **duy nhất**: `w.grad = 8`. Test tốt: so mọi gradient với sai phân trung tâm trên các biểu thức có **nút dùng lại** ($u \\cdot u$, $u + u$, residual), vì biểu thức dạng chuỗi thẳng không bao giờ lộ lỗi này.\n\n#### Liên hệ residual\n$\\mathbf{y} = \\mathbf{x} + F(\\mathbf{x})$: $\\frac{\\partial L}{\\partial \\mathbf{x}} = \\frac{\\partial L}{\\partial \\mathbf{y}} + J_F^\\top \\frac{\\partial L}{\\partial \\mathbf{y}}$. Số hạng đầu đi thẳng không bị nhân, nên gradient không tắt dần qua hàng chục, hàng trăm khối.\n\n```python\nx, w = 2.0, 1.0\nu = w * x\nfor mode in (\"cộng dồn\", \"gán đè\"):\n    g = 0.0\n    g = 3 * 1.0 if mode == \"gán đè\" else g + 3 * 1.0     # backward của t\n    g = 2 * u * 1.0 if mode == \"gán đè\" else g + 2 * u   # backward của v\n    print(mode, \"u.grad =\", g, \"w.grad =\", g * x)         # 7 14  |  4 8\n```\n\n#### Đọc thêm\n- [Automatic differentiation (Wikipedia)](https://en.wikipedia.org/wiki/Automatic_differentiation)\n- [d2l.ai: Automatic Differentiation](https://d2l.ai/chapter_preliminaries/autograd.html)\n- [Residual neural network (Wikipedia)](https://en.wikipedia.org/wiki/Residual_neural_network)",
+   "modelAnswer": "**(a) Đồ thị và giá trị**\n$w, x \\to u = wx = 2$; từ $u$ đi ra hai nhánh: $t = 3u = 6$ và $v = u^2 = 4$; cả hai vào $L = v + t = 10$. Nút $u$ có **hai nhánh ra** (vào $t$ và vào $v$).\n\n**(b) Quy tắc chuỗi nhiều biến** (cộng theo mọi đường đi từ $L$ về $u$)\n$$\\frac{\\partial L}{\\partial u} = \\underbrace{\\frac{\\partial L}{\\partial t}\\frac{\\partial t}{\\partial u}}_{1 \\cdot 3 = 3} + \\underbrace{\\frac{\\partial L}{\\partial v}\\frac{\\partial v}{\\partial u}}_{1 \\cdot 2u = 4} = 7,\\qquad \\frac{\\partial L}{\\partial w} = \\frac{\\partial L}{\\partial u}\\cdot\\frac{\\partial u}{\\partial w} = 7 \\cdot x = 14.$$\nKiểm: $L(w) = w^2x^2 + 3wx$, $L'(w) = 2wx^2 + 3x = 2 \\cdot 1 \\cdot 4 + 6 = 14$.\n\n**(c) Lỗi gán đè, thứ tự $L \\to t \\to v \\to u$**\n\n| Lệnh `backward` | Ghi | `u.grad` sau lệnh |\n|---|---|---|\n| của $L$ | `t.grad = 1`, `v.grad = 1` | $0$ |\n| của $t$ | `u.grad = 3 * t.grad` | $3$ |\n| của $v$ | `u.grad = 2u * v.grad` (**ghi đè**) | $4$ |\n| của $u$ | `w.grad = x * u.grad` | $4$ |\n\nThư viện trả `w.grad` $= 4 \\cdot 2 = 8$ thay vì $14$: số hạng $3$ của nhánh qua $t$ bị xoá khi nút $v$ ghi đè. Lỗi chỉ lộ ra khi một nút được **dùng lại**; với biểu thức dạng chuỗi thẳng thì mọi test đều qua. Test đề xuất: dựng vài biểu thức có nút dùng lại (ví dụ $u \\cdot u$, $u + u$, biểu thức trên), so `w.grad` với sai phân trung tâm $\\frac{L(w+h) - L(w-h)}{2h}$, sai số tương đối $< 10^{-6}$. Nhớ đặt `grad = 0` trước mỗi lần `backward`.\n\n**(d) Khối residual**\n$\\mathbf{y} = \\mathbf{x} + F(\\mathbf{x})$: nút $\\mathbf{x}$ có hai nhánh ra (nhánh tắt và nhánh qua $F$), nên theo (b)\n$$\\frac{\\partial L}{\\partial \\mathbf{x}} = \\frac{\\partial L}{\\partial \\mathbf{y}} + \\left(\\frac{\\partial F}{\\partial \\mathbf{x}}\\right)^\\top \\frac{\\partial L}{\\partial \\mathbf{y}},\\qquad \\frac{\\partial \\mathbf{y}}{\\partial \\mathbf{x}} = I + \\frac{\\partial F}{\\partial \\mathbf{x}}.$$\nQua nhiều khối, tích các Jacobian $\\prod (I + J_k)$ luôn chứa số hạng $I$: gradient có một \"đường cao tốc\" đi thẳng về lớp đầu mà không bị nhân với các đạo hàm nhỏ (như $\\sigma' \\le 0{,}25$), nên giảm hiện tượng gradient tắt dần.\n\n```python\nw, x, h = 1.0, 2.0, 1e-6\nL = lambda w: (w * x) ** 2 + 3 * (w * x)\nprint((L(w + h) - L(w - h)) / (2 * h))   # ~14.0 (đúng); bản gán đè trả 8\n```",
+   "rubric": [
+    {
+     "criterion": "(a) Đồ thị đúng ($w, x \\to u$; $u \\to t$ và $u \\to v$; $t, v \\to L$), giá trị $u = 2$, $t = 6$, $v = 4$, $L = 10$; chỉ ra $u$ có hai nhánh ra",
+     "points": 1
+    },
+    {
+     "criterion": "(b) $\\frac{\\partial L}{\\partial u} = \\frac{\\partial L}{\\partial t}\\frac{\\partial t}{\\partial u} + \\frac{\\partial L}{\\partial v}\\frac{\\partial v}{\\partial u} = 3 + 4 = 7$, $\\frac{\\partial L}{\\partial w} = 7x = 14$; kiểm bằng $L(w) = w^2x^2 + 3wx$, $L'(w) = 2wx^2 + 3x = 14$",
+     "points": 2
+    },
+    {
+     "criterion": "(c) Theo thứ tự $L \\to t \\to v \\to u$: nút $t$ ghi `u.grad = 3`, nút $v$ ghi đè `u.grad = 4`, nút $u$ ghi `w.grad` $= 4 \\cdot x = 8$ (đáp số duy nhất là 8, sai so với 14); giải thích mất số hạng 3 của nhánh qua $t$; test so với sai phân hữu hạn trên biểu thức có nút dùng lại",
+     "points": 1.5
+    },
+    {
+     "criterion": "(d) Jacobian $\\frac{\\partial \\mathbf{y}}{\\partial \\mathbf{x}} = I + \\frac{\\partial F}{\\partial \\mathbf{x}}$; gradient về $\\mathbf{x}$ là tổng của nhánh tắt (không bị nhân nhỏ dần) và nhánh qua $F$, nên không tắt dần qua nhiều lớp",
+     "points": 1.5
+    }
+   ]
+  }
+ ]
+}

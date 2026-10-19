@@ -1,0 +1,1016 @@
+{
+ "title": "CĐ-06 · Xử lý dữ liệu với pandas",
+ "description": "Đọc, lọc dữ liệu (loc, iloc, query) — 25% · groupby, agg, pivot, transform — 30% · merge, concat — 20% · Dữ liệu thiếu, kiểu dữ liệu, thời gian — 25%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T06-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bảng đơn hàng `df` có cột `gia` (nghìn đồng) và `tinh`. Biểu thức nào lọc đúng các đơn có giá **trên 1000** và ở tỉnh **HN**?",
+   "explanation": "Mặt nạ boolean kết hợp bằng `&` (và), `|` (hoặc), `~` (phủ định) theo từng phần tử; mỗi điều kiện phải nằm trong ngoặc vì `&`, `|` ưu tiên cao hơn phép so sánh: `(a > x) & (b == y)`.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nLọc nhiều điều kiện trong pandas là tạo **mặt nạ boolean** (Series True/False dài bằng số dòng) rồi đưa vào `df[...]`. Các điều kiện được ghép **theo từng phần tử** bằng `&` (và), `|` (hoặc), `~` (phủ định); mỗi điều kiện phải bọc trong ngoặc.\n\n#### Từng bước\n```python\nimport pandas as pd\ndf = pd.DataFrame({\"gia\": [500, 1500, 2000], \"tinh\": [\"HN\", \"HN\", \"HCM\"]})\nm1 = df[\"gia\"] > 1000          # [False, True, True]\nm2 = df[\"tinh\"] == \"HN\"        # [True, True, False]\nprint((m1 & m2).tolist())      # [False, True, False]\nprint(df[m1 & m2][\"gia\"].tolist())   # [1500]\n```\nChỉ dòng 1 thỏa cả hai điều kiện nên kết quả là đơn 1500.\n\n#### Bảng so sánh các cách viết\n| Cách viết | Kết quả | Lý do |\n|---|---|---|\n| `(a > x) & (b == y)` | đúng | ghép từng phần tử, ngoặc rõ ràng |\n| `a > x and b == y` | ValueError | `and` đòi một giá trị đúng/sai cho cả Series |\n| `a > x & b == y` | TypeError | `&` được tính trước `>` nên thành `x & b` |\n| dùng `OR` thay `&` | sai logic | lấy cả dòng chỉ thỏa một điều kiện |\n\n#### Bẫy thường gặp\n- Quen tay viết `and`, `or` như trong `if` của Python.\n- Quên ngoặc vì nghĩ phép so sánh được tính trước; trong Python, `&` và `|` có độ ưu tiên **cao hơn** `<`, `>`, `==`.\n- Muốn tránh ngoặc có thể dùng `df.query(\"gia > 1000 and tinh == 'HN'\")`: trong chuỗi `query` thì `and` được phép.\n\n#### Đọc thêm\n- [pandas: Boolean indexing](https://pandas.pydata.org/docs/user_guide/indexing.html)\n- [Python: Operator precedence](https://docs.python.org/3/reference/expressions.html)\n",
+   "distractors": {
+    "A": "`and` của Python đòi một giá trị đúng/sai duy nhất cho cả Series nên pandas báo `ValueError: The truth value of a Series is ambiguous`; phải dùng `&` để kết hợp theo từng phần tử.",
+    "B": "Thiếu ngoặc: `&` có độ ưu tiên cao hơn `>` và `==`, nên Python tính `1000 & df[\"tinh\"]` trước và báo lỗi kiểu (TypeError).",
+    "D": "`|` là phép HOẶC: kết quả lẫn cả đơn ngoài HN giá trên 1000 lẫn đơn ở HN giá thấp."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`df[df[\"gia\"] > 1000 and df[\"tinh\"] == \"HN\"]`"
+    },
+    {
+     "key": "B",
+     "text": "`df[df[\"gia\"] > 1000 & df[\"tinh\"] == \"HN\"]`"
+    },
+    {
+     "key": "C",
+     "text": "`df[(df[\"gia\"] > 1000) & (df[\"tinh\"] == \"HN\")]`"
+    },
+    {
+     "key": "D",
+     "text": "`df[(df[\"gia\"] > 1000) | (df[\"tinh\"] == \"HN\")]`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T06-A02",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Phần mềm kế toán xuất file `don_hang.csv` theo kiểu châu Âu/Việt Nam: các cột ngăn bằng dấu chấm phẩy, số thập phân dùng dấu phẩy. Nội dung file:\n\n```text\nma;gia\nD1;1250,5\nD2;980,25\n```\n\nLệnh nào đọc được cột `gia` thành số thực `[1250.5, 980.25]`?",
+   "explanation": "`sep` chỉ ký tự ngăn cột, `decimal` chỉ ký tự thập phân. File dạng `;` và `,` cần `sep=\";\", decimal=\",\"`; còn `thousands` dùng cho dấu phân cách hàng nghìn.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nCSV không có một chuẩn duy nhất cho dấu ngăn cột và dấu thập phân. Ở nhiều nước châu Âu và trong Excel cài đặt tiếng Việt, số thập phân dùng dấu phẩy, nên phần mềm chuyển sang dùng dấu chấm phẩy để ngăn cột. `read_csv` có hai tham số riêng cho hai việc này: `sep` và `decimal`.\n\n#### Từng bước\n```python\nimport io, pandas as pd\ncsv = \"ma;gia\\nD1;1250,5\\nD2;980,25\\n\"\nok  = pd.read_csv(io.StringIO(csv), sep=\";\", decimal=\",\")\nbad = pd.read_csv(io.StringIO(csv), sep=\";\", thousands=\",\")\nprint(ok[\"gia\"].tolist())    # [1250.5, 980.25]\nprint(bad[\"gia\"].tolist())   # [12505, 98025]  sai mà không báo lỗi\n```\n\n#### Bảng tham số\n| Tham số | Vai trò | Giá trị cho file này |\n|---|---|---|\n| `sep` (hoặc `delimiter`) | ký tự ngăn cột | `\";\"` |\n| `decimal` | ký tự phần thập phân | `\",\"` |\n| `thousands` | ký tự ngăn hàng nghìn (bị bỏ đi) | không dùng |\n\n#### Bẫy thường gặp\n- Dùng `thousands=\",\"` nhầm chỗ: dấu phẩy bị xóa, giá trị phình gấp 10 đến 100 lần, kiểu vẫn là số nên rất khó phát hiện.\n- Không truyền `sep`: cả dòng thành một cột tên `ma;gia`. Luôn xem nhanh `df.columns` và `df.dtypes` ngay sau khi đọc.\n- File có cả dấu chấm ngăn hàng nghìn (1.250,5) thì cần thêm `thousands=\".\"`.\n\n#### Đọc thêm\n- [pandas.read_csv](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)\n- [Decimal separator (Wikipedia)](https://en.wikipedia.org/wiki/Decimal_separator)\n- [Comma-separated values (Wikipedia)](https://en.wikipedia.org/wiki/Comma-separated_values)\n",
+   "distractors": {
+    "B": "Đảo vai trò hai tham số: tách cột theo dấu phẩy nên dòng `D1;1250,5` bị cắt sai chỗ và không có cột `gia` nào cả.",
+    "C": "`thousands` coi dấu phẩy là dấu phân cách hàng nghìn rồi bỏ đi, nên 1250,5 thành 12505 và 980,25 thành 98025: sai lệch lớn mà không hề báo lỗi.",
+    "D": "Mặc định `sep` là dấu phẩy nên cả tiêu đề `ma;gia` thành một cột duy nhất; dữ liệu bị đọc sai cấu trúc."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`pd.read_csv(\"don_hang.csv\", sep=\";\", decimal=\",\")`"
+    },
+    {
+     "key": "B",
+     "text": "`pd.read_csv(\"don_hang.csv\", sep=\",\", decimal=\";\")`"
+    },
+    {
+     "key": "C",
+     "text": "`pd.read_csv(\"don_hang.csv\", sep=\";\", thousands=\",\")`"
+    },
+    {
+     "key": "D",
+     "text": "`pd.read_csv(\"don_hang.csv\")`"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T06-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bảng đặt phòng `bk` có cột `thanh_pho`. Biến Python `ks = \"Đà Lạt\"` chứa tên thành phố cần lọc. Cách gọi `query` nào trả về đúng các dòng có `thanh_pho` bằng giá trị của biến `ks`?",
+   "explanation": "Trong `DataFrame.query`, tên trần là tên cột, còn `@ten_bien` tham chiếu biến Python ở phạm vi hiện tại, ví dụ `bk.query(\"thanh_pho == @ks\")`.",
+   "section": "b-pd",
+   "long": "#### Ý chính\n`DataFrame.query` nhận **một chuỗi biểu thức**. Trong chuỗi đó, tên trần được tra trong danh sách cột; muốn dùng biến Python bên ngoài phải thêm tiền tố `@`. Chuỗi hằng phải nằm trong dấu nháy.\n\n#### Từng bước\n```python\nimport pandas as pd\nbk = pd.DataFrame({\"thanh_pho\": [\"Đà Lạt\", \"Huế\", \"Đà Lạt\"], \"ma\": [\"B1\", \"B2\", \"B3\"]})\nks = \"Đà Lạt\"\nprint(bk.query(\"thanh_pho == @ks\")[\"ma\"].tolist())   # ['B1', 'B3']\nprint(len(bk.query(\"thanh_pho == 'ks'\")))            # 0, so với chữ ks\n```\n\n#### Sơ đồ cách query đọc một tên\n```mermaid\nflowchart TD\n  A[\"Tên xuất hiện trong chuỗi query\"] --> B{\"Có tiền tố @ ?\"}\n  B -->|\"có\"| C[\"Tra biến Python cục bộ, ví dụ @ks = Đà Lạt\"]\n  B -->|\"không\"| D{\"Nằm trong dấu nháy?\"}\n  D -->|\"có\"| E[\"Chuỗi hằng, ví dụ 'ks'\"]\n  D -->|\"không\"| F[\"Tên cột, không có cột thì UndefinedVariableError\"]\n```\n\n#### Bảng bốn phương án\n| Cách viết | Kết quả |\n|---|---|\n| `\"thanh_pho == @ks\"` | 2 dòng B1, B3 |\n| `\"thanh_pho == ks\"` | UndefinedVariableError |\n| f-string `{ks}` không nháy | SyntaxError (thành `== Đà Lạt`) |\n| `\"thanh_pho == 'ks'\"` | bảng rỗng, không báo lỗi |\n\n#### Bẫy thường gặp\n- f-string có thể chạy nếu tự thêm nháy (`f\"thanh_pho == '{ks}'\"`), nhưng sẽ hỏng khi giá trị chứa dấu nháy và dễ bị chèn biểu thức lạ; `@ks` an toàn và rõ hơn.\n- Phương án trả bảng rỗng là nguy hiểm nhất vì không có lỗi để báo động.\n\n#### Đọc thêm\n- [pandas.DataFrame.query](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html)\n- [pandas: The query() Method](https://pandas.pydata.org/docs/user_guide/indexing.html)\n",
+   "distractors": {
+    "A": "Trong chuỗi `query`, tên không có `@` được hiểu là tên cột; bảng không có cột `ks` nên pandas báo `UndefinedVariableError`.",
+    "B": "f-string chèn chữ Đà Lạt mà không có dấu nháy, biểu thức thành `thanh_pho == Đà Lạt` sai cú pháp (SyntaxError).",
+    "C": "Dấu nháy biến `ks` thành chuỗi hằng 'ks'; không báo lỗi nhưng trả về bảng rỗng vì không có thành phố nào tên là ks."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`bk.query(\"thanh_pho == ks\")`"
+    },
+    {
+     "key": "B",
+     "text": "`bk.query(f\"thanh_pho == {ks}\")`"
+    },
+    {
+     "key": "C",
+     "text": "`bk.query(\"thanh_pho == 'ks'\")`"
+    },
+    {
+     "key": "D",
+     "text": "`bk.query(\"thanh_pho == @ks\")`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T06-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Log web của trang đặt phòng có cột `status` (mã HTTP, kiểu số nguyên). Biểu thức nào lấy đúng các request có mã **404 hoặc 500**?",
+   "explanation": "`Series.isin(values)` trả mặt nạ boolean: True khi phần tử thuộc tập `values`; tương đương `(s == 404) | (s == 500)` nhưng gọn hơn khi tập lớn.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nMuốn giữ các dòng mà giá trị của một cột thuộc **một tập** cho trước, dùng `Series.isin(tap)`. Kết quả là mặt nạ boolean, đưa vào `log[...]` để lọc.\n\n#### Từng bước\n```python\nimport pandas as pd\nlog = pd.DataFrame({\"status\": [200, 404, 500, 200, 301]})\nm = log[\"status\"].isin([404, 500])\nprint(m.tolist())                    # [False, True, True, False, False]\nprint(log[m].index.tolist())         # [1, 2]\n```\nCách viết tương đương nhưng dài hơn: `(log[\"status\"] == 404) OR (log[\"status\"] == 500)` với toán tử `|` giữa hai vế có ngoặc.\n\n#### Bảng so sánh\n| Biểu thức | Hiện tượng | Vì sao |\n|---|---|---|\n| `isin([404, 500])` | đúng 2 dòng | so mỗi phần tử với cả tập |\n| `log[\"status\"] in [...]` | ValueError | `in` đòi một giá trị đúng/sai duy nhất |\n| `log[\"status\"] == [404, 500]` | ValueError: Lengths must match | so theo vị trí với list dài 2 |\n| `log.loc[[404, 500]]` | KeyError hoặc lấy nhầm dòng | `.loc` chọn theo nhãn index |\n\n#### Bẫy thường gặp\n- Nhầm giá trị trong cột với nhãn index: `.loc[...]` luôn là nhãn dòng.\n- Muốn lấy phần bù (mọi mã **trừ** 404, 500) thì thêm `~`: `log[~log[\"status\"].isin([404, 500])]`.\n- Nếu mã đọc từ file là chuỗi (`\"404\"`) thì `isin([404, 500])` ra toàn False; kiểm `dtypes` trước.\n\n#### Đọc thêm\n- [pandas.Series.isin](https://pandas.pydata.org/docs/reference/api/pandas.Series.isin.html)\n- [pandas: Indexing and selecting data](https://pandas.pydata.org/docs/user_guide/indexing.html)\n",
+   "distractors": {
+    "A": "Toán tử `in` của Python cần một giá trị đúng/sai duy nhất cho cả Series nên báo `ValueError` (truth value is ambiguous).",
+    "C": "So sánh `==` với list là so từng phần tử theo vị trí; độ dài Series khác 2 nên báo `ValueError: Lengths must match`.",
+    "D": "`.loc` với list chọn theo **nhãn index** (dòng có nhãn 404, 500), không lọc theo giá trị cột `status`; với index mặc định sẽ báo KeyError hoặc lấy nhầm dòng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`log[log[\"status\"] in [404, 500]]`"
+    },
+    {
+     "key": "B",
+     "text": "`log[log[\"status\"].isin([404, 500])]`"
+    },
+    {
+     "key": "C",
+     "text": "`log[log[\"status\"] == [404, 500]]`"
+    },
+    {
+     "key": "D",
+     "text": "`log.loc[[404, 500]]`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T06-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bảng `don` có 8 dòng đơn hàng của 3 khách hàng (cột `ma_kh`, `tien`). Kết quả của\n\n```python\nt = don.groupby(\"ma_kh\")[\"tien\"].transform(\"sum\")\n```\n\ncó dạng nào?",
+   "explanation": "`agg` thu mỗi nhóm về 1 dòng (độ dài = số nhóm); `transform` trả kết quả cùng index với bảng gốc (độ dài = số dòng), tiện để gán thành cột mới.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nSau `groupby`, có hai kiểu áp hàm:\n\n- **agg (aggregation)**: thu mỗi nhóm về một giá trị, kết quả có số dòng bằng số nhóm.\n- **transform**: tính giá trị theo nhóm rồi **phát lại** cho từng dòng của nhóm, kết quả cùng index và cùng độ dài với bảng gốc.\n\n#### Từng bước\n```python\nimport pandas as pd\ndon = pd.DataFrame({\"ma_kh\": [\"K1\",\"K2\",\"K1\",\"K3\",\"K2\",\"K1\",\"K3\",\"K3\"],\n                    \"tien\":  [1, 2, 3, 4, 5, 6, 7, 8]})\nprint(don.groupby(\"ma_kh\")[\"tien\"].sum().to_dict())   # {'K1': 10, 'K2': 7, 'K3': 19}\nt = don.groupby(\"ma_kh\")[\"tien\"].transform(\"sum\")\nprint(len(t), t.tolist())   # 8 [10, 7, 10, 19, 7, 10, 19, 19]\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 230\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"80\" y=\"22\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">don (8 dòng)</text>\n<text x=\"280\" y=\"22\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">agg sum: 3 dòng</text>\n<text x=\"470\" y=\"22\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">transform sum: 8 dòng</text>\n<g font-size=\"12\" fill=\"currentColor\">\n<rect x=\"30\" y=\"32\" width=\"100\" height=\"20\" fill=\"#3b82f6\" opacity=\"0.35\"/><text x=\"40\" y=\"47\">K1 · 1</text>\n<rect x=\"30\" y=\"54\" width=\"100\" height=\"20\" fill=\"#f59e0b\" opacity=\"0.35\"/><text x=\"40\" y=\"69\">K2 · 2</text>\n<rect x=\"30\" y=\"76\" width=\"100\" height=\"20\" fill=\"#3b82f6\" opacity=\"0.35\"/><text x=\"40\" y=\"91\">K1 · 3</text>\n<rect x=\"30\" y=\"98\" width=\"100\" height=\"20\" fill=\"#10b981\" opacity=\"0.35\"/><text x=\"40\" y=\"113\">K3 · 4</text>\n<rect x=\"30\" y=\"120\" width=\"100\" height=\"20\" fill=\"#f59e0b\" opacity=\"0.35\"/><text x=\"40\" y=\"135\">K2 · 5</text>\n<rect x=\"30\" y=\"142\" width=\"100\" height=\"20\" fill=\"#3b82f6\" opacity=\"0.35\"/><text x=\"40\" y=\"157\">K1 · 6</text>\n<rect x=\"30\" y=\"164\" width=\"100\" height=\"20\" fill=\"#10b981\" opacity=\"0.35\"/><text x=\"40\" y=\"179\">K3 · 7</text>\n<rect x=\"30\" y=\"186\" width=\"100\" height=\"20\" fill=\"#10b981\" opacity=\"0.35\"/><text x=\"40\" y=\"201\">K3 · 8</text>\n<rect x=\"230\" y=\"76\" width=\"100\" height=\"20\" fill=\"#3b82f6\" opacity=\"0.35\"/><text x=\"240\" y=\"91\">K1 · 10</text>\n<rect x=\"230\" y=\"98\" width=\"100\" height=\"20\" fill=\"#f59e0b\" opacity=\"0.35\"/><text x=\"240\" y=\"113\">K2 · 7</text>\n<rect x=\"230\" y=\"120\" width=\"100\" height=\"20\" fill=\"#10b981\" opacity=\"0.35\"/><text x=\"240\" y=\"135\">K3 · 19</text>\n<rect x=\"420\" y=\"32\" width=\"100\" height=\"20\" fill=\"#3b82f6\" opacity=\"0.35\"/><text x=\"430\" y=\"47\">10</text>\n<rect x=\"420\" y=\"54\" width=\"100\" height=\"20\" fill=\"#f59e0b\" opacity=\"0.35\"/><text x=\"430\" y=\"69\">7</text>\n<rect x=\"420\" y=\"76\" width=\"100\" height=\"20\" fill=\"#3b82f6\" opacity=\"0.35\"/><text x=\"430\" y=\"91\">10</text>\n<rect x=\"420\" y=\"98\" width=\"100\" height=\"20\" fill=\"#10b981\" opacity=\"0.35\"/><text x=\"430\" y=\"113\">19</text>\n<rect x=\"420\" y=\"120\" width=\"100\" height=\"20\" fill=\"#f59e0b\" opacity=\"0.35\"/><text x=\"430\" y=\"135\">7</text>\n<rect x=\"420\" y=\"142\" width=\"100\" height=\"20\" fill=\"#3b82f6\" opacity=\"0.35\"/><text x=\"430\" y=\"157\">10</text>\n<rect x=\"420\" y=\"164\" width=\"100\" height=\"20\" fill=\"#10b981\" opacity=\"0.35\"/><text x=\"430\" y=\"179\">19</text>\n<rect x=\"420\" y=\"186\" width=\"100\" height=\"20\" fill=\"#10b981\" opacity=\"0.35\"/><text x=\"430\" y=\"201\">19</text>\n</g>\n<line x1=\"135\" y1=\"110\" x2=\"222\" y2=\"110\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"335\" y1=\"110\" x2=\"412\" y2=\"110\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-dasharray=\"4 3\"/>\n<text x=\"373\" y=\"102\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">phát lại</text>\n<text x=\"280\" y=\"222\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">màu = khách hàng; transform giữ đúng vị trí từng dòng</text>\n</svg>\n\n#### Bẫy thường gặp\n- Gán `don[\"tong\"] = don.groupby(\"ma_kh\")[\"tien\"].sum()` sẽ lệch: Series kết quả có index là mã khách, không khớp index 0 đến 7 nên ra toàn NaN. Muốn thêm cột thì dùng `transform`.\n- `transform` với hàm tự viết phải trả về đúng độ dài nhóm hoặc một số vô hướng.\n\n#### Đọc thêm\n- [pandas: Group by, mục Transformation](https://pandas.pydata.org/docs/user_guide/groupby.html)\n",
+   "distractors": {
+    "A": "Đây là kết quả của `groupby(...).sum()` hoặc `agg(\"sum\")`: gộp mỗi nhóm thành một dòng. `transform` thì trả lại đúng hình dạng ban đầu.",
+    "C": "`transform` phát (broadcast) giá trị nhóm cho **mọi** dòng của nhóm, không chỉ dòng đầu.",
+    "D": "Nhầm với `don[\"tien\"].sum()`; sau `groupby`, hàm được áp riêng cho từng nhóm."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Series dài 3, index là `ma_kh`; mỗi phần tử là tổng tiền của một khách hàng"
+    },
+    {
+     "key": "B",
+     "text": "Series dài 8, cùng index với `don`; mỗi dòng mang tổng tiền của khách sở hữu dòng đó"
+    },
+    {
+     "key": "C",
+     "text": "Series dài 8, chỉ dòng đầu tiên của mỗi khách mang tổng tiền, các dòng còn lại của khách đó là NaN"
+    },
+    {
+     "key": "D",
+     "text": "Một số duy nhất là tổng tiền cả bảng, vì transform áp hàm lên toàn bộ cột"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T06-A06",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Log web có cột `path` và `user_id`; request của khách chưa đăng nhập có `user_id` là NaN. Lệnh nào đếm **tổng số request** của mỗi `path`, tính cả request của khách chưa đăng nhập?",
+   "explanation": "`size()` đếm số dòng của mỗi nhóm, kể cả dòng có NaN; `count()` đếm số giá trị không thiếu của từng cột.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nBa hàm đếm hay bị nhầm sau `groupby`:\n\n- `size()`: số **dòng** của nhóm, không quan tâm giá trị thiếu.\n- `count()`: số giá trị **không thiếu** của từng cột.\n- `nunique()`: số giá trị **khác nhau** (mặc định bỏ NaN).\n\n#### Từng bước\n```python\nimport pandas as pd\nlog = pd.DataFrame({\"path\": [\"/a\", \"/a\", \"/b\", \"/a\"],\n                    \"user_id\": [\"u1\", None, None, \"u2\"]})\nprint(log.groupby(\"path\").size().to_dict())               # {'/a': 3, '/b': 1}\nprint(log.groupby(\"path\")[\"user_id\"].count().to_dict())   # {'/a': 2, '/b': 0}\nprint(log.groupby(\"path\")[\"user_id\"].nunique().to_dict()) # {'/a': 2, '/b': 0}\n```\nPath `/b` có 1 request nhưng `count()` báo 0 vì `user_id` của nó thiếu.\n\n#### Bảng so sánh\n| Hàm | Đếm gì | Tính dòng có NaN? |\n|---|---|---|\n| `size()` | số dòng mỗi nhóm | có |\n| `count()` | giá trị không thiếu | không |\n| `nunique()` | giá trị khác nhau | không (mặc định) |\n| `value_counts()` | tần suất từng cặp nhóm và giá trị | không (mặc định) |\n\n#### Bẫy thường gặp\n- Dùng `count()` để đếm request rồi báo cáo lưu lượng thấp hơn thực tế đúng bằng phần khách ẩn danh.\n- `size()` trên DataFrameGroupBy trả **Series**, còn `count()` trả DataFrame (mỗi cột một số đếm) nếu không chọn cột.\n\n#### Đọc thêm\n- [pandas: Group by, mục Aggregation](https://pandas.pydata.org/docs/user_guide/groupby.html)\n- [pandas: Working with missing data](https://pandas.pydata.org/docs/user_guide/missing_data.html)\n",
+   "distractors": {
+    "A": "`count()` chỉ đếm giá trị **không thiếu**, nên bỏ sót các request có `user_id` là NaN.",
+    "B": "`nunique()` đếm số người dùng **khác nhau** (và cũng bỏ NaN), không phải số request.",
+    "D": "Đếm theo từng cặp (path, user_id) và mặc định bỏ NaN, nên ra nhiều dòng mỗi path chứ không phải tổng số request."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`log.groupby(\"path\")[\"user_id\"].count()`"
+    },
+    {
+     "key": "B",
+     "text": "`log.groupby(\"path\")[\"user_id\"].nunique()`"
+    },
+    {
+     "key": "C",
+     "text": "`log.groupby(\"path\").size()`"
+    },
+    {
+     "key": "D",
+     "text": "`log.groupby(\"path\")[\"user_id\"].value_counts()`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T06-A07",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Ghép đơn hàng tháng 7 và tháng 8 thành một bảng:\n\n```python\nt7 = pd.DataFrame({\"ma\": [\"D1\", \"D2\", \"D3\"]})   # đơn tháng 7\nt8 = pd.DataFrame({\"ma\": [\"D4\", \"D5\"]})         # đơn tháng 8\nprint(pd.concat([t7, t8]).index.tolist())\n```\n\nKết quả in ra là gì?",
+   "explanation": "`pd.concat([a, b])` xếp chồng dòng và giữ nhãn gốc nên index có thể trùng; dùng `ignore_index=True` để đánh lại $0, 1, \\dots, n-1$.",
+   "section": "b-pd",
+   "long": "#### Ý chính\n`pd.concat([a, b])` (mặc định `axis=0`) đặt các dòng của `b` ngay dưới `a` và **giữ nguyên nhãn index** của từng bảng. Nhãn trùng là hợp lệ trong pandas.\n\n#### Từng bước\n```python\nimport pandas as pd\nt7 = pd.DataFrame({\"ma\": [\"D1\", \"D2\", \"D3\"]})\nt8 = pd.DataFrame({\"ma\": [\"D4\", \"D5\"]})\nprint(pd.concat([t7, t8]).index.tolist())                     # [0, 1, 2, 0, 1]\nprint(pd.concat([t7, t8], ignore_index=True).index.tolist())  # [0, 1, 2, 3, 4]\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 200\" width=\"100%\" style=\"max-width:560px\">\n<g font-size=\"12\" fill=\"currentColor\">\n<text x=\"90\" y=\"20\" text-anchor=\"middle\">t7 và t8</text>\n<text x=\"300\" y=\"20\" text-anchor=\"middle\">concat mặc định</text>\n<text x=\"480\" y=\"20\" text-anchor=\"middle\">ignore_index=True</text>\n<rect x=\"40\" y=\"30\" width=\"100\" height=\"22\" fill=\"#3b82f6\" opacity=\"0.3\"/><text x=\"50\" y=\"46\">0 · D1</text>\n<rect x=\"40\" y=\"54\" width=\"100\" height=\"22\" fill=\"#3b82f6\" opacity=\"0.3\"/><text x=\"50\" y=\"70\">1 · D2</text>\n<rect x=\"40\" y=\"78\" width=\"100\" height=\"22\" fill=\"#3b82f6\" opacity=\"0.3\"/><text x=\"50\" y=\"94\">2 · D3</text>\n<rect x=\"40\" y=\"120\" width=\"100\" height=\"22\" fill=\"#f59e0b\" opacity=\"0.3\"/><text x=\"50\" y=\"136\">0 · D4</text>\n<rect x=\"40\" y=\"144\" width=\"100\" height=\"22\" fill=\"#f59e0b\" opacity=\"0.3\"/><text x=\"50\" y=\"160\">1 · D5</text>\n<rect x=\"250\" y=\"30\" width=\"100\" height=\"22\" fill=\"#3b82f6\" opacity=\"0.3\"/><text x=\"260\" y=\"46\">0 · D1</text>\n<rect x=\"250\" y=\"54\" width=\"100\" height=\"22\" fill=\"#3b82f6\" opacity=\"0.3\"/><text x=\"260\" y=\"70\">1 · D2</text>\n<rect x=\"250\" y=\"78\" width=\"100\" height=\"22\" fill=\"#3b82f6\" opacity=\"0.3\"/><text x=\"260\" y=\"94\">2 · D3</text>\n<rect x=\"250\" y=\"102\" width=\"100\" height=\"22\" fill=\"#f59e0b\" opacity=\"0.3\"/><text x=\"260\" y=\"118\" fill=\"#ef4444\">0 · D4</text>\n<rect x=\"250\" y=\"126\" width=\"100\" height=\"22\" fill=\"#f59e0b\" opacity=\"0.3\"/><text x=\"260\" y=\"142\" fill=\"#ef4444\">1 · D5</text>\n<rect x=\"430\" y=\"30\" width=\"100\" height=\"22\" fill=\"#10b981\" opacity=\"0.3\"/><text x=\"440\" y=\"46\">0 · D1</text>\n<rect x=\"430\" y=\"54\" width=\"100\" height=\"22\" fill=\"#10b981\" opacity=\"0.3\"/><text x=\"440\" y=\"70\">1 · D2</text>\n<rect x=\"430\" y=\"78\" width=\"100\" height=\"22\" fill=\"#10b981\" opacity=\"0.3\"/><text x=\"440\" y=\"94\">2 · D3</text>\n<rect x=\"430\" y=\"102\" width=\"100\" height=\"22\" fill=\"#10b981\" opacity=\"0.3\"/><text x=\"440\" y=\"118\">3 · D4</text>\n<rect x=\"430\" y=\"126\" width=\"100\" height=\"22\" fill=\"#10b981\" opacity=\"0.3\"/><text x=\"440\" y=\"142\">4 · D5</text>\n<text x=\"300\" y=\"175\" text-anchor=\"middle\" fill=\"#ef4444\">nhãn 0, 1 bị trùng</text>\n</g>\n<line x1=\"150\" y1=\"100\" x2=\"240\" y2=\"100\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<line x1=\"360\" y1=\"100\" x2=\"420\" y2=\"100\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n</svg>\n\n#### Bẫy thường gặp\n- Index trùng khiến `df.loc[0]` trả về **hai** dòng (D1 và D4), dễ gây lỗi khó hiểu ở bước sau.\n- Muốn phát hiện trùng ngay khi ghép: `pd.concat([t7, t8], verify_integrity=True)` sẽ báo ValueError.\n- Muốn biết dòng đến từ bảng nào: `pd.concat([t7, t8], keys=[\"T7\", \"T8\"])` tạo MultiIndex.\n\n#### Đọc thêm\n- [pandas.concat](https://pandas.pydata.org/docs/reference/api/pandas.concat.html)\n- [pandas: Merge, join, concatenate and compare](https://pandas.pydata.org/docs/user_guide/merging.html)\n",
+   "distractors": {
+    "B": "Chỉ đúng khi truyền `ignore_index=True`; mặc định `concat` giữ nguyên nhãn index của từng bảng.",
+    "C": "Nhầm `concat` với phép giao các nhãn chung; `concat` theo trục dòng nối toàn bộ dòng của cả hai bảng.",
+    "D": "`concat` cho phép nhãn trùng; chỉ báo lỗi khi bật `verify_integrity=True`."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`[0, 1, 2, 0, 1]`"
+    },
+    {
+     "key": "B",
+     "text": "`[0, 1, 2, 3, 4]`"
+    },
+    {
+     "key": "C",
+     "text": "`[0, 1]`"
+    },
+    {
+     "key": "D",
+     "text": "Báo lỗi vì hai bảng có nhãn index trùng nhau"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T06-A08",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Đoạn code sau in ra gì?\n\n```python\nimport numpy as np\nimport pandas as pd\ns = pd.Series([1.5, np.nan, 2.0, np.nan])\nprint((s == np.nan).sum(), s.isna().sum())\n```",
+   "explanation": "Vì $\\text{NaN} \\neq \\text{NaN}$, phép `s == np.nan` luôn ra False; muốn tìm ô thiếu phải dùng `isna()`/`notna()`.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nNaN (Not a Number) theo chuẩn số thực IEEE 754 có tính chất đặc biệt: **mọi phép so sánh bằng với NaN đều cho False**, kể cả $\\text{NaN} = \\text{NaN}$. Vì vậy không thể tìm ô thiếu bằng `== np.nan`; pandas cung cấp `isna()` và `notna()`.\n\n#### Từng bước\n```python\nimport numpy as np, pandas as pd\ns = pd.Series([1.5, np.nan, 2.0, np.nan])\nprint((s == np.nan).tolist())   # [False, False, False, False]\nprint(s.isna().tolist())        # [False, True, False, True]\nprint((s == np.nan).sum(), s.isna().sum())   # 0 2\nprint(np.nan == np.nan)         # False\n```\n\n#### Bảng tóm tắt\n| Biểu thức | Kết quả với NaN | Dùng để |\n|---|---|---|\n| `x == np.nan` | luôn False | không dùng |\n| `x != np.nan` | luôn True | không dùng |\n| `s.isna()` | True ở ô thiếu | đếm, lọc ô thiếu |\n| `s.notna()` | True ở ô có giá trị | giữ dòng đủ dữ liệu |\n\n#### Bẫy thường gặp\n- Viết `df[df[\"gia\"] == np.nan]` rồi kết luận \"không có dữ liệu thiếu\" vì kết quả rỗng.\n- `None` trong cột số được pandas chuyển thành NaN, nên `is None` cũng không phát hiện được.\n- Đếm ô thiếu từng cột: `df.isna().sum()`; tỷ lệ thiếu: `df.isna().mean()`.\n\n#### Đọc thêm\n- [pandas: Working with missing data](https://pandas.pydata.org/docs/user_guide/missing_data.html)\n- [NaN (Wikipedia)](https://en.wikipedia.org/wiki/NaN)\n- [IEEE 754 (Wikipedia)](https://en.wikipedia.org/wiki/IEEE_754)\n",
+   "distractors": {
+    "A": "Tưởng `== np.nan` nhận ra ô thiếu; theo chuẩn IEEE 754, NaN không bằng bất kỳ giá trị nào, kể cả chính nó.",
+    "B": "`isna()` nhận ra đúng hai ô NaN, nên vế thứ hai là 2.",
+    "C": "Đảo ngược vai trò hai biểu thức: chính `isna()` mới là cách phát hiện ô thiếu."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`2 2`"
+    },
+    {
+     "key": "B",
+     "text": "`0 0`"
+    },
+    {
+     "key": "C",
+     "text": "`2 0`"
+    },
+    {
+     "key": "D",
+     "text": "`0 2`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T06-B01",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Log web của một trang đặt phòng ghi thời gian phản hồi `ms`. Đoạn code sau in ra gì? Ghi đúng một dòng.\n\n```python\nimport pandas as pd\nlog = pd.DataFrame({\n    \"path\": [\"/api/rooms\", \"/home\", \"/api/book\", \"/home\", \"/api/rooms\", \"/about\"],\n    \"ms\":   [120, 300, 450, 80, 300, 100],\n})\na = log[\"ms\"].between(100, 300).sum()\nb = log.loc[~log[\"path\"].str.startswith(\"/api\"), \"ms\"].sum()\nprint(a, b)\n```",
+   "explanation": "`between(100, 300)` ứng với $100 \\le ms \\le 300$: 120, 300, 300, 100 nên `a = 4`. `~` đảo mặt nạ: path không bắt đầu bằng `/api` có `ms` là 300, 80, 100, tổng 480.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nHai công cụ lọc hay dùng với log web:\n\n- `Series.between(trai, phai)` kiểm $trai \\le x \\le phai$; mặc định `inclusive=\"both\"` (gồm cả hai đầu).\n- `.str.startswith(\"/api\")` trả mặt nạ theo tiền tố chuỗi; `~` đảo mặt nạ.\n\n#### Từng bước\n| Dòng | path | ms | between(100, 300) | bắt đầu bằng /api | ~ |\n|---|---|---|---|---|---|\n| 0 | /api/rooms | 120 | True | True | False |\n| 1 | /home | 300 | True | False | True |\n| 2 | /api/book | 450 | False | True | False |\n| 3 | /home | 80 | False | False | True |\n| 4 | /api/rooms | 300 | True | True | False |\n| 5 | /about | 100 | True | False | True |\n\n- `a` = số True ở cột between $= 4$.\n- `b` = tổng `ms` các dòng cột `~` là True: $300 + 80 + 100 = 480$.\n\n```python\nimport pandas as pd\nlog = pd.DataFrame({\"path\": [\"/api/rooms\", \"/home\", \"/api/book\", \"/home\", \"/api/rooms\", \"/about\"],\n                    \"ms\": [120, 300, 450, 80, 300, 100]})\nprint(log[\"ms\"].between(100, 300).sum(),\n      log.loc[~log[\"path\"].str.startswith(\"/api\"), \"ms\"].sum())   # 4 480\n```\n\n#### Bẫy thường gặp\n- Nghĩ `between` giống `range` (bỏ đầu phải): ra 2. Muốn bỏ đầu mút thì truyền `inclusive=\"neither\"`, `\"left\"` hoặc `\"right\"`.\n- Quên `~`: được 870, chính là tổng của nhóm `/api`.\n- `sum()` trên mặt nạ boolean đếm số True vì True được tính là 1.\n\n#### Đọc thêm\n- [pandas.Series.between](https://pandas.pydata.org/docs/reference/api/pandas.Series.between.html)\n- [pandas: Working with text data](https://pandas.pydata.org/docs/user_guide/text.html)\n",
+   "mistakes": [
+    {
+     "value": "1 480",
+     "why": "Tưởng `between` loại cả hai đầu mút; mặc định `inclusive=\"both\"` nên 100 và 300 đều được tính."
+    },
+    {
+     "value": "2 480",
+     "why": "Tưởng `between` giống `range` (gồm đầu trái, bỏ đầu phải) nên bỏ hai giá trị 300."
+    },
+    {
+     "value": "4 870",
+     "why": "Bỏ qua dấu `~`: 870 là tổng `ms` của các path **bắt đầu** bằng `/api`."
+    }
+   ],
+   "answer": "4 480",
+   "accept": [
+    "4 480"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T06-B02",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Theo **pandas ≥ 3.0** (Copy-on-Write là mặc định), đoạn code sau in ra gì?\n\n```python\ndf = pd.DataFrame({\"phong\": [\"101\", \"102\", \"103\"],\n                   \"gia\": [800, 950, 1200]})\ndf[df[\"gia\"] > 900][\"gia\"] = 1000\nprint(df[\"gia\"].tolist())\n```",
+   "explanation": "Với Copy-on-Write, `df[mask][\"gia\"] = 1000` không bao giờ sửa `df`. Cách đúng là gán một bước: `df.loc[df[\"gia\"] > 900, \"gia\"] = 1000`.",
+   "section": "b-pd",
+   "long": "#### Ý chính\n**Gán chuỗi (chained assignment)** là viết hai phép lấy dữ liệu liên tiếp rồi gán: `df[mask][\"gia\"] = 1000`. Bước `df[mask]` tạo ra một đối tượng **mới**; phép gán sau đó chỉ sửa đối tượng tạm này. Từ pandas 3.0, Copy-on-Write (CoW) là mặc định nên quy tắc trở nên nhất quán: mọi kết quả của phép lấy dữ liệu hành xử như một bản sao, và gán chuỗi **không bao giờ** sửa `df` (pandas phát cảnh báo `ChainedAssignmentError`).\n\n#### Từng bước\n```python\nimport pandas as pd\ndf = pd.DataFrame({\"phong\": [\"101\", \"102\", \"103\"], \"gia\": [800, 950, 1200]})\ndf[df[\"gia\"] > 900][\"gia\"] = 1000          # chỉ sửa bản sao tạm, có cảnh báo\nprint(df[\"gia\"].tolist())                  # [800, 950, 1200]\ndf.loc[df[\"gia\"] > 900, \"gia\"] = 1000      # một bước: sửa thẳng df\nprint(df[\"gia\"].tolist())                  # [800, 1000, 1000]\n```\n\n#### Sơ đồ\n```mermaid\nflowchart LR\n  A[\"df gốc\"] -->|\"df[mask]\"| B[\"bản sao tạm\"]\n  B -->|\"gán cột gia = 1000\"| C[\"bản sao đã sửa, rồi bị bỏ\"]\n  A -->|\"df.loc[mask, 'gia'] = 1000\"| D[\"df gốc được sửa\"]\n```\n\n#### Bảng so sánh\n| Cách viết | pandas ≥ 3.0 |\n|---|---|\n| `df[mask][\"gia\"] = 1000` | không sửa `df`, cảnh báo ChainedAssignmentError |\n| `df[\"gia\"][mask] = 1000` | không sửa `df`, cảnh báo ChainedAssignmentError |\n| `df.loc[mask, \"gia\"] = 1000` | sửa `df` |\n\n#### Bẫy thường gặp\n- Code cũ dựa vào `df[\"gia\"][mask] = ...` từng \"chạy được\" ở một số phiên bản trước; khi lên pandas 3.0 nó âm thầm không còn tác dụng, chỉ còn cảnh báo.\n- Cảnh báo không phải exception: chương trình vẫn chạy, nên phải đọc log cảnh báo.\n\n#### Đọc thêm\n- [pandas: Copy-on-Write (CoW)](https://pandas.pydata.org/docs/user_guide/copy_on_write.html)\n- [What's new in pandas 3.0.0](https://pandas.pydata.org/docs/whatsnew/v3.0.0.html)\n- [Copy-on-write (Wikipedia)](https://en.wikipedia.org/wiki/Copy-on-write)\n",
+   "distractors": {
+    "B": "Đây là kỳ vọng sai về gán chuỗi (chained assignment): `df[mask]` tạo đối tượng mới, gán vào đó không chạm tới `df`.",
+    "C": "Mặt nạ vẫn được áp dụng cho đối tượng tạm; vấn đề là kết quả gán không quay về `df`, chứ không phải điều kiện bị bỏ qua.",
+    "D": "pandas 3.0 chỉ phát cảnh báo `ChainedAssignmentError` (một warning), chương trình vẫn chạy tiếp và in danh sách cũ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`[800, 950, 1200]`; `df` giữ nguyên vì phép gán rơi vào một bản sao tạm"
+    },
+    {
+     "key": "B",
+     "text": "`[800, 1000, 1000]`; phép gán ghi xuyên qua mặt nạ vào thẳng `df`"
+    },
+    {
+     "key": "C",
+     "text": "`[1000, 1000, 1000]`; điều kiện bị bỏ qua và cả cột được gán"
+    },
+    {
+     "key": "D",
+     "text": "Chương trình dừng với một exception vì pandas 3.0 cấm hẳn cú pháp gán chuỗi"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T06-B03",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Bảng đặt phòng `bk` có các cột theo thứ tự `ma_dat, ngay_dat, so_dem, gia_dem, trang_thai` và index mặc định $0, 1, 2, \\dots$ Biểu thức nào trả về **đúng 3 cột** `so_dem, gia_dem, trang_thai` (giữ mọi dòng)?",
+   "explanation": "`loc` cắt theo nhãn và **gồm cả** hai đầu mút; `iloc` cắt theo vị trí kiểu Python $[a, b)$. Tương đương: `bk.iloc[:, 2:5]`.",
+   "section": "b-pd",
+   "long": "#### Ý chính\n- `.loc[dòng, cột]` dùng **nhãn**; cắt lát `\"a\":\"c\"` **gồm cả** nhãn cuối.\n- `.iloc[dòng, cột]` dùng **vị trí số nguyên**; cắt lát `2:4` theo kiểu Python, **không** gồm vị trí 4.\n- Chỉ đưa một bộ chỉ số vào `.loc[...]` thì đó là chỉ số **dòng**.\n\n#### Từng bước\n| Vị trí | 0 | 1 | 2 | 3 | 4 |\n|---|---|---|---|---|---|\n| Nhãn cột | ma_dat | ngay_dat | so_dem | gia_dem | trang_thai |\n\n```python\nimport pandas as pd\nbk = pd.DataFrame([[1, 2, 3, 4, 5]],\n                  columns=[\"ma_dat\", \"ngay_dat\", \"so_dem\", \"gia_dem\", \"trang_thai\"])\nprint(bk.loc[:, \"so_dem\":\"trang_thai\"].columns.tolist())  # 3 cột\nprint(bk.iloc[:, 2:4].columns.tolist())                   # ['so_dem', 'gia_dem']\nprint(bk.iloc[:, 2:5].columns.tolist())                   # 3 cột, cách viết theo vị trí\n```\n\n#### Bẫy thường gặp\n- Lẫn quy ước đầu mút: theo nhãn thì gồm cả hai đầu (vì nhãn không có \"phần tử kế tiếp\" rõ ràng), theo vị trí thì nửa mở $[a, b)$.\n- Viết `bk.loc[\"so_dem\":\"trang_thai\"]` tưởng là cắt cột; thực ra pandas hiểu đó là cắt **dòng** theo nhãn, nên không ra 3 cột cần lấy.\n- `iloc` không nhận chuỗi: báo TypeError.\n- Cần cột rời rạc thì dùng list: `bk[[\"so_dem\", \"trang_thai\"]]`.\n\n#### Đọc thêm\n- [pandas: Selection by label và Selection by position](https://pandas.pydata.org/docs/user_guide/indexing.html)\n- [pandas: 10 minutes to pandas](https://pandas.pydata.org/docs/user_guide/10min.html)\n",
+   "distractors": {
+    "A": "`iloc` cắt theo vị trí và **không** lấy đầu mút phải (giống list Python), nên chỉ được 2 cột `so_dem, gia_dem`.",
+    "B": "Chỉ một bộ chỉ số trong `loc` là cắt theo **nhãn dòng**, không phải cột; kết quả không phải 3 cột cần lấy.",
+    "D": "`iloc` chỉ nhận số nguyên vị trí; truyền nhãn chuỗi sẽ báo TypeError."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`bk.iloc[:, 2:4]`"
+    },
+    {
+     "key": "B",
+     "text": "`bk.loc[\"so_dem\":\"trang_thai\"]`"
+    },
+    {
+     "key": "C",
+     "text": "`bk.loc[:, \"so_dem\":\"trang_thai\"]`"
+    },
+    {
+     "key": "D",
+     "text": "`bk.iloc[:, \"so_dem\":\"trang_thai\"]`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T06-B04",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Thống kê log web theo đường dẫn. Đoạn code sau in ra gì? Ghi đúng 2 dòng.\n\n```python\nimport pandas as pd\nlog = pd.DataFrame({\n    \"path\": [\"/home\", \"/rooms\", \"/home\", \"/rooms\", \"/home\", \"/book\"],\n    \"ip\":   [\"a\", \"b\", \"a\", \"a\", \"c\", \"b\"],\n})\ng = log.groupby(\"path\")[\"ip\"]\nprint(g.size().to_dict())\nprint(g.nunique().to_dict())\n```",
+   "explanation": "`size()` đếm số request mỗi path: /book 1, /home 3, /rooms 2. `nunique()` đếm số IP khác nhau: /home có {a, c} nên 2, /rooms có {a, b} nên 2. Khóa được sắp tăng dần.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nTrên `SeriesGroupBy`:\n\n- `size()` = số phần tử (số request) mỗi nhóm.\n- `nunique()` = số giá trị khác nhau (số IP khác nhau) mỗi nhóm.\n\nMặc định `groupby(sort=True)` sắp **khóa nhóm** tăng dần, nên dict in ra theo thứ tự chữ cái của path.\n\n#### Từng bước\n| path | các IP | size | nunique |\n|---|---|---|---|\n| /book | b | 1 | 1 |\n| /home | a, a, c | 3 | 2 |\n| /rooms | b, a | 2 | 2 |\n\n```python\nimport pandas as pd\nlog = pd.DataFrame({\"path\": [\"/home\", \"/rooms\", \"/home\", \"/rooms\", \"/home\", \"/book\"],\n                    \"ip\":   [\"a\", \"b\", \"a\", \"a\", \"c\", \"b\"]})\ng = log.groupby(\"path\")[\"ip\"]\nprint(g.size().to_dict())      # {'/book': 1, '/home': 3, '/rooms': 2}\nprint(g.nunique().to_dict())   # {'/book': 1, '/home': 2, '/rooms': 2}\n```\n\n#### Ý nghĩa thực tế\nTỷ số $\\frac{size}{nunique}$ là số request trung bình mỗi IP trên một trang; ở `/home` là $3/2 = 1{,}5$. Tỷ số này cao bất thường thường là dấu hiệu bot hoặc tải lại trang liên tục.\n\n#### Bẫy thường gặp\n- Đoán thứ tự dict theo thứ tự xuất hiện trong dữ liệu; chỉ đúng khi `groupby(..., sort=False)`.\n- Nhầm `nunique` với `size` khi có IP lặp.\n\n#### Đọc thêm\n- [pandas: Group by: split-apply-combine](https://pandas.pydata.org/docs/user_guide/groupby.html)\n",
+   "mistakes": [
+    {
+     "value": "{'/home': 3, '/rooms': 2, '/book': 1}\n{'/home': 2, '/rooms': 2, '/book': 1}",
+     "why": "Giữ thứ tự xuất hiện; mặc định `groupby(sort=True)` sắp khóa tăng dần nên `/book` đứng đầu."
+    },
+    {
+     "value": "{'/book': 1, '/home': 3, '/rooms': 2}\n{'/book': 1, '/home': 3, '/rooms': 2}",
+     "why": "Nhầm `nunique` với `size`: `/home` có 3 request nhưng chỉ 2 IP khác nhau (a lặp lại)."
+    },
+    {
+     "value": "{'/book': 1, '/home': 2, '/rooms': 2}\n{'/book': 1, '/home': 3, '/rooms': 2}",
+     "why": "Đảo vai trò: `size` đếm số dòng, `nunique` đếm số giá trị khác nhau."
+    }
+   ],
+   "answer": "{'/book': 1, '/home': 3, '/rooms': 2}\n{'/book': 1, '/home': 2, '/rooms': 2}",
+   "accept": [
+    "{'/book': 1, '/home': 3, '/rooms': 2}\n{'/book': 1, '/home': 2, '/rooms': 2}",
+    "{'/book':1,'/home':3,'/rooms':2}\n{'/book':1,'/home':2,'/rooms':2}"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T06-B05",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Cho bảng doanh thu theo ngày và kênh:\n\n```python\ndf = pd.DataFrame({\"ngay\": [\"T2\", \"T2\", \"T3\"],\n                   \"kenh\": [\"web\", \"web\", \"app\"],\n                   \"tien\": [100, 300, 200]})\np1 = df.pivot(index=\"ngay\", columns=\"kenh\", values=\"tien\")\np2 = df.pivot_table(index=\"ngay\", columns=\"kenh\", values=\"tien\")\n```\n\nĐiều gì xảy ra?",
+   "explanation": "`pivot` chỉ định hình lại, đòi mỗi cặp (index, columns) là duy nhất; `pivot_table` gộp trùng bằng `aggfunc` (mặc định trung bình): $(100 + 300)/2 = 200$.",
+   "section": "b-pd",
+   "long": "#### Ý chính\n- `pivot(index, columns, values)` chỉ **định hình lại** bảng; mỗi cặp (index, columns) phải xuất hiện tối đa một lần, nếu không pandas báo `ValueError: Index contains duplicate entries, cannot reshape`.\n- `pivot_table(...)` vừa định hình vừa **gộp**: cặp trùng được gộp bằng `aggfunc`, mặc định là `\"mean\"`.\n\n#### Từng bước\nCặp (T2, web) có hai dòng: 100 và 300.\n\n- `pivot` không biết chọn giá trị nào nên báo lỗi.\n- `pivot_table` lấy trung bình: $(100 + 300)/2 = 200$. Ô (T2, app) và (T3, web) không có dữ liệu nên là NaN.\n\n```python\nimport pandas as pd\ndf = pd.DataFrame({\"ngay\": [\"T2\", \"T2\", \"T3\"], \"kenh\": [\"web\", \"web\", \"app\"],\n                   \"tien\": [100, 300, 200]})\np2 = df.pivot_table(index=\"ngay\", columns=\"kenh\", values=\"tien\")\nprint(p2.loc[\"T2\", \"web\"])                     # 200.0\np3 = df.pivot_table(index=\"ngay\", columns=\"kenh\", values=\"tien\",\n                    aggfunc=\"sum\", fill_value=0)\nprint(p3.loc[\"T2\", \"web\"], p3.loc[\"T2\", \"app\"])   # 400 0\n```\n\n#### Sơ đồ chọn hàm\n```mermaid\nflowchart TD\n  A[\"Cần bảng ngày x kênh\"] --> B{\"Mỗi cặp ngày, kênh chỉ có 1 dòng?\"}\n  B -->|\"chắc chắn có\"| C[\"pivot: chỉ định hình\"]\n  B -->|\"có thể trùng\"| D[\"pivot_table với aggfunc rõ ràng\"]\n  D --> E[\"sum cho doanh thu, mean cho giá trung bình\"]\n```\n\n#### Bẫy thường gặp\n- Quên rằng `aggfunc` mặc định là trung bình, báo cáo doanh thu bị thấp hơn thực tế. Luôn ghi rõ `aggfunc=\"sum\"` khi cộng tiền.\n- Dùng `fill_value=0` để ô trống thành 0 khi 0 có nghĩa (không có doanh thu).\n\n#### Đọc thêm\n- [pandas: Reshaping and pivot tables](https://pandas.pydata.org/docs/user_guide/reshaping.html)\n- [pandas.pivot_table](https://pandas.pydata.org/docs/reference/api/pandas.pivot_table.html)\n- [Pivot table (Wikipedia)](https://en.wikipedia.org/wiki/Pivot_table)\n",
+   "distractors": {
+    "A": "`pivot` không gộp gì cả, còn `pivot_table` mặc định `aggfunc=\"mean\"` chứ không phải `sum`.",
+    "B": "`pivot` không tự chọn dòng nào khi trùng mà báo lỗi; `pivot_table` lấy trung bình, không lấy tổng.",
+    "C": "`pivot_table` được thiết kế để gộp các cặp trùng bằng `aggfunc`, nên không báo lỗi."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Cả hai đều chạy được, ô (T2, web) cùng bằng 400 vì mặc định cộng dồn các dòng trùng"
+    },
+    {
+     "key": "B",
+     "text": "`p1` giữ dòng xuất hiện sau nên ô (T2, web) bằng 300; `p2` cho 400"
+    },
+    {
+     "key": "C",
+     "text": "Cả hai đều báo ValueError vì cặp (T2, web) bị trùng"
+    },
+    {
+     "key": "D",
+     "text": "`p1` báo ValueError vì cặp (T2, web) xuất hiện hai lần; `p2` chạy được và ô (T2, web) bằng 200"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T06-B06",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Một số đơn hàng bị mất thông tin kênh bán. Đoạn code sau in ra gì và vì sao?\n\n```python\ndon = pd.DataFrame({\"kenh\": [\"web\", None, \"app\", \"web\", None],\n                    \"tien\": [100, 50, 200, 150, 70]})\nprint(don[\"tien\"].sum(), don.groupby(\"kenh\")[\"tien\"].sum().sum())\n```",
+   "explanation": "Tổng toàn cột $= 570$; theo nhóm chỉ còn web $250$ và app $200$, tổng $450$, hụt đúng $50 + 70 = 120$ của hai dòng thiếu kênh. Dùng `dropna=False` để giữ nhóm NaN.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nKhi khóa nhóm bị thiếu (NaN/None), `groupby` mặc định **bỏ** các dòng đó (`dropna=True`). Vì vậy tổng của các nhóm có thể nhỏ hơn tổng toàn cột, và phần chênh lệch đúng bằng tổng của các dòng mất khóa.\n\n#### Từng bước\n| kenh | tien | có trong groupby mặc định? |\n|---|---|---|\n| web | 100 | có |\n| (thiếu) | 50 | không |\n| app | 200 | có |\n| web | 150 | có |\n| (thiếu) | 70 | không |\n\n- Tổng cột: $100 + 50 + 200 + 150 + 70 = 570$.\n- Theo nhóm: web $= 250$, app $= 200$, cộng lại $450$.\n- Chênh lệch $570 - 450 = 120 = 50 + 70$.\n\n```python\nimport pandas as pd\ndon = pd.DataFrame({\"kenh\": [\"web\", None, \"app\", \"web\", None], \"tien\": [100, 50, 200, 150, 70]})\nprint(don[\"tien\"].sum(), don.groupby(\"kenh\")[\"tien\"].sum().sum())   # 570 450\nprint(don.groupby(\"kenh\", dropna=False)[\"tien\"].sum().to_dict())    # có thêm nhóm NaN: 120\n```\n\n#### Bẫy thường gặp\n- Báo cáo doanh thu theo kênh rồi cộng lại để ra \"tổng doanh thu\": bị hụt mà không ai biết. Nên đối chiếu tổng theo nhóm với tổng toàn bảng như một bước kiểm tra.\n- Thay vì bỏ, có thể gán nhãn rõ ràng: `don[\"kenh\"].fillna(\"khong_ro\")` trước khi `groupby`.\n- NaN ở **giá trị** (`tien`) thì khác: `sum()` bỏ qua NaN đó nhưng nhóm vẫn còn.\n\n#### Đọc thêm\n- [pandas: Group by, mục NA group handling](https://pandas.pydata.org/docs/user_guide/groupby.html)\n- [pandas: Working with missing data](https://pandas.pydata.org/docs/user_guide/missing_data.html)\n",
+   "distractors": {
+    "A": "Chỉ đúng khi gọi `groupby(\"kenh\", dropna=False)`; mặc định các dòng khóa thiếu bị loại khỏi kết quả.",
+    "C": "`don[\"tien\"].sum()` không liên quan cột `kenh`; cả 5 giá trị tiền đều được cộng, ra 570.",
+    "D": "NaN ở **khóa** không lan sang giá trị; nhóm NaN đơn giản là bị bỏ, các nhóm còn lại vẫn có tổng bình thường."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`570 570`, vì `groupby` gom mọi khóa NaN vào một nhóm riêng"
+    },
+    {
+     "key": "B",
+     "text": "`570 450`, vì `groupby` mặc định bỏ các dòng có khóa NaN (`dropna=True`)"
+    },
+    {
+     "key": "C",
+     "text": "`450 450`, vì `sum()` trên cột `tien` cũng bỏ các dòng có `kenh` thiếu"
+    },
+    {
+     "key": "D",
+     "text": "`570 nan`, vì chỉ cần một khóa NaN là tổng theo nhóm thành NaN"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T06-B07",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Bảng `don` (cột `ma_don`, `ma_kh`) và bảng danh mục khách `kh` (khóa `ma_kh` không trùng). Đội kiểm toán dữ liệu cần lấy **các đơn có `ma_kh` không tồn tại trong `kh`** (đơn mồ côi). Biểu thức nào đúng?",
+   "explanation": "Anti-join: giữ dòng bên trái không có khóa bên phải, viết `don[~don[\"ma_kh\"].isin(kh[\"ma_kh\"])]` hoặc left merge với `indicator=True` rồi lọc `_merge == \"left_only\"`.",
+   "section": "b-pd",
+   "long": "#### Ý chính\n\"Đơn mồ côi\" là đơn có `ma_kh` không xuất hiện trong bảng khách: đây là phép **anti-join** (giữ dòng bên trái **không** khớp bên phải). pandas không có `how=\"anti\"`, nhưng có hai cách tương đương:\n\n1. `don[~don[\"ma_kh\"].isin(kh[\"ma_kh\"])]`\n2. `don.merge(kh, on=\"ma_kh\", how=\"left\", indicator=True)` rồi lọc `_merge == \"left_only\"`.\n\n#### Từng bước\n```python\nimport pandas as pd\ndon = pd.DataFrame({\"ma_don\": [1, 2, 3, 4], \"ma_kh\": [\"K1\", \"K2\", \"K9\", \"K1\"]})\nkh  = pd.DataFrame({\"ma_kh\": [\"K1\", \"K2\", \"K3\"]})\nprint(don[~don[\"ma_kh\"].isin(kh[\"ma_kh\"])][\"ma_don\"].tolist())          # [3]\nm = don.merge(kh, on=\"ma_kh\", how=\"left\", indicator=True)\nprint(m[\"_merge\"].astype(str).tolist())   # ['both', 'both', 'left_only', 'both']\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 200\" width=\"100%\" style=\"max-width:560px\">\n<circle cx=\"220\" cy=\"100\" r=\"80\" fill=\"#10b981\" opacity=\"0.25\" stroke=\"currentColor\"/>\n<circle cx=\"340\" cy=\"100\" r=\"80\" fill=\"#3b82f6\" opacity=\"0.15\" stroke=\"currentColor\"/>\n<text x=\"170\" y=\"30\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">don.ma_kh</text>\n<text x=\"390\" y=\"30\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">kh.ma_kh</text>\n<text x=\"180\" y=\"96\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">K9</text>\n<text x=\"180\" y=\"116\" text-anchor=\"middle\" font-size=\"11\" fill=\"#10b981\">left_only</text>\n<text x=\"280\" y=\"96\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">K1, K2</text>\n<text x=\"280\" y=\"116\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">both</text>\n<text x=\"385\" y=\"96\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">K3</text>\n<text x=\"385\" y=\"116\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">right_only</text>\n<text x=\"280\" y=\"196\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">anti-join = phần chỉ thuộc bảng trái (đơn mồ côi)</text>\n</svg>\n\n#### Bảng cột _merge theo kiểu join\n| how | giá trị `_merge` có thể có |\n|---|---|\n| left | both, left_only |\n| right | both, right_only |\n| outer | both, left_only, right_only |\n| inner | both |\n\n#### Bẫy thường gặp\n- Lọc `right_only` sau left join luôn ra rỗng.\n- Quên `~` nên lấy đúng phần ngược lại.\n- Kiểm tra toàn vẹn khóa nên chạy định kỳ: số đơn mồ côi khác 0 là dấu hiệu lỗi đồng bộ dữ liệu.\n\n#### Đọc thêm\n- [pandas: Merge, join, concatenate and compare](https://pandas.pydata.org/docs/user_guide/merging.html)\n- [Join (SQL) (Wikipedia)](https://en.wikipedia.org/wiki/Join_%28SQL%29)\n",
+   "distractors": {
+    "A": "Thiếu `~`: đây là các đơn **có** khách hợp lệ, ngược với yêu cầu.",
+    "B": "Inner join chỉ giữ các đơn khớp được khách, nên đơn mồ côi bị loại hết.",
+    "D": "Với left join, cột `_merge` chỉ có `both` hoặc `left_only`; đơn mồ côi mang nhãn `left_only`, lọc `right_only` luôn ra bảng rỗng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`don[don[\"ma_kh\"].isin(kh[\"ma_kh\"])]`"
+    },
+    {
+     "key": "B",
+     "text": "`don.merge(kh, on=\"ma_kh\", how=\"inner\")`"
+    },
+    {
+     "key": "C",
+     "text": "`don[~don[\"ma_kh\"].isin(kh[\"ma_kh\"])]`"
+    },
+    {
+     "key": "D",
+     "text": "`don.merge(kh, on=\"ma_kh\", how=\"left\", indicator=True).query(\"_merge == 'right_only'\")`"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T06-B08",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Đoạn code sau in ra gì?\n\n```python\ndon = pd.DataFrame({\"ma_sp\": [1, 2], \"gia\": [100, 200], \"sl\": [3, 1]})\nsp  = pd.DataFrame({\"ma_sp\": [1, 2], \"gia\": [90, 210], \"ten\": [\"Ao\", \"Mu\"]})\nr = don.merge(sp, on=\"ma_sp\")\nprint(r.columns.tolist())\n```",
+   "explanation": "Cột không phải khóa mà trùng tên ở hai bảng nhận hậu tố theo `suffixes=(\"_x\", \"_y\")`; thứ tự cột là: khóa, các cột còn lại của bảng trái, rồi các cột của bảng phải.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nKhi hai bảng có cột **không phải khóa** trùng tên, `merge` giữ cả hai và gắn hậu tố mặc định `suffixes=(\"_x\", \"_y\")`: `_x` cho bảng trái, `_y` cho bảng phải. Cột khóa trong `on` được gộp làm một.\n\n#### Từng bước\n| Nguồn | Cột |\n|---|---|\n| khóa (gộp) | ma_sp |\n| bảng trái `don` | gia thành gia_x, sl |\n| bảng phải `sp` | gia thành gia_y, ten |\n\nThứ tự cột kết quả: khóa, các cột còn lại của bảng trái theo thứ tự gốc, rồi các cột của bảng phải.\n\n```python\nimport pandas as pd\ndon = pd.DataFrame({\"ma_sp\": [1, 2], \"gia\": [100, 200], \"sl\": [3, 1]})\nsp  = pd.DataFrame({\"ma_sp\": [1, 2], \"gia\": [90, 210], \"ten\": [\"Ao\", \"Mu\"]})\nprint(don.merge(sp, on=\"ma_sp\").columns.tolist())\n# ['ma_sp', 'gia_x', 'sl', 'gia_y', 'ten']\nr = don.merge(sp, on=\"ma_sp\", suffixes=(\"_ban\", \"_niem_yet\"))\nprint(r.columns.tolist())\n# ['ma_sp', 'gia_ban', 'sl', 'gia_niem_yet', 'ten']\n```\n\n#### Bẫy thường gặp\n- Code phía sau vẫn gọi `r[\"gia\"]` và gặp KeyError vì cột đã đổi tên thành `gia_x`, `gia_y`.\n- Hậu tố `_x`, `_y` khó đọc; nên đặt `suffixes` có nghĩa (giá bán và giá niêm yết) hoặc đổi tên cột trước khi ghép.\n- Nếu ghép bằng `left_on`/`right_on` với hai tên khác nhau thì **cả hai** cột khóa đều được giữ lại.\n\n#### Đọc thêm\n- [pandas.DataFrame.merge](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)\n- [pandas: Merge, join, concatenate and compare](https://pandas.pydata.org/docs/user_guide/merging.html)\n",
+   "distractors": {
+    "A": "Tưởng cột trùng tên bị ghi đè; pandas giữ cả hai và thêm hậu tố để phân biệt.",
+    "B": "pandas không để hai cột cùng tên sau merge; mặc định thêm hậu tố `_x` (bảng trái) và `_y` (bảng phải).",
+    "C": "Cột khóa trong `on` được gộp làm một, không bị gắn hậu tố."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`['ma_sp', 'gia', 'sl', 'ten']`"
+    },
+    {
+     "key": "B",
+     "text": "`['ma_sp', 'gia', 'sl', 'gia', 'ten']`"
+    },
+    {
+     "key": "C",
+     "text": "`['ma_sp_x', 'gia_x', 'sl', 'ma_sp_y', 'gia_y', 'ten']`"
+    },
+    {
+     "key": "D",
+     "text": "`['ma_sp', 'gia_x', 'sl', 'gia_y', 'ten']`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T06-B09",
+   "module": "B",
+   "type": "output",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Ngày được nhập theo kiểu Việt Nam (ngày/tháng/năm), có một ngày không tồn tại. Đoạn code sau in ra gì? Ghi đúng một dòng.\n\n```python\nimport pandas as pd\ns = pd.Series([\"05/03/2026\", \"31/12/2026\", \"30/02/2026\"])\nd = pd.to_datetime(s, format=\"%d/%m/%Y\", errors=\"coerce\")\nprint(d.isna().sum(), d.min().month, d.max().day)\n```",
+   "explanation": "30/02/2026 không tồn tại nên thành NaT (1 giá trị thiếu). Còn lại 2026-03-05 và 2026-12-31: `min()` và `max()` bỏ qua NaT, cho tháng 3 và ngày 31.",
+   "section": "b-pd",
+   "long": "#### Ý chính\n`pd.to_datetime` với `format=\"%d/%m/%Y\"` đọc chuỗi theo đúng thứ tự ngày, tháng, năm. Với `errors=\"coerce\"`, chuỗi không hợp lệ (ví dụ ngày 30 tháng 2) trở thành `NaT` (Not a Time) thay vì làm dừng chương trình. Các phép `min()`, `max()` bỏ qua NaT.\n\n#### Từng bước\n| Chuỗi | Kết quả | Ghi chú |\n|---|---|---|\n| 05/03/2026 | 2026-03-05 | ngày 5 tháng 3 |\n| 31/12/2026 | 2026-12-31 | |\n| 30/02/2026 | NaT | tháng 2 không có ngày 30 |\n\n- `d.isna().sum()` $= 1$.\n- `d.min()` là 2026-03-05, tháng $= 3$.\n- `d.max()` là 2026-12-31, ngày $= 31$.\n\n```python\nimport pandas as pd\ns = pd.Series([\"05/03/2026\", \"31/12/2026\", \"30/02/2026\"])\nd = pd.to_datetime(s, format=\"%d/%m/%Y\", errors=\"coerce\")\nprint(d.isna().sum(), d.min().month, d.max().day)   # 1 3 31\n```\n\n#### Bẫy thường gặp\n- Không truyền `format` với dữ liệu kiểu Việt Nam: chuỗi như 05/03 có thể bị hiểu là ngày 3 tháng 5. Ghi rõ `format` (hoặc ít nhất `dayfirst=True`) để tránh mơ hồ.\n- Mặc định `errors=\"raise\"`: một dòng hỏng làm hỏng cả lần đọc. `coerce` giúp chạy tiếp nhưng phải **đếm NaT** và báo cáo, đừng âm thầm bỏ.\n- Định dạng ISO 8601 (`2026-03-05`) không mơ hồ, nên ưu tiên khi xuất dữ liệu.\n\n#### Đọc thêm\n- [pandas.to_datetime](https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html)\n- [Python: strftime and strptime format codes](https://docs.python.org/3/library/datetime.html)\n- [ISO 8601 (Wikipedia)](https://en.wikipedia.org/wiki/ISO_8601)\n",
+   "mistakes": [
+    {
+     "value": "2 5 3",
+     "why": "Đọc theo kiểu Mỹ tháng/ngày: 05/03 thành 3/5 và hai chuỗi còn lại không hợp lệ; nhưng `format=\"%d/%m/%Y\"` nói rõ ngày đứng trước."
+    },
+    {
+     "value": "0 3 31",
+     "why": "Tưởng 30/02 tự lùi sang 02/03; thực tế ngày không tồn tại nên với `errors=\"coerce\"` thành NaT."
+    },
+    {
+     "value": "1 5 31",
+     "why": "Lấy nhầm số đầu (ngày 05) làm tháng của ngày nhỏ nhất; 05/03/2026 là ngày 5 tháng 3."
+    }
+   ],
+   "answer": "1 3 31",
+   "accept": [
+    "1 3 31"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T06-B10",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "File đặt phòng có cột `so_khach` bị thiếu ở vài dòng nên pandas đọc thành float64 (ví dụ `2.0, NaN, 3.0`). Kỹ sư muốn chuyển cột về số nguyên mà vẫn giữ thông tin \"thiếu\". Nhận định nào đúng?",
+   "explanation": "Kiểu `int64` không biểu diễn được NaN; kiểu nullable `\"Int64\"` (chữ I hoa) dùng mặt nạ riêng nên giữ được ô thiếu: `[2, <NA>, 3]`.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nNaN là một giá trị **số thực**. Kiểu `int64` của NumPy không có chỗ cho NaN, nên một cột số nguyên có ô thiếu bị pandas đọc thành `float64`. Gọi `astype(int)` sẽ báo `IntCastingNaNError`. pandas có kiểu **nullable** `\"Int64\"` (chữ I hoa) lưu thêm một mặt nạ thiếu riêng, ô thiếu hiển thị là `<NA>`.\n\n#### Từng bước\n```python\nimport pandas as pd\ns = pd.Series([2.0, None, 3.0])       # float64\ntry:\n    s.astype(int)\nexcept Exception as e:\n    print(type(e).__name__)           # IntCastingNaNError\nt = s.astype(\"Int64\")\nprint(t.tolist())                     # [2, <NA>, 3]\nprint(t.isna().tolist())              # [False, True, False]\nprint(t.sum())                        # 5, bỏ qua ô thiếu\n```\n\n#### Bảng so sánh kiểu\n| Kiểu | Lưu được ô thiếu? | Giá trị thiếu |\n|---|---|---|\n| `int64` | không | báo lỗi khi ép |\n| `float64` | có | NaN (số nguyên bị hiện thành 2.0) |\n| `Int64` (nullable) | có | `pd.NA` |\n\n#### Bẫy thường gặp\n- `fillna(0).astype(int)` chạy được nhưng biến \"không rõ số khách\" thành \"0 khách\", làm sai trung bình và thống kê.\n- Nhầm `\"Int64\"` (nullable, chữ I hoa) với `\"int64\"` (NumPy, không cho thiếu).\n- Khi đọc file có thể chỉ định ngay: `pd.read_csv(..., dtype={\"so_khach\": \"Int64\"})`.\n\n#### Đọc thêm\n- [pandas: Nullable integer data type](https://pandas.pydata.org/docs/user_guide/integer_na.html)\n- [pandas.DataFrame.astype](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.astype.html)\n",
+   "distractors": {
+    "B": "pandas không âm thầm biến NaN thành 0 (vì như vậy làm sai số liệu); nó báo `IntCastingNaNError`.",
+    "C": "NaN là giá trị số thực; kiểu int64 của NumPy không có chỗ cho NaN nên không thể vừa là int64 vừa giữ NaN.",
+    "D": "pandas có kiểu nguyên cho phép thiếu (nullable) `Int64` với giá trị thiếu `pd.NA`, không cần bỏ dòng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`astype(int)` báo lỗi vì NaN không có dạng int64; `astype(\"Int64\")` cho số nguyên với ô thiếu là `<NA>`"
+    },
+    {
+     "key": "B",
+     "text": "`astype(int)` chạy được và tự thay NaN bằng 0, không cần xử lý gì thêm"
+    },
+    {
+     "key": "C",
+     "text": "`astype(int)` chạy được, cột thành int64 và các ô thiếu vẫn là NaN"
+    },
+    {
+     "key": "D",
+     "text": "pandas không thể lưu cột số nguyên có ô thiếu, nên bắt buộc `dropna()` trước khi đổi kiểu"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T06-C01",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Bảng đặt phòng của một khách sạn (`dem`: số đêm, `gia`: nghìn đồng/đêm). Đoạn code sau in ra gì? Ghi đúng một dòng.\n\n```python\nimport pandas as pd\nbk = pd.DataFrame({\n    \"ma\":   [\"B1\", \"B2\", \"B3\", \"B4\", \"B5\", \"B6\"],\n    \"loai\": [\"Std\", \"Deluxe\", \"Std\", \"Suite\", \"Deluxe\", \"Std\"],\n    \"dem\":  [2, 3, 5, 1, 3, 4],\n    \"gia\":  [700, 1500, 650, 3000, 1400, 700],\n})\nsub = bk.query(\"loai != 'Std' or dem >= 4\")\ntop = sub.sort_values([\"dem\", \"gia\"], ascending=[False, True])\nprint(top[\"ma\"].head(3).tolist(), top[\"gia\"].iloc[-1])\n```",
+   "explanation": "`sub` gồm B2, B3, B4, B5, B6 (B1 là Std và chỉ 2 đêm). Sắp `dem` giảm, cùng `dem` thì `gia` tăng: B3(5), B6(4), B5(3; 1400), B2(3; 1500), B4(1). Dòng cuối là B4 với giá 3000.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nCâu này ghép ba thao tác: lọc bằng `query` với `or`, sắp xếp theo **hai khóa với hai chiều khác nhau**, và lấy dòng theo vị trí bằng `iloc` trên bảng **đã sắp**.\n\n#### Từng bước\n1. Lọc `loai != 'Std' or dem >= 4`:\n\n| ma | loai | dem | gia | giữ? |\n|---|---|---|---|---|\n| B1 | Std | 2 | 700 | không |\n| B2 | Deluxe | 3 | 1500 | có |\n| B3 | Std | 5 | 650 | có (dem ≥ 4) |\n| B4 | Suite | 1 | 3000 | có |\n| B5 | Deluxe | 3 | 1400 | có |\n| B6 | Std | 4 | 700 | có (dem ≥ 4) |\n\n2. Sắp `dem` giảm, cùng `dem` thì `gia` tăng: B3 (5), B6 (4), B5 (3; 1400), B2 (3; 1500), B4 (1).\n3. `head(3)` của cột `ma` là `['B3', 'B6', 'B5']`; `iloc[-1]` là dòng cuối **của bảng đã sắp** (B4), giá 3000.\n\n```python\nimport pandas as pd\nbk = pd.DataFrame({\"ma\": [\"B1\",\"B2\",\"B3\",\"B4\",\"B5\",\"B6\"],\n                   \"loai\": [\"Std\",\"Deluxe\",\"Std\",\"Suite\",\"Deluxe\",\"Std\"],\n                   \"dem\": [2, 3, 5, 1, 3, 4], \"gia\": [700, 1500, 650, 3000, 1400, 700]})\ntop = bk.query(\"loai != 'Std' or dem >= 4\").sort_values([\"dem\", \"gia\"], ascending=[False, True])\nprint(top[\"ma\"].head(3).tolist(), top[\"gia\"].iloc[-1])   # ['B3', 'B6', 'B5'] 3000\n```\n\n#### Bẫy thường gặp\n- `ascending=[False, True]` áp **từng chiều cho từng khóa** theo thứ tự trong list.\n- Sau `sort_values`, index giữ nhãn gốc (B4 vẫn mang nhãn 3). `iloc[-1]` theo vị trí nên lấy B4; còn `top[\"gia\"].loc[5]` sẽ lấy B6 theo nhãn.\n- Trong chuỗi `query` được dùng `and`, `or`, `not` (khác với mặt nạ thông thường phải dùng `&`, `|`, `~`).\n\n#### Đọc thêm\n- [pandas.DataFrame.sort_values](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sort_values.html)\n- [pandas: The query() Method](https://pandas.pydata.org/docs/user_guide/indexing.html)\n",
+   "mistakes": [
+    {
+     "value": "['B3', 'B6', 'B2'] 3000",
+     "why": "Áp `ascending=False` cho cả hai cột; cột `gia` tăng dần nên giữa B2 (1500) và B5 (1400) cùng 3 đêm, B5 đứng trước."
+    },
+    {
+     "value": "['B3', 'B6', 'B5'] 700",
+     "why": "Lấy dòng cuối của bảng gốc `bk` (B6); `top[\"gia\"].iloc[-1]` là dòng cuối của `top` sau khi sắp, tức B4."
+    },
+    {
+     "value": "['B3', 'B5', 'B2'] 3000",
+     "why": "Bỏ sót B6: B6 là Std nhưng `dem = 4` thỏa vế `dem >= 4` của phép `or`."
+    }
+   ],
+   "answer": "['B3', 'B6', 'B5'] 3000",
+   "accept": [
+    "['B3', 'B6', 'B5'] 3000",
+    "['B3','B6','B5'] 3000"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T06-C02",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Tính tỷ trọng mỗi đơn trong tổng chi tiêu của chính khách hàng đó. Đoạn code sau in ra gì? Ghi đúng 2 dòng.\n\n```python\nimport pandas as pd\ndon = pd.DataFrame({\n    \"kh\":   [\"An\", \"Binh\", \"An\", \"Chi\", \"Binh\", \"An\"],\n    \"tien\": [200, 300, 600, 500, 200, 200],\n})\ndon[\"ty_le\"] = don[\"tien\"] / don.groupby(\"kh\")[\"tien\"].transform(\"sum\")\nprint(don[\"ty_le\"].tolist())\nprint(don.loc[don[\"ty_le\"] >= 0.5, \"kh\"].tolist())\n```",
+   "explanation": "Tổng theo khách: An $= 1000$, Binh $= 500$, Chi $= 500$. Tỷ lệ $= \\frac{tien}{tong_{kh}}$: 0,2; 0,6; 0,6; 1,0; 0,4; 0,2. Các dòng có tỷ lệ $\\ge 0{,}5$ là dòng 1, 2, 3.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nTỷ trọng một đơn trong chi tiêu của chính khách hàng đó là\n$$ty\\_le_i = \\frac{tien_i}{\\sum_{j \\in kh(i)} tien_j}$$\nMẫu số khác nhau theo từng khách nhưng phải gắn được vào **từng dòng**, nên dùng `transform(\"sum\")`.\n\n#### Từng bước\n| dòng | kh | tien | tổng của kh | ty_le | ≥ 0,5? |\n|---|---|---|---|---|---|\n| 0 | An | 200 | 1000 | 0,2 | |\n| 1 | Binh | 300 | 500 | 0,6 | có |\n| 2 | An | 600 | 1000 | 0,6 | có |\n| 3 | Chi | 500 | 500 | 1,0 | có |\n| 4 | Binh | 200 | 500 | 0,4 | |\n| 5 | An | 200 | 1000 | 0,2 | |\n\n```python\nimport pandas as pd\ndon = pd.DataFrame({\"kh\": [\"An\", \"Binh\", \"An\", \"Chi\", \"Binh\", \"An\"],\n                    \"tien\": [200, 300, 600, 500, 200, 200]})\ndon[\"ty_le\"] = don[\"tien\"] / don.groupby(\"kh\")[\"tien\"].transform(\"sum\")\nprint(don[\"ty_le\"].tolist())                        # [0.2, 0.6, 0.6, 1.0, 0.4, 0.2]\nprint(don.loc[don[\"ty_le\"] >= 0.5, \"kh\"].tolist())  # ['Binh', 'An', 'Chi']\nprint(don.groupby(\"kh\")[\"ty_le\"].sum().tolist())    # [1.0, 1.0, 1.0] để tự kiểm\n```\n\n#### Bẫy thường gặp\n- Chia cho `don[\"tien\"].sum()` (tổng toàn bảng) là tỷ trọng trong **doanh thu cả cửa hàng**, khác câu hỏi.\n- Kết quả lọc giữ thứ tự dòng gốc, không tự sắp theo tên.\n- Mẹo tự kiểm: tổng tỷ trọng trong mỗi nhóm phải bằng 1.\n\n#### Đọc thêm\n- [pandas: Group by, mục Transformation](https://pandas.pydata.org/docs/user_guide/groupby.html)\n",
+   "mistakes": [
+    {
+     "value": "[0.1, 0.15, 0.3, 0.25, 0.1, 0.1]\n[]",
+     "why": "Chia cho tổng toàn bảng (2000) thay vì tổng của từng khách; `transform` trả tổng theo nhóm cho từng dòng."
+    },
+    {
+     "value": "[0.2, 0.6, 0.6, 1.0, 0.4, 0.2]\n['An', 'Binh', 'Chi']",
+     "why": "Tưởng kết quả lọc được sắp theo tên; `loc` với mặt nạ giữ thứ tự dòng gốc (dòng 1 Binh, dòng 2 An, dòng 3 Chi)."
+    },
+    {
+     "value": "[0.2, 0.6, 0.6, 1.0, 0.4, 0.2]\n['An', 'Chi']",
+     "why": "Quên dòng của Binh: 300/500 = 0,6 cũng thỏa `>= 0.5`."
+    }
+   ],
+   "answer": "[0.2, 0.6, 0.6, 1.0, 0.4, 0.2]\n['Binh', 'An', 'Chi']",
+   "accept": [
+    "[0.2, 0.6, 0.6, 1.0, 0.4, 0.2]\n['Binh', 'An', 'Chi']",
+    "[0.2,0.6,0.6,1.0,0.4,0.2]\n['Binh','An','Chi']"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T06-C03",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Bảng đặt phòng của hai khách sạn:\n\n```python\nbk = pd.DataFrame({\"ks\":  [\"HL\", \"DL\", \"HL\", \"DL\", \"HL\"],\n                   \"ma\":  [\"B1\", \"B2\", \"B3\", \"B4\", \"B5\"],\n                   \"gia\": [900, 1200, 1500, 800, 1100]})\n```\n\nBiểu thức nào trả về, với mỗi khách sạn, **nguyên dòng** đặt phòng có giá cao nhất (đúng cặp mã và giá)?",
+   "explanation": "`groupby(...)[\"gia\"].idxmax()` trả nhãn dòng có giá lớn nhất trong mỗi nhóm (DL: 1, HL: 2); `bk.loc[...]` lấy nguyên các dòng đó: B2 và B3.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nBài toán \"top 1 mỗi nhóm\" cần giữ **nguyên dòng** (mã và giá đi cùng nhau). Cách gọn: `groupby(...)[\"gia\"].idxmax()` trả về **nhãn dòng** có giá lớn nhất mỗi nhóm, rồi dùng `.loc` lấy các dòng đó.\n\n#### Từng bước\n```python\nimport pandas as pd\nbk = pd.DataFrame({\"ks\": [\"HL\", \"DL\", \"HL\", \"DL\", \"HL\"],\n                   \"ma\": [\"B1\", \"B2\", \"B3\", \"B4\", \"B5\"],\n                   \"gia\": [900, 1200, 1500, 800, 1100]})\nprint(bk.groupby(\"ks\")[\"gia\"].idxmax().to_dict())          # {'DL': 1, 'HL': 2}\nprint(bk.loc[bk.groupby(\"ks\")[\"gia\"].idxmax()][\"ma\"].tolist())   # ['B2', 'B3']\nprint(bk.groupby(\"ks\").max().to_dict())   # HL: ma B5, gia 1500  (ghép sai cặp)\n```\n\n#### Bảng so sánh\n| Cách viết | HL ra gì | Đúng yêu cầu? |\n|---|---|---|\n| `loc[idxmax()]` | B3, 1500 | đúng |\n| `groupby().max()` | ma B5, gia 1500 | sai: max từng cột độc lập |\n| `sort_values(\"gia\").groupby().head(1)` | B1, 900 | sai: lấy rẻ nhất |\n| `groupby()[\"gia\"].max()` | chỉ số 1500 | thiếu cột `ma` |\n\n#### Cách khác tương đương\n`bk.sort_values(\"gia\", ascending=False).groupby(\"ks\").head(1)` cũng đúng; cách này mở rộng được sang top k bằng `head(k)`.\n\n#### Bẫy thường gặp\n- `idxmax` trả **nhãn** chứ không phải vị trí; nếu index bị trùng (ví dụ sau `concat`) thì `.loc` có thể lấy thừa dòng. Nên `reset_index(drop=True)` trước.\n- Khi hai booking cùng giá lớn nhất, `idxmax` chỉ lấy dòng xuất hiện đầu tiên.\n\n#### Đọc thêm\n- [pandas: Group by: split-apply-combine](https://pandas.pydata.org/docs/user_guide/groupby.html)\n- [pandas.DataFrame.sort_values](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sort_values.html)\n",
+   "distractors": {
+    "A": "`max()` lấy giá trị lớn nhất của **từng cột độc lập**: với HL ra `ma = B5` (chuỗi lớn nhất) và `gia = 1500`, ghép sai cặp vì B5 có giá 1100.",
+    "C": "Sắp tăng dần rồi lấy dòng đầu nên được booking **rẻ nhất** (B1, B4); cần `ascending=False`.",
+    "D": "Chỉ trả về Series giá lớn nhất, mất cột `ma` nên không biết booking nào."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`bk.groupby(\"ks\").max()`"
+    },
+    {
+     "key": "B",
+     "text": "`bk.loc[bk.groupby(\"ks\")[\"gia\"].idxmax()]`"
+    },
+    {
+     "key": "C",
+     "text": "`bk.sort_values(\"gia\").groupby(\"ks\").head(1)`"
+    },
+    {
+     "key": "D",
+     "text": "`bk.groupby(\"ks\")[\"gia\"].max()`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T06-C04",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Gộp đơn hàng từ kênh web và kênh app (hai bảng có cột khác nhau). Đoạn code sau in ra gì? Ghi đúng một dòng.\n\n```python\nimport pandas as pd\nweb = pd.DataFrame({\"ma\": [\"W1\", \"W2\", \"W3\"], \"tien\": [100, 250, 80],\n                    \"coupon\": [\"GIAM10\", None, \"FREESHIP\"]})\napp = pd.DataFrame({\"ma\": [\"A1\", \"A2\"], \"tien\": [300, 120],\n                    \"thiet_bi\": [\"ios\", \"android\"]})\ntat_ca = pd.concat([web, app], ignore_index=True)\nprint(tat_ca.shape, tat_ca[\"coupon\"].isna().sum(), tat_ca[\"thiet_bi\"].notna().sum())\n```",
+   "explanation": "`concat` mặc định nối theo hợp các cột (`join=\"outer\"`): 4 cột `ma, tien, coupon, thiet_bi`, 5 dòng. `coupon` thiếu ở W2, A1, A2 (3 ô); `thiet_bi` có giá trị ở 2 dòng app.",
+   "section": "b-pd",
+   "long": "#### Ý chính\n`pd.concat` theo dòng mặc định dùng `join=\"outer\"` cho **cột**: kết quả có hợp tất cả các cột; ô nào bảng nguồn không có cột đó thì được điền NaN. `ignore_index=True` chỉ đánh lại nhãn dòng, không thêm cột.\n\n#### Từng bước\n| ma | tien | coupon | thiet_bi |\n|---|---|---|---|\n| W1 | 100 | GIAM10 | NaN |\n| W2 | 250 | NaN (None gốc) | NaN |\n| W3 | 80 | FREESHIP | NaN |\n| A1 | 300 | NaN (điền thêm) | ios |\n| A2 | 120 | NaN (điền thêm) | android |\n\n- `shape` $= (5, 4)$.\n- `coupon` thiếu: W2, A1, A2 nên $3$.\n- `thiet_bi` có giá trị: A1, A2 nên $2$.\n\n```python\nimport pandas as pd\nweb = pd.DataFrame({\"ma\": [\"W1\", \"W2\", \"W3\"], \"tien\": [100, 250, 80],\n                    \"coupon\": [\"GIAM10\", None, \"FREESHIP\"]})\napp = pd.DataFrame({\"ma\": [\"A1\", \"A2\"], \"tien\": [300, 120], \"thiet_bi\": [\"ios\", \"android\"]})\nt = pd.concat([web, app], ignore_index=True)\nprint(t.shape, t[\"coupon\"].isna().sum(), t[\"thiet_bi\"].notna().sum())   # (5, 4) 3 2\nprint(pd.concat([web, app], join=\"inner\").columns.tolist())             # ['ma', 'tien']\n```\n\n#### Bẫy thường gặp\n- Đếm \"khách không dùng coupon\" bằng `isna()` sau khi gộp sẽ lẫn cả đơn app (app vốn không có trường coupon). Nên thêm cột nguồn, ví dụ `keys=[\"web\", \"app\"]` hoặc `assign(kenh=\"app\")`, trước khi gộp.\n- Tên cột lệch nhau một ký tự (`coupon` và `Coupon`) sẽ tạo hai cột riêng; chuẩn hóa tên trước khi `concat`.\n\n#### Đọc thêm\n- [pandas.concat](https://pandas.pydata.org/docs/reference/api/pandas.concat.html)\n- [pandas: Merge, join, concatenate and compare](https://pandas.pydata.org/docs/user_guide/merging.html)\n",
+   "mistakes": [
+    {
+     "value": "(5, 4) 1 2",
+     "why": "Chỉ đếm ô `None` sẵn có của web; quên rằng 2 dòng app không có cột `coupon` nên được điền NaN."
+    },
+    {
+     "value": "(5, 5) 3 2",
+     "why": "Tưởng `ignore_index=True` thêm cột chứa index cũ như `reset_index()`; nó chỉ đánh lại nhãn 0 đến 4, không thêm cột."
+    }
+   ],
+   "answer": "(5, 4) 3 2",
+   "accept": [
+    "(5, 4) 3 2",
+    "(5,4) 3 2"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T06-C05",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Bảng `don` lấy từ cơ sở dữ liệu có `ma_kh` kiểu số nguyên; bảng hạng thành viên `kh` đọc từ file JSON nên `ma_kh` là chuỗi:\n\n```python\ndon = pd.DataFrame({\"ma_kh\": [101, 102, 103], \"tien\": [500, 200, 350]})\nkh  = pd.DataFrame({\"ma_kh\": [\"101\", \"102\", \"104\"],\n                    \"hang\": [\"Vang\", \"Bac\", \"Dong\"]})\nr = don.merge(kh, on=\"ma_kh\", how=\"left\")\n```\n\nĐiều gì xảy ra ở dòng `merge` và cách xử lý hợp lý là gì?",
+   "explanation": "pandas từ chối merge khóa int64 với khóa chuỗi (`ValueError: You are trying to merge on int64 and ... columns`). Chuẩn hóa kiểu khóa trước: sau khi ép, khách 101, 102 có hạng, 103 là NaN.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nKhóa ghép phải **cùng kiểu**. pandas từ chối merge khi một bên là số nguyên và bên kia là chuỗi, báo `ValueError: You are trying to merge on int64 and ... columns`, vì nếu tự ép kiểu có thể che giấu lỗi dữ liệu (ví dụ mã có số 0 đứng đầu như `\"0101\"`).\n\n#### Từng bước\n```python\nimport pandas as pd\ndon = pd.DataFrame({\"ma_kh\": [101, 102, 103], \"tien\": [500, 200, 350]})\nkh  = pd.DataFrame({\"ma_kh\": [\"101\", \"102\", \"104\"], \"hang\": [\"Vang\", \"Bac\", \"Dong\"]})\nprint(don[\"ma_kh\"].dtype, kh[\"ma_kh\"].dtype)    # int64 và kiểu chuỗi\ntry:\n    don.merge(kh, on=\"ma_kh\", how=\"left\")\nexcept ValueError as e:\n    print(\"ValueError\")\nkh2 = kh.assign(ma_kh=kh[\"ma_kh\"].astype(int))\nprint(don.merge(kh2, on=\"ma_kh\", how=\"left\")[\"hang\"].tolist())   # ['Vang', 'Bac', nan]\n```\n\n#### Quy trình xử lý khóa\n```mermaid\nflowchart TD\n  A[\"Hai bảng cần ghép\"] --> B[\"So dtypes của cột khóa\"]\n  B --> C{\"Cùng kiểu?\"}\n  C -->|\"không\"| D[\"Chọn kiểu chung\"]\n  D --> E[\"Mã có số 0 đầu: giữ chuỗi, đổi bên số bằng astype(str) và zfill\"]\n  D --> F[\"Mã thuần số: astype(int) bên chuỗi\"]\n  C -->|\"có\"| G[\"merge với validate phù hợp\"]\n  E --> G\n  F --> G\n```\n\n#### Bẫy thường gặp\n- Ép `astype(int)` khi cột chuỗi có giá trị như `\"KH101\"` sẽ báo lỗi; dùng `pd.to_numeric(..., errors=\"coerce\")` để thấy dòng nào hỏng.\n- Ép mã có số 0 đầu sang số làm mất số 0 (`\"0101\"` thành 101). Khi đó nên đưa cả hai về chuỗi.\n- Sau khi sửa kiểu, vẫn kiểm số dòng trước và sau merge để phát hiện khóa trùng.\n\n#### Đọc thêm\n- [pandas: Merge, join, concatenate and compare](https://pandas.pydata.org/docs/user_guide/merging.html)\n- [pandas.to_numeric](https://pandas.pydata.org/docs/reference/api/pandas.to_numeric.html)\n",
+   "distractors": {
+    "A": "pandas không tự đổi kiểu khóa khi merge; ép ngầm như vậy dễ che lỗi dữ liệu nên nó từ chối.",
+    "B": "Với khóa số nguyên và chuỗi pandas báo lỗi ngay; hơn nữa đổi sang inner join cũng không làm 101 khớp với \"101\".",
+    "D": "`merge(on=...)` làm việc trực tiếp trên cột, không cần đặt index; lỗi thật nằm ở kiểu dữ liệu của khóa."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Chạy được: pandas tự ép \"101\" thành 101 nên đơn của khách 101 và 102 có hạng"
+    },
+    {
+     "key": "B",
+     "text": "Chạy được nhưng cột `hang` toàn NaN vì 101 khác \"101\"; đổi sang `how=\"inner\"` là xong"
+    },
+    {
+     "key": "C",
+     "text": "Báo ValueError vì hai cột khóa khác kiểu (số nguyên và chuỗi); cần ép cùng kiểu, ví dụ `kh[\"ma_kh\"].astype(int)`, rồi mới merge"
+    },
+    {
+     "key": "D",
+     "text": "Báo KeyError vì cột `ma_kh` phải được đặt làm index trước khi merge"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T06-C06",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Phân tích giờ truy cập trong log web (chú ý request cuối rơi sang ngày hôm sau). Đoạn code sau in ra gì? Ghi đúng 2 dòng.\n\n```python\nimport pandas as pd\nlog = pd.DataFrame({\"ts\": pd.to_datetime([\n    \"2026-10-12 08:05:00\", \"2026-10-12 08:59:30\", \"2026-10-12 09:00:00\",\n    \"2026-10-12 23:10:00\", \"2026-10-13 00:20:00\"])})\nprint(log[\"ts\"].dt.hour.value_counts().sort_index().to_dict())\nprint((log[\"ts\"].max() - log[\"ts\"].min()).total_seconds() / 3600)\n```",
+   "explanation": "Giờ của 5 mốc: 8, 8, 9, 23, 0; sắp theo giờ được {0: 1, 8: 2, 9: 1, 23: 1}. Khoảng cách từ 08:05 ngày 12 tới 00:20 ngày 13 là $16 + \\frac{15}{60} = 16{,}25$ giờ.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nCột datetime có bộ truy cập `.dt` để lấy thành phần thời gian: `.dt.hour` trả **phần giờ** (0 đến 23), cắt bỏ phút và giây, không làm tròn. Hiệu hai Timestamp là một **Timedelta**, chứa cả phần ngày; `.total_seconds()` đổi ra giây.\n\n#### Từng bước\n| ts | dt.hour |\n|---|---|\n| 2026-10-12 08:05:00 | 8 |\n| 2026-10-12 08:59:30 | 8 |\n| 2026-10-12 09:00:00 | 9 |\n| 2026-10-12 23:10:00 | 23 |\n| 2026-10-13 00:20:00 | 0 |\n\n`value_counts().sort_index()` cho $\\{0: 1, 8: 2, 9: 1, 23: 1\\}$.\n\nKhoảng thời gian: từ 08:05 ngày 12 đến 00:20 ngày 13 là 16 giờ 15 phút, tức $\\frac{58500}{3600} = 16{,}25$ giờ.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 130\" width=\"100%\" style=\"max-width:560px\">\n<line x1=\"30\" y1=\"70\" x2=\"530\" y2=\"70\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<g font-size=\"11\" fill=\"currentColor\" text-anchor=\"middle\">\n<line x1=\"40\" y1=\"64\" x2=\"40\" y2=\"76\" stroke=\"currentColor\"/><text x=\"40\" y=\"92\">08:00</text>\n<line x1=\"490\" y1=\"64\" x2=\"490\" y2=\"76\" stroke=\"currentColor\"/><text x=\"490\" y=\"92\">00:00</text>\n<line x1=\"265\" y1=\"64\" x2=\"265\" y2=\"76\" stroke=\"currentColor\"/><text x=\"265\" y=\"92\">16:00</text>\n<text x=\"490\" y=\"106\">ngày 13</text><text x=\"40\" y=\"106\">ngày 12</text>\n</g>\n<circle cx=\"42\" cy=\"70\" r=\"5\" fill=\"#3b82f6\"/>\n<circle cx=\"60\" cy=\"70\" r=\"5\" fill=\"#3b82f6\"/>\n<circle cx=\"74\" cy=\"70\" r=\"5\" fill=\"#f59e0b\"/>\n<circle cx=\"467\" cy=\"70\" r=\"5\" fill=\"#10b981\"/>\n<circle cx=\"499\" cy=\"70\" r=\"5\" fill=\"#ef4444\"/>\n<line x1=\"42\" y1=\"40\" x2=\"499\" y2=\"40\" stroke=\"#ef4444\" stroke-width=\"1.5\"/>\n<line x1=\"42\" y1=\"34\" x2=\"42\" y2=\"46\" stroke=\"#ef4444\"/><line x1=\"499\" y1=\"34\" x2=\"499\" y2=\"46\" stroke=\"#ef4444\"/>\n<text x=\"270\" y=\"30\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">max − min = 16 giờ 15 phút = 16,25 giờ</text>\n<text x=\"280\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">xanh dương: giờ 8 · cam: giờ 9 · xanh lá: giờ 23 · đỏ: giờ 0</text>\n</svg>\n\n```python\nimport pandas as pd\nts = pd.to_datetime([\"2026-10-12 08:05:00\", \"2026-10-12 08:59:30\", \"2026-10-12 09:00:00\",\n                     \"2026-10-12 23:10:00\", \"2026-10-13 00:20:00\"])\ns = pd.Series(ts)\nprint(s.dt.hour.value_counts().sort_index().to_dict())   # {0: 1, 8: 2, 9: 1, 23: 1}\nprint((s.max() - s.min()).total_seconds() / 3600)        # 16.25\n```\n\n#### Bẫy thường gặp\n- Muốn làm tròn về giờ gần nhất thì dùng `.dt.round(\"h\")`; về đầu giờ thì `.dt.floor(\"h\")`.\n- Lấy `.dt.hour` rồi trừ nhau sẽ mất phần ngày, ra số âm qua nửa đêm.\n- Timedelta có `.days` và `.seconds` riêng: `.seconds` chỉ là phần dư trong ngày, không phải tổng số giây.\n\n#### Đọc thêm\n- [pandas: Time series / date functionality](https://pandas.pydata.org/docs/user_guide/timeseries.html)\n- [pandas.Series.dt.hour](https://pandas.pydata.org/docs/reference/api/pandas.Series.dt.hour.html)\n",
+   "mistakes": [
+    {
+     "value": "{0: 1, 8: 1, 9: 2, 23: 1}\n16.25",
+     "why": "Làm tròn 08:59:30 lên 9 giờ; `.dt.hour` chỉ lấy phần giờ (cắt bỏ phút giây), nên vẫn là 8."
+    },
+    {
+     "value": "{0: 1, 8: 2, 9: 1, 23: 1}\n-7.75",
+     "why": "Chỉ trừ giờ trong ngày (00:20 trừ 08:05) mà bỏ qua ngày; Timestamp mang cả ngày nên hiệu là 16 giờ 15 phút."
+    },
+    {
+     "value": "{8: 2, 9: 1, 23: 1, 0: 1}\n16.25",
+     "why": "Quên `sort_index()`: dict được sắp theo khóa giờ tăng dần, giờ 0 đứng đầu."
+    }
+   ],
+   "answer": "{0: 1, 8: 2, 9: 1, 23: 1}\n16.25",
+   "accept": [
+    "{0: 1, 8: 2, 9: 1, 23: 1}\n16.25",
+    "{0:1,8:2,9:1,23:1}\n16.25"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T06-C07",
+   "module": "C",
+   "type": "output",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Tính số đêm lưu trú từ ngày nhận phòng `ci` và ngày trả phòng `co`. Đoạn code sau in ra gì? Ghi đúng 2 dòng.\n\n```python\nimport pandas as pd\nbk = pd.DataFrame({\n    \"ci\": pd.to_datetime([\"2026-07-30\", \"2026-08-02\", \"2026-07-05\", \"2026-08-10\"]),\n    \"co\": pd.to_datetime([\"2026-08-02\", \"2026-08-03\", \"2026-07-08\", \"2026-08-14\"]),\n})\nbk[\"dem\"] = (bk[\"co\"] - bk[\"ci\"]).dt.days\nprint(bk[\"dem\"].tolist())\nprint(bk.groupby(bk[\"ci\"].dt.month)[\"dem\"].sum().to_dict())\n```",
+   "explanation": "Hiệu hai Timestamp là Timedelta; `.dt.days` lấy số ngày: 3, 1, 3, 4. Theo tháng nhận phòng: tháng 7 gồm $3 + 3 = 6$, tháng 8 gồm $1 + 4 = 5$.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nSố đêm lưu trú $= $ ngày trả phòng $-$ ngày nhận phòng. Hiệu hai cột datetime là cột Timedelta; `.dt.days` lấy phần số ngày nguyên. Không cộng thêm 1: ngày trả phòng không tính là một đêm.\n\n#### Từng bước\n| booking | ci | co | dem | tháng của ci |\n|---|---|---|---|---|\n| 0 | 30/07 | 02/08 | 3 | 7 |\n| 1 | 02/08 | 03/08 | 1 | 8 |\n| 2 | 05/07 | 08/07 | 3 | 7 |\n| 3 | 10/08 | 14/08 | 4 | 8 |\n\nTổng theo tháng nhận phòng: tháng 7 là $3 + 3 = 6$, tháng 8 là $1 + 4 = 5$.\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 120\" width=\"100%\" style=\"max-width:560px\">\n<g font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">\n<rect x=\"40\" y=\"40\" width=\"100\" height=\"36\" fill=\"#10b981\" opacity=\"0.35\" stroke=\"currentColor\"/><text x=\"90\" y=\"63\">đêm 30/7</text>\n<rect x=\"150\" y=\"40\" width=\"100\" height=\"36\" fill=\"#10b981\" opacity=\"0.35\" stroke=\"currentColor\"/><text x=\"200\" y=\"63\">đêm 31/7</text>\n<rect x=\"260\" y=\"40\" width=\"100\" height=\"36\" fill=\"#3b82f6\" opacity=\"0.35\" stroke=\"currentColor\"/><text x=\"310\" y=\"63\">đêm 1/8</text>\n<rect x=\"370\" y=\"40\" width=\"150\" height=\"36\" fill=\"none\" stroke=\"#ef4444\" stroke-dasharray=\"4 3\"/><text x=\"445\" y=\"63\">2/8 trả phòng</text>\n<text x=\"200\" y=\"28\">ci = 30/7 (tháng 7) · co − ci = 3 ngày = 3 đêm</text>\n<text x=\"280\" y=\"102\">cả 3 đêm tính cho tháng 7 vì code nhóm theo tháng của ci</text>\n</g>\n</svg>\n\n```python\nimport pandas as pd\nbk = pd.DataFrame({\"ci\": pd.to_datetime([\"2026-07-30\", \"2026-08-02\", \"2026-07-05\", \"2026-08-10\"]),\n                   \"co\": pd.to_datetime([\"2026-08-02\", \"2026-08-03\", \"2026-07-08\", \"2026-08-14\"])})\nbk[\"dem\"] = (bk[\"co\"] - bk[\"ci\"]).dt.days\nprint(bk[\"dem\"].tolist())                                       # [3, 1, 3, 4]\nprint(bk.groupby(bk[\"ci\"].dt.month)[\"dem\"].sum().to_dict())     # {7: 6, 8: 5}\n```\n\n#### Bẫy thường gặp\n- Cộng 1 theo thói quen đếm \"số ngày\" (đếm cả hai đầu).\n- Nhóm theo tháng trả phòng sẽ cho kết quả khác; báo cáo cần nói rõ quy ước. Muốn chia đêm đúng theo tháng thực tế phải \"nổ\" mỗi booking thành từng đêm (ví dụ bằng `pd.date_range` rồi `explode`).\n- `groupby` có thể nhận trực tiếp một Series (ở đây `bk[\"ci\"].dt.month`) làm khóa, không cần tạo cột mới.\n\n#### Đọc thêm\n- [pandas: Time deltas](https://pandas.pydata.org/docs/user_guide/timedeltas.html)\n- [pandas.Series.dt.days](https://pandas.pydata.org/docs/reference/api/pandas.Series.dt.days.html)\n",
+   "mistakes": [
+    {
+     "value": "[4, 2, 4, 5]\n{7: 8, 8: 7}",
+     "why": "Đếm cả ngày trả phòng (cộng thêm 1); số đêm đúng bằng hiệu hai ngày, không cộng 1."
+    },
+    {
+     "value": "[3, 1, 3, 4]\n{7: 3, 8: 8}",
+     "why": "Nhóm theo tháng trả phòng; code nhóm theo `bk[\"ci\"].dt.month`, nên booking 30/7 đến 2/8 tính vào tháng 7."
+    },
+    {
+     "value": "[2, 1, 3, 4]\n{7: 5, 8: 5}",
+     "why": "Tính 30/7 đến 2/8 như thể tháng 7 có 30 ngày; tháng 7 có 31 ngày nên được 3 đêm (30, 31/7 và 1/8)."
+    }
+   ],
+   "answer": "[3, 1, 3, 4]\n{7: 6, 8: 5}",
+   "accept": [
+    "[3, 1, 3, 4]\n{7: 6, 8: 5}",
+    "[3,1,3,4]\n{7:6,8:5}"
+   ],
+   "ignoreCase": false
+  },
+  {
+   "id": "T06-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Giá phòng bị thiếu được điền bằng giá trung bình của **cùng loại phòng**. Đoạn code sau in ra gì?\n\n```python\nbk = pd.DataFrame({\"loai\": [\"Std\", \"Std\", \"Deluxe\", \"Std\", \"Deluxe\", \"Deluxe\"],\n                   \"gia\":  [600, None, 1500, 900, None, 1300]})\nbk[\"gia2\"] = bk[\"gia\"].fillna(bk.groupby(\"loai\")[\"gia\"].transform(\"mean\"))\nprint(bk[\"gia2\"].tolist())\n```",
+   "explanation": "Trung bình theo loại (bỏ NaN): Std $= (600 + 900)/2 = 750$, Deluxe $= (1500 + 1300)/2 = 1400$. `transform` phát các giá trị này về từng dòng, `fillna` chỉ thay ô thiếu.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nĐiền giá trị thiếu theo nhóm là mẫu rất phổ biến: tính thống kê theo nhóm bằng `transform` (ra Series cùng index với bảng gốc), rồi đưa vào `fillna`. `fillna` khớp **theo index**, chỉ thay các ô đang thiếu.\n\n#### Từng bước\n1. Trung bình theo loại, `mean()` tự bỏ NaN: Std $= \\frac{600 + 900}{2} = 750$; Deluxe $= \\frac{1500 + 1300}{2} = 1400$.\n2. `transform(\"mean\")` trả: `[750, 750, 1400, 750, 1400, 1400]`.\n3. `fillna` thay dòng 1 bằng 750 và dòng 4 bằng 1400.\n\n| dòng | loai | gia | transform | gia2 |\n|---|---|---|---|---|\n| 0 | Std | 600 | 750 | 600.0 |\n| 1 | Std | NaN | 750 | **750.0** |\n| 2 | Deluxe | 1500 | 1400 | 1500.0 |\n| 3 | Std | 900 | 750 | 900.0 |\n| 4 | Deluxe | NaN | 1400 | **1400.0** |\n| 5 | Deluxe | 1300 | 1400 | 1300.0 |\n\n```python\nimport pandas as pd\nbk = pd.DataFrame({\"loai\": [\"Std\", \"Std\", \"Deluxe\", \"Std\", \"Deluxe\", \"Deluxe\"],\n                   \"gia\": [600, None, 1500, 900, None, 1300]})\ntb = bk.groupby(\"loai\")[\"gia\"].transform(\"mean\")\nprint(bk[\"gia\"].fillna(tb).tolist())   # [600.0, 750.0, 1500.0, 900.0, 1400.0, 1300.0]\nprint(bk[\"gia\"].fillna(bk[\"gia\"].mean()).tolist())   # trung bình toàn cột 1075\n```\n\n#### Bẫy thường gặp\n- Điền bằng trung bình toàn cột làm phòng Std bị đội giá và Deluxe bị hạ giá.\n- Nếu tính trung bình nhóm trên **toàn bộ dữ liệu** trước khi chia train/test thì thông tin của tập test rò rỉ vào train; trong bài toán học máy, hãy tính trên tập train.\n- Cột vẫn là float (`600.0`) vì từng có NaN; đổi kiểu sau khi điền nếu cần.\n\n#### Đọc thêm\n- [pandas: Working with missing data](https://pandas.pydata.org/docs/user_guide/missing_data.html)\n- [pandas: Group by, mục Transformation](https://pandas.pydata.org/docs/user_guide/groupby.html)\n",
+   "distractors": {
+    "A": "Đây là điền bằng trung bình **toàn cột** $(600 + 1500 + 900 + 1300)/4 = 1075$, không phân biệt loại phòng.",
+    "B": "Đây là kết quả của `ffill()` (lấy giá dòng ngay trên), không phải trung bình theo nhóm.",
+    "C": "Tưởng `transform` trả 2 giá trị (mỗi loại một) nên không khớp index; thực tế nó trả 6 giá trị cùng index với `bk` nên `fillna` khớp theo từng dòng."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`[600.0, 1075.0, 1500.0, 900.0, 1075.0, 1300.0]`"
+    },
+    {
+     "key": "B",
+     "text": "`[600.0, 600.0, 1500.0, 900.0, 900.0, 1300.0]`"
+    },
+    {
+     "key": "C",
+     "text": "`[600.0, nan, 1500.0, 900.0, nan, 1300.0]`"
+    },
+    {
+     "key": "D",
+     "text": "`[600.0, 750.0, 1500.0, 900.0, 1400.0, 1300.0]`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T06-C09",
+   "module": "C",
+   "type": "code",
+   "points": 6,
+   "level": "van-dung",
+   "prompt": "Log web của trang đặt phòng khách sạn sau khi tách trường được đưa vào DataFrame `log` với các cột:\n\n- `ts`: chuỗi thời điểm dạng `\"YYYY-MM-DD HH:MM:SS\"`; một số dòng hỏng (ví dụ `\"N/A\"` hoặc chuỗi rỗng).\n- `status`: mã HTTP (số nguyên).\n- `ms`: thời gian phản hồi ở dạng **chuỗi**; request bị timeout ghi `\"-\"`.\n\nVí dụ:\n\n```python\nlog = pd.DataFrame({\n    \"ts\": [\"2026-10-12 08:10:00\", \"2026-10-12 08:40:00\", \"N/A\",\n           \"2026-10-12 10:05:00\", \"\"],\n    \"status\": [200, 503, 200, 200, 500],\n    \"ms\": [\"120\", \"-\", \"90\", \"300\", \"50\"],\n})\n```\n\nViết (trên giấy) hàm `bao_cao_gio(log)` bằng pandas, trả về DataFrame có **index là mốc đầu mỗi giờ**, liên tục từ giờ của bản ghi hợp lệ sớm nhất đến giờ của bản ghi hợp lệ muộn nhất (**kể cả giờ không có request**), gồm các cột:\n\n| Cột | Ý nghĩa |\n|---|---|\n| `so_req` | số request trong giờ (số nguyên; giờ trống là 0) |\n| `ty_le_loi` | tỷ lệ request có `status >= 500` (giờ trống là 0.0) |\n| `ms_tb` | trung bình `ms` của các request có `ms` hợp lệ (không có thì NaN) |\n\nYêu cầu: bỏ các dòng có `ts` không chuyển được thành thời điểm; không làm thay đổi `log` đầu vào. Với ví dụ trên, kết quả có 3 dòng 08:00, 09:00, 10:00 với `so_req` = 2, 0, 1.",
+   "explanation": "Ba bước: làm sạch kiểu (`to_datetime`, `to_numeric` với `errors=\"coerce\"`), đặt `ts` làm index rồi `resample(\"1h\")` để có đủ mốc giờ, sau đó tính `size`, `mean` của cột lỗi 0/1 và `mean` của `ms`.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nBài toán gồm hai phần: **làm sạch kiểu dữ liệu** (thời gian, số) mà không làm dừng chương trình vì vài dòng hỏng, và **gom theo khung giờ cố định** sao cho giờ không có request vẫn xuất hiện. Công cụ: `to_datetime`/`to_numeric` với `errors=\"coerce\"`, rồi `set_index(\"ts\").resample(\"1h\")`.\n\n#### Từng bước với dữ liệu ví dụ\n| ts gốc | ts sau coerce | status | ms sau to_numeric | loi |\n|---|---|---|---|---|\n| 08:10:00 | 08:10 | 200 | 120 | 0 |\n| 08:40:00 | 08:40 | 503 | NaN | 1 |\n| N/A | NaT (bỏ) | | | |\n| 10:05:00 | 10:05 | 200 | 300 | 0 |\n| (rỗng) | NaT (bỏ) | | | |\n\n`resample(\"1h\")` tạo các mốc 08:00, 09:00, 10:00:\n\n| giờ | so_req | ty_le_loi | ms_tb |\n|---|---|---|---|\n| 08:00 | 2 | $1/2 = 0{,}5$ | 120 (bỏ NaN) |\n| 09:00 | 0 | 0.0 (điền) | NaN |\n| 10:00 | 1 | 0.0 | 300 |\n\n#### Luồng xử lý\n```mermaid\nflowchart LR\n  A[\"log thô\"] --> B[\"copy\"]\n  B --> C[\"to_datetime coerce, dropna ts\"]\n  C --> D[\"to_numeric ms coerce\"]\n  D --> E[\"cột loi = 1 nếu status từ 500 trở lên\"]\n  E --> F[\"set_index ts, resample 1h\"]\n  F --> G[\"size, mean loi, mean ms\"]\n  G --> H[\"fillna 0 cho ty_le_loi\"]\n```\n\n#### Các cách khác được chấp nhận\n- `df[\"gio\"] = df[\"ts\"].dt.floor(\"h\")`, `groupby(\"gio\")`, rồi `reindex(pd.date_range(min, max, freq=\"h\"))` và điền 0 cho `so_req`.\n- Dùng `agg` có tên: `g.agg(so_req=(\"loi\", \"size\"), ty_le_loi=(\"loi\", \"mean\"), ms_tb=(\"ms\", \"mean\"))`.\n\n#### Bẫy thường gặp\n- `groupby(df[\"ts\"].dt.hour)` gộp các ngày khác nhau vào cùng \"giờ 8\" và không tạo giờ trống.\n- Tính tỷ lệ lỗi bằng `sum / count` của cột `ms` (bỏ NaN) làm sai mẫu số; mẫu số phải là số request.\n- Quên `copy()` rồi gán đè `log[\"ts\"]` làm hỏng dữ liệu đầu vào của người gọi.\n\n#### Đọc thêm\n- [pandas: Time series, mục Resampling](https://pandas.pydata.org/docs/user_guide/timeseries.html)\n- [pandas.DataFrame.resample](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html)\n- [pandas.to_numeric](https://pandas.pydata.org/docs/reference/api/pandas.to_numeric.html)\n",
+   "modelAnswer": "```python\nimport pandas as pd\n\ndef bao_cao_gio(log):\n    df = log.copy()                                   # không sửa dữ liệu đầu vào\n    df[\"ts\"] = pd.to_datetime(df[\"ts\"], format=\"%Y-%m-%d %H:%M:%S\", errors=\"coerce\")\n    df = df.dropna(subset=[\"ts\"])                     # bỏ dòng thời gian hỏng\n    df[\"ms\"] = pd.to_numeric(df[\"ms\"], errors=\"coerce\")   # \"-\" thành NaN\n    df[\"loi\"] = (df[\"status\"] >= 500).astype(int)\n\n    g = df.set_index(\"ts\").resample(\"1h\")              # đủ mọi giờ, kể cả giờ trống\n    out = pd.DataFrame({\n        \"so_req\": g.size(),\n        \"ty_le_loi\": g[\"loi\"].mean(),\n        \"ms_tb\": g[\"ms\"].mean(),\n    })\n    out[\"so_req\"] = out[\"so_req\"].astype(int)\n    out[\"ty_le_loi\"] = out[\"ty_le_loi\"].fillna(0.0)   # giờ trống: 0 lỗi\n    return out\n```\n\nÝ chính: `errors=\"coerce\"` biến dữ liệu hỏng thành NaT/NaN thay vì dừng chương trình; `resample(\"1h\")` tạo đủ các mốc giờ liên tiếp nên giờ không có request vẫn có dòng (`size()` cho 0, `mean()` cho NaN). Tỷ lệ lỗi là trung bình của cột 0/1.",
+   "rubric": [
+    {
+     "criterion": "Chuyển `ts` bằng `pd.to_datetime(..., errors=\"coerce\")` (có `format` rõ ràng) và bỏ dòng NaT; làm trên bản sao, không sửa `log`",
+     "points": 1.5
+    },
+    {
+     "criterion": "Chuyển `ms` sang số bằng `pd.to_numeric(..., errors=\"coerce\")` để `\"-\"` thành NaN và bị bỏ qua khi tính trung bình",
+     "points": 1
+    },
+    {
+     "criterion": "Gom theo giờ bằng `resample(\"1h\")` (hoặc `dt.floor` + `reindex` theo `date_range`) sao cho giờ trống vẫn có dòng với `so_req = 0`",
+     "points": 2
+    },
+    {
+     "criterion": "Tính đúng `ty_le_loi` (trung bình cột 0/1, giờ trống điền 0.0) và `ms_tb` (trung bình bỏ NaN); đúng tên cột và kiểu số nguyên của `so_req`",
+     "points": 1.5
+    }
+   ]
+  },
+  {
+   "id": "T06-D01",
+   "module": "D",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung-cao",
+   "prompt": "Chuỗi khách sạn có 3 cơ sở. Bảng `bk` gồm 20 booking (cột `ks`, cột `huy` = 1 nếu booking bị hủy) được tóm tắt thành:\n\n```python\nr = bk.groupby(\"ks\")[\"huy\"].agg(n=\"size\", rate=\"mean\")\n```\n\n| ks | n | rate |\n|---|---|---|\n| DL | 8 | 0.25 |\n| HL | 2 | 0.50 |\n| SG | 10 | 0.10 |\n\nBan giám đốc hỏi **tỷ lệ hủy của toàn chuỗi** (số booking bị hủy chia tổng số booking). Chỉ dùng `r`, biểu thức nào cho đúng con số đó, và giá trị bằng bao nhiêu?",
+   "explanation": "Tỷ lệ chung là trung bình có trọng số: $\\frac{\\sum_i n_i \\cdot rate_i}{\\sum_i n_i} = \\frac{2 + 1 + 1}{20} = 0{,}2$, bằng đúng `bk[\"huy\"].mean()`.",
+   "section": "b-pd",
+   "long": "#### Ý chính\nTỷ lệ của toàn chuỗi **không** phải trung bình cộng các tỷ lệ của từng cơ sở, mà là **trung bình có trọng số** theo số booking:\n$$p = \\frac{\\sum_i n_i \\, rate_i}{\\sum_i n_i}$$\nTử số $\\sum_i n_i \\, rate_i$ chính là tổng số booking bị hủy.\n\n#### Từng bước\n| ks | n | rate | $n \\cdot rate$ (số hủy) |\n|---|---|---|---|\n| DL | 8 | 0,25 | 2 |\n| HL | 2 | 0,50 | 1 |\n| SG | 10 | 0,10 | 1 |\n| Tổng | 20 | | 4 |\n\n- Đúng: $p = \\frac{4}{20} = 0{,}2$.\n- Trung bình không trọng số: $\\frac{0{,}25 + 0{,}5 + 0{,}1}{3} \\approx 0{,}283$, bị HL (chỉ 2 booking) kéo lên.\n- Trung vị các tỷ lệ: $0{,}25$.\n- Chia cho số khách sạn: $\\frac{4}{3} \\approx 1{,}333$, lớn hơn 1 nên chắc chắn sai.\n\n```python\nimport pandas as pd\nbk = pd.DataFrame({\"ks\": [\"HL\"] * 2 + [\"DL\"] * 8 + [\"SG\"] * 10,\n                   \"huy\": [1, 0] + [1, 1] + [0] * 6 + [1] + [0] * 9})\nr = bk.groupby(\"ks\")[\"huy\"].agg(n=\"size\", rate=\"mean\")\nprint((r[\"rate\"] * r[\"n\"]).sum() / r[\"n\"].sum(), bk[\"huy\"].mean())   # 0.2 0.2\nprint(round(r[\"rate\"].mean(), 3))                                    # 0.283\n```\n\n#### Liên hệ\nTrung bình các trung bình có thể dẫn tới kết luận ngược khi so sánh các nhóm có quy mô khác nhau; hiện tượng cực đoan của việc gộp nhóm sai cách là nghịch lý Simpson.\n\n#### Bẫy thường gặp\n- Dùng `groupby(...).mean().mean()` cho mọi chỉ số \"trung bình chung\".\n- Khi chỉ có bảng tóm tắt, luôn giữ lại cột `n` để có thể gộp lại đúng.\n\n#### Đọc thêm\n- [Weighted arithmetic mean (Wikipedia)](https://en.wikipedia.org/wiki/Weighted_arithmetic_mean)\n- [Simpson's paradox (Wikipedia)](https://en.wikipedia.org/wiki/Simpson%27s_paradox)\n- [pandas: Group by, mục Named aggregation](https://pandas.pydata.org/docs/user_guide/groupby.html)\n",
+   "distractors": {
+    "B": "Trung bình của các tỷ lệ coi HL (2 booking) nặng ngang SG (10 booking); đây là trung bình không trọng số, không phải tỷ lệ toàn chuỗi.",
+    "C": "Trung vị các tỷ lệ cũng bỏ qua quy mô từng cơ sở; chỉ trùng tỷ lệ chung khi mọi cơ sở có cùng số booking.",
+    "D": "Tử số đúng (4 booking bị hủy) nhưng chia cho số khách sạn thay vì tổng số booking; tỷ lệ lớn hơn 1 là dấu hiệu sai."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`(r[\"rate\"] * r[\"n\"]).sum() / r[\"n\"].sum()`, bằng 0,2"
+    },
+    {
+     "key": "B",
+     "text": "`r[\"rate\"].mean()`, bằng khoảng 0,283"
+    },
+    {
+     "key": "C",
+     "text": "`r[\"rate\"].median()`, bằng 0,25"
+    },
+    {
+     "key": "D",
+     "text": "`(r[\"rate\"] * r[\"n\"]).sum() / len(r)`, bằng khoảng 1,333"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T06-D02",
+   "module": "D",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung-cao",
+   "prompt": "Giá phòng của một khách sạn thay đổi theo mùa; bảng `gia` ghi giá có hiệu lực **từ** ngày `tu_ngay`. Gán giá cho từng booking theo ngày nhận phòng:\n\n```python\ngia = pd.DataFrame({\"tu_ngay\": pd.to_datetime([\"2026-06-01\", \"2026-07-01\", \"2026-07-15\"]),\n                    \"gia_dem\": [900, 1200, 1500]})\nbk = pd.DataFrame({\"ma\": [\"B1\", \"B2\", \"B3\"],\n                   \"ngay\": pd.to_datetime([\"2026-06-20\", \"2026-07-15\", \"2026-07-10\"])})\nr = pd.merge_asof(bk.sort_values(\"ngay\"), gia, left_on=\"ngay\", right_on=\"tu_ngay\")\nprint(r[\"ma\"].tolist(), r[\"gia_dem\"].tolist())\n```\n\nKết quả in ra là gì?",
+   "explanation": "`merge_asof` (mặc định `direction=\"backward\"`) ghép mỗi dòng trái với dòng phải có khóa lớn nhất $\\le$ khóa trái: 20/6 nhận 900, 10/7 nhận 1200, 15/7 nhận 1500. Cả hai bảng phải được sắp theo khóa.",
+   "section": "b-pd",
+   "long": "#### Ý chính\n`pd.merge_asof` là phép ghép \"gần đúng\" theo khóa có thứ tự (thường là thời gian): mỗi dòng bảng trái được ghép với **một** dòng bảng phải có khóa gần nhất theo hướng `direction`. Mặc định `direction=\"backward\"`: lấy dòng có khóa lớn nhất mà $\\le$ khóa trái, và `allow_exact_matches=True` nên khóa bằng nhau được tính. Hai bảng **phải được sắp** theo khóa; kết quả theo thứ tự của bảng trái đã sắp.\n\n#### Từng bước\n| booking (đã sắp) | ngày | mốc giá gần nhất không sau ngày | gia_dem |\n|---|---|---|---|\n| B1 | 20/06 | 01/06 | 900 |\n| B3 | 10/07 | 01/07 | 1200 |\n| B2 | 15/07 | 15/07 (trùng đúng ngày) | 1500 |\n\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 150\" width=\"100%\" style=\"max-width:560px\">\n<rect x=\"30\" y=\"40\" width=\"200\" height=\"28\" fill=\"#3b82f6\" opacity=\"0.25\"/>\n<rect x=\"230\" y=\"40\" width=\"96\" height=\"28\" fill=\"#f59e0b\" opacity=\"0.3\"/>\n<rect x=\"326\" y=\"40\" width=\"204\" height=\"28\" fill=\"#ef4444\" opacity=\"0.2\"/>\n<g font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">\n<text x=\"130\" y=\"59\">900 từ 01/06</text>\n<text x=\"278\" y=\"59\">1200 từ 01/07</text>\n<text x=\"428\" y=\"59\">1500 từ 15/07</text>\n<text x=\"30\" y=\"30\">01/06</text><text x=\"230\" y=\"30\">01/07</text><text x=\"326\" y=\"30\">15/07</text>\n</g>\n<line x1=\"30\" y1=\"100\" x2=\"530\" y2=\"100\" stroke=\"currentColor\" stroke-width=\"1.5\"/>\n<g font-size=\"12\" fill=\"currentColor\" text-anchor=\"middle\">\n<circle cx=\"157\" cy=\"100\" r=\"5\" fill=\"#10b981\"/><text x=\"157\" y=\"122\">B1 20/06</text>\n<circle cx=\"288\" cy=\"100\" r=\"5\" fill=\"#10b981\"/><text x=\"288\" y=\"122\">B3 10/07</text>\n<circle cx=\"326\" cy=\"100\" r=\"5\" fill=\"#10b981\"/><text x=\"350\" y=\"140\">B2 15/07</text>\n</g>\n<line x1=\"157\" y1=\"94\" x2=\"40\" y2=\"72\" stroke=\"#10b981\" stroke-width=\"1.5\"/>\n<line x1=\"288\" y1=\"94\" x2=\"240\" y2=\"72\" stroke=\"#10b981\" stroke-width=\"1.5\"/>\n<line x1=\"326\" y1=\"94\" x2=\"326\" y2=\"72\" stroke=\"#10b981\" stroke-width=\"1.5\"/>\n</svg>\n\nMũi nối xanh lá chỉ về mốc giá gần nhất ở **phía trước hoặc trùng** ngày booking (backward).\n\n```python\nimport pandas as pd\ngia = pd.DataFrame({\"tu_ngay\": pd.to_datetime([\"2026-06-01\", \"2026-07-01\", \"2026-07-15\"]),\n                    \"gia_dem\": [900, 1200, 1500]})\nbk = pd.DataFrame({\"ma\": [\"B1\", \"B2\", \"B3\"],\n                   \"ngay\": pd.to_datetime([\"2026-06-20\", \"2026-07-15\", \"2026-07-10\"])})\nr = pd.merge_asof(bk.sort_values(\"ngay\"), gia, left_on=\"ngay\", right_on=\"tu_ngay\")\nprint(r[\"ma\"].tolist(), r[\"gia_dem\"].tolist())   # ['B1', 'B3', 'B2'] [900, 1200, 1500]\n```\n\n#### Bẫy thường gặp\n- Quên sắp bảng trái: pandas báo `ValueError: left keys must be sorted`.\n- Cho rằng thứ tự kết quả giống `bk` gốc; muốn trả lại thứ tự cũ thì giữ một cột thứ tự rồi sắp lại.\n- Ghép theo từng khách sạn thì thêm `by=\"ma_ks\"`; giới hạn khoảng cách tối đa thì dùng `tolerance=pd.Timedelta(\"30D\")`.\n\n#### Đọc thêm\n- [pandas.merge_asof](https://pandas.pydata.org/docs/reference/api/pandas.merge_asof.html)\n- [pandas: Merge, join, concatenate and compare](https://pandas.pydata.org/docs/user_guide/merging.html)\n",
+   "distractors": {
+    "A": "Ghép giá thì đúng nhưng giữ thứ tự gốc của `bk`; `merge_asof` trả kết quả theo thứ tự của bảng trái **đã sắp** theo `ngay`.",
+    "C": "Tưởng mốc trùng đúng ngày không được tính; mặc định `allow_exact_matches=True` nên B2 (15/7) nhận giá 1500 có hiệu lực từ 15/7.",
+    "D": "Đây là hướng `direction=\"forward\"` (lấy mốc gần nhất phía sau); mặc định là `\"backward\"`, lấy mốc gần nhất **không sau** ngày booking."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`['B1', 'B2', 'B3'] [900, 1500, 1200]`"
+    },
+    {
+     "key": "B",
+     "text": "`['B1', 'B3', 'B2'] [900, 1200, 1500]`"
+    },
+    {
+     "key": "C",
+     "text": "`['B1', 'B3', 'B2'] [900, 1200, 1200]`"
+    },
+    {
+     "key": "D",
+     "text": "`['B1', 'B3', 'B2'] [1200, 1500, 1500]`"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T06-D03",
+   "module": "D",
+   "type": "code",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Một chuỗi khách sạn lưu hai bảng:\n\n- `bk` (booking): `ma_dat`, `ma_ks`, `checkin`, `checkout` (datetime), `gia_dem` (nghìn đồng/đêm), `trang_thai` (`\"ok\"` hoặc `\"huy\"`).\n- `ks` (danh mục khách sạn, khóa `ma_ks` không trùng): `ma_ks`, `ten`, `so_phong`.\n\nVí dụ:\n\n```python\nbk = pd.DataFrame({\n    \"ma_dat\": [\"D1\", \"D2\", \"D3\", \"D4\", \"D5\"],\n    \"ma_ks\":  [\"HL\", \"HL\", \"DL\", \"DL\", \"HL\"],\n    \"checkin\":  pd.to_datetime([\"2026-07-01\", \"2026-07-03\", \"2026-07-02\", \"2026-07-05\", \"2026-07-10\"]),\n    \"checkout\": pd.to_datetime([\"2026-07-03\", \"2026-07-04\", \"2026-07-05\", \"2026-07-06\", \"2026-07-12\"]),\n    \"gia_dem\": [1000, 1200, 800, 900, 1100],\n    \"trang_thai\": [\"ok\", \"huy\", \"ok\", \"ok\", \"ok\"],\n})\nks = pd.DataFrame({\"ma_ks\": [\"DL\", \"HL\", \"SG\"],\n                   \"ten\": [\"Đà Lạt\", \"Hạ Long\", \"Sài Gòn\"],\n                   \"so_phong\": [20, 30, 50]})\n```\n\nViết (trên giấy) hàm `bao_cao_ks(bk, ks)` trả về DataFrame **một dòng cho mỗi khách sạn trong `ks`** với các cột theo thứ tự `ma_ks, ten, so_dat, ty_le_huy, dem_ban, doanh_thu`:\n\n| Cột | Ý nghĩa |\n|---|---|\n| `so_dat` | tổng số booking (kể cả bị hủy) |\n| `ty_le_huy` | số booking hủy chia `so_dat` |\n| `dem_ban` | tổng số đêm của các booking **không hủy** (số đêm = `checkout - checkin` tính theo ngày) |\n| `doanh_thu` | tổng `số đêm × gia_dem` của các booking **không hủy** |\n\nYêu cầu: khách sạn không có booking nào vẫn có dòng với `so_dat`, `dem_ban`, `doanh_thu` bằng 0 (số nguyên) và `ty_le_huy` bằng 0.0; sắp `doanh_thu` giảm dần, bằng nhau thì `ma_ks` tăng dần; index đánh lại từ 0; không làm thay đổi `bk`, `ks`. Với ví dụ, thứ tự dòng là HL (doanh thu 4200), DL (3300), SG (0).",
+   "explanation": "Tính cột phụ (số đêm, cờ hủy, đêm và tiền chỉ của booking không hủy), gộp bằng named aggregation, rồi left merge từ danh mục `ks` và điền 0 cho khách sạn chưa có booking.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nĐây là mẫu \"báo cáo theo danh mục\" điển hình: tính cột phụ ở mức booking, gộp theo khách sạn, rồi ghép vào **danh mục** để không sót khách sạn nào. Ba điểm dễ sai: chỉ tính đêm và doanh thu của booking không hủy nhưng tỷ lệ hủy phải tính trên **mọi** booking; merge phải đi từ `ks`; và điền 0 cho khách sạn chưa có booking.\n\n#### Từng bước với dữ liệu ví dụ\n| ma_dat | ma_ks | dem | huy | dem_ok | tien_ok |\n|---|---|---|---|---|---|\n| D1 | HL | 2 | 0 | 2 | 2000 |\n| D2 | HL | 1 | 1 | 0 | 0 |\n| D3 | DL | 3 | 0 | 3 | 2400 |\n| D4 | DL | 1 | 0 | 1 | 900 |\n| D5 | HL | 2 | 0 | 2 | 2200 |\n\n| ma_ks | so_dat | ty_le_huy | dem_ban | doanh_thu |\n|---|---|---|---|---|\n| HL | 3 | $1/3 \\approx 0{,}333$ | 4 | 4200 |\n| DL | 2 | 0.0 | 4 | 3300 |\n| SG | 0 | 0.0 | 0 | 0 |\n\n#### Luồng xử lý\n```mermaid\nflowchart TD\n  A[\"bk\"] --> B[\"assign dem = co - ci theo ngày, huy = trang_thai bằng huy\"]\n  B --> C[\"dem_ok, tien_ok = 0 nếu huy\"]\n  C --> D[\"groupby ma_ks, agg 4 chỉ số\"]\n  K[\"ks danh mục\"] --> E[\"left merge từ ks, validate one_to_one\"]\n  D --> E\n  E --> F[\"fillna 0, astype int\"]\n  F --> G[\"sort doanh_thu giảm, ma_ks tăng, reset_index\"]\n```\n\n#### Bẫy thường gặp\n- Lọc bỏ booking hủy **trước** khi `groupby` thì `ty_le_huy` luôn bằng 0 và `so_dat` thiếu.\n- `bk.merge(ks, how=\"left\")` (đi từ booking) làm mất SG vì SG không có booking.\n- Sau left merge, cột đếm thành float vì có NaN; cần `fillna(0)` rồi `astype(int)`.\n- Sắp hai khóa phải truyền `ascending=[False, True]`.\n- Gán cột mới thẳng vào `bk` (ví dụ `bk[\"dem\"] = ...`) là sửa dữ liệu của người gọi; dùng `assign` hoặc `copy()`.\n\n#### Đọc thêm\n- [pandas: Group by, mục Named aggregation](https://pandas.pydata.org/docs/user_guide/groupby.html)\n- [pandas: Merge, join, concatenate and compare](https://pandas.pydata.org/docs/user_guide/merging.html)\n- [pandas: Time deltas](https://pandas.pydata.org/docs/user_guide/timedeltas.html)\n",
+   "modelAnswer": "```python\nimport pandas as pd\n\ndef bao_cao_ks(bk, ks):\n    b = bk.assign(\n        dem=(bk[\"checkout\"] - bk[\"checkin\"]).dt.days,\n        huy=(bk[\"trang_thai\"] == \"huy\").astype(int),\n    )                                                  # assign trả bản mới, bk không đổi\n    ok = b[\"huy\"] == 0\n    b[\"dem_ok\"] = b[\"dem\"].where(ok, 0)                # đêm của booking hủy tính là 0\n    b[\"tien_ok\"] = (b[\"dem\"] * b[\"gia_dem\"]).where(ok, 0)\n\n    tk = (b.groupby(\"ma_ks\")\n            .agg(so_dat=(\"ma_dat\", \"size\"),\n                 ty_le_huy=(\"huy\", \"mean\"),\n                 dem_ban=(\"dem_ok\", \"sum\"),\n                 doanh_thu=(\"tien_ok\", \"sum\"))\n            .reset_index())\n\n    out = ks[[\"ma_ks\", \"ten\"]].merge(tk, on=\"ma_ks\", how=\"left\", validate=\"one_to_one\")\n    out = out.fillna({\"so_dat\": 0, \"ty_le_huy\": 0.0, \"dem_ban\": 0, \"doanh_thu\": 0})\n    cot_nguyen = [\"so_dat\", \"dem_ban\", \"doanh_thu\"]\n    out[cot_nguyen] = out[cot_nguyen].astype(int)\n    return (out.sort_values([\"doanh_thu\", \"ma_ks\"], ascending=[False, True])\n               .reset_index(drop=True))\n```\n\nÝ chính: tính số đêm bằng hiệu ngày; tách \"đêm bán được\" và \"doanh thu\" chỉ cho booking không hủy bằng `where`; một lần `groupby().agg()` với named aggregation; **left merge từ `ks`** để khách sạn không có booking vẫn xuất hiện (điền 0); `validate=\"one_to_one\"` chặn trùng khóa làm nhân dòng.",
+   "rubric": [
+    {
+     "criterion": "Tính số đêm bằng `(checkout - checkin).dt.days` và cờ hủy; chỉ cộng đêm/doanh thu của booking không hủy (`where`, lọc hoặc nhân với cờ)",
+     "points": 1.5
+    },
+    {
+     "criterion": "Một bước `groupby(\"ma_ks\").agg(...)` cho ra đúng 4 chỉ số, trong đó `ty_le_huy` là trung bình cờ hủy trên **mọi** booking",
+     "points": 1.5
+    },
+    {
+     "criterion": "Left merge từ `ks` (không phải từ `bk`) để giữ khách sạn không có booking; điền 0 và đưa về kiểu số nguyên",
+     "points": 1.5
+    },
+    {
+     "criterion": "Sắp xếp hai khóa đúng chiều, `reset_index(drop=True)`, đúng tên và thứ tự cột, không sửa dữ liệu đầu vào",
+     "points": 1.5
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,990 @@
+{
+ "title": "CĐ-11 · MLOps và vận hành mô hình",
+ "description": "Serving: batching, cache, lượng tử hóa, p95, TTFT — 25% · CI/CD, cổng eval, quản lý phiên bản dữ liệu và model — 20% · Giám sát: drift, canary, rollback — 25% · Chi phí/1K request, GPU, ROI — 20% · Docker, tái lập kết quả — 10%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T11-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Dashboard của API chấm điểm tín dụng ghi: **p95 latency = 420 ms** (tính trên mọi request trong 1 giờ qua). Phát biểu nào diễn giải đúng con số này?",
+   "explanation": "p95 là giá trị $x$ sao cho khoảng 95% quan sát $\\le x$: $P(\\text{latency} \\le 420\\ \\text{ms}) \\approx 0{,}95$. 5% request còn lại (đuôi chậm) có thể chậm hơn nhiều.",
+   "section": "c-ops",
+   "long": "#### Ý chính\np95 là **phân vị thứ 95** của phân phối độ trễ: khoảng 95% request nhanh hơn hoặc bằng giá trị này, khoảng 5% chậm hơn. Nó là một **ngưỡng**, không phải trung bình của nhóm nào. Dashboard dùng p95 (và p99) vì trung bình che mất đuôi chậm, mà người dùng gặp đuôi chậm thì vẫn bực.\n\n#### Từng bước\n1. Thu thập độ trễ của mọi request trong cửa sổ (ở đây 1 giờ).\n2. Sắp xếp tăng dần, lấy giá trị tại vị trí khoảng 95% (cách tính chính xác phụ thuộc phương pháp: nearest-rank, nội suy tuyến tính...).\n3. Diễn giải: $P(\\text{latency} \\le 420\\ \\text{ms}) \\approx 0{,}95$.\n\nVí dụ: 1 giờ có 36.000 request thì khoảng $0{,}05 \\times 36\\,000 = 1\\,800$ request chậm hơn 420 ms, và p95 không nói gì về việc chúng chậm đến mức nào (có thể 500 ms, có thể 5 s). Muốn biết đuôi xa hơn phải xem p99 hoặc max.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 220\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Phân phối độ trễ (lệch phải), vạch p95</text>\n<line x1=\"40\" y1=\"180\" x2=\"540\" y2=\"180\" stroke=\"currentColor\"/>\n<path d=\"M40 180 C 90 175, 120 40, 170 40 S 260 140, 330 165 S 470 178, 540 179\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<line x1=\"380\" y1=\"40\" x2=\"380\" y2=\"180\" stroke=\"#ef4444\" stroke-width=\"2\" stroke-dasharray=\"6 4\"/>\n<text x=\"384\" y=\"55\" font-size=\"12\" fill=\"#ef4444\">p95 = 420 ms</text>\n<text x=\"200\" y=\"120\" font-size=\"13\" fill=\"currentColor\">95% request</text>\n<text x=\"430\" y=\"160\" font-size=\"13\" fill=\"currentColor\">5% đuôi chậm</text>\n<text x=\"40\" y=\"200\" font-size=\"12\" fill=\"currentColor\">0 ms</text>\n<text x=\"490\" y=\"200\" font-size=\"12\" fill=\"currentColor\">độ trễ →</text>\n</svg>\n\n| Chỉ số | Câu hỏi nó trả lời |\n|---|---|\n| mean | trung bình mỗi request chờ bao lâu (bị kéo bởi vài request rất chậm) |\n| p50 | request \"điển hình\" chờ bao lâu |\n| p95 / p99 | ngưỡng mà 95% / 99% request không vượt quá |\n\n#### Bẫy thường gặp\n- Đọc p95 thành \"trung bình của 95% nhanh nhất\".\n- Đảo chiều: nghĩ chỉ 5% request nhanh hơn p95.\n- Lấy trung bình các p95 của nhiều server để ra p95 toàn hệ thống: phân vị **không cộng trung bình được**, phải gộp dữ liệu gốc hoặc histogram.\n\n#### Đọc thêm\n- [Percentile, Wikipedia](https://en.wikipedia.org/wiki/Percentile)\n- [Google SRE Book: Service Level Objectives](https://sre.google/sre-book/service-level-objectives/)\n",
+   "distractors": {
+    "A": "Nhầm phân vị với trung bình có cắt đuôi. p95 là một ngưỡng (một giá trị trong phân phối), không phải trung bình của một nhóm request.",
+    "C": "Nhầm tỉ lệ request với tỉ lệ thời gian, và nhầm \"không vượt quá\" thành \"bằng đúng\". p95 nói về phân phối độ trễ của các request.",
+    "D": "Đảo chiều phân vị: 95% nằm **dưới** p95, chỉ khoảng 5% chậm hơn ngưỡng này."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Độ trễ trung bình của 95% request nhanh nhất trong giờ đó là 420 ms"
+    },
+    {
+     "key": "B",
+     "text": "Khoảng 95% request trong giờ đó có độ trễ không vượt quá 420 ms"
+    },
+    {
+     "key": "C",
+     "text": "Trong 95% thời gian của giờ đó, API phản hồi đúng 420 ms"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ 5% request có độ trễ không vượt quá 420 ms, còn lại chậm hơn"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T11-A02",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Tính năng **dynamic batching** của một inference server (ví dụ NVIDIA Triton) làm gì?",
+   "explanation": "Thời gian một lượt chạy GPU thường có dạng $t(b) = t_0 + c \\cdot b$ với chi phí cố định $t_0$ lớn, nên throughput $b / t(b)$ tăng theo batch size $b$; đổi lại request phải chờ thêm tối đa một cửa sổ gom batch.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nGPU hiệu quả nhất khi xử lý nhiều mẫu một lúc: mỗi lượt chạy có một phần chi phí cố định (khởi chạy kernel, đọc trọng số từ bộ nhớ) không đổi theo số mẫu. **Dynamic batching** ở server chờ một cửa sổ rất ngắn (ví dụ vài mili giây) để gom các request đến gần nhau thành một batch, rồi chạy một lượt cho cả batch.\n\n#### Từng bước\nGiả sử một lượt chạy tốn $t(b) = t_0 + c \\cdot b$.\n1. Throughput $= \\dfrac{b}{t_0 + c\\,b}$, tăng dần theo $b$ và tiến tới $1/c$ khi $b$ lớn.\n2. Đổi lại, mỗi request phải chờ tối đa một cửa sổ gom batch (`max_queue_delay`) và chạy trong một lượt lâu hơn, nên độ trễ tăng.\n3. Cấu hình hợp lý: chọn batch tối đa và thời gian chờ tối đa sao cho p95 vẫn trong SLO.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 200\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Không batching và có dynamic batching</text>\n<text x=\"10\" y=\"60\" font-size=\"12\" fill=\"currentColor\">Không gom</text>\n<rect x=\"100\" y=\"45\" width=\"60\" height=\"22\" fill=\"#ef4444\"/><rect x=\"165\" y=\"45\" width=\"60\" height=\"22\" fill=\"#ef4444\"/><rect x=\"230\" y=\"45\" width=\"60\" height=\"22\" fill=\"#ef4444\"/><rect x=\"295\" y=\"45\" width=\"60\" height=\"22\" fill=\"#ef4444\"/>\n<text x=\"370\" y=\"61\" font-size=\"12\" fill=\"currentColor\">4 lượt chạy</text>\n<text x=\"10\" y=\"130\" font-size=\"12\" fill=\"currentColor\">Gom batch</text>\n<rect x=\"100\" y=\"115\" width=\"20\" height=\"22\" fill=\"#f59e0b\"/>\n<rect x=\"125\" y=\"115\" width=\"90\" height=\"22\" fill=\"#10b981\"/>\n<text x=\"230\" y=\"131\" font-size=\"12\" fill=\"currentColor\">chờ gom (vàng) + 1 lượt cho 4 request (xanh)</text>\n<line x1=\"100\" y1=\"170\" x2=\"540\" y2=\"170\" stroke=\"currentColor\"/>\n<text x=\"480\" y=\"188\" font-size=\"12\" fill=\"currentColor\">thời gian →</text>\n</svg>\n\n| Cơ chế | Gộp hay tách? | Mục tiêu |\n|---|---|---|\n| Dynamic batching | gộp nhiều request | throughput, chi phí |\n| Cache kết quả | bỏ qua mô hình khi trùng | độ trễ, chi phí |\n| Tensor/pipeline parallel | tách một mô hình ra nhiều GPU | chạy model lớn, độ trễ |\n\n#### Bẫy thường gặp\n- Nhầm batch size huấn luyện (ảnh hưởng hội tụ) với batching lúc phục vụ.\n- Đặt cửa sổ chờ quá dài lúc lưu lượng thấp: request phải đợi mà batch vẫn không đầy.\n- Nghĩ batching làm từng request nhanh hơn: thường là ngược lại, chỉ tổng throughput tăng.\n\n#### Đọc thêm\n- [NVIDIA Triton: Dynamic Batcher](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/batcher.html)\n- [Made With ML: Serving](https://madewithml.com/courses/mlops/serving/)\n",
+   "distractors": {
+    "A": "Đây là ý tưởng chia nhỏ (sharding/tensor parallel), ngược với batching. Dynamic batching gộp nhiều request, không tách một request.",
+    "B": "Nhầm batch size lúc huấn luyện (SGD) với batching lúc phục vụ. Dynamic batching chỉ là cơ chế của server suy luận.",
+    "C": "Đó là cache kết quả. Batching vẫn chạy mô hình cho từng request, chỉ là chạy chung một lượt để tận dụng GPU."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Chia một request lớn thành nhiều batch nhỏ chạy song song trên nhiều GPU để giảm độ trễ của chính request đó"
+    },
+    {
+     "key": "B",
+     "text": "Tự điều chỉnh batch size khi huấn luyện để loss hội tụ nhanh hơn"
+    },
+    {
+     "key": "C",
+     "text": "Lưu kết quả của các request giống hệt nhau để trả lại mà không cần chạy mô hình"
+    },
+    {
+     "key": "D",
+     "text": "Gom các request đến gần nhau trong một cửa sổ chờ ngắn thành một batch để tăng throughput GPU"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T11-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Khi dùng **DVC** để quản lý phiên bản dữ liệu huấn luyện, thứ được commit vào Git thường là gì?",
+   "explanation": "DVC băm nội dung dữ liệu (ví dụ MD5) và ghi hash vào file nhỏ được Git theo dõi; `git checkout <commit>` + `dvc checkout` khôi phục đúng phiên bản dữ liệu tương ứng: $\\text{phiên bản} = (\\text{commit code}, \\text{hash dữ liệu})$.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nGit sinh ra để theo dõi file văn bản nhỏ. Dữ liệu huấn luyện (hàng GB, nhị phân) mà commit thẳng vào Git sẽ làm repo phình to và chậm. **DVC** tách làm hai: dữ liệu thật đẩy lên remote storage (S3, GCS, ổ mạng...), còn Git chỉ giữ một file metadata nhỏ chứa **hash nội dung**. Mỗi commit Git vì vậy xác định đúng một phiên bản dữ liệu.\n\n#### Từng bước\n1. `dvc add data/train.parquet` tạo `data/train.parquet.dvc` chứa hash (ví dụ MD5) và thêm file dữ liệu vào `.gitignore`.\n2. `git add data/train.parquet.dvc .gitignore && git commit`.\n3. `dvc push` đẩy nội dung lên remote.\n4. Muốn quay lại phiên bản cũ: `git checkout <commit>` rồi `dvc checkout` (hoặc `dvc pull`).\n\nPhiên bản đầy đủ của một lần huấn luyện: $(\\text{commit code}, \\text{hash dữ liệu}, \\text{tham số})$.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  D[\"data/train.parquet (2 GB)\"] -->|\"dvc add\"| M[\"train.parquet.dvc chứa hash\"]\n  M -->|\"git commit\"| G[\"Git repo (nhỏ)\"]\n  D -->|\"dvc push\"| S[\"Remote storage S3/GCS\"]\n  G -->|\"git checkout + dvc pull\"| R[\"Khôi phục đúng phiên bản\"]\n  S --> R\n```\n\n| Cách lưu | Tái lập được? | Vì sao |\n|---|---|---|\n| Commit thẳng file dữ liệu vào Git | về lý thuyết có | repo phình to, chậm, khó dùng |\n| Chỉ lưu câu SQL | không | bảng nguồn đổi theo thời gian |\n| Chỉ lưu trọng số model | không | không chạy lại được huấn luyện |\n| DVC: hash trong Git, dữ liệu ở remote | có | hash xác định nội dung bất biến |\n\n#### Bẫy thường gặp\n- Quên `dvc push`: đồng nghiệp checkout được file `.dvc` nhưng không kéo được dữ liệu.\n- Tin rằng câu truy vấn là đủ để tái lập.\n\n#### Đọc thêm\n- [DVC: Data Versioning](https://dvc.org/doc/start/data-management/data-versioning)\n- [Made With ML: Versioning](https://madewithml.com/courses/mlops/versioning/)\n",
+   "distractors": {
+    "B": "Git không hợp với file dữ liệu lớn (repo phình to, diff vô nghĩa với file nhị phân). DVC tách dữ liệu ra remote storage, Git chỉ giữ con trỏ.",
+    "C": "Bảng nguồn thay đổi theo thời gian nên chạy lại cùng truy vấn thường ra dữ liệu khác. Muốn tái lập phải cố định nội dung bằng hash hoặc snapshot.",
+    "D": "Lưu model mà không lưu dữ liệu thì không tái lập hay kiểm toán được quá trình huấn luyện; nguồn dữ liệu cũng không bất biến."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "File `.dvc`/`dvc.lock` chứa hash nội dung, trỏ tới dữ liệu nằm ở remote storage"
+    },
+    {
+     "key": "B",
+     "text": "Toàn bộ file dữ liệu, để Git tự nén và so sánh khác biệt giữa các phiên bản"
+    },
+    {
+     "key": "C",
+     "text": "Câu truy vấn SQL lấy dữ liệu; chạy lại truy vấn sẽ cho đúng dữ liệu cũ"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ file trọng số model; dữ liệu không cần quản lý vì có thể tải lại từ nguồn"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T11-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bài báo *Hidden Technical Debt in Machine Learning Systems* (Sculley và cộng sự, NeurIPS 2015) nêu nguyên tắc **CACE** (*Changing Anything Changes Everything*). Nguyên tắc này cảnh báo điều gì?",
+   "explanation": "Với mô hình dùng các đặc trưng $x_1, \\dots, x_n$, đổi phân phối của một $x_i$ làm thay đổi trọng số học được của các $x_j$ khác; vì vậy không có thay đổi nào là \"hoàn toàn cô lập\".",
+   "section": "c-ops",
+   "long": "#### Ý chính\nBài báo *Hidden Technical Debt in Machine Learning Systems* chỉ ra rằng hệ ML tích lũy \"nợ kỹ thuật\" theo những cách mà phần mềm thường không có. Một trong số đó là **entanglement** (vướng víu), tóm gọn bằng **CACE: Changing Anything Changes Everything**. Mô hình trộn mọi đặc trưng lại với nhau, nên không có thay đổi nào thật sự cô lập.\n\n#### Từng bước (ví dụ)\nMô hình tuyến tính $\\hat{y} = w_1 x_1 + w_2 x_2 + w_3 x_3$, trong đó $x_1$ và $x_2$ tương quan mạnh.\n1. Đổi cách tính $x_1$ (ví dụ đổi cửa sổ thời gian): sau khi huấn luyện lại, không chỉ $w_1$ đổi mà $w_2$ cũng đổi để bù.\n2. Bỏ $x_3$: phần thông tin của $x_3$ được phân bổ lại cho $x_1, x_2$.\n3. Đổi siêu tham số (ví dụ hệ số regularization) cũng làm mọi trọng số đổi.\n\nHệ quả: kiểm thử từng phần riêng rẽ như module phần mềm là không đủ; cần đánh giá lại toàn mô hình mỗi khi đổi bất kỳ đầu vào nào.\n\n#### Bảng các dạng nợ trong bài báo\n| Dạng nợ | Ví dụ |\n|---|---|\n| Entanglement (CACE) | thêm một đặc trưng làm trọng số các đặc trưng khác thay đổi |\n| Correction cascades | mô hình B sửa lỗi cho mô hình A, đổi A thì B hỏng |\n| Undeclared consumers | dịch vụ khác âm thầm dùng output của mô hình |\n| Data dependencies không ổn định | bảng nguồn đổi định nghĩa cột mà không báo |\n| Glue code, pipeline jungles | nhiều script dán nối khó bảo trì |\n\n#### Bẫy thường gặp\n- Coi CACE là quy trình (huấn luyện lại liên tục) thay vì một cảnh báo về rủi ro.\n- Áp tư duy \"đóng gói module\" của phần mềm truyền thống cho mô hình ML.\n\n#### Đọc thêm\n- [Sculley et al., NeurIPS 2015](https://proceedings.neurips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html)\n- [Technical debt, Wikipedia](https://en.wikipedia.org/wiki/Technical_debt)\n",
+   "distractors": {
+    "A": "Nhầm CACE với vấn đề đồng bộ cấu hình. Bài báo có bàn nợ cấu hình nhưng CACE nói về sự vướng víu (entanglement) giữa các đầu vào của mô hình.",
+    "B": "Đây chính là giả định sai mà CACE bác bỏ: trong ML, ranh giới trừu tượng yếu, mô hình phụ thuộc lẫn nhau (cascade) nên không cô lập được như module phần mềm.",
+    "D": "Hiểu CACE thành một chính sách vận hành. CACE là quan sát về rủi ro, không phải khuyến nghị huấn luyện lại liên tục."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Mỗi lần đổi code phải đổi file cấu hình tương ứng, nếu không pipeline sẽ lỗi"
+    },
+    {
+     "key": "B",
+     "text": "Thay một mô hình chỉ ảnh hưởng đầu ra của chính nó, nên có thể kiểm thử và cập nhật từng phần riêng rẽ như module phần mềm"
+    },
+    {
+     "key": "C",
+     "text": "Các đầu vào bị \"rối\" vào nhau: đổi một đặc trưng có thể làm thay đổi hành vi của cả mô hình"
+    },
+    {
+     "key": "D",
+     "text": "Nên huấn luyện lại toàn bộ mô hình mỗi khi có dữ liệu mới để tránh nợ kỹ thuật"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T11-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Bộ lọc spam email mở rộng sang khách hàng doanh nghiệp: tỉ lệ email tiếng Anh trong lưu lượng tăng từ 10% lên 45%. Với một email cho trước, tiêu chí thế nào là spam **không đổi**. Đây là dạng dịch chuyển nào?",
+   "explanation": "Phân rã $P(X, Y) = P(X) \\, P(Y \\mid X)$. Covariate shift: $P_{\\text{mới}}(X) \\ne P_{\\text{cũ}}(X)$ nhưng $P(Y \\mid X)$ không đổi. Mô hình có thể vẫn đúng về nguyên tắc nhưng kém ở vùng ít dữ liệu huấn luyện (email tiếng Anh).",
+   "section": "c-ops",
+   "long": "#### Ý chính\nViết phân phối chung $P(X, Y) = P(X)\\,P(Y \\mid X)$. Có hai kiểu dịch chuyển hay gặp:\n- **Covariate shift / data drift**: $P(X)$ đổi, $P(Y \\mid X)$ giữ nguyên.\n- **Concept drift**: $P(Y \\mid X)$ đổi, tức cùng một đầu vào nhưng nhãn đúng đã khác.\n\nTrong đề, tỉ lệ email tiếng Anh tăng (đầu vào đổi) nhưng tiêu chí spam với một email cho trước không đổi, nên đây là covariate shift.\n\n#### Từng bước phân loại\n1. Đầu vào có đổi phân phối không? Có: tiếng Anh 10% → 45%.\n2. Với cùng một email, nhãn đúng có đổi không? Không.\n3. Có lỗi pipeline khiến đặc trưng tính khác nhau giữa train và serve không? Đề không nói.\nVậy: covariate shift. Rủi ro: mô hình học chủ yếu từ email tiếng Việt nên có thể kém ở vùng tiếng Anh dù \"quy luật\" không đổi.\n\n#### Bảng so sánh\n| Dạng | Cái gì đổi | Ví dụ |\n|---|---|---|\n| Covariate shift | $P(X)$ | thêm nhóm khách hàng mới, ngôn ngữ mới |\n| Concept drift | $P(Y \\mid X)$ | kẻ gửi spam đổi chiêu, cùng nội dung nhưng nay là spam |\n| Label shift | $P(Y)$, giữ $P(X \\mid Y)$ | mùa dịch làm tỉ lệ ca dương tính tăng |\n| Training-serving skew | không đổi gì ngoài đời; lỗi kỹ thuật | tiền xử lý khác nhau giữa hai pipeline |\n\n#### Bẫy thường gặp\n- Gọi mọi thay đổi là \"concept drift\".\n- Nghĩ covariate shift vô hại: nếu mô hình chưa học đủ vùng dữ liệu mới thì chất lượng vẫn giảm, cần thêm dữ liệu vùng đó.\n\n#### Đọc thêm\n- [Concept drift, Wikipedia](https://en.wikipedia.org/wiki/Concept_drift)\n- [Dataset shift, Wikipedia](https://en.wikipedia.org/wiki/Dataset_shift)\n- [Made With ML: Monitoring](https://madewithml.com/courses/mlops/monitoring/)\n",
+   "distractors": {
+    "A": "Concept drift xảy ra khi cùng một email nhưng xác suất là spam thay đổi (ví dụ kẻ gửi spam đổi chiêu). Đề nói rõ tiêu chí không đổi.",
+    "C": "Đề mô tả phân phối đầu vào (ngôn ngữ email) thay đổi, không nói tỉ lệ spam đổi; label shift giả định phân phối đầu vào trong mỗi lớp giữ nguyên.",
+    "D": "Skew là lỗi kỹ thuật do hai đường xử lý khác nhau, không phải do thế giới thật thay đổi. Ở đây dữ liệu thật đổi."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Concept drift: quan hệ $P(Y \\mid X)$ giữa nội dung email và nhãn spam đã đổi"
+    },
+    {
+     "key": "B",
+     "text": "Data drift (covariate shift): $P(X)$ đổi còn $P(Y \\mid X)$ giữ nguyên"
+    },
+    {
+     "key": "C",
+     "text": "Label shift: tỉ lệ spam $P(Y)$ đổi còn $P(X \\mid Y)$ giữ nguyên"
+    },
+    {
+     "key": "D",
+     "text": "Training-serving skew: pipeline phục vụ tính đặc trưng khác pipeline huấn luyện"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T11-A06",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Triển khai kiểu **shadow** (shadow deployment) cho một model mới nghĩa là gì?",
+   "explanation": "Shadow: $\\text{response} = f_{\\text{cũ}}(x)$, còn $f_{\\text{mới}}(x)$ chỉ được ghi log để so sánh. Rủi ro với người dùng bằng 0, nhưng không đo được tác động lên hành vi người dùng.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nBốn kiểu phát hành model hay gặp khác nhau ở câu hỏi: **người dùng thật có nhận kết quả của model mới không, và bao nhiêu người?** Shadow là kiểu an toàn nhất: model mới chạy trên bản sao lưu lượng thật, kết quả chỉ được ghi log để so sánh, người dùng vẫn nhận kết quả model cũ.\n\n#### Từng bước của shadow\n1. Gateway nhân bản request: một bản tới model cũ (trả về người dùng), một bản tới model mới (bất đồng bộ).\n2. Ghi log $(x, f_{\\text{cũ}}(x), f_{\\text{mới}}(x), \\text{độ trễ})$.\n3. So sánh: tỉ lệ dự đoán khác nhau, độ trễ, lỗi, phân phối điểm.\n4. Hạn chế: không đo được phản ứng người dùng (click, mua) với model mới, và tốn thêm tài nguyên tính toán.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  U[\"Người dùng\"] --> GW[\"Gateway\"]\n  GW --> OLD[\"Model cũ\"]\n  OLD -->|\"kết quả trả về\"| U\n  GW -. \"bản sao request\" .-> NEW[\"Model mới (shadow)\"]\n  NEW --> LOG[\"Log để so sánh\"]\n```\n\n| Kiểu | Người dùng nhận kết quả model mới | Dùng để |\n|---|---|---|\n| Shadow | 0% | kiểm tra kỹ thuật không rủi ro |\n| Canary | một phần nhỏ, tăng dần | phát hiện sự cố sớm với ít người bị ảnh hưởng |\n| A/B test | một nhóm ngẫu nhiên, cố định | đo tác động kinh doanh có ý nghĩa thống kê |\n| Blue-green | 100% một lần | chuyển nhanh, quay lại nhanh |\n\n#### Bẫy thường gặp\n- Gọi canary là shadow. Ở canary, có người dùng thật nhận kết quả mới.\n- Model shadow có tác dụng phụ (gửi email, ghi DB): phải tắt các tác dụng phụ đó.\n\n#### Đọc thêm\n- [Martin Fowler: Canary Release](https://martinfowler.com/bliki/CanaryRelease.html)\n- [Martin Fowler: Blue Green Deployment](https://martinfowler.com/bliki/BlueGreenDeployment.html)\n- [Made With ML: Systems design](https://madewithml.com/courses/mlops/systems-design/)\n",
+   "distractors": {
+    "B": "Đó là canary release: người dùng thật nhận kết quả của model mới. Shadow không trả kết quả mới cho ai.",
+    "C": "Đó là A/B test: cả hai nhóm đều nhận kết quả thật từ model được gán.",
+    "D": "Đó là blue-green deployment: chuyển toàn bộ lưu lượng, người dùng nhận kết quả của bản mới ngay."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Model mới nhận bản sao request thật và chỉ ghi log; người dùng vẫn nhận kết quả của model cũ"
+    },
+    {
+     "key": "B",
+     "text": "Model mới phục vụ thật một phần nhỏ người dùng, ví dụ 5%, rồi tăng dần nếu ổn"
+    },
+    {
+     "key": "C",
+     "text": "Hai model phục vụ hai nhóm người dùng ngẫu nhiên để so sánh chỉ số kinh doanh"
+    },
+    {
+     "key": "D",
+     "text": "Dựng môi trường mới song song, chuyển toàn bộ 100% lưu lượng sang một lần, giữ nguyên môi trường cũ để quay lại khi cần"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T11-A07",
+   "module": "A",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "nhan-biet",
+   "prompt": "Một GPU thuê giá **2,40 USD/giờ** (giá giả định) phục vụ ổn định **20 request/giây** khi chạy đầy tải. Chỉ tính tiền thuê GPU, chi phí cho **1.000 request** là bao nhiêu? **Đơn vị: USD, làm tròn 4 chữ số thập phân.**",
+   "explanation": "Request/giờ $= 20 \\times 3600 = 72\\,000$. Chi phí/1K $= \\dfrac{2{,}40}{72\\,000} \\times 1000 \\approx 0{,}0333$ USD.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nKhi thuê GPU theo giờ, chi phí cho mỗi 1.000 request bằng **giá mỗi giờ chia số request phục vụ được mỗi giờ**, nhân 1.000. Điều kiện: GPU chạy đầy tải; nếu GPU nhàn rỗi một phần thời gian thì chi phí thực/1K cao hơn.\n\n#### Từng bước\n1. Request mỗi giờ: $20 \\times 3600 = 72\\,000$.\n2. Chi phí mỗi request: $2{,}40 / 72\\,000 \\approx 0{,}0000333$ USD.\n3. Chi phí/1K: $0{,}0000333 \\times 1000 \\approx 0{,}0333$ USD.\n\n```python\nprice, rps = 2.40, 20\nprint(round(price / (rps * 3600) * 1000, 4))   # 0.0333\n```\n\n#### Bảng: ảnh hưởng của mức sử dụng\n| Mức sử dụng GPU | Request thật mỗi giờ | Chi phí/1K (USD) |\n|---|---|---|\n| 100% | 72.000 | 0,0333 |\n| 50% | 36.000 | 0,0667 |\n| 25% | 18.000 | 0,1333 |\n\nChi phí/1K tỉ lệ nghịch với mức sử dụng: $\\text{chi phí/1K} = \\dfrac{\\text{giá/giờ}}{\\text{throughput} \\times 3600 \\times u} \\times 1000$ với $u$ là mức sử dụng.\n\n#### Bẫy thường gặp\n- Đổi giờ ra phút (60) thay vì giây (3600), ra 2 USD.\n- Quên nhân 1.000, ra chi phí một request.\n- Dùng throughput đỉnh cho cả ngày trong khi lưu lượng ban đêm thấp.\n\n#### Đọc thêm\n- [Made With ML: Serving](https://madewithml.com/courses/mlops/serving/)\n- [Throughput, Wikipedia](https://en.wikipedia.org/wiki/Throughput)\n",
+   "mistakes": [
+    {
+     "value": 2.0,
+     "why": "Đổi giờ ra phút thay vì giây: $20 \\times 60 = 1200$ request/giờ thì $2{,}4 / 1200 \\times 1000 = 2$. Một giờ có 3600 giây."
+    },
+    {
+     "value": 3e-05,
+     "why": "Đây là chi phí cho **một** request ($2{,}4 / 72000$), quên nhân 1.000."
+    },
+    {
+     "value": 0.12,
+     "why": "Lấy $2{,}4 / 20$: chia giá theo giờ cho throughput theo giây, lệch đơn vị."
+    }
+   ],
+   "answer": 0.0333,
+   "tol": 5.1e-05
+  },
+  {
+   "id": "T11-A08",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Muốn build lại Docker image sau 6 tháng vẫn ra đúng cùng base image, dòng `FROM` nào phù hợp nhất?",
+   "explanation": "Digest là hash nội dung của image: $\\text{digest} = \\text{SHA-256}(\\text{manifest})$, nên cùng digest bảo đảm cùng nội dung; tag chỉ là con trỏ có thể đổi.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nTrong Docker, **tag** (như `3.11-slim`, `latest`) là nhãn có thể được gán lại cho image khác bất kỳ lúc nào: mỗi bản vá bảo mật hay bản Python 3.11.x mới được đẩy lên cùng tag. **Digest** (`sha256:...`) là hash nội dung của image, nên cố định tuyệt đối: cùng digest thì cùng từng byte.\n\n#### Từng bước ghim digest\n1. Kéo image: `docker pull python:3.11-slim`.\n2. Xem digest: `docker images --digests` hoặc đọc dòng `Digest:` khi pull.\n3. Viết `FROM python:3.11-slim@sha256:<digest>`; phần tag giữ lại cho dễ đọc, Docker dùng digest.\n4. Định kỳ cập nhật digest có chủ đích (để nhận bản vá bảo mật) và chạy lại test.\n\n#### Bảng so sánh\n| Cách viết `FROM` | Build lại sau 6 tháng | Ghi chú |\n|---|---|---|\n| `python:latest` | gần như chắc chắn khác | có thể nhảy cả phiên bản Python chính |\n| `python:3` | có thể khác | mọi bản 3.x |\n| `python:3.11-slim` | có thể khác | bản vá 3.11.x, gói hệ điều hành |\n| `python:3.11-slim@sha256:...` | giống hệt | bất biến |\n\nBase image chỉ là một phần: muốn tái lập hoàn toàn còn phải ghim phiên bản thư viện (`requirements.txt` có `==` hoặc lock file kèm hash).\n\n#### Bẫy thường gặp\n- Tin rằng tag cụ thể như `3.11-slim` là bất biến.\n- Ghim digest rồi quên cập nhật bản vá bảo mật mãi mãi.\n\n#### Đọc thêm\n- [Docker docs: Image digests](https://docs.docker.com/dhi/core-concepts/digests/)\n- [Docker docs: Dockerfile reference](https://docs.docker.com/reference/dockerfile/)\n",
+   "distractors": {
+    "A": "Tag `latest` trỏ tới bản mới nhất tại thời điểm build, nên build sau 6 tháng gần như chắc chắn ra base image khác.",
+    "B": "Tag là nhãn có thể bị gán lại: bản vá `3.11.x` và thay đổi hệ điều hành bên dưới vẫn được đẩy lên cùng tag. Chỉ digest mới bất biến.",
+    "C": "Vừa dùng tag rộng (mọi bản 3.x) vừa nâng cấp gói theo thời điểm build, càng làm môi trường trôi theo thời gian."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "`FROM python:latest` (luôn lấy bản mới nhất)"
+    },
+    {
+     "key": "B",
+     "text": "`FROM python:3.11-slim` (tag đã cố định phiên bản)"
+    },
+    {
+     "key": "C",
+     "text": "`FROM python:3` kèm `RUN pip install --upgrade pip`"
+    },
+    {
+     "key": "D",
+     "text": "`FROM python:3.11-slim@sha256:<digest>`"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T11-B01",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "TTFT (ms) của 24 request tới chatbot trong một phút:\n\n312, 287, 455, 301, 298, 1210, 333, 276, 290, 341, 305, 318, 289, 702, 296, 310, 284, 327, 299, 515, 302, 293, 281, 640\n\nTính **p95 theo phương pháp nearest-rank**: sắp xếp tăng dần, p95 là phần tử thứ $\\lceil 0{,}95 \\cdot n \\rceil$ (đếm từ 1). **Đơn vị: ms, nhập số nguyên.**",
+   "explanation": "Thứ hạng $r = \\lceil 0{,}95 \\times 24 \\rceil = \\lceil 22{,}8 \\rceil = 23$. Bốn giá trị lớn nhất sau sắp xếp: 515, 640, 702, 1210, nên phần tử thứ 23 là 702 ms.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nPhương pháp **nearest-rank**: sắp xếp $n$ giá trị tăng dần, phân vị $p$ là phần tử ở thứ hạng $r = \\lceil p \\cdot n \\rceil$ (đếm từ 1). Kết quả luôn là một giá trị có thật trong dữ liệu, không nội suy.\n\n#### Từng bước\n1. $n = 24$, $r = \\lceil 0{,}95 \\times 24 \\rceil = \\lceil 22{,}8 \\rceil = 23$.\n2. Sắp xếp: 276, 281, 284, 287, 289, 290, 293, 296, 298, 299, 301, 302, 305, 310, 312, 318, 327, 333, 341, 455, 515, 640, **702**, 1210.\n3. Phần tử thứ 23 là **702 ms**.\n\n```python\nimport math\ns = sorted(L)                     # L là danh sách trong đề\nr = math.ceil(0.95 * len(s))      # 23\nprint(s[r - 1])                   # 702 (chỉ số Python bắt đầu từ 0)\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">24 giá trị TTFT đã sắp xếp (cột đỏ = hạng 23)</text>\n<line x1=\"30\" y1=\"220\" x2=\"550\" y2=\"220\" stroke=\"currentColor\"/>\n<rect x=\"34.0\" y=\"164.8\" width=\"17\" height=\"55.2\" fill=\"#3b82f6\"/>\n<rect x=\"55.5\" y=\"163.8\" width=\"17\" height=\"56.2\" fill=\"#3b82f6\"/>\n<rect x=\"77.0\" y=\"163.2\" width=\"17\" height=\"56.8\" fill=\"#3b82f6\"/>\n<rect x=\"98.5\" y=\"162.6\" width=\"17\" height=\"57.4\" fill=\"#3b82f6\"/>\n<rect x=\"120.0\" y=\"162.2\" width=\"17\" height=\"57.8\" fill=\"#3b82f6\"/>\n<rect x=\"141.5\" y=\"162.0\" width=\"17\" height=\"58.0\" fill=\"#3b82f6\"/>\n<rect x=\"163.0\" y=\"161.4\" width=\"17\" height=\"58.6\" fill=\"#3b82f6\"/>\n<rect x=\"184.5\" y=\"160.8\" width=\"17\" height=\"59.2\" fill=\"#3b82f6\"/>\n<rect x=\"206.0\" y=\"160.4\" width=\"17\" height=\"59.6\" fill=\"#3b82f6\"/>\n<rect x=\"227.5\" y=\"160.2\" width=\"17\" height=\"59.8\" fill=\"#3b82f6\"/>\n<rect x=\"249.0\" y=\"159.8\" width=\"17\" height=\"60.2\" fill=\"#3b82f6\"/>\n<rect x=\"270.5\" y=\"159.6\" width=\"17\" height=\"60.4\" fill=\"#3b82f6\"/>\n<rect x=\"292.0\" y=\"159.0\" width=\"17\" height=\"61.0\" fill=\"#3b82f6\"/>\n<rect x=\"313.5\" y=\"158.0\" width=\"17\" height=\"62.0\" fill=\"#3b82f6\"/>\n<rect x=\"335.0\" y=\"157.6\" width=\"17\" height=\"62.4\" fill=\"#3b82f6\"/>\n<rect x=\"356.5\" y=\"156.4\" width=\"17\" height=\"63.6\" fill=\"#3b82f6\"/>\n<rect x=\"378.0\" y=\"154.6\" width=\"17\" height=\"65.4\" fill=\"#3b82f6\"/>\n<rect x=\"399.5\" y=\"153.4\" width=\"17\" height=\"66.6\" fill=\"#3b82f6\"/>\n<rect x=\"421.0\" y=\"151.8\" width=\"17\" height=\"68.2\" fill=\"#3b82f6\"/>\n<rect x=\"442.5\" y=\"129.0\" width=\"17\" height=\"91.0\" fill=\"#3b82f6\"/>\n<rect x=\"464.0\" y=\"117.0\" width=\"17\" height=\"103.0\" fill=\"#3b82f6\"/>\n<rect x=\"485.5\" y=\"92.0\" width=\"17\" height=\"128.0\" fill=\"#3b82f6\"/>\n<rect x=\"507.0\" y=\"79.6\" width=\"17\" height=\"140.4\" fill=\"#ef4444\"/>\n<rect x=\"528.5\" y=\"40.0\" width=\"17\" height=\"180.0\" fill=\"#f59e0b\"/>\n<text x=\"499.0\" y=\"73.6\" font-size=\"11\" fill=\"#ef4444\">702</text>\n<text x=\"498.5\" y=\"36\" font-size=\"11\" fill=\"#f59e0b\">1210 (cắt)</text>\n<text x=\"34\" y=\"238\" font-size=\"11\" fill=\"currentColor\">hạng 1</text>\n<text x=\"500\" y=\"238\" font-size=\"11\" fill=\"currentColor\">hạng 24</text>\n</svg>\n\n| Phương pháp | Kết quả (ms) |\n|---|---|\n| Nearest-rank (đề yêu cầu) | 702 |\n| Nội suy tuyến tính, `numpy.percentile` mặc định | 692,7 |\n| Trung bình (không phải phân vị) | 386 |\n| Giá trị lớn nhất (p100) | 1210 |\n\n#### Bẫy thường gặp\n- Làm tròn xuống $22{,}8 \\to 22$, ra 640 ms.\n- Quên đổi thứ hạng (đếm từ 1) sang chỉ số Python (đếm từ 0): `s[23]` ra 1210.\n- Dùng numpy mà không ghi phương pháp; khi số sát ngưỡng SLO, hai phương pháp có thể cho kết luận khác nhau.\n- Mẫu chỉ 24 request: p95 dựa vào 1 đến 2 điểm cuối nên rất nhiễu.\n\n#### Đọc thêm\n- [Percentile: The nearest-rank method, Wikipedia](https://en.wikipedia.org/wiki/Percentile)\n",
+   "mistakes": [
+    {
+     "value": 692.7,
+     "why": "Dùng nội suy tuyến tính (mặc định của `numpy.percentile`): $640 + 0{,}85 \\times (702 - 640) = 692{,}7$. Đề yêu cầu nearest-rank."
+    },
+    {
+     "value": 640,
+     "why": "Làm tròn xuống $0{,}95 \\times 24 = 22{,}8$ thành 22. Nearest-rank dùng làm tròn **lên** (hàm trần) nên thứ hạng là 23."
+    },
+    {
+     "value": 1210,
+     "why": "Lấy giá trị lớn nhất (p100) thay vì p95."
+    },
+    {
+     "value": 386,
+     "why": "Đây là trung bình cộng; trung bình không phản ánh đuôi chậm mà SLO p95 bảo vệ."
+    }
+   ],
+   "answer": 702,
+   "tol": 0
+  },
+  {
+   "id": "T11-B02",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Chatbot RAG tăng ngữ cảnh truy xuất từ khoảng 1.000 lên 8.000 token mỗi prompt. Đo thấy **TTFT** tăng từ 0,3 s lên 1,6 s, còn tốc độ sinh sau token đầu (token/s) gần như không đổi. Giải thích nào hợp lý nhất?",
+   "explanation": "Độ trễ tổng $\\approx \\text{TTFT} + (N_{\\text{out}} - 1) \\cdot \\text{TPOT}$. TTFT chủ yếu là prefill, chi phí tăng theo độ dài prompt; TPOT (thời gian mỗi token sau đó) phụ thuộc chủ yếu vào việc đọc trọng số và KV cache.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nSinh văn bản bằng LLM có hai pha:\n- **Prefill**: chạy mô hình qua **toàn bộ prompt** một lượt để tạo KV cache; xong pha này mới có token đầu tiên. TTFT chủ yếu là thời gian prefill (cộng thời gian xếp hàng).\n- **Decode**: sinh từng token một, mỗi bước đọc trọng số và KV cache. Thời gian mỗi token (TPOT) tăng rất chậm theo độ dài ngữ cảnh.\n\nPrompt dài gấp 8 lần làm prefill lâu hơn nhiều, trong khi decode gần như không đổi: đúng như số liệu đo được.\n\n#### Từng bước\nMô hình độ trễ đơn giản: $T_{\\text{tổng}} \\approx \\text{TTFT} + (N_{\\text{out}} - 1)\\cdot \\text{TPOT}$.\n1. TTFT tăng $1{,}6 / 0{,}3 \\approx 5{,}3$ lần khi prompt tăng 8 lần: hợp với prefill (một phần chi phí cố định, phần còn lại tăng theo độ dài).\n2. Token/s sau token đầu không đổi: decode không bị ảnh hưởng nhiều, loại trừ giả thuyết KV cache bị tắt.\n3. 8.000 token văn bản chỉ cỡ 30 đến 40 KB: truyền mạng mất vài ms, loại trừ giả thuyết mạng.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 170\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Dòng thời gian một request (minh hoạ)</text>\n<text x=\"10\" y=\"58\" font-size=\"12\" fill=\"currentColor\">1K token</text>\n<rect x=\"90\" y=\"45\" width=\"30\" height=\"20\" fill=\"#f59e0b\"/><rect x=\"120\" y=\"45\" width=\"260\" height=\"20\" fill=\"#3b82f6\"/>\n<text x=\"10\" y=\"108\" font-size=\"12\" fill=\"currentColor\">8K token</text>\n<rect x=\"90\" y=\"95\" width=\"160\" height=\"20\" fill=\"#f59e0b\"/><rect x=\"250\" y=\"95\" width=\"260\" height=\"20\" fill=\"#3b82f6\"/>\n<text x=\"90\" y=\"145\" font-size=\"12\" fill=\"#f59e0b\">vàng: prefill (đến token đầu = TTFT)</text>\n<text x=\"330\" y=\"145\" font-size=\"12\" fill=\"#3b82f6\">xanh: decode, dài như nhau</text>\n</svg>\n\n| Thay đổi | Ảnh hưởng chính |\n|---|---|\n| Prompt dài hơn | TTFT tăng |\n| Output dài hơn | tổng thời gian tăng, TTFT không đổi |\n| Tải cao, xếp hàng | TTFT tăng |\n| Lượng tử hoá trọng số | decode nhanh hơn (ít byte phải đọc) |\n\n#### Bẫy thường gặp\n- Nhầm TTFT với tổng thời gian trả lời.\n- Đổ lỗi cho mạng mà không ước lượng kích thước dữ liệu.\n- Cách giảm TTFT trong RAG: bớt số đoạn truy xuất, rerank để giữ đoạn tốt nhất, prefix caching cho phần prompt cố định.\n\n#### Đọc thêm\n- [Hugging Face: LLM inference optimization](https://huggingface.co/docs/transformers/main/en/llm_optims)\n- [Made With ML: Serving](https://madewithml.com/courses/mlops/serving/)\n",
+   "distractors": {
+    "A": "Số token output không quyết định TTFT; token đầu ra ngay sau prefill. Độ dài output ảnh hưởng tổng thời gian, không phải TTFT.",
+    "B": "8.000 token chỉ cỡ vài chục KB, truyền mất vài mili giây trên mạng thông thường. Đổ cho mạng là quy nhầm nguyên nhân.",
+    "D": "Nếu KV cache bị tắt thì tốc độ decode (token/s) phải giảm mạnh; đề cho biết tốc độ đó gần như không đổi."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Prompt dài khiến mô hình phải sinh nhiều token output hơn nên token đầu tiên ra chậm"
+    },
+    {
+     "key": "B",
+     "text": "Gói tin prompt lớn làm mạng chậm: 8.000 token cần thêm khoảng 1,3 s để truyền từ client tới server suy luận"
+    },
+    {
+     "key": "C",
+     "text": "Prefill phải xử lý toàn bộ prompt trước token đầu; decode từng token ít phụ thuộc độ dài prompt"
+    },
+    {
+     "key": "D",
+     "text": "KV cache bị tắt khi prompt dài nên mỗi token sinh ra đều phải tính lại từ đầu"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T11-B03",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Một tính năng gọi API LLM, mỗi request trung bình **1.500 token input** và **300 token output**. Giá giả định: input 0,50 USD/1 triệu token, output 2,00 USD/1 triệu token. Chi phí API cho **1.000 request** là bao nhiêu?",
+   "explanation": "Mỗi request: $1500 \\times \\frac{0{,}5}{10^6} + 300 \\times \\frac{2{,}0}{10^6} = 0{,}00075 + 0{,}0006 = 0{,}00135$ USD; nhân 1.000 được 1,35 USD.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nAPI LLM tính tiền theo token, **input và output có đơn giá khác nhau** (output thường đắt hơn vài lần). Chi phí mỗi request là tổng hai phần; chi phí/1K request là chi phí mỗi request nhân 1.000.\n\n#### Từng bước\n1. Input: $1500 \\times \\dfrac{0{,}50}{10^6} = 0{,}00075$ USD.\n2. Output: $300 \\times \\dfrac{2{,}00}{10^6} = 0{,}00060$ USD.\n3. Mỗi request: $0{,}00135$ USD; mỗi 1.000 request: $1{,}35$ USD.\n4. Tỉ trọng: input chiếm $0{,}75/1{,}35 \\approx 56\\%$, output $44\\%$ dù số token output chỉ bằng 1/5.\n\n```python\nc = 1500 * 0.5 / 1e6 + 300 * 2.0 / 1e6\nprint(round(c * 1000, 2))   # 1.35\n```\n\n#### Bảng độ nhạy (giá giả định)\n| Thay đổi | Chi phí/1K (USD) |\n|---|---|\n| Hiện tại | 1,35 |\n| Cắt prompt còn 1.000 token | 1,10 |\n| Giới hạn output còn 200 token | 1,15 |\n| Cả hai | 0,90 |\n\nMuốn giảm chi phí: rút gọn prompt cố định (hoặc dùng prompt caching), giới hạn `max_tokens`, cache câu trả lời cho câu hỏi lặp lại, dùng model nhỏ cho câu dễ.\n\n#### Bẫy thường gặp\n- Bỏ quên output.\n- Lấy giá trung bình cho mọi token.\n- Quên nhân 1.000 hoặc nhầm \"1K token\" với \"1K request\".\n\n#### Đọc thêm\n- [Hugging Face: Tokenizer summary (token là gì)](https://huggingface.co/docs/transformers/main/en/tokenizer_summary)\n- [Made With ML: Systems design](https://madewithml.com/courses/mlops/systems-design/)\n",
+   "distractors": {
+    "B": "Chỉ tính phần input ($1500 \\times 0{,}5 / 10^6 \\times 1000$), bỏ quên output, phần thường có đơn giá cao hơn.",
+    "C": "Lấy giá trung bình $(0{,}5 + 2{,}0)/2 = 1{,}25$ USD/1 triệu cho cả 1.800 token. Input và output có đơn giá riêng, phải tính riêng rồi cộng.",
+    "D": "Đây là chi phí của **một** request; quên nhân 1.000."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1,35 USD"
+    },
+    {
+     "key": "B",
+     "text": "0,75 USD"
+    },
+    {
+     "key": "C",
+     "text": "2,25 USD"
+    },
+    {
+     "key": "D",
+     "text": "0,00135 USD"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T11-B04",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Nhóm sửa prompt qua 35 vòng; mỗi vòng chạy **cùng một golden set 150 mẫu** và giữ bản có điểm cao nhất. Bản cuối đạt 91% (ngưỡng cổng CI là 90%). Sau release, chấm 1.000 mẫu lấy ngẫu nhiên từ log mới thì chỉ được 84%. Nguyên nhân chính và cách sửa cổng eval là gì?",
+   "explanation": "Chọn bản tốt nhất trong 35 lần thử trên cùng 150 mẫu là một dạng tối ưu trên tập test, nên điểm 91% bị lạc quan. Sai số chuẩn trên 1.000 mẫu: $\\sqrt{0{,}84 \\times 0{,}16 / 1000} \\approx 0{,}012$, quá nhỏ để giải thích mức giảm 7 điểm.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nGolden set dùng để **chọn** giữa nhiều phương án thì không còn là tập kiểm tra độc lập: chọn bản tốt nhất trong 35 lần thử chính là \"huấn luyện\" trên tập đó. Điểm 91% vì vậy bị lạc quan (thiên lệch chọn lọc). Điểm 84% trên 1.000 mẫu log mới mới phản ánh chất lượng thật.\n\n#### Từng bước kiểm tra giả thuyết \"chỉ do nhiễu\"\n1. Sai số chuẩn của tỉ lệ trên 1.000 mẫu: $\\sqrt{0{,}84 \\times 0{,}16 / 1000} \\approx 0{,}012$ (1,2 điểm %).\n2. Sai số chuẩn trên 150 mẫu: $\\sqrt{0{,}91 \\times 0{,}09 / 150} \\approx 0{,}023$.\n3. Chênh 7 điểm % lớn hơn nhiều so với độ dao động ngẫu nhiên kết hợp ($\\approx 2{,}6$ điểm %), nên phải có nguyên nhân hệ thống: quá khớp với golden set (và có thể golden set không đại diện cho log hiện tại).\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  DEV[\"Dev set: được xem, dùng để sửa prompt\"] --> PR[\"Mỗi PR\"]\n  PR --> GATE[\"Cổng CI trên tập nhanh\"]\n  GATE --> HO[\"Holdout ẩn: chỉ chạy trước release\"]\n  HO --> REL[\"Release\"]\n  REL --> LOG[\"Log production\"]\n  LOG -->|\"mẫu mới, gán nhãn\"| DEV\n  LOG -->|\"xoay vòng định kỳ\"| HO\n```\n\n| Biện pháp | Tác dụng |\n|---|---|\n| Tách dev set và holdout ẩn | điểm holdout không bị tối ưu trực tiếp |\n| Làm mới tập từ log | bám theo phân phối câu hỏi hiện tại |\n| Giới hạn số lần nhìn holdout | giảm rò rỉ qua lựa chọn |\n| Nhân bản mẫu | không có tác dụng, chỉ là ảo giác cỡ mẫu |\n\n#### Bẫy thường gặp\n- Nâng ngưỡng trên cùng tập đã dùng mòn.\n- Coi mọi chênh lệch là nhiễu của LLM mà không tính sai số chuẩn.\n\n#### Đọc thêm\n- [Made With ML: Evaluation](https://madewithml.com/courses/mlops/evaluation/)\n- [Training, validation, and test data sets, Wikipedia](https://en.wikipedia.org/wiki/Training,_validation,_and_test_data_sets)\n",
+   "distractors": {
+    "A": "Nâng ngưỡng trên cùng tập đã bị dùng mòn chỉ khiến nhóm tối ưu thêm cho tập đó, làm quá khớp nặng hơn.",
+    "B": "Với 1.000 mẫu, sai số chuẩn của tỉ lệ chỉ khoảng 1,2 điểm %; chênh 7 điểm không giải thích được bằng nhiễu ngẫu nhiên.",
+    "C": "Nhân bản mẫu không thêm thông tin mới, điểm vẫn y nguyên và vẫn quá khớp; cần mẫu mới, độc lập."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Ngưỡng 90% quá thấp; chỉ cần nâng ngưỡng cổng CI lên 95% trên cùng golden set đó là ngăn được hiện tượng này"
+    },
+    {
+     "key": "B",
+     "text": "LLM có tính ngẫu nhiên; chạy lại eval sau release vài lần nữa thì điểm sẽ quay về khoảng 91% như trong CI"
+    },
+    {
+     "key": "C",
+     "text": "Golden set quá nhỏ; nhân bản mỗi mẫu 5 lần thành 750 mẫu để điểm ổn định và đáng tin cậy hơn hẳn"
+    },
+    {
+     "key": "D",
+     "text": "Golden set bị dùng lặp lại để chọn prompt nên điểm bị quá khớp; cần thêm holdout ẩn và làm mới tập từ log"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T11-B05",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Kiểm toán yêu cầu tái lập model v3 đã huấn luyện 4 tháng trước. Model registry có commit code, siêu tham số và tên bảng `transactions`, nhưng bảng này được cập nhật và ghi đè hằng ngày. Cần bổ sung gì vào quy trình để lần sau tái lập được?",
+   "explanation": "Một lần huấn luyện tái lập được khi cố định đủ bộ: $(\\text{code}, \\text{dữ liệu}, \\text{cấu hình}, \\text{môi trường}, \\text{seed})$. Thiếu phiên bản dữ liệu thì các thành phần còn lại không đủ.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nTái lập một lần huấn luyện cần cố định **đủ** các thành phần: code, dữ liệu, cấu hình (siêu tham số), môi trường (thư viện, phần cứng) và seed. Registry có code và siêu tham số nhưng chỉ ghi **tên bảng**; nội dung bảng đã bị ghi đè nên mất hẳn mắt xích dữ liệu.\n\n#### Từng bước bổ sung quy trình\n1. Mỗi lần huấn luyện, chụp snapshot dữ liệu bất biến: `dvc add` + `dvc push`, hoặc dùng bảng có time-travel (ghi lại số phiên bản bảng), hoặc xuất file parquet vào kho đối tượng chỉ ghi một lần.\n2. Ghi hash/phiên bản đó vào metadata của model trong registry (cùng commit code, tham số, image digest, seed).\n3. Đặt chính sách lưu giữ snapshot ít nhất bằng thời gian kiểm toán yêu cầu.\n4. Định kỳ diễn tập: chọn một model cũ, tái huấn luyện và so chỉ số.\n\n#### Bảng kiểm \"đủ để tái lập\"\n| Thành phần | Có trong registry? | Cách cố định |\n|---|---|---|\n| Code | có (commit) | Git commit |\n| Siêu tham số | có | file cấu hình trong repo |\n| Dữ liệu | **không** (chỉ tên bảng) | hash DVC / time-travel |\n| Môi trường | ? | Docker image digest, lock file |\n| Seed | ? | ghi trong cấu hình |\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  C[\"commit a1b2c3\"] --> M[\"Model v3 trong registry\"]\n  D[\"data hash 9f8e...\"] --> M\n  P[\"params.yaml\"] --> M\n  E[\"image sha256:...\"] --> M\n  M --> A[\"Kiểm toán: tái huấn luyện và so chỉ số\"]\n```\n\n#### Bẫy thường gặp\n- Nghĩ seed là đủ.\n- Ghi số dòng hay ngày chạy thay vì hash nội dung.\n- Nhầm \"tải lại trọng số\" với \"tái lập huấn luyện\".\n\n#### Đọc thêm\n- [Made With ML: Versioning](https://madewithml.com/courses/mlops/versioning/)\n- [MLflow Model Registry](https://mlflow.org/docs/latest/model-registry.html)\n",
+   "distractors": {
+    "A": "Seed chỉ cố định phần ngẫu nhiên của thuật toán. Dữ liệu đầu vào đã đổi thì cùng seed vẫn ra model khác.",
+    "C": "Số dòng không phát hiện được việc sửa giá trị trong các dòng cũ; cũng không giúp lấy lại dữ liệu cũ.",
+    "D": "Tải lại trọng số chỉ là dùng lại model, không phải tái lập quá trình huấn luyện mà kiểm toán yêu cầu."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Lưu thêm random seed; cùng seed, code và siêu tham số thì kết quả sẽ giống hệt"
+    },
+    {
+     "key": "B",
+     "text": "Gắn mỗi phiên bản model với snapshot dữ liệu bất biến (hash DVC hoặc time-travel) trong metadata registry"
+    },
+    {
+     "key": "C",
+     "text": "Ghi lại số dòng của bảng lúc huấn luyện để kiểm tra dữ liệu chưa thay đổi"
+    },
+    {
+     "key": "D",
+     "text": "Lưu file trọng số v3 thật cẩn thận ở nhiều nơi; tái lập nghĩa là tải lại đúng file trọng số đó khi kiểm toán hỏi"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T11-B06",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Canary 2% của model mới chạy 20 phút, nhận **150 request và không có lỗi nào**. Model cũ có tỉ lệ lỗi 0,4%. Kết luận nào đúng?",
+   "explanation": "Rule of three: khi quan sát 0 sự kiện trên $n$ lần thử, cận trên khoảng tin cậy 95% của tỉ lệ $\\approx 3/n$. Với $n = 150$: $\\approx 0{,}02$. Muốn cận trên xuống dưới 0,4% cần $n \\ge 3 / 0{,}004 = 750$ request không lỗi.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nKhông thấy lỗi nào trong một mẫu nhỏ **không** chứng minh tỉ lệ lỗi thấp. **Rule of three**: quan sát 0 sự kiện trong $n$ lần thử thì cận trên của khoảng tin cậy 95% cho tỉ lệ sự kiện xấp xỉ $3/n$.\n\n#### Từng bước\n1. Cận trên chính xác: giải $(1 - p)^n = 0{,}05$, được $p = 1 - 0{,}05^{1/n}$. Với $n = 150$: $p \\approx 0{,}0198$.\n2. Xấp xỉ: $3/150 = 0{,}02$, tức tỉ lệ lỗi thật có thể tới khoảng 2%, gấp 5 lần mức 0,4% của model cũ.\n3. Nếu tỉ lệ lỗi thật đúng bằng 0,4% thì xác suất không thấy lỗi nào trong 150 request là $(1 - 0{,}004)^{150} \\approx 0{,}55$: chuyện rất bình thường.\n4. Muốn cận trên xuống dưới 0,4% cần $n \\ge 3 / 0{,}004 = 750$ request không lỗi.\n\n```python\nn = 150\nprint(round(3 / n, 2), round(1 - 0.05 ** (1 / n), 4), round((1 - 0.004) ** n, 2))\n# 0.02 0.0198 0.55\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 230\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Cận trên 95% của tỉ lệ lỗi khi 0 lỗi trên n request (≈ 3/n)</text>\n<line x1=\"40\" y1=\"200\" x2=\"545\" y2=\"200\" stroke=\"currentColor\"/>\n<line x1=\"40\" y1=\"40\" x2=\"40\" y2=\"200\" stroke=\"currentColor\"/>\n<polyline points=\"65.0,80.0 77.5,120.0 90.0,140.0 102.5,152.0 115.0,160.0 127.5,165.7 140.0,170.0 152.5,173.3 165.0,176.0 177.5,178.2 190.0,180.0 202.5,181.5 215.0,182.9 227.5,184.0 240.0,185.0 252.5,185.9 265.0,186.7 277.5,187.4 290.0,188.0 302.5,188.6 315.0,189.1 327.5,189.6 340.0,190.0 352.5,190.4 365.0,190.8 377.5,191.1 390.0,191.4 402.5,191.7 415.0,192.0 427.5,192.3 440.0,192.5 452.5,192.7 465.0,192.9 477.5,193.1 490.0,193.3 502.5,193.5 515.0,193.7 527.5,193.8 540.0,194.0\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2.5\"/>\n<line x1=\"40\" y1=\"184.0\" x2=\"545\" y2=\"184.0\" stroke=\"#10b981\" stroke-dasharray=\"5 4\"/>\n<text x=\"420\" y=\"178.0\" font-size=\"12\" fill=\"#10b981\">model cũ 0,4%</text>\n<circle cx=\"77.5\" cy=\"120.0\" r=\"5\" fill=\"#ef4444\"/>\n<text x=\"85.5\" y=\"114.0\" font-size=\"12\" fill=\"#ef4444\">n = 150: 2%</text>\n<circle cx=\"227.5\" cy=\"184.0\" r=\"5\" fill=\"#f59e0b\"/>\n<text x=\"217.5\" y=\"204.0\" font-size=\"12\" fill=\"#f59e0b\">n = 750</text>\n<text x=\"40\" y=\"218\" font-size=\"11\" fill=\"currentColor\">0</text>\n<text x=\"520\" y=\"218\" font-size=\"11\" fill=\"currentColor\">2000</text>\n<text x=\"44\" y=\"48\" font-size=\"11\" fill=\"currentColor\">4%</text>\n</svg>\n\n| Số request không lỗi | Cận trên 95% |\n|---|---|\n| 150 | 2,0% |\n| 750 | 0,4% |\n| 3.000 | 0,1% |\n\n#### Bẫy thường gặp\n- Quy tắc \"n > 30 là đủ\" chỉ là kinh nghiệm cho trung bình của biến liên tục, không dùng cho biến cố hiếm.\n- Chạy canary theo đồng hồ cố định mà không xét số request.\n\n#### Đọc thêm\n- [Rule of three (statistics), Wikipedia](https://en.wikipedia.org/wiki/Rule_of_three_%28statistics%29)\n- [Google SRE Workbook: Canarying Releases](https://sre.google/workbook/canarying-releases/)\n",
+   "distractors": {
+    "A": "Chỉ nhìn ước lượng điểm. Với 150 request, kể cả khi tỉ lệ lỗi thật là 0,4% thì xác suất không thấy lỗi nào vẫn khoảng 55%.",
+    "B": "Quy tắc \"n > 30\" không áp dụng cho biến cố hiếm. Với tỉ lệ cỡ 0,4%, cần hàng trăm đến hàng nghìn request mới thấy được vài lỗi.",
+    "D": "Thời gian quan trọng (bắt chu kỳ ngày đêm) nhưng tiêu chí thống kê là số request; một mốc giờ cố định bất kể lưu lượng là quy tắc máy móc."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Model mới tốt hơn rõ rệt vì tỉ lệ lỗi quan sát là 0% so với 0,4%"
+    },
+    {
+     "key": "B",
+     "text": "Đủ bằng chứng, vì cỡ mẫu 150 lớn hơn 30 nên theo định lý giới hạn trung tâm, ước lượng tỉ lệ lỗi đã đáng tin"
+    },
+    {
+     "key": "C",
+     "text": "Chưa đủ: 0 lỗi trên 150 request cho cận trên 95% của tỉ lệ lỗi khoảng $3/150 = 2\\%$"
+    },
+    {
+     "key": "D",
+     "text": "Chưa đủ, vì canary phải chạy ít nhất 24 giờ dù lưu lượng nhiều hay ít"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T11-B07",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Mô hình dự đoán vỡ nợ: nhãn thật (khách có vỡ nợ hay không) chỉ biết sau **90 ngày**. Trong 90 ngày đầu sau deploy, nên giám sát gì để phát hiện sớm vấn đề về chất lượng?",
+   "explanation": "Khi chưa có nhãn, theo dõi $P(X)$ và $P(\\hat{y})$ qua các chỉ số drift như PSI hoặc kiểm định KS. Điểm dự đoán dịch chuyển mạnh là cảnh báo sớm, sau đó xác nhận bằng nhãn khi có.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nKhi nhãn đến trễ (label delay), không đo được accuracy hay AUC trong thời gian thực. Phải dùng **tín hiệu thay thế**: dữ liệu đầu vào có còn giống lúc huấn luyện không, và đầu ra của mô hình có dịch chuyển bất thường không. Đây là cảnh báo sớm; khi nhãn về thì xác nhận bằng chỉ số chất lượng thật.\n\n#### Từng bước thiết kế giám sát\n1. **Chất lượng dữ liệu** (theo giờ): tỉ lệ null, giá trị ngoài khoảng, kiểu dữ liệu, số request.\n2. **Drift đầu vào** (theo ngày): PSI hoặc kiểm định KS cho từng đặc trưng quan trọng so với dữ liệu huấn luyện.\n3. **Drift đầu ra** (theo ngày): phân phối điểm dự đoán, tỉ lệ hồ sơ bị đánh giá \"rủi ro cao\".\n4. **Nhãn sớm một phần**: ví dụ chậm trả 30 ngày là tín hiệu sớm của vỡ nợ 90 ngày.\n5. **Khi có nhãn** (sau 90 ngày): AUC, calibration theo từng tháng giải ngân.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  R[\"Request mới\"] --> Q[\"Kiểm tra dữ liệu: null, khoảng giá trị\"]\n  R --> DI[\"Drift đầu vào: PSI, KS\"]\n  R --> P[\"Mô hình\"] --> DO[\"Drift điểm dự đoán\"]\n  DO --> AL[\"Cảnh báo sớm\"]\n  DI --> AL\n  Q --> AL\n  L90[\"Nhãn sau 90 ngày\"] --> AUC[\"AUC, calibration\"]\n```\n\n| Tín hiệu | Có ngay? | Ý nghĩa |\n|---|---|---|\n| Null, khoảng giá trị | có | lỗi pipeline |\n| Drift đặc trưng | có | dân số khách hàng đổi |\n| Drift điểm dự đoán | có | hành vi mô hình đổi |\n| AUC | sau 90 ngày | chất lượng thật |\n\n#### Bẫy thường gặp\n- Chỉ giám sát hạ tầng (độ trễ, HTTP 5xx).\n- So dự đoán với chính nó.\n- Đặt cảnh báo drift cho mọi đặc trưng: quá nhiều báo động giả; nên ưu tiên đặc trưng quan trọng.\n\n#### Đọc thêm\n- [Made With ML: Monitoring](https://madewithml.com/courses/mlops/monitoring/)\n- [Google: Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml)\n",
+   "distractors": {
+    "B": "AUC cần nhãn thật, mà nhãn chỉ có sau 90 ngày; không tính được AUC hằng ngày.",
+    "C": "Bỏ qua các tín hiệu thay thế (proxy). Đợi 90 ngày mới phát hiện vấn đề thì thiệt hại đã xảy ra.",
+    "D": "Lập luận vòng: so dự đoán với chính nó luôn cho accuracy 100%, không mang thông tin."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Drift của đặc trưng đầu vào và của phân phối điểm dự đoán, cùng các kiểm tra chất lượng dữ liệu"
+    },
+    {
+     "key": "B",
+     "text": "AUC tính hằng ngày trên các request mới, vì AUC là chỉ số chuẩn và ổn định nhất cho bài toán chấm điểm vỡ nợ"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ độ trễ và tỉ lệ lỗi HTTP, vì chất lượng mô hình chỉ đo được sau 90 ngày"
+    },
+    {
+     "key": "D",
+     "text": "Dùng chính dự đoán của mô hình làm nhãn tạm để tính accuracy hằng ngày"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T11-B08",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Trên cùng một GPU thuê theo giờ, tăng batch size tối đa từ 1 lên 16: throughput tăng từ **50 lên 200 request/s**, p95 tăng từ 60 lên 140 ms (vẫn trong SLO 200 ms). Chi phí GPU cho mỗi 1.000 request thay đổi thế nào?",
+   "explanation": "Chi phí/1K $= \\dfrac{\\text{giá/giờ}}{\\text{throughput} \\times 3600} \\times 1000$. Throughput tăng $200 / 50 = 4$ lần nên chi phí/1K giảm còn $1/4$.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nThuê GPU trả tiền theo **thời gian**, không theo số request. Vì vậy chi phí/1K request tỉ lệ nghịch với throughput:\n$$\\text{chi phí/1K} = \\frac{\\text{giá/giờ}}{\\text{throughput} \\times 3600} \\times 1000.$$\nBatching tăng throughput 4 lần thì chi phí/1K giảm còn 1/4, miễn là vẫn giữ được SLO độ trễ.\n\n#### Từng bước (giả sử giá 1 USD/giờ để dễ nhìn)\n1. Batch 1: $1 / (50 \\times 3600) \\times 1000 \\approx 0{,}00556$ USD/1K.\n2. Batch 16: $1 / (200 \\times 3600) \\times 1000 \\approx 0{,}00139$ USD/1K.\n3. Tỉ lệ: $0{,}00139 / 0{,}00556 = 0{,}25$.\n4. Ràng buộc: p95 = 140 ms vẫn dưới SLO 200 ms nên thay đổi chấp nhận được.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280.0\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Chi phí/1K request (đơn vị 0,001 USD, giá giả định 1 USD/giờ)</text>\n<line x1=\"50\" y1=\"210\" x2=\"550\" y2=\"210\" stroke=\"currentColor\"/>\n<line x1=\"50\" y1=\"30\" x2=\"50\" y2=\"210\" stroke=\"currentColor\"/>\n<rect x=\"86.8\" y=\"53.5\" width=\"171.5\" height=\"156.5\" fill=\"#ef4444\"/>\n<text x=\"172.5\" y=\"48.5\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">5.56</text>\n<text x=\"172.5\" y=\"228.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">batch 1</text>\n<rect x=\"331.8\" y=\"170.9\" width=\"171.5\" height=\"39.1\" fill=\"#10b981\"/>\n<text x=\"417.5\" y=\"165.9\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">1.39</text>\n<text x=\"417.5\" y=\"228.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">batch 16</text>\n</svg>\n\n| Cấu hình | Throughput | p95 | Chi phí/1K (tương đối) |\n|---|---|---|---|\n| batch 1 | 50 req/s | 60 ms | 1 |\n| batch 16 | 200 req/s | 140 ms | 0,25 |\n\n#### Bẫy thường gặp\n- Nghĩ mỗi batch \"tốn\" theo số request bên trong.\n- Lấy tỉ lệ độ trễ làm tỉ lệ chi phí.\n- Quên rằng throughput chỉ quy ra tiết kiệm khi có đủ lưu lượng để lấp đầy batch; lưu lượng thấp thì batch không đầy và lợi ích nhỏ hơn.\n\n#### Đọc thêm\n- [NVIDIA Triton: Dynamic Batcher](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/batcher.html)\n- [Throughput, Wikipedia](https://en.wikipedia.org/wiki/Throughput)\n",
+   "distractors": {
+    "A": "Nhầm giữa công việc mỗi lượt chạy với chi phí. Tiền thuê tính theo thời gian, không theo số request trong một batch.",
+    "B": "Đơn giá mỗi giờ không đổi nhưng chi phí/1K request = giá mỗi giờ chia số request mỗi giờ, mà mẫu số tăng 4 lần.",
+    "C": "Độ trễ của từng request không quyết định chi phí thuê; chi phí phụ thuộc throughput. p95 chỉ là ràng buộc SLO."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng 16 lần, vì mỗi lượt chạy GPU giờ phải xử lý 16 request"
+    },
+    {
+     "key": "B",
+     "text": "Không đổi, vì vẫn thuê một GPU với cùng đơn giá"
+    },
+    {
+     "key": "C",
+     "text": "Tăng khoảng 2,3 lần, theo đúng tỉ lệ tăng p95 từ 60 lên 140 ms, vì mỗi request chiếm GPU lâu hơn"
+    },
+    {
+     "key": "D",
+     "text": "Giảm còn 1/4, vì giá mỗi giờ không đổi mà số request mỗi giờ tăng 4 lần"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T11-B09",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Dockerfile sau mất 6 phút để build lại mỗi khi sửa **một dòng** trong `serve.py`, vì `pip` cài lại toàn bộ thư viện:\n\n```dockerfile\nFROM python:3.11-slim\nWORKDIR /app\nCOPY . .\nRUN pip install -r requirements.txt\nCMD [\"python\", \"serve.py\"]\n```\n\nSửa thế nào là đúng?",
+   "explanation": "Docker cache theo lớp: một lớp bị build lại khi nó hoặc lớp trước đổi. `COPY . .` đổi mỗi khi code đổi nên mọi lớp phía sau đều chạy lại; đưa bước cài thư viện (chỉ phụ thuộc `requirements.txt`) lên trước thì lớp đó được dùng lại.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nMỗi lệnh trong Dockerfile tạo một **lớp** (layer). Docker dùng lại lớp đã build nếu lệnh và mọi dữ liệu đầu vào của nó không đổi; một khi một lớp bị build lại thì **mọi lớp phía sau** cũng build lại. `COPY . .` chép cả code, nên sửa một dòng `serve.py` làm lớp này đổi và kéo theo `pip install` chạy lại.\n\n#### Từng bước sửa\n```dockerfile\nFROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nCMD [\"python\", \"serve.py\"]\n```\n1. Lớp `COPY requirements.txt` chỉ đổi khi danh sách thư viện đổi.\n2. Lớp `pip install` vì vậy được dùng lại khi chỉ sửa code.\n3. `COPY . .` đặt cuối: sửa code chỉ build lại lớp rẻ này.\n4. Thêm `.dockerignore` (bỏ `.git`, dữ liệu, `__pycache__`) để thay đổi không liên quan không làm hỏng cache.\n\n#### Hình minh hoạ\n```mermaid\nflowchart TB\n  A[\"FROM python:3.11-slim (cache)\"] --> B[\"COPY requirements.txt (cache)\"]\n  B --> C[\"RUN pip install (cache, tiết kiệm 6 phút)\"]\n  C --> D[\"COPY . . (build lại khi sửa code)\"]\n  D --> E[\"CMD\"]\n```\n\n| Thứ tự | Sửa `serve.py` thì build lại |\n|---|---|\n| `COPY . .` trước `pip install` | `COPY` + `pip install` (6 phút) |\n| `pip install` trước `COPY . .` | chỉ `COPY` (vài giây) |\n\n#### Bẫy thường gặp\n- Nhầm `--no-cache-dir` của pip với cache lớp của Docker: cái đầu làm image nhỏ hơn, không làm build nhanh hơn.\n- Gộp mọi thứ vào một `RUN`: giảm số lớp nhưng mất khả năng dùng lại.\n\n#### Đọc thêm\n- [Docker docs: Build cache](https://docs.docker.com/build/cache/)\n- [Docker docs: Building best practices](https://docs.docker.com/build/building/best-practices/)\n",
+   "distractors": {
+    "A": "`--no-cache-dir` chỉ bỏ cache của pip để image nhỏ hơn; không giúp Docker dùng lại lớp đã build.",
+    "C": "Giảm số lớp không giải quyết việc lớp cài thư viện bị vô hiệu hoá mỗi khi bất kỳ file code nào đổi.",
+    "D": "Base image đầy đủ không chứa các thư viện riêng của dự án; `pip install` vẫn chạy lại như cũ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Thêm `--no-cache-dir` vào lệnh `pip install` để build nhanh hơn"
+    },
+    {
+     "key": "B",
+     "text": "Chép `requirements.txt` và chạy `pip install` trước, sau đó mới `COPY . .`"
+    },
+    {
+     "key": "C",
+     "text": "Gộp mọi lệnh thành một `RUN` duy nhất để giảm số lớp của image và tăng tốc build"
+    },
+    {
+     "key": "D",
+     "text": "Đổi base image sang bản `python:3.11` đầy đủ cho có sẵn nhiều thư viện"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T11-B10",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Khi ra model v5, nhóm đổi định nghĩa đặc trưng `so_giao_dich` **tại chỗ** từ \"số giao dịch 30 ngày\" thành \"số giao dịch 7 ngày\" (giữ nguyên tên cột). v5 gặp sự cố nên được rollback về v4 trong registry, nhưng v4 cũng cho dự đoán sai nhiều dù file model v4 không đổi. Nguyên nhân và bài học đúng là gì?",
+   "explanation": "Model là hàm $f_{v4}(x)$ học với $x = \\text{giao dịch 30 ngày}$; khi cấp $x' = \\text{giao dịch 7 ngày}$ (giá trị nhỏ hơn khoảng 4 lần) thì $f_{v4}(x')$ sai dù $f_{v4}$ không đổi. Đây là training-serving skew do nợ kỹ thuật về dữ liệu.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nRollback chỉ an toàn khi **cả model lẫn đầu vào của nó** quay về đúng trạng thái cũ. Ở đây file model v4 không đổi nhưng cột `so_giao_dich` đã bị đổi nghĩa tại chỗ (30 ngày thành 7 ngày). v4 nhận giá trị nhỏ hơn khoảng 4 lần so với lúc học, nên dự đoán lệch. Đây là ví dụ kinh điển của nợ kỹ thuật về phụ thuộc dữ liệu.\n\n#### Từng bước phân tích\n1. Lúc huấn luyện v4: $x = $ số giao dịch 30 ngày, ví dụ trung bình 24.\n2. Sau khi đổi: $x' = $ số giao dịch 7 ngày, trung bình khoảng $24 \\times 7/30 \\approx 5{,}6$.\n3. $f_{v4}(x')$ coi mọi khách như \"ít giao dịch\", nên điểm rủi ro lệch hệ thống.\n4. Cách đúng: tạo đặc trưng mới `so_giao_dich_7ngay`, giữ `so_giao_dich_30ngay` chạy song song; chỉ xoá đặc trưng cũ khi không còn model nào (kể cả model dự phòng rollback) dùng nó.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  subgraph SAI[\"Đổi tại chỗ\"]\n    F1[\"so_giao_dich: nay là 7 ngày\"] --> V4a[\"v4 (học với 30 ngày)\"]\n    F1 --> V5a[\"v5\"]\n  end\n  subgraph DUNG[\"Version hoá đặc trưng\"]\n    F30[\"so_giao_dich_30ngay\"] --> V4b[\"v4\"]\n    F7[\"so_giao_dich_7ngay\"] --> V5b[\"v5\"]\n  end\n```\n\n| Cách làm | Rollback về v4 |\n|---|---|\n| Đổi định nghĩa, giữ tên | hỏng âm thầm |\n| Thêm đặc trưng tên mới, giữ cũ | an toàn |\n| Lưu \"hợp đồng\" đặc trưng kèm model (tên, phiên bản, phân phối kỳ vọng) | phát hiện lệch ngay khi deploy |\n\n#### Bẫy thường gặp\n- Nghĩ rollback chỉ là đổi con trỏ model trong registry.\n- Đổ cho concept drift khi model vừa chạy tốt ngay trước đó.\n\n#### Đọc thêm\n- [Sculley et al. (2015), Hidden Technical Debt in ML Systems](https://proceedings.neurips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html)\n- [Feature store, Wikipedia](https://en.wikipedia.org/wiki/Feature_store)\n- [Google: Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml)\n",
+   "distractors": {
+    "A": "Đề nói file v4 không đổi. Checksum là thực hành tốt nhưng không giải quyết việc đầu vào bị đổi nghĩa.",
+    "B": "v4 vừa chạy tốt ngay trước đó nên đây không phải drift tự nhiên; lỗi nằm ở đặc trưng bị đổi định nghĩa.",
+    "D": "Tốc độ chuyển lưu lượng không làm dự đoán sai; vấn đề là đầu vào của v4 không còn đúng định nghĩa nó đã học."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "File trọng số v4 trong registry đã hỏng; cần lưu kèm checksum cho mỗi file model"
+    },
+    {
+     "key": "B",
+     "text": "v4 đã cũ nên bị concept drift; nên huấn luyện lại v4 trên dữ liệu mới nhất thay vì cố rollback về một model đã lỗi thời"
+    },
+    {
+     "key": "C",
+     "text": "v4 nhận đặc trưng theo định nghĩa mới; cần version hoá đặc trưng và giữ bản cũ đến khi hết khả năng rollback"
+    },
+    {
+     "key": "D",
+     "text": "Rollback phải chuyển dần như canary; chuyển 100% về v4 một lần gây quá tải"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T11-C01",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Dịch vụ LLM nhận trung bình **12 request/giây**, thời gian xử lý trung bình mỗi request (từ lúc vào đến lúc xong) là **2,5 giây**. Mỗi replica xử lý đồng thời tối đa **8 request**, và nhóm muốn giữ mức dùng slot không quá **80%**. Dùng định luật Little, cần tối thiểu bao nhiêu replica? **Nhập số nguyên.**",
+   "explanation": "Định luật Little: $L = \\lambda W = 12 \\times 2{,}5 = 30$ request đồng thời. Số replica $= \\lceil 30 / (8 \\times 0{,}8) \\rceil = \\lceil 4{,}6875 \\rceil = 5$.",
+   "section": "c-ops",
+   "long": "#### Ý chính\n**Định luật Little**: trong hệ ổn định, số phần tử trung bình đang ở trong hệ bằng tốc độ đến nhân thời gian lưu trung bình:\n$$L = \\lambda W.$$\nÁp dụng cho dịch vụ: số request đang xử lý đồng thời = request/giây × thời gian xử lý mỗi request. Từ đó suy ra số slot (và số replica) cần có.\n\n#### Từng bước\n1. $L = 12 \\times 2{,}5 = 30$ request đồng thời trung bình.\n2. Sức chứa hữu dụng mỗi replica: $8 \\times 0{,}8 = 6{,}4$ slot (giữ 20% dư cho dao động).\n3. Số replica $= \\lceil 30 / 6{,}4 \\rceil = \\lceil 4{,}6875 \\rceil = 5$.\n\n```python\nimport math\nL = 12 * 2.5\nprint(math.ceil(L / (8 * 0.8)))   # 5\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 170\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Định luật Little: L = λ · W</text>\n<rect x=\"20\" y=\"60\" width=\"120\" height=\"50\" rx=\"6\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2\"/>\n<text x=\"80\" y=\"90\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">λ = 12 req/s</text>\n<line x1=\"140\" y1=\"85\" x2=\"200\" y2=\"85\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<polygon points=\"200,85 190,80 190,90\" fill=\"currentColor\"/>\n<rect x=\"200\" y=\"45\" width=\"180\" height=\"80\" rx=\"6\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2\"/>\n<text x=\"290\" y=\"78\" text-anchor=\"middle\" font-size=\"13\" fill=\"currentColor\">đang xử lý: L = 30</text>\n<text x=\"290\" y=\"100\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">mỗi request ở W = 2,5 s</text>\n<line x1=\"380\" y1=\"85\" x2=\"440\" y2=\"85\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<polygon points=\"440,85 430,80 430,90\" fill=\"currentColor\"/>\n<text x=\"450\" y=\"90\" font-size=\"13\" fill=\"currentColor\">ra 12 req/s</text>\n<text x=\"280\" y=\"155\" text-anchor=\"middle\" font-size=\"12\" fill=\"#f59e0b\">30 / (8 slot × 80%) = 4,69 → 5 replica</text>\n</svg>\n\n| Mức dùng slot tối đa | Replica cần |\n|---|---|\n| 100% | 4 |\n| 80% | 5 |\n| 60% | 7 |\n\n#### Bẫy thường gặp\n- Chia lưu lượng (req/s) cho số slot mà quên nhân thời gian xử lý.\n- Làm tròn xuống: 4,69 replica nghĩa là 4 replica không đủ.\n- Little cho giá trị **trung bình**; lúc cao điểm hoặc khi độ trễ tăng (W tăng) thì L tăng theo, nên mới cần biên dự phòng.\n\n#### Đọc thêm\n- [Little's law, Wikipedia](https://en.wikipedia.org/wiki/Little%27s_law)\n- [Queueing theory, Wikipedia](https://en.wikipedia.org/wiki/Queueing_theory)\n",
+   "mistakes": [
+    {
+     "value": 4,
+     "why": "Quên điều kiện 80%: $30 / 8 = 3{,}75$ làm tròn lên 4."
+    },
+    {
+     "value": 30,
+     "why": "Đây mới là số request đồng thời $L = \\lambda W$, chưa chia cho sức chứa mỗi replica."
+    },
+    {
+     "value": 2,
+     "why": "Lấy $12 / 8 = 1{,}5$ rồi làm tròn lên, quên nhân thời gian xử lý $W$: lưu lượng vào không phải là số request đang chạy."
+    }
+   ],
+   "answer": 5,
+   "tol": 0
+  },
+  {
+   "id": "T11-C02",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Đo trên một GPU: thời gian một lượt chạy mô hình với batch $b$ request là $t(b) = 20 + 5b$ (ms). Server luôn gom đủ batch $b = 16$ (giả sử lưu lượng đủ lớn để GPU chạy liên tục). Throughput đạt bao nhiêu? **Đơn vị: request/giây, nhập số nguyên.**",
+   "explanation": "$t(16) = 20 + 5 \\times 16 = 100$ ms; throughput $= \\dfrac{16}{0{,}1\\ \\text{s}} = 160$ request/s (gấp 4 lần so với $b = 1$).",
+   "section": "c-ops",
+   "long": "#### Ý chính\nMỗi lượt chạy GPU tốn $t(b) = t_0 + c\\,b$: phần cố định $t_0 = 20$ ms (khởi chạy, đọc trọng số) và phần tỉ lệ $c = 5$ ms cho mỗi request. Throughput $= b / t(b)$ tăng theo $b$ nhưng **không tuyến tính**, và bị chặn trên bởi $1/c = 200$ request/s.\n\n#### Từng bước\n1. $t(16) = 20 + 5 \\times 16 = 100$ ms $= 0{,}1$ s.\n2. Throughput $= 16 / 0{,}1 = 160$ request/s.\n3. So với $b = 1$: $t(1) = 25$ ms, throughput $= 40$ request/s. Tăng 4 lần chứ không phải 16 lần.\n4. Cái giá: mỗi request nằm trong một lượt chạy 100 ms (thay vì 25 ms), cộng thời gian chờ gom batch.\n\n```python\nfor b in [1, 2, 4, 8, 16, 32]:\n    print(b, round(b / ((20 + 5 * b) / 1000)))\n# 1 40, 2 67, 4 100, 8 133, 16 160, 32 178\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 240\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Throughput (req/s) theo batch size, tiệm cận 200</text>\n<line x1=\"30\" y1=\"210\" x2=\"540\" y2=\"210\" stroke=\"currentColor\"/>\n<line x1=\"30\" y1=\"40\" x2=\"540\" y2=\"40\" stroke=\"#ef4444\" stroke-dasharray=\"5 4\"/>\n<text x=\"470\" y=\"34\" font-size=\"11\" fill=\"#ef4444\">trần 1/c = 200</text>\n<polyline points=\"60,176.0 150,153.3 240,125.0 330,96.7 420,74.0 510,58.9\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2.5\"/>\n<text x=\"60\" y=\"228\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">b=1</text><text x=\"60\" y=\"168.0\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">40</text>\n<text x=\"150\" y=\"228\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">b=2</text><text x=\"150\" y=\"145.3\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">67</text>\n<text x=\"240\" y=\"228\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">b=4</text><text x=\"240\" y=\"117.0\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">100</text>\n<text x=\"330\" y=\"228\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">b=8</text><text x=\"330\" y=\"88.7\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">133</text>\n<text x=\"420\" y=\"228\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">b=16</text><text x=\"420\" y=\"66.0\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">160</text>\n<text x=\"510\" y=\"228\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">b=32</text><text x=\"510\" y=\"50.9\" text-anchor=\"middle\" font-size=\"11\" fill=\"currentColor\">178</text>\n</svg>\n\n| Batch | $t(b)$ (ms) | Throughput (req/s) |\n|---|---|---|\n| 1 | 25 | 40 |\n| 4 | 40 | 100 |\n| 16 | 100 | 160 |\n| 32 | 180 | 178 |\n\n#### Bẫy thường gặp\n- Nhân throughput batch 1 với batch size (ra 640).\n- Bỏ quên chi phí cố định (ra 200).\n- Đẩy batch lên mãi: lợi ích giảm dần trong khi độ trễ tăng tuyến tính.\n\n#### Đọc thêm\n- [NVIDIA Triton: Dynamic Batcher](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/batcher.html)\n- [Made With ML: Serving](https://madewithml.com/courses/mlops/serving/)\n",
+   "mistakes": [
+    {
+     "value": 40,
+     "why": "Đây là throughput khi $b = 1$: $1 / 25$ ms $= 40$ request/s."
+    },
+    {
+     "value": 640,
+     "why": "Giả sử throughput tăng tuyến tính theo batch: $16 \\times 40 = 640$. Thời gian mỗi lượt cũng tăng theo $b$."
+    },
+    {
+     "value": 200,
+     "why": "Bỏ quên chi phí cố định 20 ms: $16 / (5 \\times 16)$ ms $= 200$ request/s."
+    }
+   ],
+   "answer": 160,
+   "tol": 0
+  },
+  {
+   "id": "T11-C03",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Cần phục vụ một model **34 tỷ tham số** trên GPU 24 GB. Trọng số lượng tử hóa **INT4** (4 bit/tham số), và cứ mỗi **nhóm 128 tham số** lưu thêm một hệ số scale **FP16** (16 bit). Tính bộ nhớ chỉ riêng cho trọng số. **Đơn vị: GB (1 GB = $10^9$ byte), làm tròn 2 chữ số thập phân.**",
+   "explanation": "Số bit mỗi tham số $= 4 + \\dfrac{16}{128} = 4{,}125$. Bộ nhớ $= \\dfrac{34 \\times 10^9 \\times 4{,}125}{8} = 17{,}53 \\times 10^9$ byte $\\approx 17{,}53$ GB (còn khoảng 6,5 GB cho KV cache và runtime).",
+   "section": "c-ops",
+   "long": "#### Ý chính\nBộ nhớ trọng số $=$ số tham số $\\times$ số bit mỗi tham số $/ 8$. Lượng tử hoá theo nhóm (group-wise) lưu thêm một hệ số scale cho mỗi nhóm, nên số bit thực tế mỗi tham số lớn hơn 4 một chút.\n\n#### Từng bước\n1. Bit mỗi tham số: $4 + \\dfrac{16}{128} = 4{,}125$.\n2. Tổng bit: $34 \\times 10^9 \\times 4{,}125 = 140{,}25 \\times 10^9$ bit.\n3. Đổi ra byte: $140{,}25 \\times 10^9 / 8 = 17{,}53 \\times 10^9$ byte $\\approx 17{,}53$ GB.\n4. Còn lại trên GPU 24 GB: $\\approx 6{,}5$ GB cho KV cache, activation và runtime.\n\n```python\nn = 34e9\nprint(round(n * (4 + 16/128) / 8 / 1e9, 2))   # 17.53\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280.0\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Bộ nhớ trọng số của model 34 tỷ tham số (GPU 24 GB)</text>\n<line x1=\"50\" y1=\"210\" x2=\"550\" y2=\"210\" stroke=\"currentColor\"/>\n<line x1=\"50\" y1=\"30\" x2=\"50\" y2=\"210\" stroke=\"currentColor\"/>\n<rect x=\"74.5\" y=\"57.0\" width=\"114.3\" height=\"153.0\" fill=\"#ef4444\"/>\n<text x=\"131.7\" y=\"52.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">68 GB</text>\n<text x=\"131.7\" y=\"228.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">FP16</text>\n<rect x=\"237.8\" y=\"133.5\" width=\"114.3\" height=\"76.5\" fill=\"#f59e0b\"/>\n<text x=\"295.0\" y=\"128.5\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">34 GB</text>\n<text x=\"295.0\" y=\"228.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">INT8</text>\n<rect x=\"401.2\" y=\"170.6\" width=\"114.3\" height=\"39.4\" fill=\"#10b981\"/>\n<text x=\"458.3\" y=\"165.6\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">17.53 GB</text>\n<text x=\"458.3\" y=\"228.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">INT4 + scale</text>\n</svg>\n\n| Độ chính xác | Byte/tham số | Bộ nhớ 34B | Vừa GPU 24 GB? |\n|---|---|---|---|\n| FP16 | 2 | 68 GB | không |\n| INT8 | 1 | 34 GB | không |\n| INT4 (nhóm 128, scale FP16) | 0,516 | 17,53 GB | có, còn ~6,5 GB |\n\n#### Bẫy thường gặp\n- Bỏ quên scale/zero-point: sai số nhỏ ở đây (0,53 GB) nhưng với nhóm 32 tham số thì phần phụ trội tăng lên 0,5 bit mỗi tham số.\n- Nhầm bit và byte.\n- Chỉ tính trọng số mà quên KV cache: với ngữ cảnh dài và nhiều request đồng thời, KV cache có thể lớn ngang trọng số.\n- INT4 tiết kiệm bộ nhớ nhưng có thể giảm chất lượng; phải đánh giá lại trên golden set.\n\n#### Đọc thêm\n- [Hugging Face: Quantization overview](https://huggingface.co/docs/transformers/main/en/quantization/overview)\n- [Half-precision floating-point format, Wikipedia](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)\n",
+   "mistakes": [
+    {
+     "value": 17,
+     "why": "Bỏ quên phần scale: $34 \\times 10^9 \\times 0{,}5$ byte $= 17$ GB. Mỗi tham số thật ra tốn $4 + 16/128 = 4{,}125$ bit."
+    },
+    {
+     "value": 68,
+     "why": "Đây là bộ nhớ FP16 (2 byte/tham số), chưa lượng tử hóa."
+    },
+    {
+     "value": 34,
+     "why": "Đây là bộ nhớ INT8 (1 byte/tham số)."
+    },
+    {
+     "value": 140.25,
+     "why": "Nhầm bit với byte: $34 \\times 10^9 \\times 4{,}125$ là số **bit**, phải chia 8."
+    }
+   ],
+   "answer": 17.53,
+   "tol": 0.0051
+  },
+  {
+   "id": "T11-C04",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "API tóm tắt văn bản đặt cache phía trước model. Mọi request đều tra cache mất **15 ms**; nếu hit thì trả luôn, nếu miss thì gọi model mất thêm **900 ms**. Tỉ lệ cache hit đo được là **35%**. Độ trễ trung bình mỗi request là bao nhiêu? **Đơn vị: ms, làm tròn 1 chữ số thập phân.**",
+   "explanation": "$\\bar{t} = 0{,}35 \\times 15 + 0{,}65 \\times (15 + 900) = 5{,}25 + 594{,}75 = 600$ ms, tương đương $15 + 0{,}65 \\times 900$.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nĐộ trễ trung bình là **kỳ vọng có trọng số** theo xác suất hit và miss. Lưu ý: request miss vẫn đã tốn thời gian tra cache trước khi gọi model.\n\n#### Từng bước\n1. Nhánh hit (35%): 15 ms.\n2. Nhánh miss (65%): $15 + 900 = 915$ ms.\n3. Trung bình: $0{,}35 \\times 15 + 0{,}65 \\times 915 = 5{,}25 + 594{,}75 = 600$ ms.\n4. Cách viết gọn: $\\bar{t} = t_{\\text{cache}} + (1 - h)\\,t_{\\text{model}} = 15 + 0{,}65 \\times 900 = 600$.\n\n```python\nh = 0.35\nprint(round(h * 15 + (1 - h) * (15 + 900), 1))   # 600.0\n```\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  R[\"Request\"] --> C{\"Tra cache 15 ms\"}\n  C -->|\"hit 35%\"| H[\"Trả ngay: 15 ms\"]\n  C -->|\"miss 65%\"| M[\"Gọi model 900 ms\"]\n  M --> W[\"Ghi vào cache\"] --> T[\"Tổng 915 ms\"]\n```\n\n| Hit rate | Độ trễ trung bình (ms) |\n|---|---|\n| 0% (không cache) | 900 (không tra cache) |\n| 0% (có cache nhưng không hit) | 915 |\n| 35% | 600 |\n| 60% | 375 |\n\nCache còn giảm chi phí gọi model theo tỉ lệ hit. Nhưng p95 gần như không cải thiện khi hit rate dưới 95%: request chậm nhất vẫn là request miss (915 ms).\n\n#### Bẫy thường gặp\n- Quên thời gian tra cache trong nhánh miss.\n- Đảo xác suất hit và miss.\n- Kết luận cache cải thiện p95 chỉ vì mean giảm.\n\n#### Đọc thêm\n- [Cache (computing), Wikipedia](https://en.wikipedia.org/wiki/Cache_%28computing%29)\n",
+   "mistakes": [
+    {
+     "value": 590.25,
+     "why": "Quên rằng request miss vẫn tốn 15 ms tra cache: $0{,}35 \\times 15 + 0{,}65 \\times 900$."
+    },
+    {
+     "value": 330,
+     "why": "Đảo hit và miss: dùng 0,35 cho nhánh miss và 0,65 cho nhánh hit."
+    },
+    {
+     "value": 457.5,
+     "why": "Lấy trung bình cộng đơn giản $(15 + 900)/2$, bỏ qua tỉ lệ hit."
+    }
+   ],
+   "answer": 600,
+   "tol": 0.051
+  },
+  {
+   "id": "T11-C05",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Giám sát đặc trưng `so_tien_giao_dich` chia 5 khoảng. Tỉ lệ khi huấn luyện (expected): **[0,10; 0,20; 0,40; 0,20; 0,10]**. Tỉ lệ tuần này (actual): **[0,05; 0,15; 0,35; 0,25; 0,20]**. Tính PSI $= \\sum_i (a_i - e_i) \\ln \\dfrac{a_i}{e_i}$ (logarit tự nhiên). **Làm tròn 3 chữ số thập phân.**",
+   "explanation": "Từng khoảng: $(-0{,}05)\\ln 0{,}5 = 0{,}0347$; $(-0{,}05)\\ln 0{,}75 = 0{,}0144$; $(-0{,}05)\\ln 0{,}875 = 0{,}0067$; $0{,}05 \\ln 1{,}25 = 0{,}0112$; $0{,}10 \\ln 2 = 0{,}0693$. Tổng $\\approx 0{,}136$, nằm trong vùng \"dịch chuyển vừa\" (0,1 đến 0,25) theo quy ước thường dùng.",
+   "section": "c-ops",
+   "long": "#### Ý chính\n**PSI (Population Stability Index)** đo mức dịch chuyển phân phối của một biến giữa tập tham chiếu (expected, thường là dữ liệu huấn luyện) và dữ liệu hiện tại (actual):\n$$\\text{PSI} = \\sum_i (a_i - e_i) \\ln \\frac{a_i}{e_i}.$$\nNó bằng tổng KL divergence hai chiều $D_{KL}(a \\parallel e) + D_{KL}(e \\parallel a)$. Quy ước thường dùng trong ngành: $< 0{,}1$ ổn định, $0{,}1$ đến $0{,}25$ dịch chuyển vừa, $> 0{,}25$ dịch chuyển lớn.\n\n#### Từng bước\n| Khoảng | $e_i$ | $a_i$ | $a_i - e_i$ | $\\ln(a_i/e_i)$ | Tích |\n|---|---|---|---|---|---|\n| 1 | 0,10 | 0,05 | −0,05 | −0,6931 | 0,0347 |\n| 2 | 0,20 | 0,15 | −0,05 | −0,2877 | 0,0144 |\n| 3 | 0,40 | 0,35 | −0,05 | −0,1335 | 0,0067 |\n| 4 | 0,20 | 0,25 | 0,05 | 0,2231 | 0,0112 |\n| 5 | 0,10 | 0,20 | 0,10 | 0,6931 | 0,0693 |\n| | | | | **Tổng** | **0,136** |\n\n```python\nimport math\ne = [.1, .2, .4, .2, .1]; a = [.05, .15, .35, .25, .2]\nprint(round(sum((x - y) * math.log(x / y) for x, y in zip(a, e)), 3))   # 0.136\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 240\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Tỉ lệ theo khoảng: huấn luyện (xanh) và tuần này (cam)</text>\n<line x1=\"60\" y1=\"200\" x2=\"545\" y2=\"200\" stroke=\"currentColor\"/>\n<rect x=\"70\" y=\"160.0\" width=\"30\" height=\"40.0\" fill=\"#3b82f6\"/>\n<rect x=\"102\" y=\"180.0\" width=\"30\" height=\"20.0\" fill=\"#f59e0b\"/>\n<text x=\"101\" y=\"218\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">khoảng 1</text>\n<rect x=\"165\" y=\"120.0\" width=\"30\" height=\"80.0\" fill=\"#3b82f6\"/>\n<rect x=\"197\" y=\"140.0\" width=\"30\" height=\"60.0\" fill=\"#f59e0b\"/>\n<text x=\"196\" y=\"218\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">khoảng 2</text>\n<rect x=\"260\" y=\"40.0\" width=\"30\" height=\"160.0\" fill=\"#3b82f6\"/>\n<rect x=\"292\" y=\"60.0\" width=\"30\" height=\"140.0\" fill=\"#f59e0b\"/>\n<text x=\"291\" y=\"218\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">khoảng 3</text>\n<rect x=\"355\" y=\"120.0\" width=\"30\" height=\"80.0\" fill=\"#3b82f6\"/>\n<rect x=\"387\" y=\"100.0\" width=\"30\" height=\"100.0\" fill=\"#f59e0b\"/>\n<text x=\"386\" y=\"218\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">khoảng 4</text>\n<rect x=\"450\" y=\"160.0\" width=\"30\" height=\"40.0\" fill=\"#3b82f6\"/>\n<rect x=\"482\" y=\"120.0\" width=\"30\" height=\"80.0\" fill=\"#f59e0b\"/>\n<text x=\"481\" y=\"218\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">khoảng 5</text>\n</svg>\n\nKết luận: PSI $\\approx 0{,}136$, dịch chuyển vừa, chủ yếu do khoảng giá trị cao (khoảng 5) tăng gấp đôi. Nên điều tra nguyên nhân (nhóm khách mới? lạm phát?) và theo dõi chất lượng mô hình trên nhóm này.\n\n#### Bẫy thường gặp\n- Tính KL một chiều (0,070) hoặc dùng $\\log_{10}$ (0,059) rồi so với ngưỡng của logarit tự nhiên.\n- Khoảng có tỉ lệ 0 làm $\\ln$ vô cực: cần cộng một số rất nhỏ hoặc gộp khoảng.\n- Ngưỡng 0,1 và 0,25 là quy ước kinh nghiệm, không phải kiểm định thống kê.\n\n#### Đọc thêm\n- [Kullback–Leibler divergence, Wikipedia](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence)\n- [Made With ML: Monitoring](https://madewithml.com/courses/mlops/monitoring/)\n",
+   "mistakes": [
+    {
+     "value": 0.07,
+     "why": "Tính KL divergence một chiều $\\sum a_i \\ln(a_i/e_i)$ thay vì PSI; PSI là tổng KL hai chiều."
+    },
+    {
+     "value": 0.059,
+     "why": "Dùng $\\log_{10}$ thay cho $\\ln$; quy ước ngưỡng PSI 0,1 và 0,25 đi kèm logarit tự nhiên."
+    },
+    {
+     "value": 0.25,
+     "why": "Cộng giá trị tuyệt đối chênh lệch $\\sum |a_i - e_i|$, thiếu hệ số $\\ln(a_i/e_i)$."
+    }
+   ],
+   "answer": 0.136,
+   "tol": 0.00051
+  },
+  {
+   "id": "T11-C06",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Pipeline CD tự động promote model lên production nếu đạt cổng eval offline. Model mới đạt AUC offline 0,91 nhưng chạy thật sai nhiều. Điều tra cho thấy bước tiền xử lý ở dịch vụ phục vụ được viết lại bằng Java và không chuyển chữ về chữ thường như code Python lúc huấn luyện. Nên bổ sung kiểm thử nào vào CI?",
+   "explanation": "Training-serving skew: $g_{\\text{train}}(x) \\ne g_{\\text{serve}}(x)$ nên $f(g_{\\text{serve}}(x))$ sai dù $f$ tốt. Test cần kiểm $\\lVert g_{\\text{train}}(x) - g_{\\text{serve}}(x) \\rVert \\le \\varepsilon$ trên tập request mẫu; tốt nhất là dùng chung một code tiền xử lý.",
+   "section": "c-ops",
+   "long": "#### Ý chính\n**Training-serving skew**: mô hình $f$ tốt nhưng đầu vào lúc phục vụ được tạo bằng một hàm tiền xử lý $g_{\\text{serve}}$ khác với $g_{\\text{train}}$ lúc huấn luyện. Cổng eval offline chỉ chạy $g_{\\text{train}}$ nên không bao giờ thấy lỗi. Rules of ML khuyến nghị dùng lại cùng code giữa huấn luyện và phục vụ, và kiểm tra sự khớp nhau giữa hai đường.\n\n#### Từng bước thiết kế test đối chiếu\n1. Lấy 500 request mẫu (đa dạng: chữ hoa, dấu tiếng Việt, ký tự đặc biệt, trường rỗng).\n2. Chạy qua $g_{\\text{train}}$ (Python) và $g_{\\text{serve}}$ (Java) để lấy vector đặc trưng.\n3. Assert: đặc trưng phân loại khớp tuyệt đối; đặc trưng số $|g_{\\text{train}} - g_{\\text{serve}}| \\le 10^{-6}$; dự đoán cuối khớp nhau.\n4. Chạy test này trong CI mỗi khi đổi code ở **một trong hai** phía.\n5. Ở production: log đặc trưng lúc phục vụ, định kỳ so với đặc trưng tính lại offline.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  S[\"500 request mẫu\"] --> GT[\"Tiền xử lý huấn luyện (Python)\"]\n  S --> GS[\"Tiền xử lý phục vụ (Java)\"]\n  GT --> CMP{\"Đặc trưng khớp?\"}\n  GS --> CMP\n  CMP -->|\"khớp\"| OK[\"CI xanh, cho promote\"]\n  CMP -->|\"lệch\"| FAIL[\"CI đỏ, chặn promote\"]\n```\n\n| Kiểm thử | Bắt được skew? |\n|---|---|\n| Ngưỡng AUC offline | không |\n| Unit test hàm huấn luyện | không |\n| Eval nhiều seed | không |\n| Test đối chiếu hai đường tiền xử lý | có |\n\n#### Bẫy thường gặp\n- Tin rằng AUC offline cao là đủ để promote tự động.\n- Viết lại tiền xử lý bằng ngôn ngữ khác mà không có test đối chiếu.\n\n#### Đọc thêm\n- [Google: Rules of Machine Learning (training-serving skew)](https://developers.google.com/machine-learning/guides/rules-of-ml)\n- [Made With ML: Testing](https://madewithml.com/courses/mlops/testing/)\n",
+   "distractors": {
+    "B": "AUC offline tính bằng pipeline Python nên không hề thấy lỗi ở pipeline Java; nâng ngưỡng không bắt được skew.",
+    "C": "Code chạy không lỗi vẫn có thể cho đặc trưng sai; lỗi ở đây là khác biệt logic giữa hai đường xử lý.",
+    "D": "Giảm nhiễu của ước lượng offline nhưng vẫn chỉ đo pipeline huấn luyện; không chạm tới tiền xử lý phía phục vụ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Test đối chiếu: cùng request mẫu qua tiền xử lý của huấn luyện và của phục vụ phải ra đặc trưng khớp nhau"
+    },
+    {
+     "key": "B",
+     "text": "Nâng ngưỡng AUC offline của cổng eval từ 0,90 lên 0,93"
+    },
+    {
+     "key": "C",
+     "text": "Unit test bảo đảm hàm huấn luyện chạy hết mà không ném ngoại lệ"
+    },
+    {
+     "key": "D",
+     "text": "Chạy eval offline với 5 seed khác nhau rồi lấy trung bình AUC, giúp cổng eval ổn định hơn và giảm rủi ro promote nhầm model"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T11-C07",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Dịch vụ có tải ổn định **50 request/s** suốt ngày. Hai loại GPU (giá giả định, tính tiền theo giờ cho cả GPU, không chia nhỏ):\n\n| GPU | Giá | Throughput tối đa trong SLO |\n|---|---|---|\n| X | 1,20 USD/giờ | 30 request/s |\n| Y | 3,60 USD/giờ | 120 request/s |\n\nPhương án nào đủ công suất với chi phí mỗi giờ thấp nhất?",
+   "explanation": "X: cần $\\lceil 50 / 30 \\rceil = 2$ GPU, $2 \\times 1{,}2 = 2{,}4$ USD/giờ. Y: $\\lceil 50 / 120 \\rceil = 1$ GPU, 3,6 USD/giờ. Chi phí/1K khi đầy tải chỉ đúng khi mức dùng cao; với tải cụ thể phải tính theo số GPU nguyên.",
+   "section": "c-ops",
+   "long": "#### Ý chính\n\"Chi phí/1K request khi đầy tải\" chỉ là chỉ số so sánh **hiệu quả** của phần cứng. Khi phải trả nguyên giá cho cả GPU theo giờ, chi phí thật phụ thuộc **số GPU nguyên** cần để chịu tải. GPU mạnh nhưng chạy non tải có thể đắt hơn hai GPU yếu chạy gần đầy.\n\n#### Từng bước\n1. X: cần $\\lceil 50/30 \\rceil = 2$ GPU, chi phí $2 \\times 1{,}20 = 2{,}40$ USD/giờ, mức dùng $50/60 \\approx 83\\%$.\n2. Y: cần $\\lceil 50/120 \\rceil = 1$ GPU, chi phí $3{,}60$ USD/giờ, mức dùng $50/120 \\approx 42\\%$.\n3. Chi phí/1K thật ở 50 req/s: X $= 2{,}40/(50 \\times 3{,}6) \\approx 0{,}0133$ USD; Y $= 3{,}60/180 = 0{,}02$ USD.\n4. Chi phí/1K khi đầy tải (con số dễ gây nhầm): X $\\approx 0{,}0111$, Y $\\approx 0{,}0083$ USD.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280.0\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Chi phí mỗi giờ ở tải 50 req/s (giá giả định)</text>\n<line x1=\"50\" y1=\"210\" x2=\"550\" y2=\"210\" stroke=\"currentColor\"/>\n<line x1=\"50\" y1=\"30\" x2=\"50\" y2=\"210\" stroke=\"currentColor\"/>\n<rect x=\"74.5\" y=\"158.6\" width=\"114.3\" height=\"51.4\" fill=\"#ef4444\"/>\n<text x=\"131.7\" y=\"153.6\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">1.20 USD</text>\n<text x=\"131.7\" y=\"228.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">1 X (thiếu)</text>\n<rect x=\"237.8\" y=\"107.1\" width=\"114.3\" height=\"102.9\" fill=\"#10b981\"/>\n<text x=\"295.0\" y=\"102.1\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">2.40 USD</text>\n<text x=\"295.0\" y=\"228.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">2 X</text>\n<rect x=\"401.2\" y=\"55.7\" width=\"114.3\" height=\"154.3\" fill=\"#f59e0b\"/>\n<text x=\"458.3\" y=\"50.7\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">3.60 USD</text>\n<text x=\"458.3\" y=\"228.0\" text-anchor=\"middle\" font-size=\"12\" fill=\"currentColor\">1 Y</text>\n</svg>\n\n| Phương án | Công suất | Đủ 50 req/s? | USD/giờ |\n|---|---|---|---|\n| 1 X | 30 | không | 1,20 |\n| 2 X | 60 | có | 2,40 |\n| 1 Y | 120 | có | 3,60 |\n\nNếu tải tăng lên 100 req/s: X cần 4 GPU (4,80 USD/giờ), Y vẫn 1 GPU (3,60 USD/giờ), lúc đó Y rẻ hơn. Quyết định phụ thuộc mức tải dự kiến và nhu cầu dự phòng (N+1).\n\n#### Bẫy thường gặp\n- Chọn theo chi phí/1K đầy tải mà bỏ qua mức dùng thực.\n- Nhân chi phí/1K với lưu lượng như thể trả tiền theo request.\n- Quên công suất tối thiểu (1 X không đủ).\n\n#### Đọc thêm\n- [Made With ML: Systems design](https://madewithml.com/courses/mlops/systems-design/)\n- [Throughput, Wikipedia](https://en.wikipedia.org/wiki/Throughput)\n",
+   "distractors": {
+    "A": "Chỉ nhìn đơn giá, quên công suất: 1 GPU X chỉ chịu 30 request/s, thiếu so với 50.",
+    "C": "Chọn theo chi phí/1K request khi đầy tải (Y $\\approx 0{,}0083$ so với X $\\approx 0{,}0111$ USD). Nhưng ở 50 request/s, Y chỉ dùng khoảng 42% công suất mà vẫn phải trả nguyên giá.",
+    "D": "Lấy chi phí/1K khi đầy tải nhân với lưu lượng thực ($180\\,000 \\times 0{,}0083 / 1000$), tức coi như chỉ trả tiền phần công suất dùng; đề nói thuê nguyên GPU theo giờ."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1 GPU X: 1,20 USD/giờ"
+    },
+    {
+     "key": "B",
+     "text": "2 GPU X: 2,40 USD/giờ"
+    },
+    {
+     "key": "C",
+     "text": "1 GPU Y: 3,60 USD/giờ"
+    },
+    {
+     "key": "D",
+     "text": "1 GPU Y: chỉ 1,50 USD/giờ"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T11-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Cụm GPU phục vụ trợ lý nội bộ: giờ cao điểm 08:00 đến 22:00 (14 giờ) cần **8 GPU**, 10 giờ còn lại chỉ cần **1 GPU**. Hiện đang chạy cố định 8 GPU suốt 24 giờ. Mỗi GPU mới bật cần khoảng 3 phút để tải model. Nhận định nào đúng khi chuyển sang autoscaling?",
+   "explanation": "Cố định: $8 \\times 24 = 192$ GPU-giờ/ngày. Autoscaling: $8 \\times 14 + 1 \\times 10 = 122$. Tiết kiệm $\\dfrac{192 - 122}{192} = \\dfrac{70}{192} \\approx 36{,}5\\%$.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nAutoscaling tiết kiệm phần **GPU-giờ** không dùng tới ở giờ thấp điểm. Nhưng GPU mới bật cần thời gian khởi động (tải model vào VRAM, warm-up). Nếu chỉ scale khi tải đã tăng, những phút đầu cao điểm sẽ thiếu công suất và p95 vọt lên. Vì vậy với tải có quy luật theo giờ, nên dùng **scale theo lịch** hoặc scale sớm theo dự báo.\n\n#### Từng bước\n1. Cố định: $8 \\times 24 = 192$ GPU-giờ/ngày.\n2. Autoscaling: $8 \\times 14 + 1 \\times 10 = 112 + 10 = 122$ GPU-giờ/ngày.\n3. Tiết kiệm: $192 - 122 = 70$ GPU-giờ, tức $70/192 \\approx 36{,}5\\%$ so với mức cũ.\n4. Cold start 3 phút: đặt lịch scale-out lúc 07:50 để 8 GPU sẵn sàng trước 08:00; scale-in sau 22:00 có độ trễ để tránh dao động.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 240\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Số GPU theo giờ khi autoscaling (đường đỏ: cố định 8 GPU)</text>\n<line x1=\"40\" y1=\"200\" x2=\"535\" y2=\"200\" stroke=\"currentColor\"/>\n<line x1=\"40\" y1=\"56\" x2=\"535\" y2=\"56\" stroke=\"#ef4444\" stroke-dasharray=\"5 4\"/>\n<rect x=\"40.0\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<rect x=\"60.5\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<rect x=\"81.0\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<rect x=\"101.5\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<rect x=\"122.0\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<rect x=\"142.5\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<rect x=\"163.0\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<rect x=\"183.5\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<rect x=\"204.0\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"224.5\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"245.0\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"265.5\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"286.0\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"306.5\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"327.0\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"347.5\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"368.0\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"388.5\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"409.0\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"429.5\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"450.0\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"470.5\" y=\"56\" width=\"19\" height=\"144\" fill=\"#10b981\"/>\n<rect x=\"491.0\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<rect x=\"511.5\" y=\"182\" width=\"19\" height=\"18\" fill=\"#10b981\"/>\n<text x=\"40\" y=\"218\" font-size=\"11\" fill=\"currentColor\">0h</text>\n<text x=\"204\" y=\"218\" font-size=\"11\" fill=\"currentColor\">8h</text>\n<text x=\"491\" y=\"218\" font-size=\"11\" fill=\"currentColor\">22h</text>\n<text x=\"300\" y=\"232\" text-anchor=\"middle\" font-size=\"12\" fill=\"#f59e0b\">phần trống giữa đường đỏ và cột xanh = 70 GPU-giờ tiết kiệm</text>\n</svg>\n\n| Phương án | GPU-giờ/ngày | So với cố định |\n|---|---|---|\n| Cố định 8 GPU | 192 | 100% |\n| Autoscaling | 122 | 63,5% (tiết kiệm 36,5%) |\n\n#### Bẫy thường gặp\n- Tính $7/8 = 87{,}5\\%$ mà quên chỉ 10 trong 24 giờ là thấp điểm.\n- Chia tiết kiệm cho mức mới (70/122 = 57%) thay vì mức cũ.\n- Bỏ qua cold start: autoscaler phản ứng theo chỉ số, mà chỉ số chỉ tăng khi người dùng đã phải chờ.\n\n#### Đọc thêm\n- [Autoscaling, Wikipedia](https://en.wikipedia.org/wiki/Autoscaling)\n- [Made With ML: Systems design](https://madewithml.com/courses/mlops/systems-design/)\n",
+   "distractors": {
+    "A": "Lấy $7/8$ của số GPU nhưng quên rằng chỉ 10 trong 24 giờ là ban đêm.",
+    "B": "Chia phần tiết kiệm $70$ cho mức mới $122$ thay vì mức cũ $192$; và bỏ qua cold start 3 phút gây tăng p95 lúc lưu lượng lên.",
+    "C": "Chi phí tính theo GPU-giờ; giảm số GPU trong 10 giờ thấp điểm vẫn giảm tổng chi phí dù đỉnh không đổi."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Tiết kiệm 87,5% GPU-giờ vì ban đêm chỉ cần 1/8 số GPU"
+    },
+    {
+     "key": "B",
+     "text": "Tiết kiệm khoảng 57% GPU-giờ và không ảnh hưởng độ trễ, vì autoscaler phản ứng gần như tức thì khi tải tăng"
+    },
+    {
+     "key": "C",
+     "text": "Không tiết kiệm được, vì vẫn cần đủ 8 GPU vào giờ cao điểm"
+    },
+    {
+     "key": "D",
+     "text": "Tiết kiệm khoảng 36% GPU-giờ, nhưng cần scale-out trước giờ cao điểm do cold start 3 phút"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T11-C09",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Huấn luyện lại một mạng nơ-ron với **cùng code, cùng dữ liệu, cùng seed** trên GPU, nhưng accuracy hai lần chạy lệch nhau 0,3 điểm. Cách xử lý nào đúng hướng?",
+   "explanation": "Một số kernel GPU (ví dụ dùng cộng nguyên tử) cộng số thực theo thứ tự không cố định; vì phép cộng dấu phẩy động không kết hợp, $(a + b) + c \\ne a + (b + c)$, kết quả lệch nhỏ rồi khuếch đại qua nhiều bước huấn luyện. PyTorch có `torch.use_deterministic_algorithms(True)` cho mục đích này.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nCố định seed chỉ cố định **chuỗi số ngẫu nhiên**. Trên GPU, một số phép toán (ví dụ cộng dồn gradient bằng thao tác nguyên tử, một số thuật toán tích chập của cuDNN) cộng số thực theo thứ tự không cố định. Vì phép cộng dấu phẩy động không có tính kết hợp, kết quả lệch ở chữ số cuối, rồi khuếch đại qua hàng nghìn bước huấn luyện thành chênh lệch thấy được.\n\n#### Từng bước\n1. Minh hoạ tính không kết hợp:\n```python\nprint((0.1 + 0.2) + 0.3 == 0.1 + (0.2 + 0.3))   # False\n```\n2. Trong PyTorch: `torch.manual_seed(s)`, `random.seed(s)`, `numpy.random.seed(s)`; đặt seed cho từng worker của DataLoader (`worker_init_fn`, `generator`).\n3. Bật `torch.use_deterministic_algorithms(True)` và `torch.backends.cudnn.benchmark = False`; một số phép toán CUDA cần thêm biến môi trường `CUBLAS_WORKSPACE_CONFIG`.\n4. Cố định môi trường: cùng image (digest), cùng phiên bản driver/CUDA, cùng loại GPU.\n5. Chấp nhận đổi: chạy chậm hơn; và kể cả vậy, khác loại GPU vẫn có thể cho kết quả khác.\n\n#### Bảng các nguồn không tất định\n| Nguồn | Cách kiểm soát |\n|---|---|\n| Khởi tạo trọng số, dropout | seed của framework |\n| Xáo trộn dữ liệu, augmentation | seed + seed cho worker |\n| Kernel GPU không tất định | chế độ deterministic |\n| Phiên bản thư viện, driver | image ghim digest, lock file |\n| Khác loại phần cứng | ghi lại phần cứng; chấp nhận sai khác nhỏ |\n\n#### Bẫy thường gặp\n- Nghĩ seed lớn thì \"ngẫu nhiên hơn\" hay \"ổn định hơn\".\n- Báo cáo kết quả một lần chạy: nên chạy vài seed và báo trung bình kèm độ lệch.\n- Kết luận rò rỉ dữ liệu từ dao động giữa các lần chạy.\n\n#### Đọc thêm\n- [PyTorch: Reproducibility](https://pytorch.org/docs/stable/notes/randomness.html)\n- [Floating-point arithmetic, Wikipedia](https://en.wikipedia.org/wiki/Floating-point_arithmetic)\n",
+   "distractors": {
+    "A": "Độ lớn của seed không liên quan đến tính tất định; seed nào cũng chỉ là điểm bắt đầu của bộ sinh số giả ngẫu nhiên.",
+    "B": "Rebuild theo tag dễ kéo về thư viện khác phiên bản, làm môi trường kém ổn định hơn. Nguồn lệch ở đây là phép toán GPU không tất định.",
+    "D": "Rò rỉ dữ liệu làm điểm cao bất thường một cách ổn định, không gây dao động giữa hai lần chạy giống hệt nhau."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Đổi sang seed lớn hơn, ví dụ 10 chữ số, để giảm dao động giữa các lần chạy"
+    },
+    {
+     "key": "B",
+     "text": "Rebuild Docker image trước mỗi lần chạy để môi trường luôn mới nhất và giống nhau giữa các lần chạy"
+    },
+    {
+     "key": "C",
+     "text": "Bật chế độ thuật toán tất định của framework và đặt seed cho mọi nguồn ngẫu nhiên"
+    },
+    {
+     "key": "D",
+     "text": "Kết luận dữ liệu bị rò rỉ giữa train và test, cần chia lại tập dữ liệu"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T11-D01",
+   "module": "D",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung-cao",
+   "prompt": "Một tính năng đang gọi API LLM: mỗi request 1.200 token input (0,40 USD/1 triệu) và 250 token output (1,60 USD/1 triệu). Lưu lượng **8 triệu request/tháng**. Phương án tự host: 2 GPU giá **1,80 USD/giờ/GPU**, chạy 730 giờ/tháng, cộng **1.500 USD/tháng** công vận hành; chi phí chuyển đổi một lần **12.000 USD** (mọi giá đều là giả định). Giả sử tự host đủ công suất và chất lượng tương đương. Sau bao nhiêu tháng thì hoàn vốn khoản chuyển đổi? **Đơn vị: tháng, làm tròn 1 chữ số thập phân.**",
+   "explanation": "API: $1200 \\times 0{,}4 \\times 10^{-6} + 250 \\times 1{,}6 \\times 10^{-6} = 0{,}00088$ USD/request, tức $7\\,040$ USD/tháng. Tự host: $2 \\times 1{,}8 \\times 730 + 1500 = 4\\,128$ USD/tháng. Tiết kiệm $2\\,912$ USD/tháng, hoàn vốn sau $12\\,000 / 2\\,912 \\approx 4{,}1$ tháng.",
+   "section": "c-ops",
+   "long": "#### Ý chính\nThời gian hoàn vốn $=$ chi phí một lần $/$ khoản tiết kiệm **ròng** mỗi tháng. Tiết kiệm ròng là hoá đơn API bỏ đi trừ toàn bộ chi phí định kỳ của phương án tự host (GPU, công vận hành).\n\n#### Từng bước\n1. Chi phí API mỗi request: $1200 \\times 0{,}4 \\times 10^{-6} + 250 \\times 1{,}6 \\times 10^{-6} = 0{,}00048 + 0{,}0004 = 0{,}00088$ USD.\n2. Hoá đơn API mỗi tháng: $8 \\times 10^6 \\times 0{,}00088 = 7\\,040$ USD.\n3. Tự host mỗi tháng: $2 \\times 1{,}80 \\times 730 + 1500 = 2\\,628 + 1\\,500 = 4\\,128$ USD.\n4. Tiết kiệm ròng: $7\\,040 - 4\\,128 = 2\\,912$ USD/tháng.\n5. Hoàn vốn: $12\\,000 / 2\\,912 \\approx 4{,}12 \\to 4{,}1$ tháng.\n6. Kiểm tra thêm: lưu lượng hòa vốn (tự host rẻ hơn API) là $4\\,128 / 0{,}00088 \\approx 4{,}69$ triệu request/tháng; 8 triệu đã vượt mức này.\n\n```python\napi = 1200*0.40/1e6 + 250*1.60/1e6\nsaving = 8e6*api - (2*1.80*730 + 1500)\nprint(round(12000/saving, 1))   # 4.1\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\">\n<text x=\"280\" y=\"18\" text-anchor=\"middle\" font-size=\"14\" fill=\"currentColor\">Lũy kế tiết kiệm sau khi chuyển sang tự host (USD)</text>\n<line x1=\"60\" y1=\"130\" x2=\"540\" y2=\"130\" stroke=\"currentColor\"/>\n<line x1=\"60\" y1=\"30\" x2=\"60\" y2=\"230\" stroke=\"currentColor\"/>\n<polyline points=\"60,220.0 118,198.2 176,176.3 234,154.5 292,132.6 350,110.8 408,89.0 466,67.1 524,45.3\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2.5\"/>\n<circle cx=\"299.0\" cy=\"130\" r=\"5\" fill=\"#ef4444\"/>\n<text x=\"307.0\" y=\"150\" font-size=\"12\" fill=\"#ef4444\">hoàn vốn ≈ 4,1 tháng</text>\n<text x=\"64\" y=\"232\" font-size=\"11\" fill=\"currentColor\">−12.000</text>\n<text x=\"500\" y=\"146\" font-size=\"11\" fill=\"currentColor\">tháng 8</text>\n<text x=\"64\" y=\"42\" font-size=\"11\" fill=\"currentColor\">+12.000</text>\n</svg>\n\n| Lưu lượng (triệu req/tháng) | Tiết kiệm ròng (USD/tháng) | Hoàn vốn (tháng) |\n|---|---|---|\n| 4 | âm (API rẻ hơn) | không hoàn vốn |\n| 8 | 2.912 | 4,1 |\n| 12 | 6.432 | 1,9 |\n\n#### Bẫy thường gặp\n- Chia chi phí chuyển đổi cho toàn bộ hoá đơn API (1,7 tháng).\n- Quên công vận hành (2,7 tháng): con người thường là chi phí lớn bị bỏ sót.\n- Nhầm lưu lượng hòa vốn với thời gian hoàn vốn.\n- Bỏ qua rủi ro: chất lượng model tự host, dự phòng GPU, giá API giảm theo thời gian. Mọi giá ở đây là giả định.\n\n#### Đọc thêm\n- [Break-even point, Wikipedia](https://en.wikipedia.org/wiki/Break-even_point)\n- [Return on investment, Wikipedia](https://en.wikipedia.org/wiki/Return_on_investment)\n",
+   "mistakes": [
+    {
+     "value": 1.7,
+     "why": "Chỉ lấy $12\\,000 / 7\\,040$: so chi phí chuyển đổi với toàn bộ hoá đơn API, quên trừ chi phí tự host hằng tháng."
+    },
+    {
+     "value": 2.7,
+     "why": "Quên công vận hành 1.500 USD/tháng: $12\\,000 / (7\\,040 - 2\\,628) \\approx 2{,}7$."
+    },
+    {
+     "value": 4.69,
+     "why": "Đây là lưu lượng hòa vốn (triệu request/tháng) $4\\,128 / 0{,}00088$, không phải thời gian hoàn vốn."
+    }
+   ],
+   "answer": 4.1,
+   "tol": 0.051
+  },
+  {
+   "id": "T11-D02",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Bạn phụ trách đưa **model xếp hạng gợi ý v7** thay cho v6 trên ứng dụng thương mại điện tử: khoảng **2 triệu request/ngày**, SLO hiện tại p95 $\\le 250$ ms, tỉ lệ lỗi 5xx của v6 là 0,2%, chỉ số kinh doanh chính là tỉ lệ thêm vào giỏ (add-to-cart, hiện 6,0%). Offline, v7 tốt hơn v6 về NDCG@10 nhưng dùng thêm 2 đặc trưng mới từ feature store.\n\nHãy viết **kế hoạch rollout canary** gồm:\n1. Các giai đoạn (tỉ lệ lưu lượng, thời gian tối thiểu hoặc số request tối thiểu mỗi giai đoạn, cách chọn người dùng vào canary).\n2. Các chỉ số theo dõi và **tiêu chí rollback định lượng** (ngưỡng cụ thể, so với nhóm đối chứng v6 cùng thời điểm).\n3. Cơ chế rollback (làm sao quay về trong vài phút, xử lý 2 đặc trưng mới) và việc cần làm sau rollback.",
+   "explanation": "Định hướng chấm: cần (1) giai đoạn có số liệu cụ thể và lý do chọn cỡ mẫu; (2) tiêu chí rollback là ngưỡng số, so với đối chứng đồng thời, có cả chỉ số kỹ thuật lẫn kinh doanh; (3) rollback nhanh (cờ/định tuyến, giữ v6 chạy nóng) và lưu ý phụ thuộc đặc trưng.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nCanary là **phép thử có kiểm soát** trên lưu lượng thật: tăng dần tỉ lệ người dùng nhận model mới, mỗi bước so với nhóm đối chứng **cùng thời điểm**, và có ngưỡng định lượng để tự động quay lui. Một kế hoạch tốt trả lời trước ba câu: tăng thế nào, dừng khi nào, quay lui ra sao.\n\n#### Từng bước lập luận các con số\n1. Lưu lượng: 2 triệu request/ngày, nên 1% trong 24 giờ $\\approx 20\\,000$ request.\n2. Guardrail lỗi: rule of three cho biết cần $n \\ge 3/0{,}002 = 1\\,500$ request không lỗi để khẳng định tỉ lệ lỗi dưới 0,2%; giai đoạn 1% có đủ mẫu.\n3. Chỉ số kinh doanh: phát hiện giảm add-to-cart từ 6,0% xuống 5,7% ($\\alpha = 0{,}05$, power 80%) cần\n$$n \\approx \\frac{(1{,}96 + 0{,}84)^2 \\cdot 2 \\cdot 0{,}06 \\cdot 0{,}94}{0{,}003^2} \\approx 98\\,000$$\nphiên mỗi nhóm, nên chỉ kết luận về kinh doanh từ giai đoạn 25%.\n4. Mỗi giai đoạn bao trùm ít nhất một chu kỳ ngày đêm.\n\n#### Hình minh hoạ\n```mermaid\nflowchart LR\n  S0[\"Shadow 24h\"] --> S1[\"Canary 1% 24h\"]\n  S1 --> S2[\"5% 48h\"]\n  S2 --> S3[\"25% 3 đến 7 ngày\"]\n  S3 --> S4[\"50% rồi 100%\"]\n  S1 -. \"chạm guardrail\" .-> RB[\"Rollback về v6 trong vài phút\"]\n  S2 -. \"chạm guardrail\" .-> RB\n  S3 -. \"add-to-cart giảm\" .-> RB\n  RB --> PM[\"Postmortem, sửa, quay lại shadow\"]\n```\n\n| Chỉ số (so với v6 cùng lúc) | Ngưỡng rollback | Kiểu |\n|---|---|---|\n| Tỉ lệ 5xx | $> 2 \\times$ v6 khi đã có $\\ge 1\\,500$ request | tự động |\n| p95 | $> 250$ ms trong 3 cửa sổ 10 phút liên tiếp | tự động |\n| Null của 2 đặc trưng mới | $> 1\\%$ | tự động |\n| Add-to-cart | thấp hơn v6 quá 0,3 điểm % khi đủ mẫu | người quyết |\n\n#### Bẫy thường gặp\n- So với số liệu tuần trước thay vì nhóm đối chứng đồng thời (bị nhiễu bởi mùa vụ, khuyến mãi).\n- Rollback model nhưng đặc trưng đã bị đổi tại chỗ, nên v6 cũng hỏng.\n- Gán canary theo request thay vì theo người dùng: một người thấy hai phiên bản luân phiên, nhiễu chỉ số hành vi.\n- Không giữ v6 chạy nóng: rollback phải chờ khởi động.\n\n#### Đọc thêm\n- [Google SRE Workbook: Canarying Releases](https://sre.google/workbook/canarying-releases/)\n- [Martin Fowler: Canary Release](https://martinfowler.com/bliki/CanaryRelease.html)\n- [Rule of three (statistics), Wikipedia](https://en.wikipedia.org/wiki/Rule_of_three_%28statistics%29)\n",
+   "modelAnswer": "**1. Giai đoạn**\n\n| Giai đoạn | Lưu lượng | Tối thiểu | Mục đích |\n|---|---|---|---|\n| 0. Shadow | 0% (sao chép request) | 24 giờ | kiểm tra độ trễ, lỗi, đặc trưng mới có null không, khác biệt xếp hạng |\n| 1. Canary | 1% | 24 giờ, $\\approx 20\\,000$ request | guardrail kỹ thuật |\n| 2 | 5% | 48 giờ, $\\approx 200\\,000$ request | guardrail + xu hướng kinh doanh |\n| 3 | 25% | 3 đến 7 ngày | đủ cỡ mẫu cho add-to-cart |\n| 4 | 50% rồi 100% | 24 giờ mỗi bước | xác nhận |\n\nGán người dùng vào canary bằng $\\text{hash}(\\text{user\\_id}) \\bmod 100$ để một người luôn thấy cùng một phiên bản (tránh trải nghiệm nhảy qua lại và nhiễm chéo). Mỗi giai đoạn phải bao trùm ít nhất một chu kỳ ngày đêm vì hành vi mua sắm theo giờ.\n\n**2. Tiêu chí rollback** (so với nhóm v6 **cùng thời điểm**, không so với số liệu tuần trước)\n\n- *Dừng ngay, tự động* (guardrail, kiểm tra mỗi 10 phút trên dữ liệu tích luỹ của giai đoạn): tỉ lệ 5xx của v7 $> 2 \\times$ v6 (tức $> 0{,}4\\%$) khi đã có ít nhất $1\\,500$ request; p95 của v7 $> 250$ ms trong 3 cửa sổ 10 phút liên tiếp; tỉ lệ null của 2 đặc trưng mới $> 1\\%$.\n- *Dừng sau khi đủ mẫu*: add-to-cart của v7 thấp hơn v6 quá 0,3 điểm % (tương đối 5%). Cỡ mẫu mỗi nhóm để phát hiện 6,0% so với 5,7% với $\\alpha = 0{,}05$, power 80%: $n \\approx \\frac{(1{,}96 + 0{,}84)^2 \\cdot 2 \\cdot 0{,}06 \\cdot 0{,}94}{0{,}003^2} \\approx 98\\,000$ phiên mỗi nhóm, vì vậy quyết định kinh doanh chỉ đưa ra từ giai đoạn 25% trở đi.\n- Với 0 lỗi trên $n$ request, cận trên 95% của tỉ lệ lỗi $\\approx 3/n$; muốn chứng minh $< 0{,}2\\%$ cần $n \\ge 1\\,500$ request, nên giai đoạn 1% chạy 24 giờ là đủ.\n\n**3. Cơ chế rollback và sau rollback**\n\n- Định tuyến bằng feature flag ở gateway: rollback = đặt tỉ lệ v7 về 0, hiệu lực trong vài phút, không cần deploy lại. v6 luôn chạy nóng với đủ replica cho 100% lưu lượng trong suốt rollout.\n- Rollback tự động khi chạm guardrail, báo cho người trực.\n- Hai đặc trưng mới được **thêm** vào feature store dưới tên mới; không đổi hay xoá đặc trưng mà v6 đang dùng, để v6 luôn rollback được.\n- Sau rollback: giữ log request, dự đoán và đặc trưng của cả hai nhóm; phân tích theo phân khúc (thiết bị, người dùng mới/cũ); viết postmortem không đổ lỗi; sửa xong thì bắt đầu lại từ shadow.",
+   "rubric": [
+    {
+     "criterion": "Giai đoạn rollout hợp lý: có shadow hoặc tỉ lệ nhỏ trước, tăng dần (ví dụ 1% → 5% → 25% → 50% → 100%), mỗi giai đoạn có số request/thời gian tối thiểu được lập luận (bao trùm giờ cao điểm, đủ cỡ mẫu), gán người dùng ổn định theo hash user_id",
+     "points": 2
+    },
+    {
+     "criterion": "Tiêu chí rollback định lượng, so với v6 cùng thời điểm: p95, tỉ lệ 5xx, tỉ lệ null/giá trị lạ của 2 đặc trưng mới, add-to-cart; có ngưỡng dừng ngay (guardrail) và ngưỡng cần đủ mẫu; nêu được cỡ mẫu cần cho chỉ số kinh doanh",
+     "points": 2
+    },
+    {
+     "criterion": "Cơ chế rollback: định tuyến/feature flag về v6 trong vài phút, v6 vẫn chạy nóng, rollback tự động khi chạm guardrail; xử lý phụ thuộc đặc trưng (không xoá/đổi định nghĩa đặc trưng cũ), sau rollback lưu log, phân tích nguyên nhân, viết postmortem",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "T11-D03",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Nhóm vận hành **chatbot hỏi đáp chính sách bảo hành** dùng RAG. Mỗi pull request có thể đổi prompt, đổi model LLM, đổi cấu hình retriever hoặc cập nhật tài liệu. Hiện chưa có kiểm tra tự động nào; hai lần gần đây release làm sai câu trả lời về thời hạn bảo hành mà không ai phát hiện trước.\n\nHãy **thiết kế cổng eval (eval gate) trong CI** cho dự án này, nêu rõ:\n1. Dữ liệu eval: thành phần, cách gán nhãn, cách quản lý phiên bản, chống quá khớp.\n2. Chỉ số và luật pass/fail định lượng (tuyệt đối và so với baseline của nhánh chính), gồm cả phân khúc quan trọng.\n3. Cách xử lý tính ngẫu nhiên của LLM, giới hạn thời gian/chi phí chạy và những gì báo cáo trên PR.",
+   "explanation": "Định hướng chấm: cần tập eval có phiên bản, phân khúc và holdout; luật pass/fail có số, có so baseline và không chỉ dùng trung bình; xử lý nhiễu (temperature, lặp, so cặp) và ngân sách chạy.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nCổng eval là **test hồi quy cho hành vi của mô hình**: mỗi PR đổi prompt, model, retriever hay tài liệu đều phải chứng minh không làm tệ đi những gì đang đúng. Một cổng tốt có bốn phần: dữ liệu đáng tin và có phiên bản, luật pass/fail bằng số, kiểm soát nhiễu, và báo cáo dễ đọc ngay trên PR.\n\n#### Từng bước\n1. **Dữ liệu**: golden set phân khúc theo rủi ro (thời hạn bảo hành là trọng yếu vì đã từng lọt lỗi), có đoạn nguồn bắt buộc phải trích, version hoá bằng DVC; tách dev set và holdout ẩn.\n2. **Chỉ số**: đúng thông tin, trích đúng nguồn, từ chối đúng câu ngoài phạm vi; tính theo từng phân khúc chứ không chỉ trung bình.\n3. **Luật**: ngưỡng tuyệt đối + không thụt lùi so với baseline. So cặp từng mẫu bằng kiểm định McNemar: gọi $b$ = số mẫu baseline đúng mà PR sai, $c$ = ngược lại; thống kê $\\chi^2 = \\dfrac{(b - c)^2}{b + c}$. Ví dụ $b = 14$, $c = 4$: $\\chi^2 = 100/18 \\approx 5{,}6 > 3{,}84$, fail.\n4. **Nhiễu**: temperature 0, judge chạy 3 lần lấy đa số, judge được hiệu chỉnh với nhãn người.\n5. **Ngân sách**: tập nhanh mỗi PR (dưới 5 phút), tập đầy đủ + holdout trước release.\n\n#### Hình minh hoạ\n```mermaid\nflowchart TB\n  PR[\"Pull request: prompt, model, retriever, tài liệu\"] --> FAST[\"Tập nhanh 80 mẫu, temperature 0\"]\n  FAST --> RULES{\"Ngưỡng tuyệt đối, so baseline, chặn cứng\"}\n  RULES -->|\"đạt\"| MERGE[\"Cho merge\"]\n  RULES -->|\"không đạt\"| BLOCK[\"Chặn merge, bình luận ca hỏng lên PR\"]\n  MERGE --> FULL[\"Trước release: tập đầy đủ và holdout ẩn\"]\n  FULL --> REL[\"Release qua canary\"]\n```\n\n| Thành phần | Ví dụ cụ thể |\n|---|---|\n| Phiên bản | (commit, hash golden set, model, prompt) ghi trong mỗi lần chạy |\n| Ngưỡng tuyệt đối | đúng thông tin $\\ge 90\\%$, phân khúc thời hạn $\\ge 97\\%$ |\n| So baseline | không phân khúc nào giảm quá 2 điểm %, McNemar $p < 0{,}05$ thì fail |\n| Chặn cứng | sai con số thời hạn bảo hành |\n\n#### Bẫy thường gặp\n- Chỉ dùng trung bình toàn cục: cải thiện chỗ dễ che mất thụt lùi ở phân khúc trọng yếu.\n- Dùng một golden set duy nhất vừa để sửa prompt vừa để gác cổng (quá khớp).\n- LLM-as-judge chưa được kiểm với nhãn người.\n- Cổng quá chậm hoặc quá đắt khiến nhóm tắt nó đi.\n\n#### Đọc thêm\n- [Made With ML: Testing](https://madewithml.com/courses/mlops/testing/)\n- [Made With ML: Evaluation](https://madewithml.com/courses/mlops/evaluation/)\n- [McNemar's test, Wikipedia](https://en.wikipedia.org/wiki/McNemar%27s_test)\n",
+   "modelAnswer": "**1. Dữ liệu eval**\n\n| Thành phần | Số mẫu | Nguồn |\n|---|---|---|\n| Thời hạn bảo hành theo nhóm sản phẩm | 120 | chuyên viên chính sách viết và duyệt |\n| Điều kiện / ngoại lệ (rơi vỡ, vào nước, hàng tân trang) | 100 | log thật đã ẩn danh |\n| Câu ngoài phạm vi, cần từ chối hoặc chuyển người thật | 40 | tự xây dựng |\n| Câu hỏi đối nghịch (prompt injection trong câu hỏi) | 40 | tự xây dựng |\n\n- Mỗi mẫu gồm câu hỏi, đáp án chuẩn, **đoạn tài liệu nguồn bắt buộc phải trích**, nhãn phân khúc. Nhãn do 2 người duyệt độc lập; bất đồng thì chuyên viên quyết.\n- Version hoá golden set bằng DVC (hash ghi trong repo); mỗi lần chạy CI ghi lại $(\\text{commit}, \\text{hash golden set}, \\text{model}, \\text{prompt})$.\n- Chống quá khớp: tách **dev set** (nhóm được xem, dùng khi sửa prompt) và **holdout ẩn** 100 mẫu chỉ chạy ở cổng trước release; mỗi tháng thêm các ca lỗi mới từ production, xoay vòng holdout.\n- Khi tài liệu chính sách đổi, PR đổi tài liệu phải kèm cập nhật các mẫu bị ảnh hưởng.\n\n**2. Luật pass/fail**\n\n- Tuyệt đối: tỉ lệ đúng thông tin $\\ge 90\\%$; tỉ lệ trích đúng nguồn $\\ge 95\\%$; phân khúc \"thời hạn bảo hành\" $\\ge 97\\%$; từ chối đúng câu ngoài phạm vi $\\ge 90\\%$.\n- So với baseline nhánh chính (chạy cùng tập, cùng lúc): không phân khúc nào giảm quá 2 điểm %. So cặp từng mẫu: nếu số mẫu \"baseline đúng, PR sai\" lớn hơn hẳn số mẫu \"baseline sai, PR đúng\" (kiểm định McNemar, $p < 0{,}05$) thì fail.\n- Chặn cứng: bất kỳ câu trả lời nào nêu sai con số thời hạn trong phân khúc trọng yếu thì fail, kể cả khi trung bình đạt (vì đây là lỗi đã từng lọt).\n\n**3. Nhiễu, chi phí, báo cáo**\n\n- Chạy với temperature 0; các mẫu chấm bằng LLM-as-judge được chạy 3 lần lấy đa số. Judge được hiệu chỉnh trên 100 mẫu có nhãn người (độ đồng thuận $\\ge 90\\%$ mới dùng).\n- Tập nhanh 80 mẫu (phân tầng theo phân khúc) chạy cho mỗi PR, dưới 5 phút; tập đầy đủ + holdout chạy khi merge vào nhánh release. Ước tính chi phí: $300 \\text{ mẫu} \\times 3 \\text{ lần} \\times 0{,}002$ USD $\\approx 1{,}8$ USD mỗi lần chạy đầy đủ (giá giả định).\n- Bình luận trên PR: bảng điểm theo phân khúc (PR so với baseline), danh sách mẫu chuyển từ đúng sang sai kèm câu trả lời, link artifact log; cổng đỏ thì chặn merge, muốn ghi đè phải có người duyệt chính sách ký xác nhận.",
+   "rubric": [
+    {
+     "criterion": "Dữ liệu eval: golden set có phân khúc (thời hạn bảo hành, điều kiện, ngoại lệ, câu ngoài phạm vi), nhãn do người có chuyên môn duyệt, version hoá cùng code (DVC/hash), có holdout ẩn và quy trình bổ sung ca lỗi từ production",
+     "points": 2
+    },
+    {
+     "criterion": "Luật pass/fail định lượng: ngưỡng tuyệt đối (ví dụ đúng thông tin $\\ge 90\\%$, trích dẫn đúng nguồn) và không thụt lùi so với baseline (so cặp từng mẫu), ngưỡng riêng cho phân khúc trọng yếu, chặn cứng với lỗi nghiêm trọng",
+     "points": 2
+    },
+    {
+     "criterion": "Xử lý nhiễu và vận hành: temperature 0 hoặc lặp nhiều lần, kiểm định so cặp, LLM-as-judge được hiệu chỉnh với nhãn người; giới hạn thời gian/chi phí (tập nhanh mỗi PR, tập đầy đủ trước release); báo cáo trên PR gồm điểm, chênh lệch, danh sách ca hỏng",
+     "points": 2
+    }
+   ]
+  }
+ ]
+}

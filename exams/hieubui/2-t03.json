@@ -1,0 +1,988 @@
+{
+ "title": "CĐ-03 · Xác suất",
+ "description": "Tổ hợp, xác suất cơ bản — 15% · Xác suất có điều kiện, Bayes, tỉ lệ nền — 30% · Biến ngẫu nhiên, kỳ vọng, phương sai — 25% · Phân phối Bernoulli, nhị thức, Poisson, chuẩn — 30%",
+ "durationMinutes": 45,
+ "source": "Bộ đề hieubui2409/ai20k-exam-prep · dùng lại với sự cho phép của tác giả",
+ "parts": {
+  "A": "Nhận biết",
+  "B": "Thông hiểu",
+  "C": "Vận dụng",
+  "D": "Vận dụng cao"
+ },
+ "questions": [
+  {
+   "id": "T03-A01",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Nhóm ML có 10 đặc trưng ứng viên và muốn huấn luyện thử một mô hình cho **mỗi bộ gồm đúng 3 đặc trưng** (thứ tự các đặc trưng trong bộ không quan trọng, không chọn lặp). Cần huấn luyện bao nhiêu mô hình?",
+   "explanation": "Chọn 3 trong 10, không thứ tự, không lặp: $\\binom{10}{3} = \\frac{10!}{3!\\,7!} = \\frac{10 \\cdot 9 \\cdot 8}{6} = 120$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nĐây là bài **chọn không thứ tự, không lặp**: một bộ 3 đặc trưng chỉ cần biết gồm những đặc trưng nào, nên dùng **tổ hợp** $\\binom{n}{k}$.\n\n#### Từng bước\n1. Nếu đếm có thứ tự: chọn đặc trưng thứ nhất có 10 cách, thứ hai 9 cách, thứ ba 8 cách, tức $A_{10}^3 = 720$.\n2. Mỗi bộ 3 đặc trưng xuất hiện $3! = 6$ lần trong 720 cách trên (6 cách sắp thứ tự).\n3. Vậy số bộ khác nhau: $\\binom{10}{3} = \\frac{720}{6} = 120$.\n\n```python\nimport math\nprint(math.comb(10, 3), math.perm(10, 3), 10**3)   # 120 720 1000\n```\n\n#### Bảng so sánh bốn kiểu đếm\n| Thứ tự? | Lặp? | Công thức | Với $n = 10$, $k = 3$ |\n|---|---|---|---|\n| Không | Không | $\\binom{n}{k}$ | $120$ |\n| Có | Không | $\\frac{n!}{(n-k)!}$ | $720$ |\n| Có | Có | $n^k$ | $1000$ |\n| Không | Có | $\\binom{n+k-1}{k}$ | $220$ |\n\nTrong thực tế, “thử mọi bộ đặc trưng” bùng nổ rất nhanh: với 30 đặc trưng và bộ 5 đã có $\\binom{30}{5} = 142.506$ mô hình, nên người ta dùng chọn tiến/lùi (forward/backward selection) hoặc regularization thay vì vét cạn.\n\n#### Bẫy thường gặp\n- Dùng chỉnh hợp khi thứ tự không quan trọng (720).\n- Quên rằng “không lặp” loại bỏ $n^k$.\n\n#### Đọc thêm\n- [Combination (Wikipedia)](https://en.wikipedia.org/wiki/Combination)\n- [math — Python docs](https://docs.python.org/3/library/math.html)\n- [Khan Academy: Probability](https://www.khanacademy.org/math/statistics-probability/probability-library)",
+   "distractors": {
+    "A": "Tính chỉnh hợp $A_{10}^3 = 10 \\cdot 9 \\cdot 8 = 720$, tức đếm cả thứ tự; bộ $\\{x_1, x_2, x_3\\}$ và $\\{x_3, x_1, x_2\\}$ là cùng một mô hình nên phải chia thêm $3! = 6$.",
+    "C": "Tính $10^3$: vừa cho phép chọn lặp một đặc trưng, vừa đếm thứ tự. Đề nói không chọn lặp và không quan tâm thứ tự.",
+    "D": "Nhân $10 \\times 3$ theo cảm tính; đây không phải công thức đếm nào cả."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$720$"
+    },
+    {
+     "key": "B",
+     "text": "$120$"
+    },
+    {
+     "key": "C",
+     "text": "$1000$"
+    },
+    {
+     "key": "D",
+     "text": "$30$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T03-A02",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Trong log một ngày của một API: 30% request bị **chậm** (trên 1 giây), 20% request trả **lỗi 5xx**, và 10% request vừa chậm vừa lỗi 5xx. Chọn ngẫu nhiên một request. Xác suất request đó chậm **hoặc** lỗi 5xx (ít nhất một trong hai) là bao nhiêu?",
+   "explanation": "Công thức cộng: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B) = 0{,}3 + 0{,}2 - 0{,}1 = 0{,}4$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nXác suất của **hợp** hai biến cố phải trừ phần **giao** vì phần đó đã bị đếm hai lần: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 230\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Request chậm (A) và lỗi 5xx (B)</text>\n<rect x=\"40\" y=\"32\" width=\"480\" height=\"180\" fill=\"none\" stroke=\"currentColor\"/>\n<circle cx=\"230\" cy=\"122\" r=\"75\" fill=\"#3b82f6\" opacity=\"0.35\" stroke=\"currentColor\"/>\n<circle cx=\"330\" cy=\"122\" r=\"65\" fill=\"#f59e0b\" opacity=\"0.35\" stroke=\"currentColor\"/>\n<text x=\"185\" y=\"126\" text-anchor=\"middle\" fill=\"currentColor\">chỉ chậm 0,2</text>\n<text x=\"282\" y=\"126\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">0,1</text>\n<text x=\"360\" y=\"126\" text-anchor=\"middle\" fill=\"currentColor\">chỉ lỗi 0,1</text>\n<text x=\"470\" y=\"200\" text-anchor=\"middle\" fill=\"currentColor\">không cả hai: 0,6</text>\n<text x=\"160\" y=\"58\" fill=\"currentColor\">A: 0,3</text>\n<text x=\"360\" y=\"66\" fill=\"currentColor\">B: 0,2</text>\n</svg>\n\n#### Từng bước\n- $A$ = request chậm, $P(A) = 0{,}3$; $B$ = lỗi 5xx, $P(B) = 0{,}2$; $P(A \\cap B) = 0{,}1$.\n- Chỉ chậm: $0{,}3 - 0{,}1 = 0{,}2$; chỉ lỗi: $0{,}2 - 0{,}1 = 0{,}1$.\n- Hợp: $0{,}2 + 0{,}1 + 0{,}1 = 0{,}4$, đúng bằng $0{,}3 + 0{,}2 - 0{,}1$.\n- Không chậm cũng không lỗi: $1 - 0{,}4 = 0{,}6$.\n\n#### Kiểm tra giả định độc lập\nNếu chậm và lỗi độc lập thì $P(A \\cap B) = 0{,}3 \\cdot 0{,}2 = 0{,}06$. Số liệu thật là $0{,}1 > 0{,}06$: hai sự cố có xu hướng **đi cùng nhau** (ví dụ timeout làm cả hai cùng xảy ra). Vì vậy không được thay số đo thực tế bằng tích.\n\n#### Bẫy thường gặp\n- Cộng thẳng 0,5 (đếm trùng).\n- Tự giả định độc lập (0,44) khi đề đã cho số liệu giao.\n\n#### Đọc thêm\n- [Inclusion–exclusion principle (Wikipedia)](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)\n- [Khan Academy: Probability](https://www.khanacademy.org/math/statistics-probability/probability-library)\n- [OpenIntro Statistics (sách mở miễn phí)](https://www.openintro.org/book/os/)",
+   "distractors": {
+    "A": "Cộng thẳng $0{,}3 + 0{,}2$, đếm hai lần nhóm 10% vừa chậm vừa lỗi; phải trừ phần giao.",
+    "B": "Dùng $0{,}3 + 0{,}2 - 0{,}3 \\cdot 0{,}2$, tức tự giả định hai sự kiện độc lập; đề đã cho sẵn $P(\\text{chậm} \\cap \\text{lỗi}) = 0{,}1$ nên phải dùng số này.",
+    "D": "Tính $0{,}3 \\times 0{,}2$: đó là xác suất **giao** nếu hai sự kiện độc lập, không phải xác suất **hợp**."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$0{,}5$"
+    },
+    {
+     "key": "B",
+     "text": "$0{,}44$"
+    },
+    {
+     "key": "C",
+     "text": "$0{,}4$"
+    },
+    {
+     "key": "D",
+     "text": "$0{,}06$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T03-A03",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Trong dữ liệu A/B test của một app bán hàng: 40% số phiên đến từ **mobile**, và 6% số phiên là phiên **mobile có mua hàng**. Xác suất một phiên mua hàng **biết rằng** phiên đó đến từ mobile, $P(\\text{mua} \\mid \\text{mobile})$, bằng bao nhiêu?",
+   "explanation": "$P(\\text{mua} \\mid \\text{mobile}) = \\frac{P(\\text{mua} \\cap \\text{mobile})}{P(\\text{mobile})} = \\frac{0{,}06}{0{,}4} = 0{,}15$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nĐiều kiện “biết phiên đến từ mobile” **thu hẹp không gian mẫu** về nhóm mobile. Xác suất có điều kiện là tỉ lệ của phần giao trong nhóm điều kiện:\n$$P(A \\mid B) = \\frac{P(A \\cap B)}{P(B)}.$$\n\n#### Từng bước với 1.000 phiên giả định\n| | Mua | Không mua | Tổng |\n|---|---|---|---|\n| Mobile | $60$ | $340$ | $400$ |\n| Không phải mobile | ? | ? | $600$ |\n| Tổng | | | $1.000$ |\n\nTrong 400 phiên mobile có 60 phiên mua: $P(\\text{mua} \\mid \\text{mobile}) = 60/400 = 0{,}15$. Không cần biết hàng “không phải mobile”.\n\n```python\np_mobile, p_mua_va_mobile = 0.4, 0.06\nprint(p_mua_va_mobile / p_mobile)   # 0.15\n```\n\n#### Liên hệ thực tế\nTrong A/B test, chỉ số “tỉ lệ chuyển đổi trên mobile” chính là $P(\\text{mua} \\mid \\text{mobile})$. Nhầm với xác suất giao $0{,}06$ sẽ làm chỉ số mobile trông thấp hơn thực tế 2,5 lần.\n\n#### Bẫy thường gặp\n- Nhân thay vì chia (0,024).\n- Báo cáo xác suất giao 0,06 như là tỉ lệ chuyển đổi của nhóm.\n\n#### Đọc thêm\n- [Conditional probability (Wikipedia)](https://en.wikipedia.org/wiki/Conditional_probability)\n- [Khan Academy: Probability](https://www.khanacademy.org/math/statistics-probability/probability-library)\n- [Mathematics for Machine Learning, chương 6 (mml-book)](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "B": "Nhân $0{,}06 \\times 0{,}4$ thay vì chia. Xác suất có điều kiện là **chia** xác suất giao cho xác suất của điều kiện.",
+    "C": "Đây là xác suất giao $P(\\text{mua} \\cap \\text{mobile})$ trên toàn bộ phiên; chưa thu hẹp không gian mẫu về nhóm mobile.",
+    "D": "Tính $0{,}4 - 0{,}06$: đó là tỉ lệ phiên mobile **không** mua trên toàn bộ phiên, không phải xác suất có điều kiện."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$0{,}15$"
+    },
+    {
+     "key": "B",
+     "text": "$0{,}024$"
+    },
+    {
+     "key": "C",
+     "text": "$0{,}06$"
+    },
+    {
+     "key": "D",
+     "text": "$0{,}34$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T03-A04",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Cho hai biến cố $A$, $B$ với $P(A) > 0$ và $P(B) > 0$. Phát biểu nào **đúng**?",
+   "explanation": "Độc lập: $P(A \\cap B) = P(A)\\,P(B) > 0$. Xung khắc: $P(A \\cap B) = 0$. Hai điều này không thể cùng đúng khi $P(A), P(B) > 0$, nên xung khắc kéo theo không độc lập.",
+   "section": "a-xs",
+   "long": "#### Ý chính\n**Xung khắc** (mutually exclusive) và **độc lập** (independent) là hai khái niệm khác hẳn nhau:\n- Xung khắc: $A \\cap B = \\varnothing$, tức $P(A \\cap B) = 0$.\n- Độc lập: $P(A \\cap B) = P(A)\\,P(B)$, tương đương $P(A \\mid B) = P(A)$.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 200\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"140\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Xung khắc</text>\n<text x=\"420\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Độc lập</text>\n<rect x=\"20\" y=\"32\" width=\"240\" height=\"150\" fill=\"none\" stroke=\"currentColor\"/>\n<circle cx=\"90\" cy=\"107\" r=\"45\" fill=\"#3b82f6\" opacity=\"0.4\" stroke=\"currentColor\"/>\n<circle cx=\"190\" cy=\"107\" r=\"45\" fill=\"#f59e0b\" opacity=\"0.4\" stroke=\"currentColor\"/>\n<text x=\"90\" y=\"111\" text-anchor=\"middle\" fill=\"currentColor\">A</text>\n<text x=\"190\" y=\"111\" text-anchor=\"middle\" fill=\"currentColor\">B</text>\n<text x=\"140\" y=\"175\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">P(A∩B) = 0 ≠ P(A)·P(B)</text>\n<rect x=\"300\" y=\"32\" width=\"240\" height=\"150\" fill=\"none\" stroke=\"currentColor\"/>\n<rect x=\"300\" y=\"32\" width=\"120\" height=\"150\" fill=\"#3b82f6\" opacity=\"0.3\"/>\n<rect x=\"300\" y=\"32\" width=\"240\" height=\"60\" fill=\"#f59e0b\" opacity=\"0.3\"/>\n<text x=\"360\" y=\"120\" text-anchor=\"middle\" fill=\"currentColor\">A (1/2)</text>\n<text x=\"480\" y=\"66\" text-anchor=\"middle\" fill=\"currentColor\">B (2/5)</text>\n<text x=\"420\" y=\"175\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">P(A∩B) = 1/5 = 1/2 · 2/5</text>\n</svg>\n\n#### Từng bước\nGiả sử $A$, $B$ xung khắc và $P(A), P(B) > 0$. Khi đó $P(A \\cap B) = 0$ nhưng $P(A)P(B) > 0$, nên đẳng thức độc lập không thể đúng. Nói cách khác, biết $B$ xảy ra thì $P(A \\mid B) = 0$, khác hẳn $P(A)$: $B$ cho ta **thông tin** về $A$.\n\n#### Ví dụ\n| Tình huống | Xung khắc? | Độc lập? |\n|---|---|---|\n| Một request trả 200 hay 500 | Có | Không |\n| Hai lần tung đồng xu: lần 1 ngửa, lần 2 ngửa | Không | Có |\n| Người dùng ở Hà Nội và người dùng dùng iOS | Không | Tuỳ dữ liệu |\n\n#### Bẫy thường gặp\n- Nghĩ “không liên quan nhau” = “không giao nhau”.\n- Viết $P(A \\mid B) = P(B)$ thay vì $P(A)$.\n\n#### Đọc thêm\n- [Independence (probability theory) (Wikipedia)](https://en.wikipedia.org/wiki/Independence_%28probability_theory%29)\n- [Mutual exclusivity (Wikipedia)](https://en.wikipedia.org/wiki/Mutual_exclusivity)\n- [Mathematics for Machine Learning, chương 6 (mml-book)](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "A": "Nhầm “xung khắc” với “độc lập”. Xung khắc nghĩa là biết $A$ xảy ra thì chắc chắn $B$ không xảy ra, tức $A$ cho rất nhiều thông tin về $B$: $P(B \\mid A) = 0 \\ne P(B)$.",
+    "B": "$P(A \\cap B) = 0$ là điều kiện xung khắc. Độc lập là $P(A \\cap B) = P(A)\\,P(B)$, với giả thiết đề bài thì tích này luôn dương.",
+    "C": "Viết nhầm vế phải. Đúng phải là $P(A \\mid B) = P(A)$: biết $B$ không làm thay đổi xác suất của $A$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Nếu $A$, $B$ xung khắc ($A \\cap B = \\varnothing$) thì $A$, $B$ độc lập."
+    },
+    {
+     "key": "B",
+     "text": "$A$, $B$ độc lập khi và chỉ khi $P(A \\cap B) = 0$."
+    },
+    {
+     "key": "C",
+     "text": "$A$, $B$ độc lập khi và chỉ khi $P(A \\mid B) = P(B)$."
+    },
+    {
+     "key": "D",
+     "text": "Nếu $A$, $B$ xung khắc ($A \\cap B = \\varnothing$) thì $A$, $B$ không độc lập."
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T03-A05",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Số lần retry $X$ của một lệnh gọi API có phân phối: $P(X = 0) = 0{,}7$; $P(X = 1) = 0{,}2$; $P(X = 2) = 0{,}1$. Kỳ vọng $E[X]$ bằng bao nhiêu?",
+   "explanation": "$E[X] = \\sum_x x\\,P(X = x) = 0 \\cdot 0{,}7 + 1 \\cdot 0{,}2 + 2 \\cdot 0{,}1 = 0{,}4$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nKỳ vọng là **trung bình có trọng số** của các giá trị, trọng số là xác suất: $E[X] = \\sum_x x\\,P(X = x)$.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280.0\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">PMF số lần retry X, E[X] = 0,4</text>\n<line x1=\"50\" y1=\"214\" x2=\"540\" y2=\"214\" stroke=\"currentColor\"/>\n<line x1=\"50\" y1=\"34\" x2=\"50\" y2=\"214\" stroke=\"currentColor\"/>\n<rect x=\"74.5\" y=\"57.5\" width=\"114.3\" height=\"156.5\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"131.7\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"131.7\" y=\"53.5\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.7</text>\n<rect x=\"237.8\" y=\"169.3\" width=\"114.3\" height=\"44.7\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"295.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"295.0\" y=\"165.3\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.2</text>\n<rect x=\"401.2\" y=\"191.6\" width=\"114.3\" height=\"22.4\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"458.3\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"458.3\" y=\"187.6\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.1</text>\n<text x=\"295.0\" y=\"252\" text-anchor=\"middle\" fill=\"currentColor\">số retry x</text>\n</svg>\n\n#### Từng bước\n| $x$ | $P(X = x)$ | $x \\cdot P(X = x)$ | $x^2 \\cdot P(X = x)$ |\n|---|---|---|---|\n| $0$ | $0{,}7$ | $0$ | $0$ |\n| $1$ | $0{,}2$ | $0{,}2$ | $0{,}2$ |\n| $2$ | $0{,}1$ | $0{,}2$ | $0{,}4$ |\n| Tổng | $1$ | $E[X] = 0{,}4$ | $E[X^2] = 0{,}6$ |\n\nPhương sai (đọc thêm): $\\operatorname{Var}(X) = E[X^2] - (E[X])^2 = 0{,}6 - 0{,}16 = 0{,}44$.\n\nÝ nghĩa vận hành: 10.000 lệnh gọi sẽ phát sinh khoảng $10.000 \\cdot 0{,}4 = 4.000$ lần retry, tức tải thực tế lên API khoảng 14.000 request.\n\n#### Bẫy thường gặp\n- Lấy trung bình cộng các giá trị (1).\n- Nhầm $P(X \\ge 1)$ với $E[X]$.\n- Nhầm $E[X^2]$ với $E[X]$.\n\n#### Đọc thêm\n- [Expected value (Wikipedia)](https://en.wikipedia.org/wiki/Expected_value)\n- [Khan Academy: Random variables](https://www.khanacademy.org/math/statistics-probability/random-variables-stats-library)\n- [Mathematics for Machine Learning, chương 6 (mml-book)](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "A": "Lấy trung bình cộng các giá trị $(0 + 1 + 2)/3 = 1$, bỏ qua trọng số xác suất. Giá trị 0 xảy ra tới 70% nên phải được tính nặng hơn.",
+    "B": "Tính $P(X \\ge 1) = 0{,}2 + 0{,}1$: xác suất **có** retry, không phải số retry trung bình (lần retry thứ hai bị bỏ qua).",
+    "D": "Tính $E[X^2] = 0^2 \\cdot 0{,}7 + 1^2 \\cdot 0{,}2 + 2^2 \\cdot 0{,}1 = 0{,}6$, bình phương nhầm giá trị."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$1$"
+    },
+    {
+     "key": "B",
+     "text": "$0{,}3$"
+    },
+    {
+     "key": "C",
+     "text": "$0{,}4$"
+    },
+    {
+     "key": "D",
+     "text": "$0{,}6$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T03-A06",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Với hai biến ngẫu nhiên $X$, $Y$ **bất kỳ** (có kỳ vọng và phương sai hữu hạn), đẳng thức nào **luôn** đúng?",
+   "explanation": "Tính tuyến tính của kỳ vọng $E[X + Y] = E[X] + E[Y]$ đúng với **mọi** $X$, $Y$, kể cả khi phụ thuộc nhau. Phương sai thì cần thêm hạng $2\\operatorname{Cov}(X, Y)$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\n**Tính tuyến tính của kỳ vọng** đúng với mọi biến ngẫu nhiên, không cần độc lập: $E[aX + bY + c] = aE[X] + bE[Y] + c$. Các đẳng thức của phương sai và của $E[XY]$ thì cần thêm điều kiện.\n\n#### Bảng tổng hợp\n| Đẳng thức | Luôn đúng? | Điều kiện / dạng đúng |\n|---|---|---|\n| $E[X + Y] = E[X] + E[Y]$ | Có | Mọi $X, Y$ |\n| $\\operatorname{Var}(X + Y) = \\operatorname{Var}X + \\operatorname{Var}Y$ | Không | Cần $\\operatorname{Cov}(X, Y) = 0$ |\n| $E[XY] = E[X]E[Y]$ | Không | Cần $\\operatorname{Cov}(X, Y) = 0$ |\n| $\\operatorname{Var}(aX) = a^2\\operatorname{Var}(X)$ | Có | Hằng số ra ngoài phải bình phương |\n\n#### Phản ví dụ nhanh\nLấy $Y = X$ với $X \\sim \\text{Bernoulli}(0{,}5)$: $E[X] = 0{,}5$, $\\operatorname{Var}(X) = 0{,}25$.\n- $\\operatorname{Var}(X + Y) = \\operatorname{Var}(2X) = 4 \\cdot 0{,}25 = 1$, trong khi $\\operatorname{Var}X + \\operatorname{Var}Y = 0{,}5$.\n- $E[XY] = E[X^2] = 0{,}5$, trong khi $E[X]E[Y] = 0{,}25$.\n\n```python\nimport numpy as np\nx = np.random.default_rng(0).integers(0, 2, 100_000)\nprint(round(np.var(2*x), 2), round(2*np.var(x), 2))   # ~1.0 vs ~0.5\n```\n\n#### Bẫy thường gặp\n- Mang thói quen “cộng phương sai” sang các biến phụ thuộc nhau.\n- Quên bình phương hằng số trong phương sai.\n\n#### Đọc thêm\n- [Expected value (Wikipedia)](https://en.wikipedia.org/wiki/Expected_value)\n- [Variance (Wikipedia)](https://en.wikipedia.org/wiki/Variance)\n- [Mathematics for Machine Learning, chương 6 (mml-book)](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "B": "Chỉ đúng khi $X$, $Y$ không tương quan (ví dụ độc lập). Tổng quát: $\\operatorname{Var}(X + Y) = \\operatorname{Var}(X) + \\operatorname{Var}(Y) + 2\\operatorname{Cov}(X, Y)$.",
+    "C": "Chỉ đúng khi $X$, $Y$ không tương quan; ví dụ $Y = X$ thì $E[X^2] \\ne (E[X])^2$ trừ khi $\\operatorname{Var}(X) = 0$.",
+    "D": "Hằng số ra khỏi phương sai phải **bình phương**: $\\operatorname{Var}(2X) = 4\\operatorname{Var}(X)$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$E[X + Y] = E[X] + E[Y]$"
+    },
+    {
+     "key": "B",
+     "text": "$\\operatorname{Var}(X + Y) = \\operatorname{Var}(X) + \\operatorname{Var}(Y)$"
+    },
+    {
+     "key": "C",
+     "text": "$E[XY] = E[X]\\,E[Y]$"
+    },
+    {
+     "key": "D",
+     "text": "$\\operatorname{Var}(2X) = 2\\operatorname{Var}(X)$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T03-A07",
+   "module": "A",
+   "type": "mcq",
+   "points": 3,
+   "level": "nhan-biet",
+   "prompt": "Số request đến một endpoint mỗi phút được mô hình hoá bằng phân phối Poisson với trung bình $\\lambda = 4$ request/phút. **Phương sai** của số request mỗi phút là bao nhiêu?",
+   "explanation": "Với $X \\sim \\text{Poisson}(\\lambda)$: $E[X] = \\operatorname{Var}(X) = \\lambda = 4$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nPhân phối Poisson mô tả **số sự kiện** trong một khoảng thời gian khi các sự kiện đến độc lập với tốc độ trung bình $\\lambda$. Đặc điểm riêng: **kỳ vọng bằng phương sai** bằng $\\lambda$.\n$$P(X = k) = e^{-\\lambda}\\frac{\\lambda^k}{k!}, \\qquad E[X] = \\operatorname{Var}(X) = \\lambda.$$\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280.0\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Poisson(λ = 4): kỳ vọng = phương sai = 4</text>\n<line x1=\"50\" y1=\"214\" x2=\"540\" y2=\"214\" stroke=\"currentColor\"/>\n<line x1=\"50\" y1=\"34\" x2=\"50\" y2=\"214\" stroke=\"currentColor\"/>\n<rect x=\"55.7\" y=\"199.3\" width=\"26.4\" height=\"14.7\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"68.8\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<rect x=\"93.3\" y=\"155.3\" width=\"26.4\" height=\"58.7\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"106.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<rect x=\"131.0\" y=\"96.6\" width=\"26.4\" height=\"117.4\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"144.2\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<rect x=\"168.7\" y=\"57.5\" width=\"26.4\" height=\"156.5\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"181.9\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<rect x=\"206.4\" y=\"57.5\" width=\"26.4\" height=\"156.5\" fill=\"#10b981\" opacity=\"0.85\"/>\n<text x=\"219.6\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<rect x=\"244.1\" y=\"88.8\" width=\"26.4\" height=\"125.2\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"257.3\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">5</text>\n<rect x=\"281.8\" y=\"130.5\" width=\"26.4\" height=\"83.5\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"295.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">6</text>\n<rect x=\"319.5\" y=\"166.3\" width=\"26.4\" height=\"47.7\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"332.7\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">7</text>\n<rect x=\"357.2\" y=\"190.1\" width=\"26.4\" height=\"23.9\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"370.4\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">8</text>\n<rect x=\"394.9\" y=\"203.4\" width=\"26.4\" height=\"10.6\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"408.1\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">9</text>\n<rect x=\"432.6\" y=\"209.8\" width=\"26.4\" height=\"4.2\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"445.8\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">10</text>\n<rect x=\"470.3\" y=\"212.5\" width=\"26.4\" height=\"1.5\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"483.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">11</text>\n<rect x=\"508.0\" y=\"213.5\" width=\"26.4\" height=\"0.5\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"521.2\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">12</text>\n<text x=\"295.0\" y=\"252\" text-anchor=\"middle\" fill=\"currentColor\">số request trong 1 phút</text>\n</svg>\n\n#### Từng bước\n- $\\lambda = 4$ request/phút nên $\\operatorname{Var}(X) = 4$ (đơn vị request²), độ lệch chuẩn $\\sqrt{4} = 2$ request.\n- Kiểm bằng SciPy: `stats.poisson(4).var()` trả `4.0`.\n\n#### Dùng trong vận hành\n| Đại lượng | Giá trị | Ý nghĩa |\n|---|---|---|\n| Trung bình | 4 | Tải trung bình mỗi phút |\n| Phương sai | 4 | Độ dao động (đơn vị bình phương) |\n| Độ lệch chuẩn | 2 | Dao động điển hình quanh 4 |\n| $1/\\lambda$ | 0,25 phút | Thời gian chờ trung bình giữa hai request |\n\nNếu log thực tế cho phương sai lớn hơn nhiều so với trung bình (ví dụ trung bình 4 nhưng phương sai 15), dữ liệu bị **overdispersion** (request đến theo đợt) và Poisson không còn phù hợp.\n\n#### Bẫy thường gặp\n- Nhầm độ lệch chuẩn với phương sai.\n- Nhầm số request với thời gian chờ giữa các request.\n\n#### Đọc thêm\n- [Poisson distribution (Wikipedia)](https://en.wikipedia.org/wiki/Poisson_distribution)\n- [scipy.stats.poisson (SciPy docs)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.poisson.html)\n- [OpenIntro Statistics (sách mở miễn phí)](https://www.openintro.org/book/os/)",
+   "distractors": {
+    "A": "Đây là độ lệch chuẩn $\\sqrt{\\lambda} = 2$, không phải phương sai.",
+    "C": "Bình phương $\\lambda$. Với Poisson, phương sai **bằng** $\\lambda$ chứ không phải $\\lambda^2$.",
+    "D": "Tính $1/\\lambda$: đó là thời gian chờ trung bình giữa hai request (phút), thuộc phân phối mũ, không phải phương sai số request."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$2$"
+    },
+    {
+     "key": "B",
+     "text": "$4$"
+    },
+    {
+     "key": "C",
+     "text": "$16$"
+    },
+    {
+     "key": "D",
+     "text": "$0{,}25$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T03-A08",
+   "module": "A",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "nhan-biet",
+   "prompt": "Một job xử lý tài liệu gọi API của nhà cung cấp LLM **50 lần**. Mỗi lần gọi bị lỗi (timeout hoặc 5xx) với xác suất 2%, các lần gọi độc lập với nhau. Xác suất một job gặp **ít nhất một** lần gọi lỗi là bao nhiêu? Nhập dạng thập phân (không nhập %), **làm tròn 3 chữ số thập phân**.",
+   "explanation": "Dùng phần bù: $P(\\ge 1 \\text{ lỗi}) = 1 - P(\\text{0 lỗi}) = 1 - 0{,}98^{50} \\approx 1 - 0{,}364 = 0{,}636$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\n“Ít nhất một” gần như luôn tính dễ nhất bằng **phần bù**: $P(\\ge 1) = 1 - P(\\text{không lần nào})$. Với $n$ lần gọi độc lập, mỗi lần lỗi xác suất $p$:\n$$P(\\ge 1 \\text{ lỗi}) = 1 - (1 - p)^n.$$\n\n#### Từng bước\n- $P(\\text{một lần gọi không lỗi}) = 0{,}98$.\n- $P(\\text{50 lần đều không lỗi}) = 0{,}98^{50} \\approx 0{,}364$.\n- $P(\\text{ít nhất 1 lỗi}) = 1 - 0{,}364 = 0{,}636$.\n\n```python\nprint(round(1 - 0.98**50, 3))    # 0.636\n```\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280.0\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">P(ít nhất 1 lỗi) = 1 − 0,98ⁿ theo số lần gọi n</text>\n<line x1=\"50\" y1=\"214\" x2=\"540\" y2=\"214\" stroke=\"currentColor\"/>\n<line x1=\"50\" y1=\"34\" x2=\"50\" y2=\"214\" stroke=\"currentColor\"/>\n<rect x=\"58.2\" y=\"210.7\" width=\"38.1\" height=\"3.3\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"77.2\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"77.2\" y=\"206.7\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.02</text>\n<rect x=\"112.6\" y=\"198.3\" width=\"38.1\" height=\"15.7\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"131.7\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">5</text>\n<text x=\"131.7\" y=\"194.3\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.10</text>\n<rect x=\"167.1\" y=\"184.1\" width=\"38.1\" height=\"29.9\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"186.1\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">10</text>\n<text x=\"186.1\" y=\"180.1\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.18</text>\n<rect x=\"221.5\" y=\"159.6\" width=\"38.1\" height=\"54.4\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"240.6\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">20</text>\n<text x=\"240.6\" y=\"155.6\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.33</text>\n<rect x=\"275.9\" y=\"131.0\" width=\"38.1\" height=\"83.0\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"295.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">35</text>\n<text x=\"295.0\" y=\"127.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.51</text>\n<rect x=\"330.4\" y=\"110.0\" width=\"38.1\" height=\"104.0\" fill=\"#10b981\" opacity=\"0.85\"/>\n<text x=\"349.4\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">50</text>\n<text x=\"349.4\" y=\"106.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.64</text>\n<rect x=\"384.8\" y=\"86.3\" width=\"38.1\" height=\"127.7\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"403.9\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">75</text>\n<text x=\"403.9\" y=\"82.3\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.78</text>\n<rect x=\"439.3\" y=\"72.1\" width=\"38.1\" height=\"141.9\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"458.3\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">100</text>\n<text x=\"458.3\" y=\"68.1\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.87</text>\n<rect x=\"493.7\" y=\"58.3\" width=\"38.1\" height=\"155.7\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"512.8\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">150</text>\n<text x=\"512.8\" y=\"54.3\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.95</text>\n<text x=\"295.0\" y=\"252\" text-anchor=\"middle\" fill=\"currentColor\">số lần gọi API n</text>\n</svg>\n\n#### Hệ quả thiết kế\n| Số lần gọi $n$ | $P(\\ge 1 \\text{ lỗi})$ |\n|---|---|\n| 10 | 0,183 |\n| 50 | 0,636 |\n| 100 | 0,867 |\n\nTỉ lệ lỗi 2% mỗi lần gọi nghe nhỏ, nhưng job 50 lần gọi thì gần 2/3 số job gặp lỗi. Vì vậy pipeline nhiều bước cần **retry có giới hạn** và thiết kế để một lần gọi lỗi không làm hỏng cả job.\n\n#### Bẫy thường gặp\n- $n \\cdot p = 1$ là **số lỗi kỳ vọng**, không phải xác suất; xác suất không thể vượt 1.\n- Chỉ tính “đúng 1 lỗi”.\n\n#### Đọc thêm\n- [Binomial distribution (Wikipedia)](https://en.wikipedia.org/wiki/Binomial_distribution)\n- [Bernoulli distribution (Wikipedia)](https://en.wikipedia.org/wiki/Bernoulli_distribution)\n- [OpenIntro Statistics (sách mở miễn phí)](https://www.openintro.org/book/os/)",
+   "mistakes": [
+    {
+     "value": 1,
+     "why": "Nhân $50 \\times 0{,}02 = 1$ rồi kết luận “chắc chắn lỗi”. Đó là **số lỗi kỳ vọng**, không phải xác suất; cộng xác suất chỉ đúng với biến cố xung khắc."
+    },
+    {
+     "value": 0.364,
+     "why": "Đây là $0{,}98^{50} \\approx 0{,}364$, xác suất **không** lần nào lỗi. Cần lấy phần bù $1 - 0{,}98^{50}$."
+    },
+    {
+     "value": 0.372,
+     "why": "Tính xác suất **đúng một** lần lỗi $\\binom{50}{1} 0{,}02 \\cdot 0{,}98^{49} \\approx 0{,}372$, bỏ sót các trường hợp 2, 3,… lần lỗi."
+    }
+   ],
+   "answer": 0.636,
+   "tol": 0.0011
+  },
+  {
+   "id": "T03-B01",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Bộ cân bằng tải gán mỗi request ngẫu nhiên, đồng đều vào 1 trong **8 worker**, các request độc lập. Có **3 request** đến cùng lúc. Xác suất 3 request rơi vào **3 worker khác nhau** là bao nhiêu?",
+   "explanation": "Có $8^3 = 512$ cách gán (có thứ tự). Số cách gán vào 3 worker khác nhau: $8 \\cdot 7 \\cdot 6 = 336$. Vậy $P = 336/512 \\approx 0{,}656$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nKhông gian mẫu gồm mọi cách gán 3 request (phân biệt được) vào 8 worker: $8^3 = 512$ cách đồng khả năng. Tử số phải đếm theo **cùng kiểu có thứ tự**.\n\n#### Từng bước\n- Request 1: 8 lựa chọn; request 2 phải khác: 7; request 3: 6. Tổng $8 \\cdot 7 \\cdot 6 = 336$.\n- $P(\\text{khác nhau}) = \\frac{336}{512} = 0{,}65625 \\approx 0{,}656$.\n- Tương đương: $1 \\cdot \\frac{7}{8} \\cdot \\frac{6}{8}$.\n\n#### Bảng phân tích đầy đủ 512 cách\n| Kiểu phân bổ | Số cách | Xác suất |\n|---|---|---|\n| 3 worker khác nhau | $8 \\cdot 7 \\cdot 6 = 336$ | 0,656 |\n| Đúng 2 request trùng một worker | $\\binom{3}{2} \\cdot 8 \\cdot 7 = 168$ | 0,328 |\n| Cả 3 cùng một worker | $8$ | 0,016 |\n| Tổng | $512$ | 1 |\n\n```python\nimport itertools\nc = sum(len(set(a)) == 3 for a in itertools.product(range(8), repeat=3))\nprint(c, c / 8**3)    # 336 0.65625\n```\n\nĐây chính là bài toán ngày sinh (birthday problem) thu nhỏ: chỉ 3 request vào 8 worker đã có hơn 1/3 khả năng va chạm. Đó là lý do bộ cân bằng tải ngẫu nhiên thuần tuý thường được thay bằng “chọn ngẫu nhiên 2 worker rồi lấy worker ít tải hơn”.\n\n#### Bẫy thường gặp\n- Trộn tổ hợp ở tử với chỉnh hợp ở mẫu (0,109).\n\n#### Đọc thêm\n- [Birthday problem (Wikipedia)](https://en.wikipedia.org/wiki/Birthday_problem)\n- [Permutation (Wikipedia)](https://en.wikipedia.org/wiki/Permutation)\n- [Khan Academy: Probability](https://www.khanacademy.org/math/statistics-probability/probability-library)",
+   "distractors": {
+    "A": "Tử số dùng tổ hợp $\\binom{8}{3} = 56$ (không thứ tự) nhưng mẫu số $8^3$ lại đếm có thứ tự; tử và mẫu phải cùng một cách đếm.",
+    "B": "Đây là phần bù $1 - 0{,}656$: xác suất có **ít nhất hai** request trùng worker.",
+    "C": "Đây là xác suất cả 3 request dồn vào **cùng một** worker ($8$ cách trên $8^3$), ngược với yêu cầu."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\frac{56}{512} \\approx 0{,}109$"
+    },
+    {
+     "key": "B",
+     "text": "$\\frac{176}{512} \\approx 0{,}344$"
+    },
+    {
+     "key": "C",
+     "text": "$\\frac{8}{512} \\approx 0{,}016$"
+    },
+    {
+     "key": "D",
+     "text": "$\\frac{336}{512} \\approx 0{,}656$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T03-B02",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Lưu lượng của một dịch vụ được chia cho 3 vùng máy chủ: vùng X nhận 50%, vùng Y nhận 30%, vùng Z nhận 20% số request. Tỉ lệ request lỗi ở từng vùng lần lượt là 1%, 2% và 5%. Chọn ngẫu nhiên một request của dịch vụ. Xác suất request đó bị lỗi là bao nhiêu?",
+   "explanation": "Công thức xác suất toàn phần: $P(\\text{lỗi}) = \\sum_i P(\\text{lỗi} \\mid V_i)P(V_i) = 0{,}5 \\cdot 0{,}01 + 0{,}3 \\cdot 0{,}02 + 0{,}2 \\cdot 0{,}05 = 0{,}021$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nKhi một request đi qua **đúng một** trong các vùng (phân hoạch), xác suất lỗi tổng là **trung bình có trọng số** của tỉ lệ lỗi theo từng vùng (công thức xác suất toàn phần):\n$$P(L) = \\sum_i P(L \\mid V_i)\\,P(V_i).$$\n\n#### Sơ đồ cây\n```mermaid\nflowchart LR\n  R[\"Request\"] -->|\"0,5\"| X[\"Vùng X\"]\n  R -->|\"0,3\"| Y[\"Vùng Y\"]\n  R -->|\"0,2\"| Z[\"Vùng Z\"]\n  X -->|\"lỗi 0,01\"| LX[\"0,005\"]\n  Y -->|\"lỗi 0,02\"| LY[\"0,006\"]\n  Z -->|\"lỗi 0,05\"| LZ[\"0,010\"]\n  LX --> T[\"P lỗi = 0,021\"]\n  LY --> T\n  LZ --> T\n```\n\n#### Từng bước\n| Vùng | $P(V_i)$ | $P(L \\mid V_i)$ | Tích |\n|---|---|---|---|\n| X | 0,5 | 0,01 | 0,005 |\n| Y | 0,3 | 0,02 | 0,006 |\n| Z | 0,2 | 0,05 | 0,010 |\n| Tổng | 1 | | **0,021** |\n\nCâu hỏi đảo (Bayes): request bị lỗi thì từ vùng Z với xác suất $0{,}010/0{,}021 \\approx 0{,}476$. Vùng Z chỉ nhận 20% lưu lượng nhưng gây gần một nửa số lỗi, nên là ưu tiên điều tra.\n\n#### Bẫy thường gặp\n- Trung bình cộng không trọng số (0,0267).\n- Cộng các tỉ lệ (0,08).\n\n#### Đọc thêm\n- [Law of total probability (Wikipedia)](https://en.wikipedia.org/wiki/Law_of_total_probability)\n- [Bayes' theorem (Wikipedia)](https://en.wikipedia.org/wiki/Bayes%27_theorem)\n- [Mathematics for Machine Learning, chương 6 (mml-book)](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "B": "Lấy trung bình cộng $(1\\% + 2\\% + 5\\%)/3$, bỏ qua việc mỗi vùng nhận lượng request khác nhau; phải lấy trung bình **có trọng số**.",
+    "C": "Cộng thẳng các tỉ lệ lỗi $1\\% + 2\\% + 5\\%$; mỗi request chỉ đi qua **một** vùng nên phải nhân với tỉ trọng vùng.",
+    "D": "Đây là $P(\\text{Z} \\mid \\text{lỗi}) = 0{,}01/0{,}021$, trả lời một câu hỏi khác (Bayes ngược), không phải $P(\\text{lỗi})$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$0{,}021$"
+    },
+    {
+     "key": "B",
+     "text": "$0{,}0267$"
+    },
+    {
+     "key": "C",
+     "text": "$0{,}08$"
+    },
+    {
+     "key": "D",
+     "text": "$0{,}476$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T03-B03",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Hộp thư của một doanh nghiệp có 20% email là spam. Cụm từ “khuyến mãi” xuất hiện trong 40% email spam và trong 5% email bình thường. Một email mới có chứa cụm “khuyến mãi” (gọi biến cố này là $W$). Tính $P(\\text{spam} \\mid W)$. Nhập dạng thập phân, **làm tròn 3 chữ số thập phân**.",
+   "explanation": "$P(\\text{spam} \\mid W) = \\frac{0{,}4 \\cdot 0{,}2}{0{,}4 \\cdot 0{,}2 + 0{,}05 \\cdot 0{,}8} = \\frac{0{,}08}{0{,}12} \\approx 0{,}667$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nBộ lọc spam kiểu Naive Bayes dựa trên đúng phép tính này: cập nhật **xác suất tiên nghiệm** $P(\\text{spam})$ bằng **khả năng** $P(W \\mid \\text{spam})$ để ra **xác suất hậu nghiệm** $P(\\text{spam} \\mid W)$.\n\n#### Cây tần suất (1.000 email)\n```mermaid\nflowchart TD\n  A[\"1.000 email\"] -->|\"20%\"| S[\"200 spam\"]\n  A -->|\"80%\"| H[\"800 email thường\"]\n  S -->|\"40% có cụm từ\"| SW[\"80 spam có cụm từ\"]\n  H -->|\"5% có cụm từ\"| HW[\"40 thường có cụm từ\"]\n  SW --> W[\"120 email có cụm từ\"]\n  HW --> W\n```\n\n#### Từng bước\n$$P(\\text{spam} \\mid W) = \\frac{P(W \\mid \\text{spam})P(\\text{spam})}{P(W)} = \\frac{0{,}4 \\cdot 0{,}2}{0{,}4 \\cdot 0{,}2 + 0{,}05 \\cdot 0{,}8} = \\frac{0{,}08}{0{,}12} \\approx 0{,}667.$$\nTrong 120 email có cụm “khuyến mãi”, 80 là spam: $80/120 = 2/3$.\n\n#### Ảnh hưởng của tỉ lệ nền\n| $P(\\text{spam})$ | $P(\\text{spam} \\mid W)$ |\n|---|---|\n| 5% | 0,296 |\n| 20% | 0,667 |\n| 50% | 0,889 |\n\nKết quả 0,889 chỉ đúng khi spam và email thường nhiều ngang nhau. Đó chính là con số người ta nhận được khi **quên tỉ lệ nền**.\n\n#### Bẫy thường gặp\n- Lấy nhầm $P(W \\mid \\text{spam}) = 0{,}4$.\n- Bỏ tỉ lệ nền (0,889).\n\n#### Đọc thêm\n- [Bayes' theorem (Wikipedia)](https://en.wikipedia.org/wiki/Bayes%27_theorem)\n- [Naive Bayes spam filtering (Wikipedia)](https://en.wikipedia.org/wiki/Naive_Bayes_spam_filtering)\n- [Base rate fallacy (Wikipedia)](https://en.wikipedia.org/wiki/Base_rate_fallacy)",
+   "mistakes": [
+    {
+     "value": 0.4,
+     "why": "Lấy luôn $P(W \\mid \\text{spam}) = 0{,}4$; đây là chiều ngược lại của xác suất cần tìm."
+    },
+    {
+     "value": 0.889,
+     "why": "Tính $\\frac{0{,}4}{0{,}4 + 0{,}05}$, bỏ qua tỉ lệ nền: coi spam và email thường nhiều ngang nhau. Phải nhân với $P(\\text{spam}) = 0{,}2$ và $P(\\text{thường}) = 0{,}8$."
+    },
+    {
+     "value": 0.12,
+     "why": "Đây là mẫu số $P(W) = 0{,}2 \\cdot 0{,}4 + 0{,}8 \\cdot 0{,}05 = 0{,}12$, chưa chia tử số."
+    }
+   ],
+   "answer": 0.667,
+   "tol": 0.0011
+  },
+  {
+   "id": "T03-B04",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Mô hình phát hiện gian lận thẻ được đánh giá ở ngân hàng X (tỉ lệ gian lận 1%): recall 90%, tỉ lệ dương tính giả (FPR) 2%. Mô hình được dùng nguyên vẹn ở ngân hàng Y có tỉ lệ gian lận chỉ **0,1%**; giả sử recall và FPR trên Y vẫn giữ nguyên. **Precision** của mô hình ở Y thay đổi thế nào so với ở X?",
+   "explanation": "X: $\\frac{0{,}01 \\cdot 0{,}9}{0{,}01 \\cdot 0{,}9 + 0{,}99 \\cdot 0{,}02} \\approx 0{,}31$. Y: $\\frac{0{,}001 \\cdot 0{,}9}{0{,}001 \\cdot 0{,}9 + 0{,}999 \\cdot 0{,}02} \\approx 0{,}043$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nRecall và FPR được đo **trong từng lớp**, nên không phụ thuộc tỉ lệ lớp. Precision thì trộn hai lớp, nên phụ thuộc mạnh vào tỉ lệ nền $b$:\n$$\\text{precision} = \\frac{b \\cdot \\text{recall}}{b \\cdot \\text{recall} + (1 - b)\\,\\text{FPR}}.$$\n\n#### Từng bước (trên 100.000 giao dịch)\n| | Ngân hàng X ($b = 1\\%$) | Ngân hàng Y ($b = 0{,}1\\%$) |\n|---|---|---|\n| Gian lận | 1.000 | 100 |\n| Bắt được (TP = 90%) | 900 | 90 |\n| Hợp lệ | 99.000 | 99.900 |\n| Gắn cờ nhầm (FP = 2%) | 1.980 | 1.998 |\n| Precision | $900/2880 \\approx 31\\%$ | $90/2088 \\approx 4{,}3\\%$ |\n\nỞ Y, cứ khoảng 23 cảnh báo mới có 1 cảnh báo đúng. Số FP gần như không đổi (vì nhóm hợp lệ vẫn đông như cũ) trong khi TP giảm 10 lần.\n\n```python\ndef prec(b, r=0.9, f=0.02):\n    return b*r / (b*r + (1-b)*f)\nprint(round(prec(0.01), 3), round(prec(0.001), 3))   # 0.312 0.043\n```\n\n#### Bẫy thường gặp\n- Cho rằng “mô hình giữ nguyên thì precision giữ nguyên”.\n- Nhầm precision với recall.\n- Muốn giữ precision ở Y phải giảm FPR (nâng ngưỡng) hoặc thêm tầng lọc thứ hai.\n\n#### Đọc thêm\n- [Base rate fallacy (Wikipedia)](https://en.wikipedia.org/wiki/Base_rate_fallacy)\n- [Precision and recall (Wikipedia)](https://en.wikipedia.org/wiki/Precision_and_recall)\n- [Accuracy, precision, recall (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)",
+   "distractors": {
+    "A": "Precision $= P(\\text{gian lận} \\mid \\text{cờ})$ phụ thuộc cả tỉ lệ nền; recall và FPR không đổi không có nghĩa precision không đổi.",
+    "B": "Lớp dương hiếm hơn thì số dương tính giả (từ nhóm hợp lệ rất đông) lấn át số dương tính thật, precision **giảm**.",
+    "D": "Nhầm precision với recall (90%) và cho rằng precision tỉ lệ thuận với tỉ lệ nền; thực tế precision ở X chỉ khoảng 31% và quan hệ không tuyến tính."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Giữ nguyên khoảng 31%, vì recall và FPR không đổi."
+    },
+    {
+     "key": "B",
+     "text": "Tăng lên, vì có ít giao dịch gian lận hơn phải bắt."
+    },
+    {
+     "key": "C",
+     "text": "Giảm mạnh, từ khoảng 31% xuống khoảng 4%."
+    },
+    {
+     "key": "D",
+     "text": "Giảm đúng 10 lần, từ 90% xuống 9%."
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T03-B05",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Một request của hệ thống RAG đi qua 3 bước: xác thực (độ lệch chuẩn 3 ms), truy vấn vector DB (độ lệch chuẩn 4 ms) và gọi mô hình (độ lệch chuẩn 12 ms). Thời gian của 3 bước **độc lập** với nhau. Độ lệch chuẩn của **tổng** thời gian xử lý là bao nhiêu? Đơn vị: ms, nhập số nguyên.",
+   "explanation": "Độc lập nên $\\operatorname{Var}(T) = 3^2 + 4^2 + 12^2 = 169$, suy ra $\\sigma_T = \\sqrt{169} = 13$ ms.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nVới các biến **độc lập**, cái cộng được là **phương sai**, không phải độ lệch chuẩn:\n$$\\operatorname{Var}(T_1 + T_2 + T_3) = \\sigma_1^2 + \\sigma_2^2 + \\sigma_3^2, \\qquad \\sigma_T = \\sqrt{\\sigma_1^2 + \\sigma_2^2 + \\sigma_3^2}.$$\nVề hình học, độ lệch chuẩn cộng như các cạnh góc vuông (định lý Pythagoras).\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 220\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Độ lệch chuẩn cộng như cạnh tam giác vuông</text>\n<line x1=\"60\" y1=\"190\" x2=\"300\" y2=\"190\" stroke=\"#3b82f6\" stroke-width=\"4\"/>\n<line x1=\"300\" y1=\"190\" x2=\"300\" y2=\"110\" stroke=\"#f59e0b\" stroke-width=\"4\"/>\n<line x1=\"60\" y1=\"190\" x2=\"300\" y2=\"110\" stroke=\"currentColor\" stroke-dasharray=\"4 3\"/>\n<line x1=\"300\" y1=\"110\" x2=\"300\" y2=\"40\" stroke=\"#ef4444\" stroke-width=\"4\"/>\n<line x1=\"60\" y1=\"190\" x2=\"300\" y2=\"40\" stroke=\"#10b981\" stroke-width=\"3\"/>\n<text x=\"180\" y=\"208\" text-anchor=\"middle\" fill=\"currentColor\">σ₁ = 3 (hình không theo tỉ lệ)</text>\n<text x=\"330\" y=\"155\" fill=\"currentColor\">σ₂ = 4</text>\n<text x=\"330\" y=\"80\" fill=\"currentColor\">σ₃ = 12</text>\n<text x=\"150\" y=\"140\" fill=\"currentColor\" font-size=\"12\">√(3²+4²) = 5</text>\n<text x=\"120\" y=\"95\" fill=\"#10b981\" font-weight=\"bold\">√(5²+12²) = 13</text>\n<text x=\"420\" y=\"200\" fill=\"currentColor\" font-size=\"12\">Cộng thẳng: 3+4+12 = 19 (sai)</text>\n</svg>\n\n#### Từng bước\n| Bước | $\\sigma$ (ms) | $\\sigma^2$ (ms²) |\n|---|---|---|\n| Xác thực | 3 | 9 |\n| Vector DB | 4 | 16 |\n| Gọi mô hình | 12 | 144 |\n| Tổng | | **169** |\n\n$\\sigma_T = \\sqrt{169} = 13$ ms, nhỏ hơn $3 + 4 + 12 = 19$ ms vì các dao động độc lập một phần bù trừ nhau.\n\n#### Bài học tối ưu\nBước gọi mô hình đóng góp $144/169 \\approx 85\\%$ phương sai. Muốn độ trễ ổn định hơn, tối ưu bước này trước; giảm $\\sigma$ của bước xác thực từ 3 xuống 0 chỉ giảm $\\sigma_T$ từ 13 xuống $\\sqrt{160} \\approx 12{,}6$ ms.\n\n#### Bẫy thường gặp\n- Cộng thẳng độ lệch chuẩn (19).\n- Quên lấy căn (169).\n- Nếu các bước tương quan dương (cùng chậm khi tải cao), phải cộng thêm $2\\operatorname{Cov}$.\n\n#### Đọc thêm\n- [Variance (Wikipedia)](https://en.wikipedia.org/wiki/Variance)\n- [Mathematics for Machine Learning, chương 6 (mml-book)](https://mml-book.github.io/book/mml-book.pdf)\n- [Khan Academy: Random variables](https://www.khanacademy.org/math/statistics-probability/random-variables-stats-library)",
+   "mistakes": [
+    {
+     "value": 19,
+     "why": "Cộng thẳng các độ lệch chuẩn $3 + 4 + 12$. Với biến độc lập, cộng **phương sai** rồi mới lấy căn."
+    },
+    {
+     "value": 169,
+     "why": "Đây là phương sai $9 + 16 + 144 = 169$ (ms²), quên lấy căn bậc hai."
+    },
+    {
+     "value": 6.33,
+     "why": "Lấy trung bình $(3 + 4 + 12)/3$; đề hỏi tổng thời gian, không phải trung bình các bước."
+    }
+   ],
+   "answer": 13,
+   "tol": 0.05,
+   "unit": "ms"
+  },
+  {
+   "id": "T03-B06",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Một mô hình dự báo nhu cầu: nhu cầu thật $Y$ có $\\operatorname{Var}(Y) = 9$, giá trị dự báo $\\hat{Y}$ có $\\operatorname{Var}(\\hat{Y}) = 4$, và $\\operatorname{Cov}(Y, \\hat{Y}) = 3$ (đơn vị: nghìn sản phẩm, bình phương). Phương sai của sai số dự báo $e = Y - \\hat{Y}$ là bao nhiêu?",
+   "explanation": "$\\operatorname{Var}(Y - \\hat{Y}) = \\operatorname{Var}(Y) + \\operatorname{Var}(\\hat{Y}) - 2\\operatorname{Cov}(Y, \\hat{Y}) = 9 + 4 - 6 = 7$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nCông thức tổng quát cho tổ hợp tuyến tính hai biến:\n$$\\operatorname{Var}(aX + bY) = a^2\\operatorname{Var}(X) + b^2\\operatorname{Var}(Y) + 2ab\\operatorname{Cov}(X, Y).$$\nVới $a = 1$, $b = -1$: hạng hiệp phương sai mang dấu **trừ**.\n\n#### Từng bước\n$$\\operatorname{Var}(Y - \\hat{Y}) = 9 + (-1)^2 \\cdot 4 + 2 \\cdot 1 \\cdot (-1) \\cdot 3 = 9 + 4 - 6 = 7.$$\n\n#### Bảng các trường hợp\n| Giả định về $\\operatorname{Cov}(Y, \\hat{Y})$ | $\\operatorname{Var}(Y - \\hat{Y})$ | Diễn giải |\n|---|---|---|\n| $3$ (đề bài) | $7$ | Dự báo bám theo giá trị thật, sai số nhỏ |\n| $0$ | $13$ | Dự báo không liên quan giá trị thật, còn tệ hơn đoán hằng số |\n| $6$ (tương quan hoàn hảo, $\\rho = 1$) | $1$ | Chỉ còn lệch do khác biên độ |\n\nHệ số tương quan ở đây $\\rho = \\frac{3}{\\sqrt{9 \\cdot 4}} = 0{,}5$. Một dự báo hằng số (bằng trung bình) có phương sai sai số $= \\operatorname{Var}(Y) = 9$; dự báo này đạt 7, tốt hơn một chút.\n\n```python\nimport numpy as np\nC = np.array([[9, 3], [3, 4]])     # ma trận hiệp phương sai của (Y, Yhat)\na = np.array([1, -1])\nprint(a @ C @ a)                    # 7\n```\n\n#### Bẫy thường gặp\n- Bỏ hiệp phương sai (13), sai dấu (19), trừ phương sai (5).\n\n#### Đọc thêm\n- [Covariance (Wikipedia)](https://en.wikipedia.org/wiki/Covariance)\n- [Variance (Wikipedia)](https://en.wikipedia.org/wiki/Variance)\n- [Mathematics for Machine Learning, chương 6 (mml-book)](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "A": "Bỏ qua hiệp phương sai, coi $Y$ và $\\hat{Y}$ độc lập; dự báo tốt thì luôn tương quan với giá trị thật.",
+    "C": "Cộng $2\\operatorname{Cov}$ thay vì trừ. Với hiệu $Y - \\hat{Y}$, hạng hiệp phương sai mang dấu trừ.",
+    "D": "Lấy $9 - 4$: phương sai không bao giờ trừ nhau như vậy; $\\operatorname{Var}(-\\hat{Y}) = (-1)^2\\operatorname{Var}(\\hat{Y}) = +4$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$13$"
+    },
+    {
+     "key": "B",
+     "text": "$7$"
+    },
+    {
+     "key": "C",
+     "text": "$19$"
+    },
+    {
+     "key": "D",
+     "text": "$5$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T03-B07",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Độ trễ của từng request có độ lệch chuẩn 40 ms; các request độc lập, cùng phân phối. Dashboard hiển thị độ trễ **trung bình** của mỗi lô 100 request. Độ lệch chuẩn của con số trung bình này là bao nhiêu?",
+   "explanation": "$\\operatorname{Var}(\\bar{X}) = \\sigma^2/n$ nên $\\operatorname{SD}(\\bar{X}) = \\sigma/\\sqrt{n} = 40/\\sqrt{100} = 4$ ms.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nTrung bình của $n$ quan sát độc lập cùng phân phối có độ lệch chuẩn (sai số chuẩn) giảm theo $\\sqrt{n}$:\n$$\\operatorname{Var}(\\bar{X}) = \\frac{\\sigma^2}{n}, \\qquad \\operatorname{SD}(\\bar{X}) = \\frac{\\sigma}{\\sqrt{n}}.$$\n\n#### Từng bước\n- $\\operatorname{Var}(\\bar{X}) = \\frac{1}{n^2}\\sum \\operatorname{Var}(X_i) = \\frac{n\\sigma^2}{n^2} = \\frac{40^2}{100} = 16$ ms².\n- $\\operatorname{SD}(\\bar{X}) = \\sqrt{16} = 4$ ms.\n\n#### Bảng: kích thước lô và độ ổn định\n| Số request mỗi lô $n$ | $\\sigma/\\sqrt{n}$ (ms) |\n|---|---|\n| 1 | 40 |\n| 25 | 8 |\n| 100 | 4 |\n| 400 | 2 |\n\nMuốn giảm sai số chuẩn **một nửa** phải tăng cỡ lô **4 lần**. Đây cũng là lý do A/B test cần nhiều người dùng để phát hiện hiệu ứng nhỏ.\n\n```python\nimport numpy as np\nrng = np.random.default_rng(1)\nlat = rng.normal(200, 40, size=(20_000, 100))\nprint(round(lat.mean(axis=1).std(), 2))   # xấp xỉ 4\n```\n\n#### Bẫy thường gặp\n- Chia cho $n$ thay vì $\\sqrt{n}$ (0,4 ms).\n- Nhầm phương sai 16 ms² với độ lệch chuẩn.\n- Công thức cần các request **độc lập**; request trong cùng một đợt nghẽn thường tương quan, khi đó trung bình dao động nhiều hơn 4 ms.\n\n#### Đọc thêm\n- [Standard error (Wikipedia)](https://en.wikipedia.org/wiki/Standard_error)\n- [Central limit theorem (Wikipedia)](https://en.wikipedia.org/wiki/Central_limit_theorem)\n- [OpenIntro Statistics (sách mở miễn phí)](https://www.openintro.org/book/os/)",
+   "distractors": {
+    "A": "Chia cho $n = 100$ thay vì $\\sqrt{n} = 10$. Phương sai của trung bình mới chia cho $n$.",
+    "B": "Cho rằng lấy trung bình không làm thay đổi độ dao động; thực tế trung bình của nhiều request ổn định hơn từng request.",
+    "C": "Đây là $40^2/100 = 16$, tức **phương sai** của trung bình (đơn vị ms²); quên lấy căn."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$0{,}4$ ms"
+    },
+    {
+     "key": "B",
+     "text": "$40$ ms"
+    },
+    {
+     "key": "C",
+     "text": "$16$ ms"
+    },
+    {
+     "key": "D",
+     "text": "$4$ ms"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T03-B08",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Trong một A/B test, mỗi người dùng ở nhóm B bấm nút “Đăng ký” với xác suất 0,3, độc lập nhau. Lấy ngẫu nhiên 10 người dùng của nhóm B. Xác suất có **đúng 3** người bấm là bao nhiêu?",
+   "explanation": "$X \\sim \\text{Bin}(10;\\, 0{,}3)$: $P(X = 3) = \\binom{10}{3} 0{,}3^3 \\cdot 0{,}7^7 = 120 \\cdot 0{,}027 \\cdot 0{,}0824 \\approx 0{,}267$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nSố “thành công” trong $n$ phép thử Bernoulli độc lập, cùng xác suất $p$ là biến **nhị thức**:\n$$P(X = k) = \\binom{n}{k}p^k(1-p)^{n-k}.$$\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280.0\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Bin(10; 0,3): P(X = 3) ≈ 0,267</text>\n<line x1=\"50\" y1=\"214\" x2=\"540\" y2=\"214\" stroke=\"currentColor\"/>\n<line x1=\"50\" y1=\"34\" x2=\"50\" y2=\"214\" stroke=\"currentColor\"/>\n<rect x=\"56.7\" y=\"197.4\" width=\"31.2\" height=\"16.6\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"72.3\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"72.3\" y=\"193.4\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.028</text>\n<rect x=\"101.2\" y=\"143.0\" width=\"31.2\" height=\"71.0\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"116.8\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"116.8\" y=\"139.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.121</text>\n<rect x=\"145.8\" y=\"77.0\" width=\"31.2\" height=\"137.0\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"161.4\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"161.4\" y=\"73.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.233</text>\n<rect x=\"190.3\" y=\"57.5\" width=\"31.2\" height=\"156.5\" fill=\"#10b981\" opacity=\"0.85\"/>\n<text x=\"205.9\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<text x=\"205.9\" y=\"53.5\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.267</text>\n<rect x=\"234.9\" y=\"96.6\" width=\"31.2\" height=\"117.4\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"250.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<text x=\"250.5\" y=\"92.6\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.200</text>\n<rect x=\"279.4\" y=\"153.6\" width=\"31.2\" height=\"60.4\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"295.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">5</text>\n<text x=\"295.0\" y=\"149.6\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.103</text>\n<rect x=\"324.0\" y=\"192.4\" width=\"31.2\" height=\"21.6\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"339.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">6</text>\n<text x=\"339.5\" y=\"188.4\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.037</text>\n<rect x=\"368.5\" y=\"208.7\" width=\"31.2\" height=\"5.3\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"384.1\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">7</text>\n<text x=\"384.1\" y=\"204.7\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.009</text>\n<rect x=\"413.0\" y=\"213.2\" width=\"31.2\" height=\"0.8\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"428.6\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">8</text>\n<text x=\"428.6\" y=\"209.2\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.001</text>\n<rect x=\"457.6\" y=\"213.9\" width=\"31.2\" height=\"0.1\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"473.2\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">9</text>\n<text x=\"473.2\" y=\"209.9\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.000</text>\n<rect x=\"502.1\" y=\"214.0\" width=\"31.2\" height=\"0.0\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"517.7\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">10</text>\n<text x=\"517.7\" y=\"210.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.000</text>\n<text x=\"295.0\" y=\"252\" text-anchor=\"middle\" fill=\"currentColor\">số người bấm Đăng ký</text>\n</svg>\n\n#### Từng bước\n- $\\binom{10}{3} = 120$ cách chọn 3 người bấm.\n- Mỗi cách có xác suất $0{,}3^3 \\cdot 0{,}7^7 = 0{,}027 \\cdot 0{,}08235 \\approx 0{,}002224$.\n- Nhân lại: $120 \\cdot 0{,}002224 \\approx 0{,}267$.\n\n```python\nfrom scipy import stats\nprint(round(stats.binom.pmf(3, 10, 0.3), 3))   # 0.267\n```\n\n#### Bảng phân phối (rút gọn)\n| $k$ | 0 | 1 | 2 | 3 | 4 | 5 |\n|---|---|---|---|---|---|---|\n| $P(X = k)$ | 0,028 | 0,121 | 0,233 | 0,267 | 0,200 | 0,103 |\n\nDù $E[X] = np = 3$ là giá trị có xác suất lớn nhất, nó cũng chỉ xảy ra khoảng 27% số lần. Với mẫu 10 người, tỉ lệ quan sát được dao động rất mạnh quanh 30%.\n\n#### Bẫy thường gặp\n- Quên hệ số $\\binom{n}{k}$ (0,0022).\n- Quên nhân $(1-p)^{n-k}$ (0,027).\n\n#### Đọc thêm\n- [Binomial distribution (Wikipedia)](https://en.wikipedia.org/wiki/Binomial_distribution)\n- [scipy.stats.binom (SciPy docs)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binom.html)\n- [OpenIntro Statistics (sách mở miễn phí)](https://www.openintro.org/book/os/)",
+   "distractors": {
+    "B": "Chỉ tính $0{,}3^3$: quên nhân xác suất 7 người còn lại **không** bấm và quên số cách chọn 3 người.",
+    "C": "Nghĩ rằng vì tỉ lệ là 30% nên “đúng 3 trên 10” có xác suất 0,3; 3 là **giá trị kỳ vọng** $np$, không phải xác suất.",
+    "D": "Tính $0{,}3^3 \\cdot 0{,}7^7$ cho **một** thứ tự cụ thể, quên nhân hệ số $\\binom{10}{3} = 120$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$\\approx 0{,}267$"
+    },
+    {
+     "key": "B",
+     "text": "$\\approx 0{,}027$"
+    },
+    {
+     "key": "C",
+     "text": "$0{,}3$"
+    },
+    {
+     "key": "D",
+     "text": "$\\approx 0{,}0022$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T03-B09",
+   "module": "B",
+   "type": "mcq",
+   "points": 3,
+   "level": "thong-hieu",
+   "prompt": "Độ trễ phản hồi của một dịch vụ xấp xỉ phân phối chuẩn $N(200,\\, 25^2)$, đơn vị ms. Tỉ lệ request có độ trễ **trên 250 ms** xấp xỉ bao nhiêu?",
+   "explanation": "$z = \\frac{250 - 200}{25} = 2$, $P(Z > 2) = 1 - \\Phi(2) \\approx 0{,}0228$ (quy tắc 68–95–99,7 cho ước lượng nhanh $\\approx 5\\%/2 = 2{,}5\\%$).",
+   "section": "a-xs",
+   "long": "#### Ý chính\nChuẩn hoá về $Z = \\frac{X - \\mu}{\\sigma} \\sim N(0, 1)$ rồi tra đuôi. Quy tắc 68–95–99,7 cho ước lượng nhanh; SciPy cho số chính xác.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280.0\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">N(200; 25²): vùng đỏ là P(X &gt; 250) ≈ 2,3%</text>\n<path d=\"M418.9,200.0 L418.9,178.7 L420.0,179.3 L421.1,180.0 L422.2,180.6 L423.3,181.3 L424.4,181.9 L425.6,182.5 L426.7,183.0 L427.8,183.6 L428.9,184.2 L430.0,184.7 L431.1,185.2 L432.2,185.7 L433.3,186.2 L434.4,186.7 L435.6,187.2 L436.7,187.6 L437.8,188.1 L438.9,188.5 L440.0,188.9 L441.1,189.3 L442.2,189.7 L443.3,190.1 L444.4,190.4 L445.6,190.8 L446.7,191.1 L447.8,191.5 L448.9,191.8 L450.0,192.1 L451.1,192.4 L452.2,192.7 L453.3,193.0 L454.4,193.3 L455.6,193.5 L456.7,193.8 L457.8,194.0 L458.9,194.3 L460.0,194.5 L461.1,194.7 L462.2,195.0 L463.3,195.2 L464.4,195.4 L465.6,195.6 L466.7,195.7 L467.8,195.9 L468.9,196.1 L470.0,196.3 L471.1,196.4 L472.2,196.6 L473.3,196.7 L474.4,196.9 L475.6,197.0 L476.7,197.1 L477.8,197.3 L478.9,197.4 L480.0,197.5 L481.1,197.6 L482.2,197.7 L483.3,197.8 L484.4,197.9 L485.6,198.0 L486.7,198.1 L487.8,198.2 L488.9,198.3 L490.0,198.4 L491.1,198.4 L492.2,198.5 L493.3,198.6 L494.4,198.7 L495.6,198.7 L496.7,198.8 L497.8,198.8 L498.9,198.9 L500.0,199.0 L501.1,199.0 L502.2,199.1 L503.3,199.1 L504.4,199.1 L505.6,199.2 L506.7,199.2 L507.8,199.3 L508.9,199.3 L510.0,199.3 L511.1,199.4 L512.2,199.4 L513.3,199.4 L514.4,199.5 L515.6,199.5 L516.7,199.5 L517.8,199.6 L518.9,199.6 L520.0,199.6 L521.1,199.6 L522.2,199.6 L523.3,199.7 L524.4,199.7 L525.6,199.7 L526.7,199.7 L527.8,199.7 L528.9,199.7 L530.0,199.8 L530.0,200.0 Z\" fill=\"#ef4444\" opacity=\"0.45\"/>\n<path d=\"M30.0,199.8 L32.5,199.7 L35.0,199.7 L37.5,199.6 L40.0,199.6 L42.5,199.5 L45.0,199.5 L47.5,199.4 L50.0,199.3 L52.5,199.3 L55.0,199.2 L57.5,199.1 L60.0,199.0 L62.5,198.8 L65.0,198.7 L67.5,198.5 L70.0,198.4 L72.5,198.2 L75.0,198.0 L77.5,197.8 L80.0,197.5 L82.5,197.2 L85.0,196.9 L87.5,196.6 L90.0,196.3 L92.5,195.9 L95.0,195.5 L97.5,195.0 L100.0,194.5 L102.5,194.0 L105.0,193.4 L107.5,192.8 L110.0,192.1 L112.5,191.4 L115.0,190.6 L117.5,189.8 L120.0,188.9 L122.5,188.0 L125.0,186.9 L127.5,185.9 L130.0,184.7 L132.5,183.5 L135.0,182.2 L137.5,180.8 L140.0,179.3 L142.5,177.8 L145.0,176.2 L147.5,174.5 L150.0,172.7 L152.5,170.8 L155.0,168.8 L157.5,166.7 L160.0,164.6 L162.5,162.3 L165.0,160.0 L167.5,157.5 L170.0,155.0 L172.5,152.4 L175.0,149.7 L177.5,146.9 L180.0,144.1 L182.5,141.1 L185.0,138.1 L187.5,135.1 L190.0,131.9 L192.5,128.7 L195.0,125.4 L197.5,122.1 L200.0,118.8 L202.5,115.4 L205.0,112.0 L207.5,108.6 L210.0,105.1 L212.5,101.7 L215.0,98.2 L217.5,94.8 L220.0,91.4 L222.5,88.1 L225.0,84.8 L227.5,81.5 L230.0,78.3 L232.5,75.2 L235.0,72.2 L237.5,69.2 L240.0,66.4 L242.5,63.7 L245.0,61.1 L247.5,58.7 L250.0,56.3 L252.5,54.2 L255.0,52.2 L257.5,50.4 L260.0,48.7 L262.5,47.2 L265.0,45.9 L267.5,44.8 L270.0,43.9 L272.5,43.2 L275.0,42.7 L277.5,42.4 L280.0,42.3 L282.5,42.4 L285.0,42.7 L287.5,43.2 L290.0,43.9 L292.5,44.8 L295.0,45.9 L297.5,47.2 L300.0,48.7 L302.5,50.4 L305.0,52.2 L307.5,54.2 L310.0,56.3 L312.5,58.7 L315.0,61.1 L317.5,63.7 L320.0,66.4 L322.5,69.2 L325.0,72.2 L327.5,75.2 L330.0,78.3 L332.5,81.5 L335.0,84.8 L337.5,88.1 L340.0,91.4 L342.5,94.8 L345.0,98.2 L347.5,101.7 L350.0,105.1 L352.5,108.6 L355.0,112.0 L357.5,115.4 L360.0,118.8 L362.5,122.1 L365.0,125.4 L367.5,128.7 L370.0,131.9 L372.5,135.1 L375.0,138.1 L377.5,141.1 L380.0,144.1 L382.5,146.9 L385.0,149.7 L387.5,152.4 L390.0,155.0 L392.5,157.5 L395.0,160.0 L397.5,162.3 L400.0,164.6 L402.5,166.7 L405.0,168.8 L407.5,170.8 L410.0,172.7 L412.5,174.5 L415.0,176.2 L417.5,177.8 L420.0,179.3 L422.5,180.8 L425.0,182.2 L427.5,183.5 L430.0,184.7 L432.5,185.9 L435.0,186.9 L437.5,188.0 L440.0,188.9 L442.5,189.8 L445.0,190.6 L447.5,191.4 L450.0,192.1 L452.5,192.8 L455.0,193.4 L457.5,194.0 L460.0,194.5 L462.5,195.0 L465.0,195.5 L467.5,195.9 L470.0,196.3 L472.5,196.6 L475.0,196.9 L477.5,197.2 L480.0,197.5 L482.5,197.8 L485.0,198.0 L487.5,198.2 L490.0,198.4 L492.5,198.5 L495.0,198.7 L497.5,198.8 L500.0,199.0 L502.5,199.1 L505.0,199.2 L507.5,199.3 L510.0,199.3 L512.5,199.4 L515.0,199.5 L517.5,199.5 L520.0,199.6 L522.5,199.6 L525.0,199.7 L527.5,199.7 L530.0,199.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<line x1=\"30\" y1=\"200.0\" x2=\"530\" y2=\"200.0\" stroke=\"currentColor\"/>\n<line x1=\"71.7\" y1=\"200.0\" x2=\"71.7\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"71.7\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">125</text>\n<line x1=\"141.1\" y1=\"200.0\" x2=\"141.1\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"141.1\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">150</text>\n<line x1=\"210.6\" y1=\"200.0\" x2=\"210.6\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"210.6\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">175</text>\n<line x1=\"280.0\" y1=\"200.0\" x2=\"280.0\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"280.0\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">200</text>\n<line x1=\"349.4\" y1=\"200.0\" x2=\"349.4\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"349.4\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">225</text>\n<line x1=\"418.9\" y1=\"200.0\" x2=\"418.9\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"418.9\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">250</text>\n<line x1=\"488.3\" y1=\"200.0\" x2=\"488.3\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"488.3\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">275</text>\n<text x=\"280.0\" y=\"244\" text-anchor=\"middle\" fill=\"currentColor\">độ trễ (ms)</text>\n</svg>\n\n#### Từng bước\n- $\\sigma = 25$ ms (đề cho $25^2$ là **phương sai**).\n- $z = \\frac{250 - 200}{25} = 2$.\n- $P(Z > 2) = 1 - \\Phi(2) \\approx 0{,}0228$, khoảng 2,3%. Quy tắc nhanh: $P(|Z| > 2) \\approx 5\\%$, chia đôi cho một đuôi $\\approx 2{,}5\\%$.\n\n```python\nfrom scipy import stats\nprint(stats.norm.sf(250, loc=200, scale=25))   # 0.02275\n```\n\n#### Bảng đuôi phải hay dùng\n| $z$ | $P(Z > z)$ |\n|---|---|\n| 1 | 15,9% |\n| 1,645 | 5,0% |\n| 2 | 2,3% |\n| 2,326 | 1,0% |\n| 3 | 0,13% |\n\n#### Bẫy thường gặp\n- Lấy hai đuôi (4,6%).\n- Đọc $25^2$ thành độ lệch chuẩn 625 hoặc nhầm khoảng cách 50 ms là $1\\sigma$.\n- Độ trễ thật thường lệch phải; dùng phân phối chuẩn chỉ là xấp xỉ.\n\n#### Đọc thêm\n- [Normal distribution (Wikipedia)](https://en.wikipedia.org/wiki/Normal_distribution)\n- [68–95–99.7 rule (Wikipedia)](https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule)\n- [scipy.stats.norm (SciPy docs)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html)",
+   "distractors": {
+    "A": "Lấy cả hai đuôi $P(|Z| > 2)$; đề chỉ hỏi phía chậm (đuôi phải).",
+    "B": "Coi 250 ms chỉ cách trung bình 1 độ lệch chuẩn (đọc nhầm $\\sigma = 50$ từ $25^2$ hoặc từ khoảng cách 50 ms); thực tế $z = 50/25 = 2$.",
+    "D": "Dùng đuôi $3\\sigma$ ($z = 3$); 250 ms chỉ cách trung bình $2\\sigma$."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Khoảng 4,6%"
+    },
+    {
+     "key": "B",
+     "text": "Khoảng 15,9%"
+    },
+    {
+     "key": "C",
+     "text": "Khoảng 2,3%"
+    },
+    {
+     "key": "D",
+     "text": "Khoảng 0,13%"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T03-B10",
+   "module": "B",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "thong-hieu",
+   "prompt": "Số request mỗi phút tới một API nội bộ tuân theo phân phối Poisson với $\\lambda = 3$. Tính xác suất trong một phút có **không quá 2** request, tức $P(X \\le 2)$. Nhập dạng thập phân, **làm tròn 3 chữ số thập phân**.",
+   "explanation": "$P(X \\le 2) = e^{-3}\\left(1 + 3 + \\frac{3^2}{2!}\\right) = 8{,}5\\,e^{-3} \\approx 0{,}423$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\n“Không quá 2” là $X \\in \\{0, 1, 2\\}$: cộng ba xác suất Poisson.\n$$P(X \\le 2) = e^{-\\lambda}\\left(1 + \\lambda + \\frac{\\lambda^2}{2!}\\right).$$\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280.0\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Poisson(λ = 3): tổng 3 cột xanh lá = 0,423</text>\n<line x1=\"50\" y1=\"214\" x2=\"540\" y2=\"214\" stroke=\"currentColor\"/>\n<line x1=\"50\" y1=\"34\" x2=\"50\" y2=\"214\" stroke=\"currentColor\"/>\n<rect x=\"57.4\" y=\"179.2\" width=\"34.3\" height=\"34.8\" fill=\"#10b981\" opacity=\"0.85\"/>\n<text x=\"74.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"74.5\" y=\"175.2\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.050</text>\n<rect x=\"106.3\" y=\"109.7\" width=\"34.3\" height=\"104.3\" fill=\"#10b981\" opacity=\"0.85\"/>\n<text x=\"123.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"123.5\" y=\"105.7\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.149</text>\n<rect x=\"155.3\" y=\"57.5\" width=\"34.3\" height=\"156.5\" fill=\"#10b981\" opacity=\"0.85\"/>\n<text x=\"172.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"172.5\" y=\"53.5\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.224</text>\n<rect x=\"204.3\" y=\"57.5\" width=\"34.3\" height=\"156.5\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"221.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<text x=\"221.5\" y=\"53.5\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.224</text>\n<rect x=\"253.3\" y=\"96.6\" width=\"34.3\" height=\"117.4\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"270.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<text x=\"270.5\" y=\"92.6\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.168</text>\n<rect x=\"302.4\" y=\"143.6\" width=\"34.3\" height=\"70.4\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"319.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">5</text>\n<text x=\"319.5\" y=\"139.6\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.101</text>\n<rect x=\"351.4\" y=\"178.8\" width=\"34.3\" height=\"35.2\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"368.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">6</text>\n<text x=\"368.5\" y=\"174.8\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.050</text>\n<rect x=\"400.4\" y=\"198.9\" width=\"34.3\" height=\"15.1\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"417.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">7</text>\n<text x=\"417.5\" y=\"194.9\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.022</text>\n<rect x=\"449.4\" y=\"208.3\" width=\"34.3\" height=\"5.7\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"466.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">8</text>\n<text x=\"466.5\" y=\"204.3\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.008</text>\n<rect x=\"498.4\" y=\"212.1\" width=\"34.3\" height=\"1.9\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"515.5\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">9</text>\n<text x=\"515.5\" y=\"208.1\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.003</text>\n<text x=\"295.0\" y=\"252\" text-anchor=\"middle\" fill=\"currentColor\">số request trong 1 phút</text>\n</svg>\n\n#### Từng bước\n| $k$ | $e^{-3}\\frac{3^k}{k!}$ | Giá trị |\n|---|---|---|\n| 0 | $e^{-3}$ | 0,0498 |\n| 1 | $3e^{-3}$ | 0,1494 |\n| 2 | $\\frac{9}{2}e^{-3}$ | 0,2240 |\n| Tổng | $8{,}5\\,e^{-3}$ | **0,4232** |\n\n```python\nimport math\nfrom scipy import stats\nprint(round(8.5 * math.exp(-3), 4), round(stats.poisson.cdf(2, 3), 4))   # 0.4232 0.4232\n```\n\n#### Ý nghĩa\nDù trung bình là 3 request/phút, khoảng 42% số phút có từ 2 request trở xuống và 58% số phút có từ 3 request trở lên. Phân phối Poisson với $\\lambda$ nhỏ khá lệch, nên đừng nghĩ “đa số các phút có đúng 3 request”.\n\n#### Bẫy thường gặp\n- Chỉ lấy $P(X = 2)$ (0,224) hoặc quên $k = 2$ (0,199).\n- Quên chia $k!$ (0,647).\n- Lấy phần bù (0,577).\n\n#### Đọc thêm\n- [Poisson distribution (Wikipedia)](https://en.wikipedia.org/wiki/Poisson_distribution)\n- [scipy.stats.poisson (SciPy docs)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.poisson.html)\n- [Khan Academy: Probability](https://www.khanacademy.org/math/statistics-probability/probability-library)",
+   "mistakes": [
+    {
+     "value": 0.224,
+     "why": "Chỉ tính $P(X = 2) = e^{-3} \\cdot 3^2/2! \\approx 0{,}224$; “không quá 2” gồm cả 0, 1 và 2."
+    },
+    {
+     "value": 0.199,
+     "why": "Chỉ tính $P(X \\le 1) = e^{-3}(1 + 3)$, bỏ sót trường hợp đúng 2 request."
+    },
+    {
+     "value": 0.577,
+     "why": "Đây là phần bù $P(X \\ge 3) = 1 - 0{,}423$."
+    },
+    {
+     "value": 0.647,
+     "why": "Quên chia $k!$: tính $e^{-3}(1 + 3 + 9)$ thay vì $e^{-3}(1 + 3 + 9/2)$."
+    }
+   ],
+   "answer": 0.423,
+   "tol": 0.0011
+  },
+  {
+   "id": "T03-C01",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Một lô 20 ảnh đã gán nhãn có đúng **4 ảnh bị gán sai** (người kiểm không biết là ảnh nào). Người kiểm chọn ngẫu nhiên 5 ảnh **khác nhau** trong lô để soát lại. Xác suất phát hiện **ít nhất một** ảnh gán sai là bao nhiêu?",
+   "explanation": "Số cách chọn 5 ảnh đều lành: $\\binom{16}{5} = 4368$; tổng số cách: $\\binom{20}{5} = 15504$. $P = 1 - 4368/15504 \\approx 0{,}718$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nChọn 5 ảnh **khác nhau** từ một lô hữu hạn là lấy mẫu **không hoàn lại**: số ảnh sai trong mẫu có phân phối **siêu bội** (hypergeometric), không phải nhị thức.\n\n#### Từng bước\n- Tổng số cách chọn 5 ảnh: $\\binom{20}{5} = 15.504$.\n- Số cách chọn 5 ảnh đều lành (từ 16 ảnh lành): $\\binom{16}{5} = 4.368$.\n- $P(\\text{không phát hiện}) = \\frac{4368}{15504} \\approx 0{,}282$, nên $P(\\ge 1) \\approx 0{,}718$.\n\n#### Phân phối số ảnh sai $K$ trong mẫu\n| $K$ | Công thức | Xác suất |\n|---|---|---|\n| 0 | $\\binom{4}{0}\\binom{16}{5}/\\binom{20}{5}$ | 0,282 |\n| 1 | $\\binom{4}{1}\\binom{16}{4}/\\binom{20}{5}$ | 0,470 |\n| 2 | $\\binom{4}{2}\\binom{16}{3}/\\binom{20}{5}$ | 0,217 |\n| 3 | $\\binom{4}{3}\\binom{16}{2}/\\binom{20}{5}$ | 0,031 |\n| 4 | $\\binom{4}{4}\\binom{16}{1}/\\binom{20}{5}$ | 0,001 |\n\n```python\nfrom scipy import stats\nrv = stats.hypergeom(M=20, n=4, N=5)     # tổng, số ảnh sai, cỡ mẫu\nprint(round(1 - rv.pmf(0), 3), round(1 - 0.8**5, 3))   # 0.718 0.672\n```\n\n#### So với nhị thức\nLấy có hoàn lại cho $1 - 0{,}8^5 = 0{,}672$, thấp hơn. Không hoàn lại thì mỗi ảnh lành rút ra làm tỉ lệ ảnh sai còn lại tăng lên, nên dễ phát hiện hơn. Khi lô rất lớn so với mẫu, hai cách cho kết quả gần nhau.\n\n#### Bẫy thường gặp\n- Dùng nhị thức cho lô nhỏ; quên phần bù; chỉ tính “đúng một”.\n\n#### Đọc thêm\n- [Hypergeometric distribution (Wikipedia)](https://en.wikipedia.org/wiki/Hypergeometric_distribution)\n- [scipy.stats.hypergeom (SciPy docs)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.hypergeom.html)\n- [Combination (Wikipedia)](https://en.wikipedia.org/wiki/Combination)",
+   "distractors": {
+    "A": "Coi như chọn **có hoàn lại** (nhị thức với $p = 4/20$). Chọn 5 ảnh khác nhau thì mỗi ảnh lành được rút ra làm tăng tỉ lệ ảnh sai còn lại (siêu bội).",
+    "C": "Đây là xác suất **không** phát hiện ảnh sai nào (cả 5 ảnh đều lành); quên lấy phần bù.",
+    "D": "Đây là xác suất phát hiện **đúng một** ảnh sai; bỏ sót các trường hợp 2, 3, 4 ảnh sai."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$1 - 0{,}8^5 \\approx 0{,}672$"
+    },
+    {
+     "key": "B",
+     "text": "$1 - \\frac{\\binom{16}{5}}{\\binom{20}{5}} \\approx 0{,}718$"
+    },
+    {
+     "key": "C",
+     "text": "$\\frac{\\binom{16}{5}}{\\binom{20}{5}} \\approx 0{,}282$"
+    },
+    {
+     "key": "D",
+     "text": "$\\frac{4\\binom{16}{4}}{\\binom{20}{5}} \\approx 0{,}470$"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T03-C02",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Hệ thống chống gian lận có hai tầng. Tỉ lệ gian lận là 0,2%. Tầng 1 (luật) gắn cờ 99% giao dịch gian lận và 1% giao dịch hợp lệ. Tầng 2 (mô hình ML) gắn cờ 90% giao dịch gian lận và 2% giao dịch hợp lệ. Giả sử khi đã biết một giao dịch là gian lận hay hợp lệ thì quyết định của hai tầng **độc lập có điều kiện**. Một giao dịch bị **cả hai tầng** gắn cờ. Xác suất nó thực sự gian lận là bao nhiêu? Nhập dạng thập phân, **làm tròn 3 chữ số thập phân**.",
+   "explanation": "$P(G \\mid F_1 F_2) = \\frac{0{,}002 \\cdot 0{,}99 \\cdot 0{,}9}{0{,}002 \\cdot 0{,}99 \\cdot 0{,}9 + 0{,}998 \\cdot 0{,}01 \\cdot 0{,}02} = \\frac{0{,}001782}{0{,}0019816} \\approx 0{,}899$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nHai bằng chứng **độc lập có điều kiện** (khi biết lớp thật) thì likelihood nhân với nhau:\n$$P(F_1, F_2 \\mid G) = P(F_1 \\mid G)\\,P(F_2 \\mid G).$$\nCó thể cập nhật Bayes **tuần tự**: hậu nghiệm sau tầng 1 thành tiên nghiệm cho tầng 2.\n\n#### Sơ đồ cập nhật tuần tự\n```mermaid\nflowchart LR\n  P0[\"Tiên nghiệm 0,2%\"] -->|\"Tầng 1 gắn cờ: 99% vs 1%\"| P1[\"Sau tầng 1: 16,6%\"]\n  P1 -->|\"Tầng 2 gắn cờ: 90% vs 2%\"| P2[\"Sau tầng 2: 89,9%\"]\n```\n\n#### Từng bước (trên 1.000.000 giao dịch)\n| | Gian lận | Hợp lệ |\n|---|---|---|\n| Số giao dịch | 2.000 | 998.000 |\n| Tầng 1 gắn cờ | $2000 \\cdot 0{,}99 = 1980$ | $998000 \\cdot 0{,}01 = 9980$ |\n| Cả hai tầng gắn cờ | $1980 \\cdot 0{,}9 = 1782$ | $9980 \\cdot 0{,}02 = 199{,}6$ |\n\n$$P(G \\mid F_1 F_2) = \\frac{1782}{1782 + 199{,}6} \\approx 0{,}899.$$\n\nCách tính bằng tỉ số odds: odds tiên nghiệm $= 2/998$; nhân tỉ số khả năng $\\frac{0{,}99}{0{,}01} = 99$ và $\\frac{0{,}9}{0{,}02} = 45$: odds hậu nghiệm $= \\frac{2}{998} \\cdot 99 \\cdot 45 \\approx 8{,}93$, xác suất $= 8{,}93/9{,}93 \\approx 0{,}899$.\n\n#### Bẫy thường gặp\n- Dừng ở tầng 1 (0,166).\n- Nhầm recall kết hợp $0{,}891$ với xác suất hậu nghiệm.\n- Giả định độc lập có điều kiện thường **quá lạc quan**: nếu hai tầng dùng chung đặc trưng (cùng nhìn số tiền, quốc gia) thì lỗi của chúng tương quan, xác suất thật thấp hơn 0,899.\n\n#### Đọc thêm\n- [Bayes' theorem (Wikipedia)](https://en.wikipedia.org/wiki/Bayes%27_theorem)\n- [Independence (probability theory) (Wikipedia)](https://en.wikipedia.org/wiki/Independence_%28probability_theory%29)\n- [Base rate fallacy (Wikipedia)](https://en.wikipedia.org/wiki/Base_rate_fallacy)",
+   "mistakes": [
+    {
+     "value": 0.166,
+     "why": "Chỉ dùng tầng 1: $\\frac{0{,}002 \\cdot 0{,}99}{0{,}002 \\cdot 0{,}99 + 0{,}998 \\cdot 0{,}01} \\approx 0{,}166$; chưa cập nhật thêm bằng bằng chứng từ tầng 2."
+    },
+    {
+     "value": 0.891,
+     "why": "Tính $0{,}99 \\times 0{,}9$: đó là $P(\\text{cả hai cờ} \\mid \\text{gian lận})$, tức recall kết hợp, không phải xác suất hậu nghiệm."
+    },
+    {
+     "value": 0.002,
+     "why": "Giữ nguyên tỉ lệ nền 0,2%, bỏ qua hoàn toàn bằng chứng từ hai tầng."
+    }
+   ],
+   "answer": 0.899,
+   "tol": 0.0011
+  },
+  {
+   "id": "T03-C03",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Kết quả A/B test trang thanh toán, tách theo thiết bị (số đơn / số phiên):\n\n| Biến thể | Mobile | Desktop | Gộp |\n|---|---|---|---|\n| A | 30 / 200 (15%) | 160 / 800 (20%) | 190 / 1000 (19%) |\n| B | 120 / 700 (≈ 17,1%) | 66 / 300 (22%) | 186 / 1000 (18,6%) |\n\nKết luận nào **đúng**?",
+   "explanation": "Tỉ lệ gộp là trung bình có trọng số: $P(\\text{mua}) = \\sum_d P(\\text{mua} \\mid d)P(d)$. A: $0{,}2 \\cdot 0{,}15 + 0{,}8 \\cdot 0{,}2 = 0{,}19$; B: $0{,}7 \\cdot 0{,}171 + 0{,}3 \\cdot 0{,}22 = 0{,}186$. Trọng số khác nhau tạo nghịch lý Simpson; nên so theo từng nhóm và kiểm tra lại khâu chia ngẫu nhiên.",
+   "section": "a-xs",
+   "long": "#### Ý chính\n**Nghịch lý Simpson**: một xu hướng xuất hiện ở mọi nhóm con có thể đảo chiều khi gộp, vì tỉ lệ gộp là **trung bình có trọng số** và các biến thể có trọng số (cơ cấu nhóm) khác nhau.\n\n#### Từng bước\n$$P(\\text{mua} \\mid \\text{biến thể}) = \\sum_{d} P(\\text{mua} \\mid d, \\text{biến thể})\\,P(d \\mid \\text{biến thể}).$$\n\n| | Tỉ trọng mobile | Tỉ lệ mobile | Tỉ trọng desktop | Tỉ lệ desktop | Gộp |\n|---|---|---|---|---|---|\n| A | 0,2 | 15% | 0,8 | 20% | $0{,}2 \\cdot 15 + 0{,}8 \\cdot 20 = 19\\%$ |\n| B | 0,7 | 17,1% | 0,3 | 22% | $0{,}7 \\cdot 17{,}1 + 0{,}3 \\cdot 22 = 18{,}6\\%$ |\n\nB thắng ở cả hai nhóm, nhưng 70% phiên của B là mobile (nhóm có tỉ lệ nền thấp), còn A chỉ 20%. Nếu B được cùng cơ cấu 20/80 như A: $0{,}2 \\cdot 17{,}1\\% + 0{,}8 \\cdot 22\\% \\approx 21\\%$, cao hơn A rõ rệt.\n\n#### Thực tế A/B test\nTrong A/B test chia ngẫu nhiên đúng cách, cơ cấu thiết bị của hai nhóm phải gần như nhau. Chênh lệch 20% và 70% là dấu hiệu **lỗi chia nhóm** (ví dụ B chỉ bật trên app mobile, hoặc lỗi tracking), cần kiểm tra trước khi kết luận.\n\n```python\na = [(200, 30), (800, 160)]; b = [(700, 120), (300, 66)]\nprint([round(k/n, 3) for n, k in a], [round(k/n, 3) for n, k in b])\nprint(sum(k for _, k in a)/1000, sum(k for _, k in b)/1000)\n```\n\n#### Bẫy thường gặp\n- Chỉ nhìn số gộp; nghĩ đảo chiều là “không thể”; đọc sai cột desktop.\n\n#### Đọc thêm\n- [Simpson's paradox (Wikipedia)](https://en.wikipedia.org/wiki/Simpson%27s_paradox)\n- [Law of total probability (Wikipedia)](https://en.wikipedia.org/wiki/Law_of_total_probability)\n- [OpenIntro Statistics (sách mở miễn phí)](https://www.openintro.org/book/os/)",
+   "distractors": {
+    "A": "Bỏ qua biến gây nhiễu là thiết bị: B bị dồn nhiều phiên mobile (nhóm có tỉ lệ chuyển đổi nền thấp), nên số gộp không so sánh công bằng.",
+    "B": "Hoàn toàn có thể xảy ra: đây là nghịch lý Simpson, do tỉ lệ gộp là trung bình có trọng số và trọng số (tỉ trọng mobile) của A, B khác nhau.",
+    "C": "Đọc sai bảng: trên desktop B đạt 22%, cao hơn A (20%)."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "A tốt hơn B vì tỉ lệ gộp 19% cao hơn 18,6%; số liệu tách theo thiết bị chỉ là nhiễu."
+    },
+    {
+     "key": "B",
+     "text": "Số liệu chắc chắn nhập sai, vì B không thể cao hơn ở từng nhóm mà thấp hơn ở số gộp."
+    },
+    {
+     "key": "C",
+     "text": "B tốt hơn trên mobile nhưng kém hơn trên desktop, nên hai biến thể ngang nhau."
+    },
+    {
+     "key": "D",
+     "text": "B cao hơn A ở cả hai thiết bị; số gộp của B thấp hơn vì B có nhiều phiên mobile hơn."
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T03-C04",
+   "module": "C",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung",
+   "prompt": "Một sàn thương mại điện tử dùng mô hình phát hiện **tài khoản gian lận** ngay khi đăng ký. Đội ML báo cáo: “mô hình đạt accuracy 98%, recall 95%, tỉ lệ dương tính giả (FPR) 2%”. Tỉ lệ tài khoản gian lận thực tế là **0,5%**; mỗi ngày có **40.000** lượt đăng ký mới. Tài khoản bị gắn cờ sẽ bị khoá chờ xác minh thủ công.\n\n(a) Trong một ngày, tính kỳ vọng số tài khoản bị gắn cờ, số tài khoản gian lận thật trong đó, và **precision** của mô hình. (2 điểm)\n\n(b) Giải thích cho quản lý sản phẩm vì sao con số “accuracy 98%” dễ gây hiểu lầm; tính accuracy của một “mô hình” luôn đoán “hợp lệ”. (2 điểm)\n\n(c) Nhóm đề xuất chỉ chạy mô hình trên các lượt đăng ký từ dải IP rủi ro, nơi tỉ lệ gian lận là **5%** (recall, FPR giữ nguyên). Tính precision trong nhóm này và nêu thêm **một** biện pháp khác để giảm số khách thật bị khoá nhầm, kèm một rủi ro của biện pháp đó. (2 điểm)",
+   "explanation": "Định hướng chấm: dựng bảng tần suất 40.000 lượt, tính TP = 190, FP = 796, precision ≈ 19,3%; so accuracy với baseline 99,5%; precision ở nhóm 5% ≈ 71,4%; biện pháp hợp lý (hai bước, xác minh nhẹ, chỉnh ngưỡng) có nêu đánh đổi.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nAccuracy và recall/FPR đều có thể “đẹp” trong khi phần lớn cảnh báo lại sai, khi lớp dương hiếm (tỉ lệ nền 0,5%). Câu hỏi đúng cho người vận hành là **precision**: trong các tài khoản bị khoá, bao nhiêu là gian lận thật.\n\n#### Cây tần suất một ngày\n```mermaid\nflowchart TD\n  N[\"40.000 đăng ký\"] -->|\"0,5%\"| F[\"200 gian lận\"]\n  N -->|\"99,5%\"| G[\"39.800 hợp lệ\"]\n  F -->|\"recall 95%\"| TP[\"190 bị gắn cờ đúng\"]\n  F -->|\"5%\"| FN[\"10 lọt lưới\"]\n  G -->|\"FPR 2%\"| FP[\"796 khách thật bị khoá\"]\n  G -->|\"98%\"| TN[\"39.004 thông qua\"]\n  TP --> FL[\"986 tài khoản bị gắn cờ\"]\n  FP --> FL\n```\n\n#### Từng bước\n- Precision $= 190/986 \\approx 19{,}3\\%$.\n- Accuracy $= (190 + 39.004)/40.000 \\approx 97{,}98\\%$; mô hình luôn đoán “hợp lệ” đạt $99{,}5\\%$.\n- Nhóm IP rủi ro ($b = 5\\%$): precision $= \\frac{0{,}0475}{0{,}0475 + 0{,}019} \\approx 71{,}4\\%$.\n\n#### Precision theo tỉ lệ nền (recall 95%, FPR 2%)\n| Tỉ lệ nền | Precision |\n|---|---|\n| 0,1% | 4,5% |\n| 0,5% | 19,3% |\n| 2% | 49,2% |\n| 5% | 71,4% |\n\n```python\nfor b in (0.001, 0.005, 0.02, 0.05):\n    print(b, round(b*0.95 / (b*0.95 + (1-b)*0.02), 3))\n```\n\n#### Bẫy thường gặp\n- Báo cáo accuracy cho bài toán mất cân bằng.\n- Quên rằng 796 khách thật bị khoá mỗi ngày là chi phí sản phẩm lớn (khiếu nại, rời bỏ).\n\n#### Đọc thêm\n- [Base rate fallacy (Wikipedia)](https://en.wikipedia.org/wiki/Base_rate_fallacy)\n- [Confusion matrix (Wikipedia)](https://en.wikipedia.org/wiki/Confusion_matrix)\n- [Accuracy, precision, recall (Google ML Crash Course)](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)",
+   "modelAnswer": "**(a)** Kỳ vọng mỗi ngày:\n\n| | Gắn cờ | Không gắn cờ | Tổng |\n|---|---|---|---|\n| Gian lận ($0{,}5\\%$) | $200 \\cdot 0{,}95 = 190$ | $10$ | $200$ |\n| Hợp lệ | $39.800 \\cdot 0{,}02 = 796$ | $39.004$ | $39.800$ |\n| Tổng | $986$ | $39.014$ | $40.000$ |\n\n$$\\text{precision} = P(\\text{gian lận} \\mid \\text{cờ}) = \\frac{0{,}005 \\cdot 0{,}95}{0{,}005 \\cdot 0{,}95 + 0{,}995 \\cdot 0{,}02} = \\frac{190}{986} \\approx 0{,}193.$$\n\nTức khoảng 4 trên 5 tài khoản bị khoá là **khách thật**: khoảng 796 người mỗi ngày.\n\n**(b)** Accuracy $= \\frac{190 + 39.004}{40.000} \\approx 98{,}0\\%$. Nhưng “mô hình” luôn trả lời “hợp lệ” có accuracy $= 39.800/40.000 = 99{,}5\\%$, cao hơn, dù không bắt được tài khoản gian lận nào. Khi lớp dương chỉ chiếm 0,5%, accuracy gần như chỉ đo khả năng đoán lớp đa số. Cần báo cáo **precision** (bao nhiêu tài khoản bị khoá là gian lận thật) và **recall** (bắt được bao nhiêu phần gian lận), kèm số người bị khoá nhầm mỗi ngày.\n\n**(c)** Với tỉ lệ nền 5%:\n$$\\text{precision} = \\frac{0{,}05 \\cdot 0{,}95}{0{,}05 \\cdot 0{,}95 + 0{,}95 \\cdot 0{,}02} = \\frac{0{,}0475}{0{,}0665} \\approx 0{,}714.$$\nCùng mô hình nhưng chạy trên nhóm có tỉ lệ nền cao hơn thì precision tăng mạnh (từ 19% lên 71%).\n\nBiện pháp khác: thay “khoá chờ xác minh” bằng **xác minh nhẹ** (OTP qua số điện thoại, giới hạn giao dịch trong 7 ngày đầu) cho tài khoản bị gắn cờ; chỉ khoá cứng khi có thêm tín hiệu thứ hai độc lập. Rủi ro: kẻ gian dùng SIM rác vượt OTP, nên recall thực tế có thể giảm; cần theo dõi tỉ lệ gian lận lọt qua. (Rủi ro của phương án IP: bỏ sót toàn bộ gian lận ngoài dải IP rủi ro, kẻ gian chuyển sang IP “sạch”.)",
+   "rubric": [
+    {
+     "criterion": "(a) Tính đúng 200 tài khoản gian lận, TP $= 190$, FP $= 39.800 \\cdot 0{,}02 = 796$, tổng gắn cờ 986, precision $\\approx 0{,}193$ (có công thức Bayes hoặc bảng tần suất).",
+     "points": 2
+    },
+    {
+     "criterion": "(b) Chỉ ra accuracy bị chi phối bởi lớp đa số; tính accuracy của mô hình luôn đoán “hợp lệ” $= 99{,}5\\%$, cao hơn 98%; nêu nên dùng precision/recall thay accuracy.",
+     "points": 2
+    },
+    {
+     "criterion": "(c) Tính precision $\\approx 0{,}714$ ở nhóm tỉ lệ nền 5%; nêu một biện pháp hợp lý (ví dụ thêm bước xác minh nhẹ như OTP thay vì khoá, nâng ngưỡng, mô hình hai tầng) và một rủi ro tương ứng (bỏ sót gian lận ngoài nhóm IP, kẻ gian đổi IP, giảm recall…).",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "id": "T03-C05",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Một client gọi API với chính sách retry: thử **tối đa 3 lần**, dừng ngay khi có một lần thành công. Mỗi lần gọi thành công với xác suất 0,8, các lần gọi độc lập. Kỳ vọng **số lần gọi** cho một request là bao nhiêu? Nhập dạng thập phân, **làm tròn 2 chữ số thập phân**.",
+   "explanation": "Gọi $N$ là số lần gọi: $E[N] = \\sum_{k \\ge 1} P(N \\ge k) = 1 + 0{,}2 + 0{,}2^2 = 1{,}24$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nVới biến đếm nhận giá trị nguyên dương, có công thức gọn: $E[N] = \\sum_{k \\ge 1} P(N \\ge k)$. Lần gọi thứ $k$ chỉ xảy ra khi $k - 1$ lần trước đều thất bại.\n\n#### Sơ đồ chính sách retry\n```mermaid\nflowchart LR\n  C1[\"Lần 1 (luôn gọi)\"] -->|\"thành công 0,8\"| OK[\"Xong\"]\n  C1 -->|\"lỗi 0,2\"| C2[\"Lần 2\"]\n  C2 -->|\"thành công 0,8\"| OK\n  C2 -->|\"lỗi 0,2\"| C3[\"Lần 3\"]\n  C3 -->|\"thành công 0,8\"| OK\n  C3 -->|\"lỗi 0,2\"| FAIL[\"Báo lỗi, xác suất 0,008\"]\n```\n\n#### Từng bước\n| $k$ | $P(N = k)$ | $P(N \\ge k)$ |\n|---|---|---|\n| 1 | 0,8 | 1 |\n| 2 | $0{,}2 \\cdot 0{,}8 = 0{,}16$ | 0,2 |\n| 3 | $0{,}2^2 = 0{,}04$ (dừng dù thành công hay không) | 0,04 |\n\n$E[N] = 1 \\cdot 0{,}8 + 2 \\cdot 0{,}16 + 3 \\cdot 0{,}04 = 1{,}24$, khớp với $1 + 0{,}2 + 0{,}04$.\n\n```python\np = 0.8\npmf = {1: p, 2: (1-p)*p, 3: (1-p)**2}\nprint(round(sum(k*v for k, v in pmf.items()), 2), round((1-p)**3, 3))   # 1.24 0.008\n```\n\nÝ nghĩa chi phí: 10.000 request phát sinh khoảng 12.400 lần gọi API (tăng 24% chi phí) và 0,8% request vẫn thất bại sau 3 lần.\n\n#### Bẫy thường gặp\n- Dùng $1/p$ của phân phối hình học không giới hạn (1,25).\n- Quên lần gọi thứ ba (1,2).\n\n#### Đọc thêm\n- [Geometric distribution (Wikipedia)](https://en.wikipedia.org/wiki/Geometric_distribution)\n- [Expected value (Wikipedia)](https://en.wikipedia.org/wiki/Expected_value)\n- [Mathematics for Machine Learning, chương 6 (mml-book)](https://mml-book.github.io/book/mml-book.pdf)",
+   "mistakes": [
+    {
+     "value": 1.25,
+     "why": "Dùng kỳ vọng phân phối hình học $1/p = 1/0{,}8 = 1{,}25$, tức retry **không giới hạn**; ở đây bị chặn tối đa 3 lần."
+    },
+    {
+     "value": 1.2,
+     "why": "Chỉ tính $1 + 0{,}2$, quên lần gọi thứ ba xảy ra khi hai lần đầu đều lỗi (xác suất $0{,}2^2 = 0{,}04$)."
+    },
+    {
+     "value": 3,
+     "why": "Lấy số lần gọi tối đa; phần lớn request thành công ngay lần đầu."
+    }
+   ],
+   "answer": 1.24,
+   "tol": 0.0051
+  },
+  {
+   "id": "T03-C06",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Mô hình chấm điểm mỗi giao dịch bằng $p$ = xác suất gian lận (đã hiệu chỉnh tốt). Gửi một giao dịch cho nhân viên review tốn **20 nghìn đồng**. Nếu giao dịch là gian lận, review chặn được **80%** thiệt hại; thiệt hại trung bình của một giao dịch gian lận là **2 triệu đồng**. Bỏ qua chi phí khác, nên gửi review khi $p$ lớn hơn ngưỡng nào để **kỳ vọng** có lợi?",
+   "explanation": "Review có lợi khi lợi ích kỳ vọng vượt chi phí: $0{,}8 \\cdot p \\cdot 2000 > 20 \\iff p > \\frac{20}{1600} = 0{,}0125$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nRa quyết định theo **kỳ vọng**: chọn hành động có giá trị kỳ vọng tốt hơn. Ngưỡng tối ưu phụ thuộc vào tỉ lệ chi phí, không phải con số 0,5 mặc định.\n\n#### Từng bước\n- Không review: thiệt hại kỳ vọng $= p \\cdot 2000$ (nghìn đồng).\n- Review: chi phí 20, thiệt hại kỳ vọng còn $p \\cdot 2000 \\cdot (1 - 0{,}8) = 400p$.\n- Review có lợi khi $20 + 400p < 2000p \\iff 1600p > 20 \\iff p > 0{,}0125$.\n\n#### Bảng kiểm tra vài mức $p$ (nghìn đồng)\n| $p$ | Không review | Review | Nên |\n|---|---|---|---|\n| 0,005 | 10 | $20 + 2 = 22$ | Không review |\n| 0,0125 | 25 | $20 + 5 = 25$ | Hoà |\n| 0,05 | 100 | $20 + 20 = 40$ | Review |\n| 0,5 | 1000 | $20 + 200 = 220$ | Review |\n\nNếu dùng ngưỡng 0,5, mọi giao dịch có $p$ từ 0,0125 đến 0,5 bị bỏ qua dù review có lãi kỳ vọng.\n\n```python\ncost, loss, catch = 20, 2000, 0.8\nprint(cost / (catch * loss))   # 0.0125\n```\n\n#### Bẫy thường gặp\n- Bỏ qua hiệu quả 80% của review (0,01).\n- Đặt sai vị trí hệ số 0,8 (0,008).\n- Ngưỡng này chỉ đúng khi $p$ đã **hiệu chỉnh** (calibrated); điểm số thô của mô hình thường không phải xác suất thật. Ngoài ra còn ràng buộc năng lực: số nhân viên review có hạn.\n\n#### Đọc thêm\n- [Decision theory (Wikipedia)](https://en.wikipedia.org/wiki/Decision_theory)\n- [Expected value (Wikipedia)](https://en.wikipedia.org/wiki/Expected_value)\n- [Mathematics for Machine Learning, chương 6 (mml-book)](https://mml-book.github.io/book/mml-book.pdf)",
+   "distractors": {
+    "B": "Bỏ qua việc review chỉ chặn được 80% thiệt hại: $20/2000 = 0{,}01$ ngầm giả định review chặn 100%.",
+    "C": "Nhân 0,8 thay vì chia: $20 \\cdot 0{,}8/2000$; lợi ích kỳ vọng là $0{,}8 \\cdot p \\cdot 2000$ nên phải chia cho $0{,}8$.",
+    "D": "Dùng ngưỡng mặc định 0,5 của bộ phân loại, bỏ qua chênh lệch rất lớn giữa chi phí review và thiệt hại gian lận."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$0{,}0125$"
+    },
+    {
+     "key": "B",
+     "text": "$0{,}01$"
+    },
+    {
+     "key": "C",
+     "text": "$0{,}008$"
+    },
+    {
+     "key": "D",
+     "text": "$0{,}5$"
+    }
+   ],
+   "answer": "A"
+  },
+  {
+   "id": "T03-C07",
+   "module": "C",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung",
+   "prompt": "Độ trễ của một endpoint xấp xỉ phân phối chuẩn $N(120,\\, 15^2)$, đơn vị ms. Đội SRE đặt SLO theo **P95**: ngưỡng mà 95% request nhanh hơn. Tính P95 của độ trễ. Đơn vị: ms, **làm tròn 1 chữ số thập phân**.",
+   "explanation": "P95 $= \\mu + z_{0{,}95}\\,\\sigma = 120 + 1{,}645 \\cdot 15 \\approx 144{,}7$ ms.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nPhân vị $q$ của $N(\\mu, \\sigma^2)$ là $x_q = \\mu + z_q\\sigma$, với $z_q = \\Phi^{-1}(q)$. P95 là phân vị **một phía**: $z_{0{,}95} \\approx 1{,}645$.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280.0\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">N(120; 15²): 95% diện tích nằm bên trái P95</text>\n<path d=\"M30.0,200.0 L30.0,199.8 L33.6,199.7 L37.3,199.6 L40.9,199.6 L44.6,199.5 L48.2,199.4 L51.9,199.3 L55.5,199.2 L59.1,199.0 L62.8,198.8 L66.4,198.6 L70.1,198.4 L73.7,198.1 L77.3,197.8 L81.0,197.4 L84.6,197.0 L88.3,196.5 L91.9,196.0 L95.6,195.4 L99.2,194.7 L102.8,193.9 L106.5,193.0 L110.1,192.1 L113.8,191.0 L117.4,189.8 L121.1,188.5 L124.7,187.1 L128.3,185.5 L132.0,183.7 L135.6,181.8 L139.3,179.8 L142.9,177.5 L146.6,175.1 L150.2,172.5 L153.8,169.7 L157.5,166.7 L161.1,163.6 L164.8,160.2 L168.4,156.6 L172.0,152.9 L175.7,149.0 L179.3,144.9 L183.0,140.6 L186.6,136.1 L190.3,131.6 L193.9,126.9 L197.5,122.1 L201.2,117.2 L204.8,112.2 L208.5,107.2 L212.1,102.2 L215.8,97.2 L219.4,92.2 L223.0,87.3 L226.7,82.6 L230.3,77.9 L234.0,73.4 L237.6,69.1 L241.3,65.0 L244.9,61.2 L248.5,57.7 L252.2,54.5 L255.8,51.6 L259.5,49.0 L263.1,46.9 L266.7,45.1 L270.4,43.8 L274.0,42.9 L277.7,42.4 L281.3,42.3 L285.0,42.7 L288.6,43.5 L292.2,44.7 L295.9,46.4 L299.5,48.4 L303.2,50.8 L306.8,53.6 L310.5,56.8 L314.1,60.2 L317.7,64.0 L321.4,68.0 L325.0,72.2 L328.7,76.6 L332.3,81.3 L336.0,86.0 L339.6,90.9 L343.2,95.8 L346.9,100.8 L350.5,105.8 L354.2,110.8 L357.8,115.8 L361.4,120.7 L365.1,125.6 L368.7,130.3 L372.4,134.9 L376.0,139.4 L379.7,143.7 L383.3,147.8 L386.9,151.8 L390.6,155.6 L394.2,159.2 L394.2,200.0 Z\" fill=\"#10b981\" opacity=\"0.45\"/>\n<path d=\"M30.0,199.8 L32.5,199.7 L35.0,199.7 L37.5,199.6 L40.0,199.6 L42.5,199.5 L45.0,199.5 L47.5,199.4 L50.0,199.3 L52.5,199.3 L55.0,199.2 L57.5,199.1 L60.0,199.0 L62.5,198.8 L65.0,198.7 L67.5,198.5 L70.0,198.4 L72.5,198.2 L75.0,198.0 L77.5,197.8 L80.0,197.5 L82.5,197.2 L85.0,196.9 L87.5,196.6 L90.0,196.3 L92.5,195.9 L95.0,195.5 L97.5,195.0 L100.0,194.5 L102.5,194.0 L105.0,193.4 L107.5,192.8 L110.0,192.1 L112.5,191.4 L115.0,190.6 L117.5,189.8 L120.0,188.9 L122.5,188.0 L125.0,186.9 L127.5,185.9 L130.0,184.7 L132.5,183.5 L135.0,182.2 L137.5,180.8 L140.0,179.3 L142.5,177.8 L145.0,176.2 L147.5,174.5 L150.0,172.7 L152.5,170.8 L155.0,168.8 L157.5,166.7 L160.0,164.6 L162.5,162.3 L165.0,160.0 L167.5,157.5 L170.0,155.0 L172.5,152.4 L175.0,149.7 L177.5,146.9 L180.0,144.1 L182.5,141.1 L185.0,138.1 L187.5,135.1 L190.0,131.9 L192.5,128.7 L195.0,125.4 L197.5,122.1 L200.0,118.8 L202.5,115.4 L205.0,112.0 L207.5,108.6 L210.0,105.1 L212.5,101.7 L215.0,98.2 L217.5,94.8 L220.0,91.4 L222.5,88.1 L225.0,84.8 L227.5,81.5 L230.0,78.3 L232.5,75.2 L235.0,72.2 L237.5,69.2 L240.0,66.4 L242.5,63.7 L245.0,61.1 L247.5,58.7 L250.0,56.3 L252.5,54.2 L255.0,52.2 L257.5,50.4 L260.0,48.7 L262.5,47.2 L265.0,45.9 L267.5,44.8 L270.0,43.9 L272.5,43.2 L275.0,42.7 L277.5,42.4 L280.0,42.3 L282.5,42.4 L285.0,42.7 L287.5,43.2 L290.0,43.9 L292.5,44.8 L295.0,45.9 L297.5,47.2 L300.0,48.7 L302.5,50.4 L305.0,52.2 L307.5,54.2 L310.0,56.3 L312.5,58.7 L315.0,61.1 L317.5,63.7 L320.0,66.4 L322.5,69.2 L325.0,72.2 L327.5,75.2 L330.0,78.3 L332.5,81.5 L335.0,84.8 L337.5,88.1 L340.0,91.4 L342.5,94.8 L345.0,98.2 L347.5,101.7 L350.0,105.1 L352.5,108.6 L355.0,112.0 L357.5,115.4 L360.0,118.8 L362.5,122.1 L365.0,125.4 L367.5,128.7 L370.0,131.9 L372.5,135.1 L375.0,138.1 L377.5,141.1 L380.0,144.1 L382.5,146.9 L385.0,149.7 L387.5,152.4 L390.0,155.0 L392.5,157.5 L395.0,160.0 L397.5,162.3 L400.0,164.6 L402.5,166.7 L405.0,168.8 L407.5,170.8 L410.0,172.7 L412.5,174.5 L415.0,176.2 L417.5,177.8 L420.0,179.3 L422.5,180.8 L425.0,182.2 L427.5,183.5 L430.0,184.7 L432.5,185.9 L435.0,186.9 L437.5,188.0 L440.0,188.9 L442.5,189.8 L445.0,190.6 L447.5,191.4 L450.0,192.1 L452.5,192.8 L455.0,193.4 L457.5,194.0 L460.0,194.5 L462.5,195.0 L465.0,195.5 L467.5,195.9 L470.0,196.3 L472.5,196.6 L475.0,196.9 L477.5,197.2 L480.0,197.5 L482.5,197.8 L485.0,198.0 L487.5,198.2 L490.0,198.4 L492.5,198.5 L495.0,198.7 L497.5,198.8 L500.0,199.0 L502.5,199.1 L505.0,199.2 L507.5,199.3 L510.0,199.3 L512.5,199.4 L515.0,199.5 L517.5,199.5 L520.0,199.6 L522.5,199.6 L525.0,199.7 L527.5,199.7 L530.0,199.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<line x1=\"30\" y1=\"200.0\" x2=\"530\" y2=\"200.0\" stroke=\"currentColor\"/>\n<line x1=\"141.1\" y1=\"200.0\" x2=\"141.1\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"141.1\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">90</text>\n<line x1=\"210.6\" y1=\"200.0\" x2=\"210.6\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"210.6\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">105</text>\n<line x1=\"280.0\" y1=\"200.0\" x2=\"280.0\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"280.0\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">120</text>\n<line x1=\"394.4\" y1=\"200.0\" x2=\"394.4\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"394.4\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">P95 ≈ 144,7</text>\n<line x1=\"488.3\" y1=\"200.0\" x2=\"488.3\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"488.3\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">165</text>\n<text x=\"280.0\" y=\"244\" text-anchor=\"middle\" fill=\"currentColor\">độ trễ (ms)</text>\n</svg>\n\n#### Từng bước\n- $z_{0{,}95} = \\Phi^{-1}(0{,}95) \\approx 1{,}6449$.\n- P95 $= 120 + 1{,}6449 \\cdot 15 \\approx 144{,}7$ ms.\n\n```python\nfrom scipy import stats\nprint(round(stats.norm.ppf(0.95, loc=120, scale=15), 1))   # 144.7\n```\n\n#### Bảng phân vị\n| Phân vị | $z$ | Độ trễ (ms) |\n|---|---|---|\n| P50 | 0 | 120,0 |\n| P84 | 1 | 135,0 |\n| P95 | 1,645 | 144,7 |\n| P97,5 | 1,96 | 149,4 |\n| P99 | 2,326 | 154,9 |\n\n#### Lưu ý thực tế\nĐộ trễ thật thường lệch phải, đuôi dài (do GC, cold start, retry), nên P95/P99 đo được từ log thường cao hơn nhiều so với $\\mu + z\\sigma$. SRE thường tính phân vị trực tiếp từ dữ liệu thay vì giả định chuẩn.\n\n#### Bẫy thường gặp\n- Dùng 1,96 (cho khoảng hai phía 95%).\n- Dùng $2\\sigma$ hay $1\\sigma$ theo thói quen.\n\n#### Đọc thêm\n- [Normal distribution (Wikipedia)](https://en.wikipedia.org/wiki/Normal_distribution)\n- [scipy.stats.norm (SciPy docs)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html)\n- [Service Level Objectives (Google SRE Book)](https://sre.google/sre-book/service-level-objectives/)",
+   "mistakes": [
+    {
+     "value": 149.4,
+     "why": "Dùng $z = 1{,}96$ (mức cho khoảng **hai phía** 95%). P95 là phân vị một phía nên $z_{0{,}95} \\approx 1{,}645$."
+    },
+    {
+     "value": 150,
+     "why": "Dùng quy tắc $2\\sigma$: $120 + 2 \\cdot 15$. Đó xấp xỉ P97,7, không phải P95."
+    },
+    {
+     "value": 135,
+     "why": "Dùng $1\\sigma$: $120 + 15 = 135$ ms, tương ứng khoảng P84."
+    }
+   ],
+   "answer": 144.7,
+   "tol": 0.15,
+   "unit": "ms"
+  },
+  {
+   "id": "T03-C08",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Một hệ thống ghi nhận trung bình **6 lỗi mỗi giờ**; thời điểm xảy ra lỗi được mô hình hoá bằng quá trình Poisson. Xác suất trong một khoảng **10 phút** bất kỳ **không có lỗi** nào là bao nhiêu?",
+   "explanation": "Số lỗi trong 10 phút $\\sim \\text{Poisson}(\\lambda = 6 \\cdot \\tfrac{10}{60} = 1)$, nên $P(X = 0) = e^{-1} \\approx 0{,}368$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nTrong quá trình Poisson với tốc độ $r$ sự kiện mỗi đơn vị thời gian, số sự kiện trong khoảng dài $t$ có phân phối $\\text{Poisson}(\\lambda = rt)$. Phải **đổi λ theo độ dài khoảng**.\n\n#### Từng bước\n- $r = 6$ lỗi/giờ, $t = 10$ phút $= 1/6$ giờ, nên $\\lambda = 6 \\cdot \\frac{1}{6} = 1$.\n- $P(X = 0) = e^{-1} \\cdot \\frac{1^0}{0!} = e^{-1} \\approx 0{,}368$.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 260\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280.0\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Số lỗi trong 10 phút ~ Poisson(1)</text>\n<line x1=\"50\" y1=\"214\" x2=\"540\" y2=\"214\" stroke=\"currentColor\"/>\n<line x1=\"50\" y1=\"34\" x2=\"50\" y2=\"214\" stroke=\"currentColor\"/>\n<rect x=\"60.5\" y=\"57.5\" width=\"49.0\" height=\"156.5\" fill=\"#10b981\" opacity=\"0.85\"/>\n<text x=\"85.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">0</text>\n<text x=\"85.0\" y=\"53.5\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.368</text>\n<rect x=\"130.5\" y=\"57.5\" width=\"49.0\" height=\"156.5\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"155.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">1</text>\n<text x=\"155.0\" y=\"53.5\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.368</text>\n<rect x=\"200.5\" y=\"135.7\" width=\"49.0\" height=\"78.3\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"225.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">2</text>\n<text x=\"225.0\" y=\"131.7\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.184</text>\n<rect x=\"270.5\" y=\"187.9\" width=\"49.0\" height=\"26.1\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"295.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">3</text>\n<text x=\"295.0\" y=\"183.9\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.061</text>\n<rect x=\"340.5\" y=\"207.5\" width=\"49.0\" height=\"6.5\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"365.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">4</text>\n<text x=\"365.0\" y=\"203.5\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.015</text>\n<rect x=\"410.5\" y=\"212.7\" width=\"49.0\" height=\"1.3\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"435.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">5</text>\n<text x=\"435.0\" y=\"208.7\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.003</text>\n<rect x=\"480.5\" y=\"213.8\" width=\"49.0\" height=\"0.2\" fill=\"#3b82f6\" opacity=\"0.85\"/>\n<text x=\"505.0\" y=\"230\" text-anchor=\"middle\" fill=\"currentColor\">6</text>\n<text x=\"505.0\" y=\"209.8\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\">0.001</text>\n<text x=\"295.0\" y=\"252\" text-anchor=\"middle\" fill=\"currentColor\">số lỗi</text>\n</svg>\n\n#### Bảng theo độ dài khoảng\n| Khoảng | $\\lambda$ | $P(\\text{không lỗi})$ |\n|---|---|---|\n| 1 phút | 0,1 | 0,905 |\n| 10 phút | 1 | 0,368 |\n| 30 phút | 3 | 0,050 |\n| 1 giờ | 6 | 0,0025 |\n\n```python\nimport math\nfor t in (1, 10, 30, 60):\n    print(t, round(math.exp(-6 * t / 60), 4))\n```\n\nLiên hệ: thời gian chờ giữa hai lỗi có phân phối mũ với trung bình $1/r = 10$ phút; $P(\\text{chờ} > 10 \\text{ phút}) = e^{-1}$, đúng bằng đáp án.\n\n#### Bẫy thường gặp\n- Dùng $\\lambda$ của cả giờ ($e^{-6}$).\n- Lấy phần bù (0,632).\n- Chia tỉ lệ tuyến tính 5/6.\n\n#### Đọc thêm\n- [Poisson point process (Wikipedia)](https://en.wikipedia.org/wiki/Poisson_point_process)\n- [Poisson distribution (Wikipedia)](https://en.wikipedia.org/wiki/Poisson_distribution)\n- [scipy.stats.poisson (SciPy docs)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.poisson.html)",
+   "distractors": {
+    "A": "Dùng $\\lambda = 6$ của cả giờ; với khoảng 10 phút phải đổi $\\lambda = 6 \\cdot \\frac{10}{60} = 1$.",
+    "B": "Đây là xác suất có **ít nhất một** lỗi, phần bù của đáp án.",
+    "D": "Lập luận “10 phút là 1/6 giờ nên xác suất có lỗi là 1/6”; số lỗi trong khoảng thời gian không phân phối theo kiểu chia đều như vậy."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$e^{-6} \\approx 0{,}0025$"
+    },
+    {
+     "key": "B",
+     "text": "$1 - e^{-1} \\approx 0{,}632$"
+    },
+    {
+     "key": "C",
+     "text": "$e^{-1} \\approx 0{,}368$"
+    },
+    {
+     "key": "D",
+     "text": "$\\frac{5}{6} \\approx 0{,}833$"
+    }
+   ],
+   "answer": "C"
+  },
+  {
+   "id": "T03-C09",
+   "module": "C",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung",
+   "prompt": "Biến thể A của trang đăng ký có tỉ lệ chuyển đổi thật là 10%. Trong một ngày có 900 người dùng vào trang (độc lập). Gọi $X$ là số người chuyển đổi. Dùng **xấp xỉ chuẩn** cho phân phối nhị thức, khoảng nào chứa $X$ với xác suất khoảng 95%?",
+   "explanation": "$X \\sim \\text{Bin}(900;\\, 0{,}1)$: $\\mu = np = 90$, $\\sigma = \\sqrt{np(1-p)} = \\sqrt{81} = 9$. Khoảng 95%: $90 \\pm 1{,}96 \\cdot 9 \\approx [72{,}4;\\ 107{,}6]$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nKhi $np$ và $n(1-p)$ đều đủ lớn (thường $\\ge 10$), $\\text{Bin}(n, p) \\approx N\\big(np,\\ np(1-p)\\big)$. Khoảng chứa khoảng 95% giá trị: $\\mu \\pm 1{,}96\\sigma$.\n\n#### Hình minh hoạ\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 560 250\" width=\"100%\" style=\"max-width:560px\" font-family=\"sans-serif\" font-size=\"13\">\n<text x=\"280.0\" y=\"20\" text-anchor=\"middle\" fill=\"currentColor\" font-weight=\"bold\">Bin(900; 0,1) ≈ N(90; 9²): khoảng 95%</text>\n<path d=\"M144.2,200.0 L144.2,176.7 L146.9,174.9 L149.6,172.9 L152.3,170.9 L155.1,168.7 L157.8,166.5 L160.5,164.1 L163.2,161.7 L165.9,159.1 L168.6,156.4 L171.4,153.6 L174.1,150.7 L176.8,147.7 L179.5,144.7 L182.2,141.5 L184.9,138.2 L187.7,134.9 L190.4,131.4 L193.1,127.9 L195.8,124.4 L198.5,120.8 L201.2,117.1 L204.0,113.4 L206.7,109.7 L209.4,106.0 L212.1,102.2 L214.8,98.5 L217.5,94.8 L220.2,91.1 L223.0,87.4 L225.7,83.9 L228.4,80.3 L231.1,76.9 L233.8,73.6 L236.5,70.3 L239.3,67.2 L242.0,64.3 L244.7,61.4 L247.4,58.7 L250.1,56.2 L252.8,53.9 L255.6,51.8 L258.3,49.8 L261.0,48.1 L263.7,46.6 L266.4,45.3 L269.1,44.2 L271.9,43.4 L274.6,42.8 L277.3,42.4 L280.0,42.3 L282.7,42.4 L285.4,42.8 L288.1,43.4 L290.9,44.2 L293.6,45.3 L296.3,46.6 L299.0,48.1 L301.7,49.8 L304.4,51.8 L307.2,53.9 L309.9,56.2 L312.6,58.7 L315.3,61.4 L318.0,64.3 L320.7,67.2 L323.5,70.3 L326.2,73.6 L328.9,76.9 L331.6,80.3 L334.3,83.9 L337.0,87.4 L339.8,91.1 L342.5,94.8 L345.2,98.5 L347.9,102.2 L350.6,106.0 L353.3,109.7 L356.0,113.4 L358.8,117.1 L361.5,120.8 L364.2,124.4 L366.9,127.9 L369.6,131.4 L372.3,134.9 L375.1,138.2 L377.8,141.5 L380.5,144.7 L383.2,147.7 L385.9,150.7 L388.6,153.6 L391.4,156.4 L394.1,159.1 L396.8,161.7 L399.5,164.1 L402.2,166.5 L404.9,168.7 L407.7,170.9 L410.4,172.9 L413.1,174.9 L415.8,176.7 L415.8,200.0 Z\" fill=\"#10b981\" opacity=\"0.45\"/>\n<path d=\"M30.0,199.8 L32.5,199.7 L35.0,199.7 L37.5,199.6 L40.0,199.6 L42.5,199.5 L45.0,199.5 L47.5,199.4 L50.0,199.3 L52.5,199.3 L55.0,199.2 L57.5,199.1 L60.0,199.0 L62.5,198.8 L65.0,198.7 L67.5,198.5 L70.0,198.4 L72.5,198.2 L75.0,198.0 L77.5,197.8 L80.0,197.5 L82.5,197.2 L85.0,196.9 L87.5,196.6 L90.0,196.3 L92.5,195.9 L95.0,195.5 L97.5,195.0 L100.0,194.5 L102.5,194.0 L105.0,193.4 L107.5,192.8 L110.0,192.1 L112.5,191.4 L115.0,190.6 L117.5,189.8 L120.0,188.9 L122.5,188.0 L125.0,186.9 L127.5,185.9 L130.0,184.7 L132.5,183.5 L135.0,182.2 L137.5,180.8 L140.0,179.3 L142.5,177.8 L145.0,176.2 L147.5,174.5 L150.0,172.7 L152.5,170.8 L155.0,168.8 L157.5,166.7 L160.0,164.6 L162.5,162.3 L165.0,160.0 L167.5,157.5 L170.0,155.0 L172.5,152.4 L175.0,149.7 L177.5,146.9 L180.0,144.1 L182.5,141.1 L185.0,138.1 L187.5,135.1 L190.0,131.9 L192.5,128.7 L195.0,125.4 L197.5,122.1 L200.0,118.8 L202.5,115.4 L205.0,112.0 L207.5,108.6 L210.0,105.1 L212.5,101.7 L215.0,98.2 L217.5,94.8 L220.0,91.4 L222.5,88.1 L225.0,84.8 L227.5,81.5 L230.0,78.3 L232.5,75.2 L235.0,72.2 L237.5,69.2 L240.0,66.4 L242.5,63.7 L245.0,61.1 L247.5,58.7 L250.0,56.3 L252.5,54.2 L255.0,52.2 L257.5,50.4 L260.0,48.7 L262.5,47.2 L265.0,45.9 L267.5,44.8 L270.0,43.9 L272.5,43.2 L275.0,42.7 L277.5,42.4 L280.0,42.3 L282.5,42.4 L285.0,42.7 L287.5,43.2 L290.0,43.9 L292.5,44.8 L295.0,45.9 L297.5,47.2 L300.0,48.7 L302.5,50.4 L305.0,52.2 L307.5,54.2 L310.0,56.3 L312.5,58.7 L315.0,61.1 L317.5,63.7 L320.0,66.4 L322.5,69.2 L325.0,72.2 L327.5,75.2 L330.0,78.3 L332.5,81.5 L335.0,84.8 L337.5,88.1 L340.0,91.4 L342.5,94.8 L345.0,98.2 L347.5,101.7 L350.0,105.1 L352.5,108.6 L355.0,112.0 L357.5,115.4 L360.0,118.8 L362.5,122.1 L365.0,125.4 L367.5,128.7 L370.0,131.9 L372.5,135.1 L375.0,138.1 L377.5,141.1 L380.0,144.1 L382.5,146.9 L385.0,149.7 L387.5,152.4 L390.0,155.0 L392.5,157.5 L395.0,160.0 L397.5,162.3 L400.0,164.6 L402.5,166.7 L405.0,168.8 L407.5,170.8 L410.0,172.7 L412.5,174.5 L415.0,176.2 L417.5,177.8 L420.0,179.3 L422.5,180.8 L425.0,182.2 L427.5,183.5 L430.0,184.7 L432.5,185.9 L435.0,186.9 L437.5,188.0 L440.0,188.9 L442.5,189.8 L445.0,190.6 L447.5,191.4 L450.0,192.1 L452.5,192.8 L455.0,193.4 L457.5,194.0 L460.0,194.5 L462.5,195.0 L465.0,195.5 L467.5,195.9 L470.0,196.3 L472.5,196.6 L475.0,196.9 L477.5,197.2 L480.0,197.5 L482.5,197.8 L485.0,198.0 L487.5,198.2 L490.0,198.4 L492.5,198.5 L495.0,198.7 L497.5,198.8 L500.0,199.0 L502.5,199.1 L505.0,199.2 L507.5,199.3 L510.0,199.3 L512.5,199.4 L515.0,199.5 L517.5,199.5 L520.0,199.6 L522.5,199.6 L525.0,199.7 L527.5,199.7 L530.0,199.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/>\n<line x1=\"30\" y1=\"200.0\" x2=\"530\" y2=\"200.0\" stroke=\"currentColor\"/>\n<line x1=\"71.7\" y1=\"200.0\" x2=\"71.7\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"71.7\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">63</text>\n<line x1=\"144.2\" y1=\"200.0\" x2=\"144.2\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"144.2\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">72,4</text>\n<line x1=\"280.0\" y1=\"200.0\" x2=\"280.0\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"280.0\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">90</text>\n<line x1=\"415.8\" y1=\"200.0\" x2=\"415.8\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"415.8\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">107,6</text>\n<line x1=\"488.3\" y1=\"200.0\" x2=\"488.3\" y2=\"205.0\" stroke=\"currentColor\"/>\n<text x=\"488.3\" y=\"219.0\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"12\">117</text>\n<text x=\"280.0\" y=\"244\" text-anchor=\"middle\" fill=\"currentColor\">số người chuyển đổi</text>\n</svg>\n\n#### Từng bước\n- $\\mu = 900 \\cdot 0{,}1 = 90$; $np = 90 \\ge 10$, $n(1-p) = 810 \\ge 10$ nên xấp xỉ chuẩn ổn.\n- $\\sigma = \\sqrt{900 \\cdot 0{,}1 \\cdot 0{,}9} = \\sqrt{81} = 9$.\n- $90 \\pm 1{,}96 \\cdot 9 = 90 \\pm 17{,}6$, tức khoảng 72 đến 108.\n\n```python\nfrom scipy import stats\nprint(stats.binom.cdf(108, 900, 0.1) - stats.binom.cdf(71, 900, 0.1))   # khoảng 0.96 (phân phối rời rạc nên hơi trên 95%)\n```\n\n#### Bảng các khoảng\n| Khoảng | Giá trị | Tỉ lệ bao phủ |\n|---|---|---|\n| $\\mu \\pm 1\\sigma$ | 81 đến 99 | khoảng 68% |\n| $\\mu \\pm 1{,}96\\sigma$ | 72 đến 108 | khoảng 95% |\n| $\\mu \\pm 3\\sigma$ | 63 đến 117 | khoảng 99,7% |\n\nÝ nghĩa A/B: dù tỉ lệ thật không đổi, số chuyển đổi mỗi ngày dao động tự nhiên trong khoảng 72 đến 108 (tức 8% đến 12%). Một ngày đạt 11,5% chưa đủ để kết luận có cải thiện.\n\n#### Bẫy thường gặp\n- Dùng độ lệch chuẩn của một người (0,3) thay vì của tổng.\n- Quên căn bậc hai (dùng 81 làm $\\sigma$).\n\n#### Đọc thêm\n- [Binomial distribution (Wikipedia)](https://en.wikipedia.org/wiki/Binomial_distribution)\n- [Central limit theorem (Wikipedia)](https://en.wikipedia.org/wiki/Central_limit_theorem)\n- [OpenIntro Statistics (sách mở miễn phí)](https://www.openintro.org/book/os/)",
+   "distractors": {
+    "A": "Dùng $\\mu \\pm 1\\sigma = 90 \\pm 9$; khoảng này chỉ chứa khoảng 68% giá trị.",
+    "C": "Dùng độ lệch chuẩn $\\sqrt{p(1-p)} = 0{,}3$ của **một** người thay vì $\\sqrt{np(1-p)} = 9$ của tổng 900 người.",
+    "D": "Lấy phương sai $np(1-p) = 81$ làm độ lệch chuẩn ($90 \\pm 1{,}96 \\cdot 81$); quên lấy căn."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "Từ khoảng 81 đến 99"
+    },
+    {
+     "key": "B",
+     "text": "Từ khoảng 72 đến 108"
+    },
+    {
+     "key": "C",
+     "text": "Từ khoảng 89,4 đến 90,6"
+    },
+    {
+     "key": "D",
+     "text": "Từ khoảng −69 đến 249"
+    }
+   ],
+   "answer": "B"
+  },
+  {
+   "id": "T03-D01",
+   "module": "D",
+   "type": "numeric",
+   "points": 3.5,
+   "level": "van-dung-cao",
+   "prompt": "Hệ thống cảnh báo sự cố của một cụm máy chủ đánh giá từng khoảng 5 phút; 0,5% số khoảng thực sự có sự cố. Detector bắt được 90% khoảng có sự cố (recall 0,9). Đội trực muốn **ít nhất 50%** số cảnh báo là sự cố thật (precision $\\ge 0{,}5$). **Độ đặc hiệu** (specificity $= 1 - \\text{FPR}$) tối thiểu của detector là bao nhiêu? Nhập dạng thập phân, **làm tròn 4 chữ số thập phân**.",
+   "explanation": "Cần $\\frac{0{,}005 \\cdot 0{,}9}{0{,}005 \\cdot 0{,}9 + 0{,}995\\,\\text{FPR}} \\ge 0{,}5 \\iff 0{,}995\\,\\text{FPR} \\le 0{,}0045 \\iff \\text{FPR} \\le 0{,}00452$, nên specificity $\\ge 0{,}99548 \\approx 0{,}9955$.",
+   "section": "a-xs",
+   "long": "#### Ý chính\nĐây là bài “đảo ngược” tỉ lệ nền: cho trước precision mong muốn, tìm FPR (hay specificity) cần đạt. Với sự cố hiếm, specificity phải **rất** cao.\n\n#### Từng bước\nĐặt $b = 0{,}005$, recall $r = 0{,}9$, $f$ = FPR.\n$$\\frac{b\\,r}{b\\,r + (1-b)f} \\ge 0{,}5 \\iff b\\,r \\ge (1-b)f \\iff f \\le \\frac{0{,}0045}{0{,}995} \\approx 0{,}004523.$$\nSpecificity $= 1 - f \\ge 0{,}995477 \\approx 0{,}9955$.\n\nTổng quát: precision $\\ge \\pi$ khi $f \\le \\frac{b\\,r}{1-b} \\cdot \\frac{1-\\pi}{\\pi}$.\n\n#### Bảng precision theo specificity (b = 0,5%, recall 0,9)\n| Specificity | FPR | Precision |\n|---|---|---|\n| 0,99 | 1% | 31,1% |\n| 0,995 | 0,5% | 47,5% |\n| 0,9955 | 0,45% | 50,1% |\n| 0,999 | 0,1% | 81,9% |\n\n```python\nb, r = 0.005, 0.9\nfor spec in (0.99, 0.995, 0.9955, 0.999):\n    f = 1 - spec\n    print(spec, round(b*r / (b*r + (1-b)*f), 3))\nprint(round(1 - b*r/(1-b), 4))   # 0.9955\n```\n\nMỗi ngày có $288$ khoảng 5 phút; với specificity 0,99 sẽ có khoảng $288 \\cdot 0{,}995 \\cdot 0{,}01 \\approx 2{,}9$ cảnh báo giả mỗi ngày, đủ gây “mệt mỏi cảnh báo” (alert fatigue).\n\n#### Bẫy thường gặp\n- Bỏ qua tỉ lệ nền (ra 0,1).\n- Đoán specificity “bằng $1 - b$” (0,995 vẫn chưa đủ: precision chỉ 47,5%).\n- Nhầm specificity với recall.\n\n#### Đọc thêm\n- [Sensitivity and specificity (Wikipedia)](https://en.wikipedia.org/wiki/Sensitivity_and_specificity)\n- [Base rate fallacy (Wikipedia)](https://en.wikipedia.org/wiki/Base_rate_fallacy)\n- [Precision and recall (Wikipedia)](https://en.wikipedia.org/wiki/Precision_and_recall)",
+   "mistakes": [
+    {
+     "value": 0.995,
+     "why": "Lấy $1 - 0{,}005$ (một trừ tỉ lệ nền) theo cảm tính; chưa giải bất phương trình precision $\\ge 0{,}5$."
+    },
+    {
+     "value": 0.1,
+     "why": "Bỏ qua tỉ lệ nền: giải $\\frac{0{,}9}{0{,}9 + \\text{FPR}} \\ge 0{,}5$ được $\\text{FPR} \\le 0{,}9$, như thể sự cố và bình thường nhiều ngang nhau."
+    },
+    {
+     "value": 0.9,
+     "why": "Nhầm độ đặc hiệu với recall 0,9; hai đại lượng đo trên hai nhóm khác nhau (bình thường và có sự cố)."
+    }
+   ],
+   "answer": 0.9955,
+   "tol": 6e-05
+  },
+  {
+   "id": "T03-D02",
+   "module": "D",
+   "type": "mcq",
+   "points": 3,
+   "level": "van-dung-cao",
+   "prompt": "Một scheduler gán **10 job** ngẫu nhiên, đồng đều và độc lập vào **5 GPU worker**. Kỳ vọng số worker **không nhận job nào** (ngồi rảnh) là bao nhiêu?",
+   "explanation": "Đặt $I_j = 1$ nếu worker $j$ rảnh, $P(I_j = 1) = (4/5)^{10}$. Theo tính tuyến tính: $E\\left[\\sum_j I_j\\right] = 5 \\cdot 0{,}8^{10} \\approx 0{,}537$ (không cần các $I_j$ độc lập).",
+   "section": "a-xs",
+   "long": "#### Ý chính\nĐếm “số worker rảnh” bằng tổng các **biến chỉ báo** $I_j$, rồi dùng **tính tuyến tính của kỳ vọng**. Các $I_j$ phụ thuộc nhau (nếu 4 worker rảnh thì worker còn lại chắc chắn bận), nhưng tính tuyến tính vẫn đúng.\n\n#### Từng bước\n- Worker $j$ rảnh khi cả 10 job đều chọn 4 worker khác: $P(I_j = 1) = (4/5)^{10} \\approx 0{,}1074$.\n- $E[\\text{số worker rảnh}] = \\sum_{j=1}^{5} E[I_j] = 5 \\cdot 0{,}1074 \\approx 0{,}537$.\n\n#### Kiểm bằng vét cạn\n```python\nimport itertools\nidle = sum(5 - len(set(a)) for a in itertools.product(range(5), repeat=10))\nprint(idle / 5**10)   # 0.53687...\n```\n\n#### Bảng theo số job\n| Số job $m$ | $5 \\cdot 0{,}8^m$ |\n|---|---|\n| 5 | 1,638 |\n| 10 | 0,537 |\n| 20 | 0,058 |\n\nVới 5 job vào 5 worker, kỳ vọng có tới 1,6 worker rảnh, tức chỉ khoảng 3,4 worker có việc: phân bổ ngẫu nhiên lãng phí GPU. Đó là lý do scheduler thực tế dùng hàng đợi hoặc “chọn worker ít tải nhất”.\n\n#### Bẫy thường gặp\n- Quên nhân 5 (0,107).\n- Lập luận “job nhiều hơn worker thì không ai rảnh” (0): đúng cho phân bổ đều tay, sai cho phân bổ ngẫu nhiên.\n- Tính nhầm số worker bận (4,463).\n\n#### Đọc thêm\n- [Balls into bins problem (Wikipedia)](https://en.wikipedia.org/wiki/Balls_into_bins_problem)\n- [Expected value (Wikipedia)](https://en.wikipedia.org/wiki/Expected_value)\n- [Independence (probability theory) (Wikipedia)](https://en.wikipedia.org/wiki/Independence_%28probability_theory%29)",
+   "distractors": {
+    "A": "Đây là xác suất **một** worker cụ thể rảnh; theo tính tuyến tính của kỳ vọng phải cộng cho cả 5 worker.",
+    "B": "Cho rằng 10 job nhiều hơn 5 worker thì không ai rảnh; nhưng phân bổ ngẫu nhiên vẫn có thể dồn nhiều job vào một worker.",
+    "C": "Đây là kỳ vọng số worker **có** việc, phần bù của đại lượng cần tìm."
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "$0{,}8^{10} \\approx 0{,}107$"
+    },
+    {
+     "key": "B",
+     "text": "$0$"
+    },
+    {
+     "key": "C",
+     "text": "$5(1 - 0{,}8^{10}) \\approx 4{,}463$"
+    },
+    {
+     "key": "D",
+     "text": "$5 \\cdot 0{,}8^{10} \\approx 0{,}537$"
+    }
+   ],
+   "answer": "D"
+  },
+  {
+   "id": "T03-D03",
+   "module": "D",
+   "type": "essay",
+   "points": 6,
+   "level": "van-dung-cao",
+   "prompt": "Một dịch vụ inference nhận request trong giờ cao điểm với trung bình **120 request/phút**; số request mỗi phút được mô hình hoá bằng phân phối Poisson. Mỗi replica xử lý được tối đa **25 request/phút**. Độ trễ của **một lần gọi mô hình** xấp xỉ $N(300,\\, 40^2)$ ms; mỗi lần gọi lỗi với xác suất **0,1%**, độc lập.\n\n(a) Dùng xấp xỉ chuẩn cho Poisson, tìm năng lực tối thiểu $C$ (request/phút, số nguyên) sao cho $P(X > C) \\le 1\\%$ với $X$ là số request trong một phút; từ đó suy ra số replica cần chạy. (2 điểm)\n\n(b) Một agent gọi mô hình **5 lần nối tiếp**, độ trễ các lần độc lập. Tính trung bình, độ lệch chuẩn của tổng độ trễ và xác suất tổng độ trễ **vượt 1,7 giây**. (2 điểm)\n\n(c) Trong một giờ cao điểm (7.200 request), số request lỗi xấp xỉ phân phối gì, với tham số nào? Cảnh báo bật khi có **từ 15 lỗi trở lên** trong giờ: tính xác suất cảnh báo bật nhầm khi hệ thống vẫn bình thường. Nêu **hai** giả định của mô hình có thể sai trong thực tế. (2 điểm)",
+   "explanation": "Định hướng chấm: (a) $\\mu = \\sigma^2 = 120$, $C \\approx 120 + 2{,}326\\sqrt{120} \\approx 146$, 6 replica; (b) tổng $\\sim N(1500, 5 \\cdot 40^2)$, $\\sigma \\approx 89{,}4$, $P \\approx 1{,}3\\%$; (c) $\\text{Bin}(7200;\\, 0{,}001) \\approx \\text{Poisson}(7{,}2)$, $P(Y \\ge 15) \\approx 0{,}007$; giả định hợp lý.",
+   "section": "tu-luan",
+   "long": "#### Ý chính\nBài kết hợp ba công cụ: (a) Poisson với $\\lambda$ lớn xấp xỉ chuẩn để lập kế hoạch năng lực; (b) cộng **phương sai** của độ trễ nối tiếp; (c) nhị thức với $n$ lớn, $p$ nhỏ xấp xỉ Poisson để đặt ngưỡng cảnh báo.\n\n#### Sơ đồ bài toán\n```mermaid\nflowchart LR\n  A[\"Request đến: Poisson 120/phút\"] --> B[\"Năng lực C: P(X lớn hơn C) ≤ 1%\"]\n  B --> C[\"Số replica = C chia 25, làm tròn lên\"]\n  A --> D[\"Agent: 5 lần gọi nối tiếp, mỗi lần N(300, 40²)\"]\n  D --> E[\"Tổng N(1500, 8000)\"]\n  A --> F[\"Lỗi: Bin(7200, 0,001) ≈ Poisson(7,2)\"]\n  F --> G[\"Ngưỡng cảnh báo 15 lỗi/giờ\"]\n```\n\n#### Từng bước\n| Phần | Công thức | Kết quả |\n|---|---|---|\n| (a) | $C = 120 + 2{,}326\\sqrt{120}$ | 145,5, chọn 146; 6 replica |\n| (b) | $\\sigma_T = \\sqrt{5} \\cdot 40$; $z = 200/89{,}4$ | 89,4 ms; $P \\approx 1{,}3\\%$ |\n| (c) | $\\lambda = 7200 \\cdot 0{,}001$; $P(Y \\ge 15)$ | 7,2; $\\approx 0{,}73\\%$ |\n\n```python\nimport math\nfrom scipy import stats\nprint(math.ceil(120 + stats.norm.ppf(0.99) * math.sqrt(120)), stats.poisson.ppf(0.99, 120))  # 146 146.0\nprint(round(stats.norm.sf(1700, 1500, math.sqrt(8000)), 4))                                # 0.0127\nprint(round(stats.poisson.sf(14, 7.2), 4), round(stats.binom.sf(14, 7200, 0.001), 4))       # 0.0073 0.0073\n```\n\n#### Bẫy thường gặp\n- Lập năng lực theo trung bình (5 replica): khoảng 30% số phút cao điểm vượt 125 request.\n- Cộng độ lệch chuẩn ($\\sigma = 200$) thay vì phương sai.\n- Quên rằng Poisson giả định request độc lập; lưu lượng thật hay đến theo đợt.\n\n#### Đọc thêm\n- [Poisson distribution (Wikipedia)](https://en.wikipedia.org/wiki/Poisson_distribution)\n- [Normal distribution (Wikipedia)](https://en.wikipedia.org/wiki/Normal_distribution)\n- [Service Level Objectives (Google SRE Book)](https://sre.google/sre-book/service-level-objectives/)",
+   "modelAnswer": "**(a)** $X \\sim \\text{Poisson}(120)$ nên $E[X] = \\operatorname{Var}(X) = 120$, $\\sigma = \\sqrt{120} \\approx 10{,}95$. Với $\\lambda$ lớn, $X \\approx N(120,\\, 120)$:\n$$C = 120 + z_{0{,}99}\\sqrt{120} \\approx 120 + 2{,}326 \\cdot 10{,}95 \\approx 145{,}5 \\;\\Rightarrow\\; C = 146 \\text{ request/phút}.$$\n(Tính chính xác bằng Poisson cho $C = 146$, khá khớp.) Số replica: $\\lceil 146 / 25 \\rceil = 6$. Chú ý: chỉ chạy $120/25 = 4{,}8 \\to 5$ replica (theo trung bình) sẽ quá tải khoảng một phút trong mỗi vài phút cao điểm, vì $P(X > 125) \\approx 0{,}3$.\n\n**(b)** Tổng $T = L_1 + \\dots + L_5$, các $L_i$ độc lập:\n$$E[T] = 5 \\cdot 300 = 1500 \\text{ ms}, \\quad \\operatorname{Var}(T) = 5 \\cdot 40^2 = 8000, \\quad \\sigma_T = \\sqrt{8000} \\approx 89{,}4 \\text{ ms}.$$\n$$P(T > 1700) = P\\left(Z > \\frac{1700 - 1500}{89{,}4}\\right) = P(Z > 2{,}24) \\approx 0{,}013.$$\nNếu cộng nhầm độ lệch chuẩn ($5 \\cdot 40 = 200$) thì $z = 1$ và ra 16%, phóng đại rủi ro hơn 10 lần.\n\n**(c)** Số lỗi $Y \\sim \\text{Bin}(7200;\\, 0{,}001)$; $n$ lớn, $p$ nhỏ nên $Y \\approx \\text{Poisson}(\\lambda = np = 7{,}2)$.\n$$P(Y \\ge 15) = 1 - \\sum_{k=0}^{14} e^{-7{,}2}\\frac{7{,}2^k}{k!} \\approx 0{,}0073.$$\nTức khoảng 0,7% số giờ cao điểm sẽ có cảnh báo nhầm dù hệ thống bình thường.\n\nGiả định có thể sai:\n- Request đến **theo đợt** (chiến dịch marketing, client retry đồng loạt) nên phương sai lớn hơn trung bình (overdispersion); Poisson đánh giá thấp đuôi, cần dư năng lực hơn hoặc autoscaling.\n- Lỗi **không độc lập**: khi nhà cung cấp gặp sự cố, lỗi đến thành chùm; độ trễ thực tế thường **lệch phải, đuôi dài**, không đối xứng như phân phối chuẩn, nên nên đặt SLO bằng phân vị đo từ log thay vì $\\mu + z\\sigma$.",
+   "rubric": [
+    {
+     "criterion": "(a) Nêu $E[X] = \\operatorname{Var}(X) = 120$, dùng $z_{0{,}99} \\approx 2{,}326$ tính $C \\approx 145{,}5 \\to 146$ request/phút và suy ra 6 replica ($\\lceil 146/25 \\rceil$).",
+     "points": 2
+    },
+    {
+     "criterion": "(b) Trung bình 1500 ms; cộng phương sai được $\\sigma = \\sqrt{5} \\cdot 40 \\approx 89{,}4$ ms (không cộng độ lệch chuẩn); $z \\approx 2{,}24$, $P \\approx 0{,}013$.",
+     "points": 2
+    },
+    {
+     "criterion": "(c) Nêu nhị thức $\\text{Bin}(7200;\\, 0{,}001)$ xấp xỉ Poisson với $\\lambda = 7{,}2$; tính $P(Y \\ge 15) \\approx 0{,}007$; nêu đúng hai giả định có thể sai (request đến theo đợt, lỗi tương quan khi sự cố, độ trễ có đuôi dài…).",
+     "points": 2
+    }
+   ]
+  }
+ ]
+}
