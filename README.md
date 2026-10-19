@@ -1,6 +1,6 @@
 # Sổ tay ĐGNL VinUni AI thực chiến
 
-Một file HTML duy nhất (`index.html`), mở là dùng được, gồm hai phần:
+Một file HTML duy nhất (`index.html`), mở là dùng được, gồm ba tab: Sổ tay, Luyện đề và **Flashcard** (272 thẻ theo 21 chủ đề, có lặp lại ngắt quãng, thẻ lấy từ `flashcards.json`).
 
 1. **Sổ tay ôn tập**: lộ trình cấp tốc 6 ngày, cấu trúc đề ĐGNL, dạng bài hay gặp, công thức, ví dụ giải từng bước và bẫy thường gặp cho 4 phần: A Toán, B Lập trình, C AI và sản phẩm, D Logic và đạo đức.
 2. **Luyện đề**: 32 bộ, 1.472 câu, có hẹn giờ. Nộp bài thì trắc nghiệm, điền số và đoán output được chấm ngay. Mỗi câu hiện đúng/sai, đáp án, cách giải, vì sao phương án sai, giải thích chi tiết và link tới mục cần ôn trong sổ tay. Câu code và tự luận tự chấm theo rubric.

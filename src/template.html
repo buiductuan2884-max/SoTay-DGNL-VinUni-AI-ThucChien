@@ -166,6 +166,16 @@ details summary{cursor:pointer;color:var(--accent);font-weight:600}
 .explain h5{font:600 14px/1.4 var(--f-body);margin:12px 0 4px}
 textarea.out{min-height:70px}
 mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}
+.fc-card{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:28px 24px;min-height:220px;cursor:pointer;display:flex;flex-direction:column;gap:14px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.fc-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.fc-front{font:600 clamp(18px,2.6vw,22px)/1.45 var(--f-body)}
+.fc-front p,.fc-back p{margin:4px 0;max-width:none}
+.fc-back{border-top:2px dashed var(--rule);padding-top:14px;font-size:17px}
+.fc-card.flipped{border-color:var(--accent)}
+.fc-hint{margin-top:auto}
+.fc-actions{display:flex;gap:10px;flex-wrap:wrap}
+.fc-actions .btn{font-size:16px;padding:12px 18px}
+#fcDecks .prac-bar{margin:8px 0}
 input.num:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (max-width:600px){.topbar{position:static}.runbar{top:env(safe-area-inset-top,0px)}.qcard{scroll-margin-top:110px}}
 </style>
@@ -175,6 +185,7 @@ input.num:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="tabs" role="tablist" aria-label="Chế độ">
     <button class="tab" role="tab" id="tab-book" aria-selected="true" data-view="book">Sổ tay</button>
     <button class="tab" role="tab" id="tab-exam" aria-selected="false" data-view="exam">Luyện đề</button>
+    <button class="tab" role="tab" id="tab-cards" aria-selected="false" data-view="cards">Flashcard</button>
   </div>
 </div></header>
 
@@ -761,6 +772,17 @@ s.mean(), s.fillna(0).mean(), s.isna().sum()</code></pre>
 </div>
 </div>
 
+<div id="view-cards" hidden>
+<div class="xwrap" id="flashcard">
+  <div class="eyebrow">Flashcard</div>
+  <h1>Thẻ ghi nhớ</h1>
+  <p class="lead">272 thẻ rút từ sổ tay, chia theo từng mục. Chọn một chủ đề hoặc "Tổng hợp". Bấm vào thẻ (hoặc phím cách) để lật. "Nhớ rồi" (phím 2) hai lần liên tiếp thì thẻ được tính là đã thuộc; "Chưa nhớ" (phím 1) thì thẻ quay lại sau vài thẻ.</p>
+  <div id="fcDecks"></div>
+  <div id="fcStage"></div>
+  <p style="margin-top:24px"><button class="btn danger" id="fcReset">Xoá tiến độ thẻ</button></p>
+</div>
+</div>
+
 <script>
 const LEVELS={"A":[11,20,30,15],"B":[17,30,37,15],"C":[26,42,39,24],"D":[9,16,19,10]};
 const EXAMS=/*EXAMS*/;
@@ -845,13 +867,13 @@ function selfScore(q,ticks){const R=rubricOf(q),tot=R.reduce((s,r)=>s+r.points,0
 
 /* ---------- views & links ---------- */
 function show(view){
-  ['book','exam'].forEach(v=>{$('view-'+v).hidden=v!==view;$('tab-'+v).setAttribute('aria-selected',String(v===view));});
+  ['book','exam','cards'].forEach(v=>{$('view-'+v).hidden=v!==view;$('tab-'+v).setAttribute('aria-selected',String(v===view));});
 }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{show(t.dataset.view);window.scrollTo(0,0);});
 function go(id,smooth){
   const el=$(id); if(!el) return false;
-  const view=el.closest('#view-exam')?'exam':'book', same=!$('view-'+view).hidden; show(view);
-  if(id==='luyen-de') window.scrollTo(0,0); else el.scrollIntoView({behavior:smooth&&same?'smooth':'auto'});
+  const view=el.closest('#view-exam')?'exam':el.closest('#view-cards')?'cards':'book', same=!$('view-'+view).hidden; show(view);
+  if(id==='luyen-de'||id==='flashcard') window.scrollTo(0,0); else el.scrollIntoView({behavior:smooth&&same?'smooth':'auto'});
   return true;
 }
 document.addEventListener('click',e=>{
@@ -1116,6 +1138,70 @@ function qcard(q,i,st){
   }
   return h+'</div>';
 }
+
+/* ---------- flashcard ---------- */
+const CARDS=/*CARDS*/;
+const FC_PARTS=[['A','Toán',['a-tile','a-dstt','a-gt','a-xs','a-tk']],['B','Code',['b-py','b-pd','b-np','b-sql','b-se']],
+  ['C','AI',['c-ml','c-metric','c-llm','c-rag','c-agent','c-ops','c-pm']],['D','Logic',['d-logic','d-eth','d-sec','tu-luan']]];
+let fcBox=load('st-cards',{}), fcDeck=load('st-cards-deck','all'), fcQueue=[], fcFlip=false, fcDone=0;
+const known=c=>(fcBox[c.id]||0)>=2;  // thuộc = bấm "Nhớ rồi" 2 lần liên tiếp
+function fcPool(deck){
+  if(deck==='all') return CARDS;
+  if(deck==='weak') return CARDS.filter(c=>c.id in fcBox&&!known(c));
+  if(deck.startsWith('part-')){const p=FC_PARTS.find(x=>x[0]===deck.slice(5));return CARDS.filter(c=>p[2].includes(c.sec));}
+  return CARDS.filter(c=>c.sec===deck);
+}
+function fcStart(deck){
+  fcDeck=deck; save('st-cards-deck',deck); fcDone=0; fcFlip=false;
+  const pool=fcPool(deck), todo=shuffled(pool.filter(c=>!known(c))), ok=shuffled(pool.filter(known));
+  fcQueue=todo.concat(ok).map(c=>c.id); fcRender();
+}
+function fcChip(deck,label){
+  const pool=fcPool(deck), k=pool.filter(known).length;
+  return '<button class="chip" data-deck="'+deck+'" aria-pressed="'+(fcDeck===deck)+'">'+esc(label)+' <span class="note">'+k+'/'+pool.length+'</span></button>';
+}
+function fcRender(){
+  const weakN=fcPool('weak').length;
+  $('fcDecks').innerHTML='<div class="prac-bar">'+fcChip('all','Tổng hợp')+(weakN?fcChip('weak','Chưa thuộc'):'')+'</div>'+
+    FC_PARTS.map(([m,name,secs])=>'<div class="prac-bar"><b style="min-width:84px">'+m+' · '+name+'</b>'+fcChip('part-'+m,'Cả phần')+secs.map(s=>fcChip(s,secTitle(s)||s)).join('')+'</div>').join('');
+  $('fcDecks').querySelectorAll('[data-deck]').forEach(b=>b.onclick=()=>fcStart(b.dataset.deck));
+  const pool=fcPool(fcDeck), st=$('fcStage');
+  if(!fcQueue.length){
+    st.innerHTML='<div class="panel"><p class="big" style="font-size:28px">Xong phiên này</p><p>Đã lướt '+fcDone+' lượt thẻ. Đã thuộc '+pool.filter(known).length+'/'+pool.length+' thẻ trong bộ.</p>'+
+      '<div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn solid" id="fcAgain">Học lại bộ này</button>'+(weakN?'<button class="btn" id="fcWeak">Ôn '+weakN+' thẻ chưa thuộc</button>':'')+'</div></div>';
+    $('fcAgain').onclick=()=>fcStart(fcDeck); if($('fcWeak')) $('fcWeak').onclick=()=>fcStart('weak');
+    return;
+  }
+  const c=CARDS.find(x=>x.id===fcQueue[0]);
+  st.innerHTML='<p class="note">Còn '+fcQueue.length+' thẻ trong phiên · Đã thuộc '+pool.filter(known).length+'/'+pool.length+' · Mục: '+esc(secTitle(c.sec)||c.sec)+'</p>'+
+    '<div class="fc-card'+(fcFlip?' flipped':'')+'" id="fcCard" role="button" tabindex="0" aria-label="Lật thẻ">'+
+      '<div class="fc-front">'+md(c.front)+'</div>'+
+      (fcFlip?'<div class="fc-back">'+md(c.back)+'<p class="note"><a href="#'+c.sec+'">Xem trong sổ tay</a></p></div>':'<p class="note fc-hint">Bấm vào thẻ hoặc phím cách để xem đáp án</p>')+
+    '</div>'+
+    '<div class="fc-actions">'+(fcFlip?'<button class="btn danger" id="fcNo">Chưa nhớ <span class="note">(1)</span></button><button class="btn solid" id="fcYes">Nhớ rồi <span class="note">(2)</span></button>':'<button class="btn solid" id="fcShow">Lật thẻ</button>')+
+    '<button class="btn" id="fcSkip">Bỏ qua</button></div>';
+  $('fcCard').onclick=e=>{if(!e.target.closest('a'))fcTurn();};
+  if($('fcShow')) $('fcShow').onclick=fcTurn;
+  if($('fcYes')) $('fcYes').onclick=()=>fcGrade(true);
+  if($('fcNo')) $('fcNo').onclick=()=>fcGrade(false);
+  $('fcSkip').onclick=()=>{fcQueue.push(fcQueue.shift());fcFlip=false;fcRender();};
+  paint(st);
+}
+function fcTurn(){fcFlip=!fcFlip;fcRender();}
+function fcGrade(ok){
+  const id=fcQueue.shift(); fcDone++;
+  fcBox[id]=ok?Math.min((fcBox[id]||0)+1,3):0; save('st-cards',fcBox);
+  if(!ok||fcBox[id]<2) fcQueue.splice(Math.min(ok?6:3,fcQueue.length),0,id);  // chưa thuộc thì gặp lại sau vài thẻ
+  fcFlip=false; fcRender();
+}
+document.addEventListener('keydown',e=>{
+  if($('view-cards').hidden||!fcQueue.length||e.target.closest('input,textarea,select')) return;
+  if(e.key===' '||e.key==='Enter'){if(e.target.closest('a,button:not(#fcCard)'))return;e.preventDefault();fcTurn();}
+  else if(fcFlip&&e.key==='1') fcGrade(false);
+  else if(fcFlip&&e.key==='2') fcGrade(true);
+});
+$('fcReset').onclick=e=>{const b=e.target;if(b.dataset.armed){fcBox={};save('st-cards',fcBox);b.dataset.armed='';b.textContent='Xoá tiến độ thẻ';fcStart(fcDeck);}else{b.dataset.armed='1';b.textContent='Bấm lần nữa để xoá';}};
+fcStart(fcPool(fcDeck).length?fcDeck:'all');
 
 /* ---------- khởi động ---------- */
 renderHome();

@@ -1,0 +1,1362 @@
+[
+ {
+  "sec": "a-tile",
+  "front": "Công thức % thay đổi?",
+  "back": "**(mới − cũ) / cũ**. Luôn chia cho giá **cũ**. 80 → 92: 12/80 = 15%."
+ },
+ {
+  "sec": "a-tile",
+  "front": "Giảm 30% rồi giảm tiếp 10%: tổng giảm bao nhiêu?",
+  "back": "Nhân hệ số: 0,7 × 0,9 = 0,63 → giảm **37%**, không phải 40%."
+ },
+ {
+  "sec": "a-tile",
+  "front": "Tỉ lệ lỗi 4% xuống 3%: giảm bao nhiêu?",
+  "back": "Giảm **1 điểm %**, tương đương giảm **tương đối 25%** (1/4)."
+ },
+ {
+  "sec": "a-tile",
+  "front": "Trung bình có trọng số?",
+  "back": "**Σ wᵢxᵢ / Σ wᵢ**. 70 (30%) và 90 (70%) → 21 + 63 = 84."
+ },
+ {
+  "sec": "a-tile",
+  "front": "Chia tổng T theo tỉ lệ a : b, phần a bằng?",
+  "back": "**T · a / (a + b)**. Tỉ lệ 3 : 5, tổng 40 → 15 và 25."
+ },
+ {
+  "sec": "a-tile",
+  "front": "Công thức ROI?",
+  "back": "**(lợi ích − chi phí) / chi phí**. Lợi ích 1,5 tỷ, chi phí 1 tỷ → 50%."
+ },
+ {
+  "sec": "a-tile",
+  "front": "Thời gian hoàn vốn?",
+  "back": "**chi phí ban đầu / (lợi ích tháng − vận hành tháng)**. 480tr / (60 − 20) = 12 tháng."
+ },
+ {
+  "sec": "a-tile",
+  "front": "Điểm hoà vốn (số lượt)?",
+  "back": "**chi phí cố định / (giá − chi phí biến đổi mỗi lượt)**."
+ },
+ {
+  "sec": "a-tile",
+  "front": "Chi phí gọi LLM mỗi request?",
+  "back": "**(token_vào × giá_vào + token_ra × giá_ra) / 10⁶**, rồi nhân số request."
+ },
+ {
+  "sec": "a-tile",
+  "front": "Công thức RICE?",
+  "back": "**Reach × Impact × Confidence / Effort**. Điểm cao làm trước."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Tích vô hướng u·v?",
+  "back": "**Σ uᵢvᵢ**, ra một **số**. Bằng 0 → hai vector trực giao."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Chuẩn L2 và L1 của (3, 4)?",
+  "back": "L2 = √(9 + 16) = **5**. L1 = |3| + |4| = **7**."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Cosine similarity?",
+  "back": "**u·v / (‖u‖·‖v‖)**. Nhân vector với số dương thì cosine **không đổi**, tích vô hướng thì đổi."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Vector đã chuẩn hoá: liên hệ khoảng cách và cosine?",
+  "back": "**‖u − v‖² = 2 − 2cos(u, v)** → xếp theo khoảng cách tăng = xếp theo cosine giảm."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Kích thước tích (m×n)·(n×p)?",
+  "back": "**m × p**. Phần tử (i, j) = hàng i của A · cột j của B. Và (AB)ᵀ = BᵀAᵀ."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Định thức 2×2 `[[a, b], [c, d]]`?",
+  "back": "**ad − bc**. Bằng 0 → ma trận **không khả nghịch**."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "det(kA) với A cỡ n×n?",
+  "back": "**kⁿ · det A**. A 3×3, det A = 5 → det(2A) = 8·5 = 40. det(Aᵀ) = det A."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Nghịch đảo 2×2 `[[a, b], [c, d]]`?",
+  "back": "**1/(ad − bc) · [[d, −b], [−c, a]]**: đổi chỗ đường chéo chính, đổi dấu đường chéo phụ."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Trị riêng ma trận 2×2 tính nhanh?",
+  "back": "Nghiệm của **λ² − (vết)·λ + det = 0**. Tổng trị riêng = vết, tích = định thức."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Trị riêng của ma trận tam giác?",
+  "back": "Chính là các phần tử **trên đường chéo**."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Kiểm tra v có phải vector riêng của A?",
+  "back": "Tính **Av**: nếu Av = λv (cùng hướng v) thì đúng, λ là trị riêng."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Tỉ lệ phương sai giữ lại khi giữ k thành phần SVD?",
+  "back": "**Σσᵢ² (top k) / Σσᵢ²**. Nhớ **bình phương** σ. Với trị riêng hiệp phương sai thì dùng λ trực tiếp."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Hạng của ma trận từ SVD?",
+  "back": "**Số giá trị kỳ dị khác 0**. Giá trị kỳ dị của X = √(trị riêng của XᵀX)."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "`nn.Linear(768, 512)` với batch (32, 768) ra shape gì?",
+  "back": "W có shape 512×768, đầu ra **(32, 512)**. Số tham số = 768·512 + 512."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "Số tham số LoRA hạng r cho ma trận d×k?",
+  "back": "**r·(d + k)**. d = k = 1024, r = 8 → 16.384."
+ },
+ {
+  "sec": "a-dstt",
+  "front": "PC1 trong PCA là gì?",
+  "back": "Vector riêng ứng với **trị riêng lớn nhất** của ma trận hiệp phương sai: hướng có phương sai lớn nhất."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Đạo hàm xⁿ, eˣ, ln x?",
+  "back": "n·xⁿ⁻¹; eˣ; 1/x."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Quy tắc chuỗi?",
+  "back": "**[f(g(x))]' = f'(g(x))·g'(x)**. ((3x − 1)²)' = 2(3x − 1)·**3**."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Đạo hàm sigmoid?",
+  "back": "**σ'(z) = σ(z)(1 − σ(z))**, lớn nhất 0,25 tại z = 0 → mạng sâu dùng sigmoid dễ **tiêu biến gradient**."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Gradient chỉ hướng nào?",
+  "back": "Hướng hàm **tăng nhanh nhất**, độ dốc = ‖∇f‖. GD đi **ngược** gradient."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Công thức một bước gradient descent?",
+  "back": "**w ← w − η·∇L(w)**. Nhớ dấu trừ."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Loss tăng vọt rồi ra NaN khi train?",
+  "back": "**Learning rate quá lớn**. Với hàm bậc hai, hội tụ khi η < 2/λ_max của Hessian."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Loss zig-zag theo một trục, chậm theo trục kia?",
+  "back": "Dùng **momentum** hoặc **Adam**: thành phần dao động triệt tiêu, thành phần đúng hướng cộng dồn."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Adam chia cho (1 − βᵗ) để làm gì?",
+  "back": "**Bias correction**: bù việc m và v khởi tạo bằng 0 nên bị lệch về 0 ở các bước đầu."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Softmax của logits (ln 3, 0, ln 2)?",
+  "back": "e^(ln a) = a → (3, 1, 2)/6 = (0,5; 0,17; 0,33)."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Temperature T làm gì với softmax?",
+  "back": "Chia logits cho T. **T tăng → phân phối phẳng hơn**, T giảm → nhọn hơn."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Gradient của softmax + cross-entropy theo logits?",
+  "back": "**p − y** (xác suất dự đoán trừ one-hot nhãn)."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Cross-entropy của một mẫu?",
+  "back": "**−ln(p của lớp đúng)**."
+ },
+ {
+  "sec": "a-gt",
+  "front": "MSE, MAE, RMSE?",
+  "back": "MSE = TB (y − ŷ)². MAE = TB |y − ŷ|. RMSE = √MSE, luôn **RMSE ≥ MAE**."
+ },
+ {
+  "sec": "a-gt",
+  "front": "Hessian có trị riêng trái dấu tại điểm gradient = 0?",
+  "back": "Đó là **điểm yên ngựa** (saddle point), không phải cực tiểu."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Xác suất có điều kiện P(A|B)?",
+  "back": "**P(A ∩ B) / P(B)**."
+ },
+ {
+  "sec": "a-xs",
+  "front": "P(A ∪ B)?",
+  "back": "**P(A) + P(B) − P(A ∩ B)**."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Hai biến cố độc lập khi nào?",
+  "back": "**P(A ∩ B) = P(A)·P(B)**. Xung khắc (có xác suất > 0) thì **không** độc lập."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Xác suất ít nhất một lần xảy ra trong n lần độc lập?",
+  "back": "**1 − (1 − p)ⁿ**. Mọi bước đều thành công: **pⁿ** (0,95¹⁰ ≈ 0,60)."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Mẹo giải bài Bayes 'tỉ lệ nền'?",
+  "back": "Tưởng tượng **10.000 người**, đếm dương thật và dương giả, rồi lấy dương thật / tổng dương."
+ },
+ {
+  "sec": "a-xs",
+  "front": "1% gian lận, bắt 90%, báo nhầm 5%. P(gian lận | bị cảnh báo)?",
+  "back": "100 → 90 bắt được; 9.900 → 495 báo nhầm. 90/585 ≈ **15%**. Tỉ lệ nền thấp → precision thấp."
+ },
+ {
+  "sec": "a-xs",
+  "front": "E[aX + b] và Var(aX + b)?",
+  "back": "E = **a·E[X] + b**. Var = **a²·Var(X)** (hằng số b không ảnh hưởng)."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Phương sai từ kỳ vọng?",
+  "back": "**Var = E[X²] − (E[X])²**."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Cộng hai biến độc lập: cộng gì?",
+  "back": "Cộng **phương sai**, không cộng độ lệch chuẩn. SD 3 và 4 → SD tổng = 5."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Phân phối nhị thức?",
+  "back": "**C(n,k)·pᵏ(1−p)ⁿ⁻ᵏ**. Kỳ vọng np, phương sai np(1 − p)."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Phân phối Poisson λ?",
+  "back": "**P(k) = e⁻λ·λᵏ/k!**. Kỳ vọng = phương sai = λ. 6 lỗi/giờ = 1 lỗi/10 phút → P(0) = e⁻¹ ≈ 0,368."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Quy tắc 68–95–99,7?",
+  "back": "Trong ±1σ, ±2σ, ±3σ quanh trung bình chuẩn có ~68%, 95%, 99,7%. P95 một phía = **μ + 1,645σ**."
+ },
+ {
+  "sec": "a-xs",
+  "front": "Tổ hợp C(n, k)?",
+  "back": "**n! / (k!(n − k)!)**. C(10, 3) = 120."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Báo trung vị hay trung bình khi dữ liệu có ngoại lai?",
+  "back": "**Trung vị** (và các phân vị). Trung bình bị ngoại lai kéo lệch."
+ },
+ {
+  "sec": "a-tk",
+  "front": "p95 = 820 ms nghĩa là gì?",
+  "back": "Khoảng **95% request xong trong ≤ 820 ms**, 5% còn lại chậm hơn."
+ },
+ {
+  "sec": "a-tk",
+  "front": "pandas `.var()` và NumPy `np.var` khác gì?",
+  "back": "pandas mặc định **ddof = 1** (chia n − 1), NumPy mặc định **ddof = 0** (chia n)."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Sai số chuẩn của trung bình?",
+  "back": "**s / √n**. Tăng n gấp 4 → SE giảm một nửa."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Sai số chuẩn của một tỉ lệ?",
+  "back": "**√(p(1 − p)/n)**. p = 0,2, n = 400 → 0,02."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Khoảng tin cậy 95%?",
+  "back": "**ước lượng ± 1,96·SE**. Chứa 0 → chưa kết luận được. CI 99% rộng hơn ~1,31 lần."
+ },
+ {
+  "sec": "a-tk",
+  "front": "p-value là gì?",
+  "back": "Xác suất thấy kết quả cực đoan như vậy **nếu H₀ đúng**. Không phải xác suất H₀ đúng."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Sai lầm loại I, loại II, power?",
+  "back": "Loại I = **dương tính giả** (α). Loại II = âm tính giả. Power = 1 − P(loại II)."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Cỡ mẫu phụ thuộc MDE thế nào?",
+  "back": "Tỉ lệ với **1/MDE²**: MDE giảm một nửa → cần **gấp 4** mẫu. Nhanh: n/nhóm ≈ 16·p(1−p)/δ²."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Kiểm định 20 chỉ số ở mức 0,05, không có tác động thật?",
+  "back": "P(ít nhất 1 dương tính giả) = 1 − 0,95²⁰ ≈ **64%**. Bonferroni: dùng α/k."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Peeking là gì, vì sao sai?",
+  "back": "Xem p-value mỗi ngày và dừng khi p < 0,05 → **dương tính giả tăng mạnh**. Phải chốt cỡ mẫu trước."
+ },
+ {
+  "sec": "a-tk",
+  "front": "SRM là gì?",
+  "back": "Sample Ratio Mismatch: chia 50/50 mà ra lệch có ý nghĩa (kiểm định χ²) → **không tin kết quả** A/B."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Kiểm định z hai tỉ lệ?",
+  "back": "**z = (p_B − p_A)/SE** với SE dùng tỉ lệ gộp. |z| > 1,96 → có ý nghĩa ở mức 5%."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Nghịch lý Simpson?",
+  "back": "Xu hướng trong từng nhóm **đảo chiều** khi gộp lại, do tỉ trọng các nhóm khác nhau."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Guardrail metric là gì?",
+  "back": "Chỉ số **không được xấu đi** khi thử nghiệm (độ trễ, lỗi, khiếu nại), khai báo trước."
+ },
+ {
+  "sec": "a-tk",
+  "front": "Novelty effect?",
+  "back": "Hiệu ứng tăng mạnh lúc đầu rồi **giảm dần** theo tuần vì người dùng tò mò cái mới."
+ },
+ {
+  "sec": "b-py",
+  "front": "`a = [1,2,3,4,5,6]; a[1:5:2]`?",
+  "back": "**[2, 4]**. [đầu:cuối:bước], không lấy phần tử ở vị trí cuối."
+ },
+ {
+  "sec": "b-py",
+  "front": "`def f(x, ds=[])` gọi f(1), f(2) ra gì?",
+  "back": "**[1, 2]**: list mặc định tạo **một lần** khi def. Sửa: `ds=None`."
+ },
+ {
+  "sec": "b-py",
+  "front": "`g = [[0]*2]*3; g[0][0] = 9`?",
+  "back": "**[[9,0],[9,0],[9,0]]**: ba hàng là cùng một list. Dùng list comprehension."
+ },
+ {
+  "sec": "b-py",
+  "front": "`b = a` khác `a[:]` / `a.copy()` thế nào?",
+  "back": "`b = a` chỉ là **tên khác**. `a[:]`, `.copy()` là bản sao **nông** (list lồng vẫn dùng chung)."
+ },
+ {
+  "sec": "b-py",
+  "front": "`7 // 2, -7 // 2, -7 % 3`?",
+  "back": "**3, −4, 2**. `//` làm tròn **xuống** (về âm vô cùng)."
+ },
+ {
+  "sec": "b-py",
+  "front": "`\" a  b \".split()` và `.split(\" \")`?",
+  "back": "`['a', 'b']` và `['', 'a', '', 'b', '']`. Không tham số thì gộp khoảng trắng, bỏ chuỗi rỗng."
+ },
+ {
+  "sec": "b-py",
+  "front": "`d.get('x')` khi không có khoá?",
+  "back": "Trả **None** (hoặc giá trị mặc định nếu truyền). `d['x']` thì **KeyError**."
+ },
+ {
+  "sec": "b-py",
+  "front": "`g = (x for x in [1,2,3]); sum(g), sum(g)`?",
+  "back": "**6, 0**. Generator chỉ duyệt được **một lần**."
+ },
+ {
+  "sec": "b-py",
+  "front": "`[lambda: i for i in range(3)]` gọi từng hàm?",
+  "back": "**[2, 2, 2]**: lambda đọc i lúc gọi. Sửa: `lambda i=i: i`."
+ },
+ {
+  "sec": "b-py",
+  "front": "`try: return 'a'` / `finally: print('b')`?",
+  "back": "In **b trước**, rồi mới trả 'a'. finally luôn chạy."
+ },
+ {
+  "sec": "b-py",
+  "front": "`dict.fromkeys(['x','y'], [])` rồi append vào x?",
+  "back": "Cả x và y đều đổi: mọi khoá **dùng chung một list**."
+ },
+ {
+  "sec": "b-py",
+  "front": "Thuộc tính lớp `items = []` dùng chung không?",
+  "back": "Có: mọi instance **dùng chung**. Tạo list trong `__init__`."
+ },
+ {
+  "sec": "b-py",
+  "front": "`@dataclass` với `tags: list = []`?",
+  "back": "**ValueError** khi định nghĩa lớp. Dùng `field(default_factory=list)`."
+ },
+ {
+  "sec": "b-py",
+  "front": "`t = ([1], 2); t[0] += [3]`?",
+  "back": "Báo **TypeError** nhưng list vẫn bị sửa thành [1, 3]."
+ },
+ {
+  "sec": "b-py",
+  "front": "`f\"{1234567:,} {0.0456:.1%}\"`?",
+  "back": "**1,234,567 4.6%**."
+ },
+ {
+  "sec": "b-py",
+  "front": "`sorted(['cam','Tao','bo'])`?",
+  "back": "**['Tao', 'bo', 'cam']**: chữ hoa đứng trước chữ thường."
+ },
+ {
+  "sec": "b-py",
+  "front": "Kiểu nào làm được khoá dict?",
+  "back": "Bất biến: **int, float, str, tuple, frozenset, bool**. list, dict, set thì không."
+ },
+ {
+  "sec": "b-py",
+  "front": "`re.match` khác `re.search`?",
+  "back": "`match` chỉ khớp **từ đầu chuỗi**; `search` tìm ở bất kỳ đâu. `.*` tham lam; `?` phải escape thành `\\?`."
+ },
+ {
+  "sec": "b-py",
+  "front": "`{**a, **b}` khi trùng khoá?",
+  "back": "Giá trị của **b** (bên phải) thắng."
+ },
+ {
+  "sec": "b-pd",
+  "front": "Lọc hai điều kiện trong pandas?",
+  "back": "`df[(df.a > 1) & (df.b == 'HN')]`: dùng **& | ~** và **bắt buộc ngoặc**. `and` sẽ lỗi."
+ },
+ {
+  "sec": "b-pd",
+  "front": "`loc` khác `iloc`?",
+  "back": "`loc` theo **nhãn**, **lấy cả** điểm cuối. `iloc` theo **vị trí**, không lấy điểm cuối."
+ },
+ {
+  "sec": "b-pd",
+  "front": "`groupby().size()` khác `.count()`?",
+  "back": "`size` đếm **mọi dòng** (cả NaN). `count` **bỏ NaN**."
+ },
+ {
+  "sec": "b-pd",
+  "front": "`transform('sum')` khác `agg('sum')`?",
+  "back": "`transform` trả Series **dài bằng bảng gốc**; `agg` thu gọn mỗi nhóm một dòng."
+ },
+ {
+  "sec": "b-pd",
+  "front": "Kiểm tra NaN đúng cách?",
+  "back": "`s.isna()`. Còn `s == np.nan` **luôn False**."
+ },
+ {
+  "sec": "b-pd",
+  "front": "`mean()` với NaN? `fillna(0).mean()`?",
+  "back": "`mean` **bỏ qua NaN**. Điền 0 rồi tính làm trung bình **thấp sai**."
+ },
+ {
+  "sec": "b-pd",
+  "front": "groupby khi khoá là NaN?",
+  "back": "Mặc định **bỏ** các dòng có khoá NaN (`dropna=True`)."
+ },
+ {
+  "sec": "b-pd",
+  "front": "merge khi bảng phải trùng khoá?",
+  "back": "Số dòng **bị nhân lên**. Phòng bằng `validate='m:1'` hoặc khử trùng trước."
+ },
+ {
+  "sec": "b-pd",
+  "front": "merge khi hai bảng có cột trùng tên?",
+  "back": "Thêm hậu tố **_x**, **_y**."
+ },
+ {
+  "sec": "b-pd",
+  "front": "Tính tỉ lệ chuyển đổi mà merge inner với bảng 'đã mua'?",
+  "back": "Sai: inner join **mất mẫu số**. Dùng `how='left'` từ bảng toàn bộ người dùng."
+ },
+ {
+  "sec": "b-pd",
+  "front": "`pd.concat` giữ index cũ không?",
+  "back": "Có (0,1,2,0,1). Dùng `ignore_index=True`."
+ },
+ {
+  "sec": "b-pd",
+  "front": "Cột số có NaN ép sang int?",
+  "back": "`astype(int)` **lỗi**. Dùng `astype('Int64')` (nullable)."
+ },
+ {
+  "sec": "b-pd",
+  "front": "Giữ bản ghi mới nhất mỗi mã?",
+  "back": "`sort_values('ts').drop_duplicates('ma', keep='last')`."
+ },
+ {
+  "sec": "b-pd",
+  "front": "Đếm tần suất giá trị?",
+  "back": "`df['col'].value_counts()` (mặc định **bỏ NaN**). Đếm thiếu mỗi cột: `df.isna().sum()`."
+ },
+ {
+  "sec": "b-pd",
+  "front": "Tính cột mới nhanh trên 5 triệu dòng?",
+  "back": "**Vector hoá**: `df.a * df.b`, không dùng `apply(lambda r: ...)`."
+ },
+ {
+  "sec": "b-pd",
+  "front": "`pivot` khác `pivot_table`?",
+  "back": "`pivot` **lỗi** nếu cặp khoá trùng; `pivot_table` gộp được (aggfunc)."
+ },
+ {
+  "sec": "b-np",
+  "front": "`a.sum(axis=0)` với a shape (3, 4)?",
+  "back": "Shape **(4,)**: axis được ghi thì chiều đó biến mất (gộp theo hàng, còn mỗi cột một giá trị)."
+ },
+ {
+  "sec": "b-np",
+  "front": "Quy tắc broadcasting?",
+  "back": "So shape **từ phải sang trái**: từng cặp chiều bằng nhau hoặc một bên bằng 1. (3,1)+(4,) → (3,4)."
+ },
+ {
+  "sec": "b-np",
+  "front": "(2, 3) − (2,) có broadcast được không?",
+  "back": "**Không** (3 ≠ 2). Sửa: `keepdims=True` hoặc `[:, None]`."
+ },
+ {
+  "sec": "b-np",
+  "front": "Slice NumPy là view hay copy?",
+  "back": "**View**: sửa slice là sửa mảng gốc. Fancy index `a[[0,2]]` và mask thì **copy**."
+ },
+ {
+  "sec": "b-np",
+  "front": "Chuẩn hoá từng hàng về độ dài 1?",
+  "back": "`E / np.linalg.norm(E, axis=1, keepdims=True)`."
+ },
+ {
+  "sec": "b-np",
+  "front": "Đếm và tính tỉ lệ phần tử thoả điều kiện?",
+  "back": "`(x > 0.8).sum()` và `(x >= 400).mean()`."
+ },
+ {
+  "sec": "b-np",
+  "front": "Bộ nhớ ma trận 500.000 × 768 float32?",
+  "back": "500.000 × 768 × 4 byte ≈ **1,54 GB**."
+ },
+ {
+  "sec": "b-np",
+  "front": "Hai vòng lồng nhau, kể cả `range(i)`?",
+  "back": "**O(n²)** (n(n−1)/2 vẫn là n²)."
+ },
+ {
+  "sec": "b-np",
+  "front": "Vòng chia đôi `i //= 2`?",
+  "back": "**O(log n)**. log₂(10⁶) ≈ 20."
+ },
+ {
+  "sec": "b-np",
+  "front": "Vòng chia đôi bọc ngoài vòng n?",
+  "back": "**O(n log n)**."
+ },
+ {
+  "sec": "b-np",
+  "front": "`x in list` vs `x in set`?",
+  "back": "list **O(n)**, set/dict **O(1)** trung bình. Đổi sang set trước vòng lặp."
+ },
+ {
+  "sec": "b-np",
+  "front": "`list.pop(0)` và `insert(0, x)`?",
+  "back": "**O(n)** mỗi lần. Dùng `collections.deque`."
+ },
+ {
+  "sec": "b-np",
+  "front": "Đệ quy `f(n-1) + f(n-1)`?",
+  "back": "**O(2ⁿ)**."
+ },
+ {
+  "sec": "b-np",
+  "front": "`heapq.nlargest(k, xs)`?",
+  "back": "**O(n log k)**, nhanh hơn sort O(n log n) khi k nhỏ."
+ },
+ {
+  "sec": "b-np",
+  "front": "Big-O của 4n log n + 0,5n^1,5 + 200?",
+  "back": "Giữ hạng tử lớn nhất: **O(n^1,5)**."
+ },
+ {
+  "sec": "b-sql",
+  "front": "Thứ tự xử lý logic của SQL?",
+  "back": "**FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT**."
+ },
+ {
+  "sec": "b-sql",
+  "front": "Điều kiện trên SUM/COUNT đặt ở đâu?",
+  "back": "**HAVING** (sau GROUP BY). WHERE lọc trước khi gộp."
+ },
+ {
+  "sec": "b-sql",
+  "front": "So sánh với NULL?",
+  "back": "`= NULL` không bao giờ đúng → dùng **IS NULL**. `status <> 'closed'` cũng **loại** dòng NULL."
+ },
+ {
+  "sec": "b-sql",
+  "front": "COUNT(*) khác COUNT(col)?",
+  "back": "`COUNT(*)` đếm **mọi dòng**; `COUNT(col)` **bỏ NULL**."
+ },
+ {
+  "sec": "b-sql",
+  "front": "SUM trên 0 dòng trả gì?",
+  "back": "**NULL**. Dùng `COALESCE(SUM(x), 0)`."
+ },
+ {
+  "sec": "b-sql",
+  "front": "`NOT IN` với danh sách có NULL?",
+  "back": "Trả **0 dòng**. Dùng `NOT EXISTS`."
+ },
+ {
+  "sec": "b-sql",
+  "front": "LEFT JOIN mà điều kiện bảng phải nằm trong WHERE?",
+  "back": "Thành **INNER JOIN** (mất dòng bảng trái). Đưa điều kiện vào **ON**."
+ },
+ {
+  "sec": "b-sql",
+  "front": "Tìm khách chưa có đơn?",
+  "back": "`LEFT JOIN orders o ON ... WHERE o.id IS NULL`."
+ },
+ {
+  "sec": "b-sql",
+  "front": "CROSS JOIN 3 dòng × 4 dòng?",
+  "back": "**12 dòng**."
+ },
+ {
+  "sec": "b-sql",
+  "front": "ROW_NUMBER, RANK, DENSE_RANK với 90, 85, 85, 80?",
+  "back": "1,2,3,4 · 1,2,2,**4** · 1,2,2,**3**."
+ },
+ {
+  "sec": "b-sql",
+  "front": "Lấy đơn lớn nhất mỗi khách?",
+  "back": "`ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC)` rồi lọc **rn = 1** ở truy vấn ngoài."
+ },
+ {
+  "sec": "b-sql",
+  "front": "`SELECT 1/7` trong SQL?",
+  "back": "**0** (chia số nguyên). Nhân 1.0 trước."
+ },
+ {
+  "sec": "b-sql",
+  "front": "EXPLAIN khác EXPLAIN ANALYZE?",
+  "back": "`EXPLAIN ANALYZE` **chạy thật** câu lệnh và in thời gian thực tế."
+ },
+ {
+  "sec": "b-se",
+  "front": "Code review: nên chặn điều gì, góp ý điều gì?",
+  "back": "**Chặn**: lỗi đúng sai, bảo mật (SQL ghép chuỗi), thiếu test. Tên biến chưa hay → ghi **Nit:** và vẫn approve."
+ },
+ {
+  "sec": "b-se",
+  "front": "PR 1.800 dòng gồm đổi tên + refactor + tính năng?",
+  "back": "Đề nghị **tách** thành các PR nhỏ, review và revert riêng."
+ },
+ {
+  "sec": "b-se",
+  "front": "Test thỉnh thoảng đỏ vì gọi `datetime.now()`?",
+  "back": "**Truyền thời điểm vào** làm tham số (inject đồng hồ)."
+ },
+ {
+  "sec": "b-se",
+  "front": "Test dùng `sleep(2)` thỉnh thoảng fail?",
+  "back": "Thay bằng **chờ có điều kiện** (poll đến khi có kết quả, có timeout)."
+ },
+ {
+  "sec": "b-se",
+  "front": "Kim tự tháp kiểm thử?",
+  "back": "**Nhiều unit test**, ít integration, **ít E2E**. Câu SQL ghi DB thật cần integration test."
+ },
+ {
+  "sec": "b-se",
+  "front": "Client retry thanh toán làm trừ tiền hai lần?",
+  "back": "Dùng **idempotency key**: server lưu khoá, gửi lại cùng khoá thì trả kết quả cũ."
+ },
+ {
+  "sec": "b-se",
+  "front": "Retry đúng cách?",
+  "back": "**Exponential backoff + jitter**, giới hạn số lần, chỉ retry lỗi tạm thời, kèm circuit breaker."
+ },
+ {
+  "sec": "b-se",
+  "front": "Cache-aside đọc thế nào?",
+  "back": "Đọc cache → **miss** thì đọc DB → ghi vào cache → trả kết quả. Chống stampede bằng single-flight."
+ },
+ {
+  "sec": "b-se",
+  "front": "Đọc ngay sau khi ghi qua read replica?",
+  "back": "Có thể đọc **dữ liệu cũ** (độ trễ sao chép) → đọc của chính người vừa ghi phải về **DB chính**."
+ },
+ {
+  "sec": "b-se",
+  "front": "Chia nhóm A/B bằng `hash(user_id)` trong Python?",
+  "back": "Sai: `hash` của str **đổi giữa các tiến trình**. Dùng `hashlib`."
+ },
+ {
+  "sec": "c-ml",
+  "front": "Có nhãn số thực / có nhãn rời rạc / không nhãn / học qua phần thưởng?",
+  "back": "**Hồi quy / phân loại / phân cụm / học tăng cường**."
+ },
+ {
+  "sec": "c-ml",
+  "front": "Vai trò train, validation, test?",
+  "back": "Train để học; **validation chọn siêu tham số, so mô hình**; test đánh giá cuối, dùng **một lần**."
+ },
+ {
+  "sec": "c-ml",
+  "front": "Train 99%, validation 76%?",
+  "back": "**Overfitting** (variance cao) → regularization, thêm dữ liệu, giảm độ phức tạp, early stopping."
+ },
+ {
+  "sec": "c-ml",
+  "front": "Train và validation đều kém xa người làm?",
+  "back": "**Underfitting** (bias cao) → mô hình mạnh hơn, train lâu hơn, thêm đặc trưng."
+ },
+ {
+  "sec": "c-ml",
+  "front": "L1 khác L2?",
+  "back": "**L1 (Lasso)** đẩy nhiều trọng số về **đúng 0** → chọn đặc trưng. **L2 (Ridge)** co nhỏ, ổn định khi biến tương quan."
+ },
+ {
+  "sec": "c-ml",
+  "front": "5-fold CV trên 1.000 mẫu?",
+  "back": "Train **5 lần**, mỗi lần trên **800** mẫu."
+ },
+ {
+  "sec": "c-ml",
+  "front": "Dữ liệu chuỗi thời gian mà KFold shuffle?",
+  "back": "**Rò rỉ thời gian**. Phải chia theo thời gian (TimeSeriesSplit)."
+ },
+ {
+  "sec": "c-ml",
+  "front": "5 dấu hiệu rò rỉ dữ liệu hay gặp?",
+  "back": "Fit scaler/chọn đặc trưng/oversample **trước khi chia**; trộn dữ liệu thời gian; đặc trưng **chỉ biết sau** thời điểm dự đoán; cùng thực thể ở cả train và test; target encoding không out-of-fold."
+ },
+ {
+  "sec": "c-ml",
+  "front": "Ảnh của cùng một sản phẩm nằm ở cả train và test?",
+  "back": "**Group leakage** → chia theo mã sản phẩm (GroupKFold)."
+ },
+ {
+  "sec": "c-ml",
+  "front": "kNN cần lưu ý gì?",
+  "back": "**Chuẩn hoá** thang đo, nếu không đặc trưng lớn lấn át khoảng cách."
+ },
+ {
+  "sec": "c-ml",
+  "front": "Biến danh mục không thứ tự mã hoá 0, 1, 2?",
+  "back": "Sai: ép mô hình coi có thứ tự. Dùng **one-hot**."
+ },
+ {
+  "sec": "c-ml",
+  "front": "Hệ số logistic β = −0,69 nghĩa là?",
+  "back": "Odds nhân với **e^β ≈ 0,5** → giảm một nửa."
+ },
+ {
+  "sec": "c-ml",
+  "front": "Random forest tốt hơn cây sâu vì sao?",
+  "back": "Trung bình nhiều cây ít tương quan → **giảm variance**."
+ },
+ {
+  "sec": "c-metric",
+  "front": "Precision?",
+  "back": "**TP / (TP + FP)**: trong số bị gắn cờ, bao nhiêu đúng."
+ },
+ {
+  "sec": "c-metric",
+  "front": "Recall?",
+  "back": "**TP / (TP + FN)**: trong số thật sự dương, bắt được bao nhiêu."
+ },
+ {
+  "sec": "c-metric",
+  "front": "F1?",
+  "back": "**2PR / (P + R)**. P = 0,5, R = 0,8 → 0,615."
+ },
+ {
+  "sec": "c-metric",
+  "front": "Vì sao accuracy đánh lừa khi lớp mất cân bằng?",
+  "back": "1% vỡ nợ, luôn đoán 'không' → accuracy **99%**, recall **0%**."
+ },
+ {
+  "sec": "c-metric",
+  "front": "Bỏ sót nguy hiểm (ung thư, gian lận lớn) → ưu tiên?",
+  "back": "**Recall**."
+ },
+ {
+  "sec": "c-metric",
+  "front": "Báo nhầm tốn kém (tự khoá tài khoản, spam chặn email tốt) → ưu tiên?",
+  "back": "**Precision**."
+ },
+ {
+  "sec": "c-metric",
+  "front": "Hạ ngưỡng quyết định thì sao?",
+  "back": "**Recall tăng, precision giảm**, số cảnh báo tăng. AUC không đổi."
+ },
+ {
+  "sec": "c-metric",
+  "front": "Ngưỡng tối ưu theo chi phí?",
+  "back": "Gắn cờ khi **p > c_FP / (c_FP + c_FN)**. FP 10k, FN 90k → 0,1."
+ },
+ {
+  "sec": "c-metric",
+  "front": "ROC-AUC nghĩa là gì?",
+  "back": "Xác suất mô hình chấm **một mẫu dương ngẫu nhiên cao hơn một mẫu âm ngẫu nhiên**."
+ },
+ {
+  "sec": "c-metric",
+  "front": "AUC 0,98 nhưng precision chỉ 10%?",
+  "back": "Do **tỉ lệ nền** quá thấp. Không tự động chặn; dùng biện pháp nhẹ hoặc người duyệt."
+ },
+ {
+  "sec": "c-metric",
+  "front": "class_weight='balanced' tính thế nào?",
+  "back": "**n_mẫu / (số_lớp × n_lớp_đó)**. 10.000 mẫu, 100 dương → trọng số lớp dương 50."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Temperature cho trích xuất JSON và cho viết sáng tạo?",
+  "back": "Trích xuất: **0–0,2**. Sáng tạo: **0,7–1**."
+ },
+ {
+  "sec": "c-llm",
+  "front": "JSON bị lỗi parse 7% vì bị cắt giữa chừng?",
+  "back": "Tăng **max_tokens**, kiểm tra **finish_reason = 'length'**."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Đầu ra có cấu trúc ổn định?",
+  "back": "JSON Schema / structured output + **validate**, sai thì retry kèm thông báo lỗi."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Vì sao attention chia √d_k?",
+  "back": "Để tích vô hướng không lớn theo d_k, tránh **softmax bão hoà** làm gradient nhỏ."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Ngữ cảnh dài gấp 4, chi phí attention tăng?",
+  "back": "**Gấp 16** (tỉ lệ n²)."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Bỏ positional encoding thì sao?",
+  "back": "Mô hình **không phân biệt thứ tự** từ: hoán vị đầu vào chỉ hoán vị đầu ra."
+ },
+ {
+  "sec": "c-llm",
+  "front": "TTFT là gì, tăng theo gì?",
+  "back": "Thời gian tới **token đầu tiên** (prefill), tăng theo **độ dài prompt**."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Tổng thời gian trả lời 400 token, TTFT 0,8 s, 50 token/s?",
+  "back": "0,8 + 400/50 = **8,8 s**. Streaming chỉ cho thấy chữ sớm hơn."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Bộ nhớ trọng số model 7B ở FP16 / INT8 / INT4?",
+  "back": "**14 / 7 / 3,5 GB** (2 / 1 / 0,5 byte mỗi tham số), chưa tính KV cache."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Rủi ro của lượng tử hoá?",
+  "back": "Có thể **giảm chất lượng** (nhất là lớp hiếm) → phải đo lại trên golden set."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Semantic cache 'trúng sai' là gì?",
+  "back": "Hai câu gần chữ nhưng **ý ngược** (huỷ / không huỷ) → nâng ngưỡng, giới hạn phạm vi."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Prompt caching dùng thế nào?",
+  "back": "Đặt phần **cố định ở đầu** prompt, phần thay đổi ở cuối."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Model đổi hành vi sau một đêm khi gọi alias 'latest'?",
+  "back": "**Ghim snapshot** model, log phiên bản model và prompt."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Khi nào RAG, khi nào fine-tune?",
+  "back": "Kiến thức **hay đổi, cần trích dẫn → RAG**. Học **phong cách/định dạng** lặp lại → fine-tune."
+ },
+ {
+  "sec": "c-llm",
+  "front": "Hallucination xử lý thế nào?",
+  "back": "RAG + **bắt trích dẫn** + cho phép trả lời 'không có thông tin'."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Các bước pipeline RAG?",
+  "back": "Làm sạch → **chunk** → embedding → chỉ mục → truy xuất **hybrid** + lọc metadata → **rerank** → sinh có **trích dẫn** → đánh giá."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Overlap giữa các chunk để làm gì?",
+  "back": "Tránh một ý bị **cắt đôi** ở ranh giới chunk."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Chunk 4.000 token trộn nhiều chủ đề gây gì?",
+  "back": "Truy xuất **nhiễu**. Cắt theo cấu trúc (điều, khoản, mục)."
+ },
+ {
+  "sec": "c-rag",
+  "front": "BM25 giỏi gì, vector giỏi gì?",
+  "back": "BM25: khớp **chính xác mã, từ hiếm**. Vector: **cùng nghĩa khác chữ**. Kết hợp = hybrid."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Reciprocal Rank Fusion?",
+  "back": "**điểm = Σ 1/(k + hạng)**, k thường 60. Gộp theo hạng, không cộng điểm thô khác thang."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Reranker cross-encoder khác bi-encoder?",
+  "back": "Đọc **cùng lúc cặp** (truy vấn, tài liệu): chính xác hơn nhưng chậm → chỉ dùng cho top-N."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Đoạn đúng nằm ngoài top-50 ban đầu, reranker có cứu được không?",
+  "back": "**Không**: reranker chỉ sắp lại các ứng viên đã có."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Đổi embedding model nhưng không index lại?",
+  "back": "Truy vấn và tài liệu ở **hai không gian khác nhau** → sai. Phải **index lại toàn bộ**."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Hỏi 'ưu đãi năm 2025' mà ra tài liệu năm khác?",
+  "back": "**Lọc metadata** theo năm hiệu lực."
+ },
+ {
+  "sec": "c-rag",
+  "front": "recall@k và precision@k?",
+  "back": "recall@k = số liên quan trong top-k / **tổng số liên quan**. precision@k = số liên quan trong top-k / **k**."
+ },
+ {
+  "sec": "c-rag",
+  "front": "MRR?",
+  "back": "Trung bình của **1/(hạng của đoạn đúng đầu tiên)**; không có thì tính 0."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Faithfulness?",
+  "back": "Số nhận định **có căn cứ trong ngữ cảnh** / tổng số nhận định trong câu trả lời."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Context recall cao mà faithfulness thấp?",
+  "back": "Lỗi ở **tầng sinh** → bắt trả lời từ ngữ cảnh, kèm trích dẫn."
+ },
+ {
+  "sec": "c-rag",
+  "front": "Context recall thấp?",
+  "back": "Lỗi ở **tầng truy xuất** → sửa chunk, hybrid, mở rộng truy vấn."
+ },
+ {
+  "sec": "c-rag",
+  "front": "HNSW là gì?",
+  "back": "Chỉ mục **tìm láng giềng gần đúng (ANN)** dạng đồ thị nhiều tầng."
+ },
+ {
+  "sec": "c-agent",
+  "front": "Vòng lặp ReAct?",
+  "back": "**Thought → Action → Observation**, lặp lại."
+ },
+ {
+  "sec": "c-agent",
+  "front": "Trong tool calling, ai chạy hàm?",
+  "back": "**Code ứng dụng**. Model chỉ sinh tên hàm và tham số JSON."
+ },
+ {
+  "sec": "c-agent",
+  "front": "Vòng lặp agent kết thúc bình thường khi nào?",
+  "back": "Khi phản hồi **không còn yêu cầu gọi tool**."
+ },
+ {
+  "sec": "c-agent",
+  "front": "Agent gọi lặp cùng tool, cùng tham số tới khi hết token?",
+  "back": "Giới hạn **số bước/token/thời gian**, phát hiện lặp (băm tool + tham số)."
+ },
+ {
+  "sec": "c-agent",
+  "front": "LLM điền số tiền hoàn sai gấp 10?",
+  "back": "**Validate phía server** theo luật nghiệp vụ (≤ giá trị đơn), không tin con số model điền."
+ },
+ {
+  "sec": "c-agent",
+  "front": "Đặt bước người duyệt ở đâu?",
+  "back": "Trước hành động **không đảo ngược hoặc liên quan tiền** (hoàn tiền, xoá). Tra cứu, soạn nháp không cần."
+ },
+ {
+  "sec": "c-agent",
+  "front": "Màn hình duyệt hiển thị gì?",
+  "back": "**Tham số thật** của lời gọi tool do code render, không phải câu LLM tự viết."
+ },
+ {
+  "sec": "c-agent",
+  "front": "Quyền tối thiểu cho agent?",
+  "back": "Tool **hẹp, chỉ đọc, đúng khách hàng**, không dùng tài khoản quản trị chung."
+ },
+ {
+  "sec": "c-agent",
+  "front": "Multi-agent chạy song song: tổng thời gian?",
+  "back": "Phân tích + **nhánh lâu nhất** + tổng hợp."
+ },
+ {
+  "sec": "c-agent",
+  "front": "Xác suất cả chuỗi 10 bước, mỗi bước 95%?",
+  "back": "0,95¹⁰ ≈ **0,60**. Ít bước hơn thường an toàn hơn."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Shadow, canary, A/B khác nhau?",
+  "back": "**Shadow**: model mới chỉ ghi log. **Canary**: một phần nhỏ lưu lượng thật. **A/B**: chia ngẫu nhiên để đo tác động."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Canary 0 lỗi trên 150 request đủ chưa?",
+  "back": "Chưa: cận trên 95% ≈ **3/n = 2%** (quy tắc số 3)."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Data drift khác concept drift?",
+  "back": "Data drift: **P(X) đổi**, P(Y|X) giữ. Concept drift: **P(Y|X) đổi** (quy luật đổi)."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Ngưỡng PSI?",
+  "back": "< 0,1 ổn · 0,1–0,25 vừa · > 0,25 lớn. PSI = Σ (a − e)·ln(a/e)."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Training-serving skew?",
+  "back": "Đặc trưng lúc train và lúc chạy **tính khác nhau** → dùng chung code/feature store."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Định luật Little?",
+  "back": "**Số request đồng thời = tốc độ đến × thời gian xử lý**. 12/s × 2,5 s = 30."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Chi phí GPU mỗi request?",
+  "back": "**Giá giờ / số request mỗi giờ**. Batch lớn → throughput tăng → chi phí/request giảm."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Tái lập model sau 4 tháng cần gì?",
+  "back": "Snapshot dữ liệu (**DVC**/time-travel), version đặc trưng, ghim Docker **digest**, seed + chế độ tất định."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Dockerfile build lại 6 phút mỗi lần sửa code?",
+  "back": "Copy `requirements.txt` và **pip install trước**, rồi mới `COPY . .`."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Golden set dùng đi dùng lại để chọn prompt?",
+  "back": "Bị **overfit** → cần tập holdout riêng."
+ },
+ {
+  "sec": "c-ops",
+  "front": "LLM-as-judge có thiên vị gì?",
+  "back": "**Vị trí**, **độ dài**, tự khen mình. Hoán đổi thứ tự, hiệu chuẩn với nhãn người."
+ },
+ {
+  "sec": "c-ops",
+  "front": "Cohen's kappa?",
+  "back": "**κ = (p_o − p_e)/(1 − p_e)**: đồng thuận đã trừ phần do ngẫu nhiên."
+ },
+ {
+  "sec": "c-pm",
+  "front": "Mẫu cố định (mã bưu chính, 5 điều kiện hoàn tiền) dùng gì?",
+  "back": "**Regex / rule engine** (tất định, giải thích được)."
+ },
+ {
+  "sec": "c-pm",
+  "front": "Dự đoán xác suất từ dữ liệu bảng?",
+  "back": "**Gradient boosting / logistic**."
+ },
+ {
+  "sec": "c-pm",
+  "front": "Văn bản tự do (email, hợp đồng)?",
+  "back": "**LLM** (kèm kiểm tra đầu ra)."
+ },
+ {
+  "sec": "c-pm",
+  "front": "AUC offline tăng có nghĩa doanh thu tăng?",
+  "back": "Chưa: phải đo bằng **A/B test** trên người dùng thật."
+ },
+ {
+  "sec": "c-pm",
+  "front": "'85% nhân viên có dùng copilot' đủ chứng minh hiệu quả?",
+  "back": "Không: cần **nhóm đối chứng** đo thời gian xử lý, chất lượng."
+ },
+ {
+  "sec": "c-pm",
+  "front": "Món mới chưa có tương tác (cold start)?",
+  "back": "Gợi ý **dựa trên nội dung** (embedding mô tả, thẻ)."
+ },
+ {
+  "sec": "c-pm",
+  "front": "Khách chưa đăng nhập, chưa có lịch sử?",
+  "back": "Dùng **tín hiệu trong phiên** (đang xem gì, vừa tìm gì)."
+ },
+ {
+  "sec": "c-pm",
+  "front": "Popularity bias trong gợi ý?",
+  "back": "Vòng phản hồi nổi → hiện → nổi hơn. Thêm **khám phá có kiểm soát**."
+ },
+ {
+  "sec": "c-pm",
+  "front": "Duyệt tay theo ngưỡng tin cậy: tính số ca?",
+  "back": "Duyệt tay = N × tỉ lệ dưới ngưỡng. Lỗi lọt = N × tỉ lệ tự động × (1 − độ chính xác)."
+ },
+ {
+  "sec": "d-logic",
+  "front": "p → q tương đương với gì?",
+  "back": "**¬q → ¬p** (phản đảo). Không suy ra q → p hay ¬p → ¬q."
+ },
+ {
+  "sec": "d-logic",
+  "front": "'Nếu đạt test thì được phỏng vấn', Lan được phỏng vấn?",
+  "back": "**Không kết luận được** Lan có đạt test."
+ },
+ {
+  "sec": "d-logic",
+  "front": "Phủ định 'Mọi x đều P'?",
+  "back": "**Có ít nhất một x không P**."
+ },
+ {
+  "sec": "d-logic",
+  "front": "Phủ định 'Có x thoả P'?",
+  "back": "**Mọi x đều không P**."
+ },
+ {
+  "sec": "d-logic",
+  "front": "De Morgan?",
+  "back": "¬(A ∨ B) = **¬A ∧ ¬B**. ¬(A ∧ B) = **¬A ∨ ¬B**."
+ },
+ {
+  "sec": "d-logic",
+  "front": "Kiểm tra quy tắc 'Nếu P thì Q' (4 thẻ)?",
+  "back": "Lật thẻ **P** và thẻ **không Q**."
+ },
+ {
+  "sec": "d-logic",
+  "front": "Bài 'chỉ một người nói thật'?",
+  "back": "Giả sử lần lượt từng người là thủ phạm, đếm số câu đúng."
+ },
+ {
+  "sec": "d-logic",
+  "front": "Post hoc?",
+  "back": "'Xảy ra sau nên do cái trước gây ra'."
+ },
+ {
+  "sec": "d-logic",
+  "front": "Ad hominem và strawman?",
+  "back": "Ad hominem: **công kích người nói**. Strawman: **bóp méo ý** đối phương rồi bác bỏ."
+ },
+ {
+  "sec": "d-logic",
+  "front": "Survivorship bias?",
+  "back": "Chỉ khảo sát **người còn lại** (đã hoàn thành), bỏ qua người bỏ cuộc."
+ },
+ {
+  "sec": "d-logic",
+  "front": "Người tự bật tính năng có kết quả tốt hơn → bắt mọi người bật?",
+  "back": "Chưa được: **biến gây nhiễu** (họ vốn đã khác). Cần thử nghiệm ngẫu nhiên."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Tối thiểu hoá dữ liệu?",
+  "back": "Chỉ thu dữ liệu **cần cho mục đích đã nêu**."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Dùng dữ liệu cho mục đích mới (quảng cáo)?",
+  "back": "Phải **xin đồng ý riêng**; đồng ý tách theo mục đích, mặc định tắt."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Người dùng rút đồng ý?",
+  "back": "**Dừng xử lý từ thời điểm đó**; xử lý trước đó vẫn hợp lệ."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Băm SĐT bằng SHA-256 có phải ẩn danh?",
+  "back": "**Không**, chỉ là giả danh hoá: số giá trị có hạn nên vét cạn được."
+ },
+ {
+  "sec": "d-eth",
+  "front": "k-anonymity?",
+  "back": "k = kích thước **nhóm nhỏ nhất** theo các thuộc tính định danh gián tiếp."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Dữ liệu nhạy cảm gồm gì?",
+  "back": "**Sinh trắc** (vân tay, khuôn mặt), **sức khoẻ**, số định danh…"
+ },
+ {
+  "sec": "d-eth",
+  "front": "Rò rỉ dữ liệu theo GDPR?",
+  "back": "Báo cơ quan giám sát trong **72 giờ**."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Demographic parity?",
+  "back": "Tỉ lệ **được chọn** bằng nhau giữa các nhóm."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Quy tắc 4/5?",
+  "back": "Tỉ lệ nhóm thấp / nhóm cao **< 0,8** → dấu hiệu tác động bất lợi. 30% / 40% = 0,75."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Equal opportunity khác equalized odds?",
+  "back": "EO: **TPR** bằng nhau. Equalized odds: **cả TPR và FPR** bằng nhau."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Người duyệt đồng ý 99,7% đề xuất AI?",
+  "back": "**Thiên lệch tự động hoá** → đo tỉ lệ bác bỏ, kiểm tra ngẫu nhiên."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Minh bạch khi chặn người dùng?",
+  "back": "Nêu **lý do, mã tham chiếu, cách khiếu nại**; báo đang dùng AI."
+ },
+ {
+  "sec": "d-eth",
+  "front": "EU AI Act: bị cấm?",
+  "back": "Suy luận **cảm xúc nhân viên** tại nơi làm việc, chấm điểm xã hội…"
+ },
+ {
+  "sec": "d-eth",
+  "front": "EU AI Act: rủi ro cao?",
+  "back": "**Chấm điểm tín dụng, lọc CV, giáo dục** (Phụ lục III): quản lý rủi ro, nhật ký, con người giám sát."
+ },
+ {
+  "sec": "d-eth",
+  "front": "EU AI Act: chatbot? lọc spam?",
+  "back": "Chatbot: **rủi ro hạn chế** (phải minh bạch). Lọc spam: **rủi ro tối thiểu**."
+ },
+ {
+  "sec": "d-eth",
+  "front": "Phát hiện lỗi nghiêm trọng sát ngày ra mắt?",
+  "back": "**Ghi bằng chứng, báo ngay người có thẩm quyền**, đề xuất hoãn hoặc ra mắt giới hạn."
+ },
+ {
+  "sec": "d-sec",
+  "front": "LLM01?",
+  "back": "**Prompt Injection** (chữ ẩn trong email, CV, web ra lệnh cho trợ lý)."
+ },
+ {
+  "sec": "d-sec",
+  "front": "LLM02?",
+  "back": "**Sensitive Information Disclosure** (model lộ CCCD từ dữ liệu huấn luyện)."
+ },
+ {
+  "sec": "d-sec",
+  "front": "LLM03?",
+  "back": "**Supply Chain** (tải model pickle không chữ ký)."
+ },
+ {
+  "sec": "d-sec",
+  "front": "LLM04?",
+  "back": "**Data and Model Poisoning** (review giả lọt vào dữ liệu huấn luyện)."
+ },
+ {
+  "sec": "d-sec",
+  "front": "LLM05?",
+  "back": "**Improper Output Handling** (gắn đầu ra vào innerHTML, chạy SQL do LLM sinh)."
+ },
+ {
+  "sec": "d-sec",
+  "front": "LLM06?",
+  "back": "**Excessive Agency** (trợ lý tóm tắt thư lại có quyền gửi, xoá thư)."
+ },
+ {
+  "sec": "d-sec",
+  "front": "LLM07?",
+  "back": "**System Prompt Leakage** (đặt bí mật trong system prompt)."
+ },
+ {
+  "sec": "d-sec",
+  "front": "LLM08?",
+  "back": "**Vector and Embedding Weaknesses** (vector DB dùng chung, không lọc theo tenant)."
+ },
+ {
+  "sec": "d-sec",
+  "front": "LLM09 và LLM10?",
+  "back": "LLM09 **Misinformation**. LLM10 **Unbounded Consumption** (không giới hạn bước, token, request)."
+ },
+ {
+  "sec": "d-sec",
+  "front": "Vì sao câu 'đừng làm theo chỉ dẫn trong email' trong prompt là không đủ?",
+  "back": "Chỉ dẫn và dữ liệu nằm **chung một chuỗi token**. Phải chặn tất định ở tầng công cụ."
+ },
+ {
+  "sec": "d-sec",
+  "front": "'Bộ ba nguy hiểm' của agent?",
+  "back": "**Dữ liệu riêng tư + nội dung không tin cậy + kênh gửi ra ngoài**. Bỏ một trong ba."
+ },
+ {
+  "sec": "d-sec",
+  "front": "Ảnh Markdown trỏ ra domain lạ?",
+  "back": "Có thể **lộ dữ liệu** qua URL → chỉ render ảnh/link trong allowlist."
+ },
+ {
+  "sec": "tu-luan",
+  "front": "Khung 7 ý cho câu tự luận tình huống?",
+  "back": "1 Mục tiêu và đầu ra · 2 Dữ liệu và nhãn · 3 Giải pháp và baseline · 4 Đánh giá offline có ngưỡng số · 5 Rủi ro và guardrail · 6 Triển khai theo giai đoạn · 7 Giám sát và điều kiện dừng."
+ },
+ {
+  "sec": "tu-luan",
+  "front": "Câu tính toán trong tự luận cần gì?",
+  "back": "**Ghi từng bước**. Chỉ ghi kết quả bị điểm thấp; sai số mà đúng cách vẫn có điểm. Thiếu dữ kiện thì nêu giả định."
+ },
+ {
+  "sec": "tu-luan",
+  "front": "Triển khai theo giai đoạn gồm?",
+  "back": "**Shadow → pilot/canary → A/B** đo tác động thật trên chỉ số kinh doanh."
+ },
+ {
+  "sec": "tu-luan",
+  "front": "Checklist code viết tay?",
+  "back": "Đúng **tên hàm, tham số, kiểu trả**; xử lý **rỗng, NaN, chia 0**; không sửa input; pandas thì **vector hoá**; chạy tay ví dụ."
+ },
+ {
+  "sec": "tu-luan",
+  "front": "Sắp xếp giảm theo điểm, hoà theo tên trong pandas?",
+  "back": "`sort_values(['diem', 'ten'], ascending=[False, True])`."
+ },
+ {
+  "sec": "tu-luan",
+  "front": "Sắp xếp giảm theo điểm, hoà theo tên với `sorted`?",
+  "back": "`sorted(items, key=lambda x: (-x[1], x[0]))`."
+ }
+]

@@ -85,13 +85,20 @@ def main():
     known = set(re.findall(r'<(?:h3|section) id="([^"]+)"', tpl))
     bad = {q["section"] for e in exams for q in e["questions"]} - known
     assert not bad, f"section không có trong sổ tay: {bad}"
+    cards = json.loads((ROOT / "flashcards.json").read_text(encoding="utf-8"))
+    seen = {}
+    for c in cards:
+        assert c["sec"] in known and c["front"] and c["back"], c
+        seen[c["sec"]] = seen.get(c["sec"], 0) + 1
+        c["id"] = f'{c["sec"]}-{seen[c["sec"]]}'
     data = json.dumps(exams, ensure_ascii=False).replace("</", "<\\/")  # giữ "</script>" trong dữ liệu không đóng thẻ
-    assert tpl.count("/*EXAMS*/") == 1
+    assert tpl.count("/*EXAMS*/") == 1 and tpl.count("/*CARDS*/") == 1
+    tpl = tpl.replace("/*CARDS*/", json.dumps(cards, ensure_ascii=False).replace("</", "<\\/"))
     head = ('<!doctype html>\n<html lang="vi">\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n')
     (ROOT / "index.html").write_text(head + tpl.replace("/*EXAMS*/", data), encoding="utf-8")
     n = sum(len(e["questions"]) for e in exams)
-    print(f"index.html: {len(exams)} đề, {n} câu")
+    print(f"index.html: {len(exams)} đề, {n} câu, {len(cards)} flashcard")
     if "-v" in sys.argv:
         from collections import Counter
         print(Counter(q["section"] for e in exams for q in e["questions"]))
