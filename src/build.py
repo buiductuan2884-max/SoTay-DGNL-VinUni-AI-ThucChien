@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 # Thứ tự hiển thị các bộ đề: (thư mục, tên nhóm, ghi chú nguồn)
 GROUPS = [
-    ("sat-that", "Đề sát thật", "Đề tự soạn theo đúng cấu trúc 4 phần và thang điểm của đề ĐGNL."),
+    ("sat-that", "Đề sát thật", "9 đề tự soạn theo cấu trúc 4 phần, thang điểm 20/30/32/18. Đề 03–09 phủ đủ 78 dạng bài, có nhãn dạng và bẫy sau khi nộp."),
     ("luyen-nhanh", "Luyện nhanh Toán và Code tay", "Bài luyện tự soạn cho hai phần dễ mất điểm nhất."),
     ("hieubui", "Bộ đề anh Hiếu (hieubui2409)", "6 đề tổng hợp và 12 chuyên đề, dùng lại với sự cho phép của tác giả."),
     ("ai-test", "Bộ AI-TEST (cơ bản)", "10 đề mức nhận biết · giấy phép MIT © 2026 Henry Don."),
@@ -45,7 +45,7 @@ def load_exam(path):
         where = f"{path.name} câu {i}"
         assert q["module"] in "ABCD" and q["type"] in ("mcq", "numeric", "output", "code", "essay"), where
         assert q.get("prompt") and float(q.get("points", 1)) > 0, where
-        out = {k: q[k] for k in ("id", "module", "type", "points", "prompt", "explanation", "modelAnswer", "level", "long", "mistakes") if k in q}
+        out = {k: q[k] for k in ("id", "module", "type", "points", "prompt", "explanation", "modelAnswer", "level", "long", "mistakes", "dang", "trap") if k in q}
         if q["type"] == "numeric":
             assert isinstance(q["answer"], (int, float)), f"{where}: numeric cần answer là số"
             out["answer"] = q["answer"]
@@ -93,6 +93,9 @@ def main():
         c["id"] = f'{c["sec"]}-{seen[c["sec"]]}'
     data = json.dumps(exams, ensure_ascii=False).replace("</", "<\\/")  # giữ "</script>" trong dữ liệu không đóng thẻ
     assert tpl.count("/*EXAMS*/") == 1 and tpl.count("/*CARDS*/") == 1
+    dang = json.loads((ROOT / "dang.json").read_text(encoding="utf-8"))
+    assert {d["sec"] for d in dang.values()} <= known and all(q.get("dang", next(iter(dang))) in dang for e in exams for q in e["questions"])
+    tpl = tpl.replace("/*DANG*/", json.dumps(dang, ensure_ascii=False))
     tpl = tpl.replace("/*CARDS*/", json.dumps(cards, ensure_ascii=False).replace("</", "<\\/"))
     head = ('<!doctype html>\n<html lang="vi">\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n')

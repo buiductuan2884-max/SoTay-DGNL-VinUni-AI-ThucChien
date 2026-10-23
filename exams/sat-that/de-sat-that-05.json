@@ -1,0 +1,1597 @@
+{
+ "title": "Đề sát thật 05 · Ngân hàng",
+ "description": "Ngữ cảnh ngân hàng, thẻ, cho vay. Nhiều câu cài 'mồi nhử' bằng con số đẹp (accuracy tổng, 0 lỗi, p = 0,03 ở phân khúc).",
+ "durationMinutes": 90,
+ "questions": [
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-tile",
+   "points": 1.5,
+   "prompt": "5 nhân viên thẩm định xử lý 300 hồ sơ vay trong 6 giờ. Năng suất mỗi người như nhau và không đổi. Muốn xử lý 600 hồ sơ trong 4 giờ thì cần bao nhiêu nhân viên?",
+   "options": [
+    {
+     "key": "A",
+     "text": "20"
+    },
+    {
+     "key": "B",
+     "text": "10"
+    },
+    {
+     "key": "C",
+     "text": "8"
+    },
+    {
+     "key": "D",
+     "text": "15"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Năng suất = 300/(5·6) = 10 hồ sơ/người/giờ. Cần 600/(10·4) = 15 người.",
+   "dang": "A-tile-dai-so",
+   "trap": "Hai đại lượng đổi cùng lúc (số hồ sơ gấp đôi, thời gian giảm 1/3). Quy về **năng suất một người một giờ** rồi tính lại."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-tile",
+   "points": 1.5,
+   "prompt": "Lợi nhuận mỗi ngày (triệu đồng) của trung tâm tổng đài theo số nhân viên ca tối x là P(x) = −3x² + 48x − 20, với 0 ≤ x ≤ 20. Số nhân viên tối ưu và lợi nhuận lớn nhất là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "x = 8; P = 192"
+    },
+    {
+     "key": "B",
+     "text": "x = 8; P = 172"
+    },
+    {
+     "key": "C",
+     "text": "x = 20; P = −260"
+    },
+    {
+     "key": "D",
+     "text": "x = 16; P = −20"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Đỉnh parabol x = −b/(2a) = −48/(2·(−3)) = 8. P(8) = −192 + 384 − 20 = 172.",
+   "dang": "A-toi-uu",
+   "trap": "P = 192 là quên trừ hằng số 20. x = 16 là nghiệm làm P bằng P(0), không phải đỉnh."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-xs",
+   "points": 1.5,
+   "prompt": "Quy trình duyệt vay tự động gồm 4 bước độc lập, mỗi bước thành công với xác suất 0,9; chỉ cần một bước lỗi là hồ sơ phải xử lý tay. Mỗi tháng có 10.000 hồ sơ. Số hồ sơ phải xử lý tay xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "4.000"
+    },
+    {
+     "key": "B",
+     "text": "1.000"
+    },
+    {
+     "key": "C",
+     "text": "3.400"
+    },
+    {
+     "key": "D",
+     "text": "6.600"
+    }
+   ],
+   "answer": "C",
+   "explanation": "P(cả 4 bước thành công) = 0,9⁴ = 0,6561. P(xử lý tay) = 1 − 0,6561 ≈ 0,344 → ≈ 3.440 hồ sơ.",
+   "dang": "A-doc-lap",
+   "trap": "Cộng 4 × 10% = 40% là sai (đếm trùng các hồ sơ lỗi nhiều bước). 6.600 là số hồ sơ **tự động**."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-dstt",
+   "points": 1.5,
+   "prompt": "Mô hình hồi quy dự báo hạn mức thẻ có hai biến 'thu nhập' và 'tổng chi tiêu thẻ 12 tháng' tương quan 0,97. Hệ số của 'thu nhập' đổi dấu giữa các lần huấn luyện lại, dù độ chính xác gần như không đổi. Nguyên nhân và cách xử lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Thiếu dữ liệu nên cần thêm biến"
+    },
+    {
+     "key": "B",
+     "text": "Learning rate quá lớn"
+    },
+    {
+     "key": "C",
+     "text": "Mô hình đang underfitting"
+    },
+    {
+     "key": "D",
+     "text": "Đa cộng tuyến (VIF rất cao): gộp hoặc bỏ bớt một biến, hoặc dùng Ridge"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Hai biến gần như trùng thông tin nên mô hình chia trọng số giữa chúng tuỳ ý → hệ số không ổn định dù dự báo vẫn đúng.",
+   "dang": "A-hoi-quy",
+   "trap": "Dấu hiệu nhận ra: **độ chính xác ổn nhưng hệ số nhảy dấu** + tương quan rất cao giữa hai biến."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.5,
+   "prompt": "So nhãn 'đạt/không đạt' của chuyên viên và của LLM judge trên 100 hồ sơ: cùng 'đạt' 60, cùng 'không đạt' 20, chuyên viên đạt – judge không 10, chuyên viên không – judge đạt 10. Cohen's kappa xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,80"
+    },
+    {
+     "key": "B",
+     "text": "0,52"
+    },
+    {
+     "key": "C",
+     "text": "0,22"
+    },
+    {
+     "key": "D",
+     "text": "0,58"
+    }
+   ],
+   "answer": "B",
+   "explanation": "p_o = (60 + 20)/100 = 0,8. Cả hai cùng cho 'đạt' 70%: p_e = 0,7·0,7 + 0,3·0,3 = 0,58. κ = (0,8 − 0,58)/(1 − 0,58) = 0,22/0,42 ≈ 0,52.",
+   "dang": "A-kappa-mau",
+   "trap": "80% là đồng thuận thô, chưa trừ phần trùng do ngẫu nhiên; 0,22 là quên chia cho (1 − p_e)."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-llm",
+   "points": 1.5,
+   "prompt": "Câu trả lời dài 300 token; thời gian tới token đầu (TTFT) 0,6 giây; tốc độ sinh 60 token/giây. Khi bật streaming, người dùng thấy chữ đầu tiên và nhận đủ câu trả lời sau bao lâu?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chữ đầu sau 5,6 s; đủ sau 5,6 s"
+    },
+    {
+     "key": "B",
+     "text": "Streaming làm xong sớm hơn, khoảng 3 s"
+    },
+    {
+     "key": "C",
+     "text": "Chữ đầu sau 0,6 s; đủ sau 5 s"
+    },
+    {
+     "key": "D",
+     "text": "Chữ đầu sau 0,6 s; đủ sau 5,6 s (không streaming thì chờ 5,6 s mới thấy)"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Tổng = TTFT + 300/60 = 0,6 + 5 = 5,6 s. Streaming chỉ cho thấy chữ sớm, không rút ngắn tổng thời gian.",
+   "dang": "A-do-tre",
+   "trap": "Quên cộng TTFT ra 5 s; tưởng streaming làm nhanh hơn là sai bản chất."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-xs",
+   "points": 1.5,
+   "prompt": "0,2% giao dịch thẻ là gian lận. Mô hình bắt được 99% giao dịch gian lận và cảnh báo nhầm 1% giao dịch hợp lệ. Một giao dịch vừa bị cảnh báo, xác suất nó thật sự gian lận xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "99%"
+    },
+    {
+     "key": "B",
+     "text": "50%"
+    },
+    {
+     "key": "C",
+     "text": "2%"
+    },
+    {
+     "key": "D",
+     "text": "17%"
+    }
+   ],
+   "answer": "D",
+   "explanation": "100.000 giao dịch: 200 gian lận → 198 bị cảnh báo; 99.800 hợp lệ → 998 bị cảnh báo nhầm. 198/(198 + 998) ≈ 0.166.",
+   "dang": "A-bayes",
+   "trap": "Cả hai tỉ lệ 99% và 1% đều 'đẹp' nhưng tỉ lệ nền 0,2% quyết định kết quả."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-dstt",
+   "points": 1.5,
+   "prompt": "Hệ gợi ý sản phẩm xếp hạng bằng điểm giữa vector khách q = (1, 0) và vector sản phẩm. Sản phẩm P = (8, 6), sản phẩm R = (3, 0). Xếp hạng theo **tích vô hướng** và theo **cosine** chọn sản phẩm nào đứng đầu?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tích vô hướng chọn R; cosine chọn P"
+    },
+    {
+     "key": "B",
+     "text": "Tích vô hướng chọn P (8 > 3); cosine chọn R (1 > 0,8) — tích vô hướng ưu ái vector dài"
+    },
+    {
+     "key": "C",
+     "text": "Cả hai đều chọn R"
+    },
+    {
+     "key": "D",
+     "text": "Cả hai đều chọn P"
+    }
+   ],
+   "answer": "B",
+   "explanation": "q·P = 8, q·R = 3. cos(q, P) = 8/(1·10) = 0,8; cos(q, R) = 3/(1·3) = 1.",
+   "dang": "A-dot-cosine",
+   "trap": "Tích vô hướng cộng cả độ dài vector (sản phẩm phổ biến thường có vector dài); cosine chỉ xét hướng."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-gt",
+   "points": 1.5,
+   "prompt": "Loss qua các epoch: 0,90 → 1,40 → 3,20 → 11,0 → NaN. Dữ liệu đã chuẩn hoá, hàm loss đã kiểm tra đúng. Nguyên nhân khả dĩ nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Overfitting"
+    },
+    {
+     "key": "B",
+     "text": "Learning rate quá lớn: mỗi bước vượt quá cực tiểu và bị khuếch đại"
+    },
+    {
+     "key": "C",
+     "text": "Learning rate quá nhỏ"
+    },
+    {
+     "key": "D",
+     "text": "Thiếu dữ liệu"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Loss tăng theo cấp số rồi NaN là dấu hiệu phân kỳ do bước nhảy quá lớn.",
+   "dang": "A-gd",
+   "trap": "Overfitting làm loss **validation** tăng, không làm loss train bùng nổ thành NaN."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-tile",
+   "points": 1.5,
+   "prompt": "Ngân hàng gửi voucher 20.000đ cho 10.000 khách; voucher áp dụng cho mọi giao dịch của người nhận. Không gửi thì 10% khách phát sinh giao dịch; có voucher thì 14%. Mỗi giao dịch mang lại lãi 100.000đ (chưa trừ voucher). Lãi ròng thay đổi bao nhiêu khi gửi voucher?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng 40 triệu đồng"
+    },
+    {
+     "key": "B",
+     "text": "Giảm 8 triệu đồng"
+    },
+    {
+     "key": "C",
+     "text": "Tăng 32 triệu đồng"
+    },
+    {
+     "key": "D",
+     "text": "Tăng 12 triệu đồng"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Không gửi: 1.000 giao dịch × 100.000 = 100 triệu. Gửi: 1.400 × (100.000 − 20.000) = 112 triệu. Chênh +12 triệu.",
+   "dang": "A-kinh-te",
+   "trap": "Voucher cũng trả cho **1.000 khách vốn đã giao dịch** (−20 triệu). Chỉ tính 400 khách tăng thêm ra +32 hoặc +40 triệu là sai."
+  },
+  {
+   "module": "A",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 5,
+   "prompt": "Ngân hàng bán hai gói bảo hiểm A và B. Combo 1 gồm 2 gói A và 1 gói B giá 7 (trăm nghìn đồng). Combo 2 gồm 3 gói A và 2 gói B giá 12.\n\n(a) Viết hệ dưới dạng ma trận M·v = b.\n(b) Tính det M và M⁻¹.\n(c) Tìm giá mỗi gói và kiểm tra lại.",
+   "modelAnswer": "(a) M = [[2, 1], [3, 2]], v = (a, b)ᵀ, b = (7, 12)ᵀ.\n(b) det M = 2·2 − 1·3 = 1 ≠ 0. M⁻¹ = (1/1)·[[2, −1], [−3, 2]].\n(c) v = M⁻¹b = (2·7 − 12, −3·7 + 2·12) = (2, 3): gói A 200.000đ, gói B 300.000đ. Kiểm tra: 2·2 + 3 = 7 ✓; 3·2 + 2·3 = 12 ✓.",
+   "rubric": [
+    "Viết đúng ma trận M và vector b",
+    "Tính đúng det = 1 và kết luận khả nghịch",
+    "Tính đúng M⁻¹ (đổi chỗ đường chéo chính, đổi dấu đường chéo phụ)",
+    "Ra đúng a = 2, b = 3 (đơn vị trăm nghìn)",
+    "Có bước kiểm tra lại"
+   ],
+   "dang": "E-toan",
+   "trap": "Nghịch đảo 2×2 hay sai dấu ở đường chéo phụ; luôn thử lại nghiệm vào hệ ban đầu."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nd = {\"vip\": 0}\nprint(d.get(\"vip\", 5), d.get(\"moi\"), d.get(\"moi\", []))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "Báo lỗi KeyError"
+    },
+    {
+     "key": "B",
+     "text": "`0 None []`"
+    },
+    {
+     "key": "C",
+     "text": "`0 0 []`"
+    },
+    {
+     "key": "D",
+     "text": "`5 None []`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "get trả giá trị có sẵn (0) khi khoá tồn tại; khoá không tồn tại thì trả None hoặc giá trị mặc định truyền vào.",
+   "dang": "B-dict-str",
+   "trap": "Giá trị 0 là 'falsy' nhưng vẫn là giá trị có thật; get **không** thay 0 bằng mặc định."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\ngd = [(\"A\", 300), (\"B\", 100), (\"C\", 300), (\"D\", 200)]\ngd.sort(key=lambda x: x[1], reverse=True)\nprint([t for t, _ in gd])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`['A', 'C', 'B', 'D']`"
+    },
+    {
+     "key": "B",
+     "text": "`['B', 'D', 'A', 'C']`"
+    },
+    {
+     "key": "C",
+     "text": "`['C', 'A', 'D', 'B']`"
+    },
+    {
+     "key": "D",
+     "text": "`['A', 'C', 'D', 'B']`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Sắp giảm theo số tiền: 300, 300, 200, 100. Sắp xếp của Python **ổn định** (kể cả khi reverse=True): A và C bằng nhau giữ thứ tự ban đầu A trước C.",
+   "dang": "B-sorted",
+   "trap": "Nhiều người nghĩ reverse đảo luôn thứ tự các phần tử bằng nhau (C trước A)."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nt = ([\"tk1\"], 0)\ntry:\n    t[0] += [\"tk2\"]\nexcept TypeError:\n    print(\"loi\", end=\" \")\nprint(t[0])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`loi ['tk1', 'tk2']`"
+    },
+    {
+     "key": "B",
+     "text": "`loi ['tk1']`"
+    },
+    {
+     "key": "C",
+     "text": "`['tk1']`"
+    },
+    {
+     "key": "D",
+     "text": "`['tk1', 'tk2']`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "`+=` trên list sửa list tại chỗ trước, rồi mới gán lại vào tuple → gán lỗi TypeError. List đã bị sửa nên in ['tk1', 'tk2'].",
+   "dang": "B-mutable",
+   "trap": "Vừa báo lỗi vừa có tác dụng phụ — câu hỏi kiểm tra bạn có biết thứ tự hai bước của `+=`."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nclass Gio:\n    hang = []\n    def them(self, x):\n        self.hang.append(x)\n\na, b = Gio(), Gio()\na.them(1)\nb.them(2)\nprint(a.hang, len(Gio.hang))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[1] 2`"
+    },
+    {
+     "key": "B",
+     "text": "`[1, 2] 0`"
+    },
+    {
+     "key": "C",
+     "text": "`[1, 2] 2`"
+    },
+    {
+     "key": "D",
+     "text": "`[1] 1`"
+    }
+   ],
+   "answer": "C",
+   "explanation": "`hang` là thuộc tính **của lớp**, mọi đối tượng dùng chung một list. Tạo list trong `__init__` để mỗi đối tượng có list riêng.",
+   "dang": "B-py-nangcao",
+   "trap": "Giống bẫy giá trị mặc định thay đổi được, nhưng ở cấp lớp."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\na = [1, 2, 3, 4, 5]\na[1:4] = [9]\nprint(a, len(a))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[1, 9, 5] 3`"
+    },
+    {
+     "key": "B",
+     "text": "`[1, 9, 3, 4, 5] 5`"
+    },
+    {
+     "key": "C",
+     "text": "`[1, [9], 5] 3`"
+    },
+    {
+     "key": "D",
+     "text": "Báo lỗi vì độ dài khác nhau"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Gán cho slice thay **cả đoạn** chỉ số 1–3 bằng nội dung list mới (một phần tử) → list ngắn lại.",
+   "dang": "B-slicing",
+   "trap": "Gán slice cho phép độ dài khác nhau (khác với NumPy); không lồng list."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "Độ phức tạp thời gian của hàm sau là gì, và cải tiến thế nào?\n```python\ndef f(n):\n    if n <= 1:\n        return 1\n    return f(n - 1) + f(n - 2)\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "Hàm mũ (cỡ 2ⁿ); ghi nhớ kết quả (memo) hoặc tính lặp thì còn O(n)"
+    },
+    {
+     "key": "B",
+     "text": "O(n)"
+    },
+    {
+     "key": "C",
+     "text": "O(n log n)"
+    },
+    {
+     "key": "D",
+     "text": "O(n²)"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Mỗi lời gọi sinh hai lời gọi con, nhiều giá trị bị tính lại → số lời gọi tăng theo hàm mũ.",
+   "dang": "B-bigo",
+   "trap": "Đệ quy trông 'gọn' nhưng có thể là hàm mũ; đếm số lời gọi con mỗi tầng."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "`x` có shape (2, 3). Muốn trừ trung bình **từng hàng** khỏi chính hàng đó. Biểu thức nào đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "`x - x.mean(axis=1, keepdims=True)`"
+    },
+    {
+     "key": "B",
+     "text": "`x - x.mean()`"
+    },
+    {
+     "key": "C",
+     "text": "`x - x.mean(axis=0)`"
+    },
+    {
+     "key": "D",
+     "text": "`x - x.mean(axis=1)`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "x.mean(axis=1) có shape (2,) không broadcast với (2, 3) → lỗi. keepdims=True cho shape (2, 1) broadcast theo từng hàng.",
+   "dang": "B-numpy",
+   "trap": "`x - x.mean(axis=0)` chạy được nhưng trừ trung bình **cột** — sai yêu cầu mà không báo lỗi."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "Cột `so_the` đọc từ file có giá trị thiếu nên pandas để kiểu float: `s = pd.Series([1.0, None, 3.0])`. Phát biểu nào đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "`s.astype(int)` báo lỗi; `s.astype(\"Int64\")` cho [1, <NA>, 3]"
+    },
+    {
+     "key": "B",
+     "text": "Cả hai cách đều cho [1, NaN, 3]"
+    },
+    {
+     "key": "C",
+     "text": "`s.astype(int)` cho [1, 0, 3]"
+    },
+    {
+     "key": "D",
+     "text": "`s.astype(\"Int64\")` báo lỗi vì có NaN"
+    }
+   ],
+   "answer": "A",
+   "explanation": "int64 thường không biểu diễn được giá trị thiếu; kiểu nullable 'Int64' (chữ I hoa) thì có <NA>.",
+   "dang": "B-pd-nan",
+   "trap": "Không có chuyện tự điền 0 khi ép kiểu."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "```python\nkh = pd.DataFrame({\"id\": [1, 2], \"ten\": [\"An\", \"Binh\"], \"hang\": [\"vang\", \"bac\"]})\ngd = pd.DataFrame({\"id\": [1, 1, 2], \"hang\": [\"A\", \"B\", \"A\"], \"tien\": [5, 7, 9]})\nm = gd.merge(kh, on=\"id\")\nprint(m.shape, list(m.columns))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`(2, 5) ['id', 'hang_x', 'tien', 'ten', 'hang_y']`"
+    },
+    {
+     "key": "B",
+     "text": "`(3, 5) ['id', 'hang_x', 'tien', 'ten', 'hang_y']`"
+    },
+    {
+     "key": "C",
+     "text": "Báo lỗi vì trùng tên cột hang"
+    },
+    {
+     "key": "D",
+     "text": "`(3, 4) ['id', 'hang', 'tien', 'ten']`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Khoá id: mỗi giao dịch khớp một khách → 3 dòng. Cột 'hang' có ở cả hai bảng (không phải khoá) → thêm hậu tố _x (trái), _y (phải).",
+   "dang": "B-pd-merge",
+   "trap": "Hai cột 'hang' mang nghĩa khác nhau (hạng giao dịch vs hạng khách); nên đặt suffixes rõ nghĩa."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "Ngày giao dịch được nhập theo kiểu Việt Nam (ngày/tháng/năm). `pd.to_datetime(\"03/04/2026\").month` trả về gì và nên sửa thế nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "4 — pandas tự nhận kiểu Việt Nam"
+    },
+    {
+     "key": "B",
+     "text": "2026"
+    },
+    {
+     "key": "C",
+     "text": "Báo lỗi vì định dạng mơ hồ"
+    },
+    {
+     "key": "D",
+     "text": "3 — pandas hiểu là tháng/ngày; dùng `format=\"%d/%m/%Y\"` (hoặc dayfirst=True)"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Mặc định pandas đọc 'MM/DD/YYYY' kiểu Mỹ → 3 tháng 4 bị hiểu thành ngày 4 tháng 3.",
+   "dang": "B-pd-time",
+   "trap": "Lỗi im lặng: không báo lỗi nhưng mọi ngày ≤ 12 bị đảo ngày–tháng."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "```python\ndf = pd.DataFrame({\"kh\": [\"A\", \"A\", \"B\"], \"tien\": [100, None, 50]})\nr = df.groupby(\"kh\").agg(so_gd=(\"tien\", \"size\"), tong=(\"tien\", \"sum\"))\nprint(r.loc[\"A\", \"so_gd\"], r.loc[\"A\", \"tong\"])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`2 100.0`"
+    },
+    {
+     "key": "B",
+     "text": "`2 nan`"
+    },
+    {
+     "key": "C",
+     "text": "`1 nan`"
+    },
+    {
+     "key": "D",
+     "text": "`1 100.0`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "size đếm mọi dòng của nhóm (2); sum bỏ NaN (100).",
+   "dang": "B-pd-groupby",
+   "trap": "Dùng `count` thay `size` sẽ ra 1 — đếm số giao dịch mà bỏ dòng thiếu tiền là sai yêu cầu."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-sql",
+   "points": 1.25,
+   "prompt": "Bảng `customers` có 4 khách; chỉ 2 khách có sổ tiết kiệm. Truy vấn sau trả về mấy dòng và sửa thế nào để liệt kê **đủ 4 khách** (khách không có sổ ghi 0)?\n```sql\nSELECT c.id, COUNT(a.id)\nFROM customers c LEFT JOIN accounts a ON a.cid = c.id\nWHERE a.loai = 'tiet_kiem'\nGROUP BY c.id;\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "2 dòng; đổi COUNT(a.id) thành COUNT(*)"
+    },
+    {
+     "key": "B",
+     "text": "4 dòng, không cần sửa"
+    },
+    {
+     "key": "C",
+     "text": "2 dòng; chuyển `a.loai = 'tiet_kiem'` vào điều kiện ON"
+    },
+    {
+     "key": "D",
+     "text": "0 dòng; thêm DISTINCT"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Khách không có sổ có a.loai là NULL, WHERE loại họ → LEFT JOIN thành INNER JOIN.",
+   "dang": "B-sql",
+   "trap": "Đổi sang COUNT(*) không đưa khách bị loại quay lại; chỗ sai nằm ở WHERE."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Nhóm Core banking đổi trường `balance` trong API từ số (1000000) sang chuỗi ('1.000.000'). Unit test của cả hai nhóm đều xanh nhưng app mobile bị lỗi khi phát hành. Loại kiểm thử nào lẽ ra bắt được lỗi này?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng độ phủ code lên 100%"
+    },
+    {
+     "key": "B",
+     "text": "Kiểm thử tải (load test)"
+    },
+    {
+     "key": "C",
+     "text": "Contract test hướng consumer: app công bố kỳ vọng về kiểu dữ liệu, CI của nhóm Core chạy kiểm tra kỳ vọng đó"
+    },
+    {
+     "key": "D",
+     "text": "Thêm unit test cho nhóm mobile"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Unit test mỗi bên dùng dữ liệu giả của chính mình nên không thấy hợp đồng giữa hai bên bị phá.",
+   "dang": "B-review-test",
+   "trap": "'Độ phủ 100%' là mồi nhử: lỗi nằm **giữa** hai hệ thống, không nằm trong code của một bên."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "App gọi `POST /chuyen-tien`. Máy chủ đã xử lý xong nhưng phản hồi bị mất, app hết thời gian chờ và tự gửi lại → khách bị chuyển hai lần. Thiết kế đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Client sinh Idempotency-Key cho mỗi lệnh; server lưu khoá kèm kết quả, nhận lại cùng khoá thì trả kết quả cũ"
+    },
+    {
+     "key": "B",
+     "text": "Tắt tự động gửi lại ở app"
+    },
+    {
+     "key": "C",
+     "text": "Tăng thời gian chờ lên 60 giây"
+    },
+    {
+     "key": "D",
+     "text": "Kiểm tra trùng theo (tài khoản, số tiền) trong 5 phút"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Idempotency key phân biệt 'gửi lại cùng một lệnh' với 'hai lệnh giống nhau'.",
+   "dang": "B-he-thong",
+   "trap": "Chặn trùng theo (tài khoản, số tiền) sẽ chặn nhầm khi khách cố ý chuyển hai lần cùng số tiền."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "`giao_dich` là list tuple `(tai_khoan, loai, so_tien)` với `loai` là `'nap'` hoặc `'rut'`. Viết hàm `so_du_cuoi(giao_dich)` trả dict số dư cuối của từng tài khoản (bắt đầu từ 0). Lệnh rút vượt số dư hiện tại thì **bỏ qua**. Tài khoản đã xuất hiện trong giao dịch luôn có trong kết quả.\n\nVí dụ: `[('A','nap',100), ('A','rut',30), ('B','rut',50), ('A','rut',100), ('B','nap',20)]` → `{'A': 70, 'B': 20}`.",
+   "modelAnswer": "def so_du_cuoi(giao_dich):\n    so_du = {}\n    for tk, loai, tien in giao_dich:\n        hien = so_du.get(tk, 0)\n        if loai == \"nap\":\n            hien += tien\n        elif loai == \"rut\" and tien <= hien:\n            hien -= tien\n        so_du[tk] = hien\n    return so_du",
+   "rubric": [
+    "Dùng dict lưu số dư, mặc định 0 bằng get",
+    "Xử lý đúng nạp và rút",
+    "Bỏ qua lệnh rút vượt số dư (không để số dư âm)",
+    "Tài khoản chỉ có lệnh rút thất bại vẫn xuất hiện với số dư 0",
+    "Đúng tên hàm, trả dict"
+   ],
+   "dang": "B-code-tay",
+   "trap": "Bẫy biên: rút đúng bằng số dư thì **được** (≤), rút trên tài khoản chưa có tiền thì bỏ qua nhưng tài khoản vẫn phải có trong kết quả."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "tu-luan",
+   "points": 6.5,
+   "prompt": "DataFrame `gd` có cột `kh`, `so_tien`, `trang_thai` (`'thanh_cong'` hoặc `'that_bai'`). Viết hàm `top_khach(gd, k)` trả DataFrame gồm `kh`, `tong` (tổng tiền giao dịch thành công), `so_gd` (số giao dịch thành công) của **k khách** có `tong` lớn nhất; hoà thì theo `kh` tăng dần; index từ 0. Không lặp từng dòng.",
+   "modelAnswer": "def top_khach(gd, k):\n    ok = gd[gd[\"trang_thai\"] == \"thanh_cong\"]\n    out = (ok.groupby(\"kh\", as_index=False)\n             .agg(tong=(\"so_tien\", \"sum\"), so_gd=(\"so_tien\", \"size\")))\n    return (out.sort_values([\"tong\", \"kh\"], ascending=[False, True])\n               .head(k)\n               .reset_index(drop=True))",
+   "rubric": [
+    "Lọc giao dịch thành công **trước** khi gộp",
+    "groupby kh với sum và size",
+    "Sắp hai tiêu chí đúng chiều",
+    "head(k) và reset_index(drop=True)"
+   ],
+   "dang": "B-code-tay",
+   "trap": "Lọc sau khi gộp (dùng HAVING kiểu pandas) sẽ cộng cả giao dịch thất bại vào tổng."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Chính sách: hồ sơ vay dưới 50 triệu, thu nhập từ 8 triệu/tháng và không có nợ xấu thì được duyệt nhanh. Mỗi quyết định phải giải trình được với thanh tra. Cách triển khai phù hợp nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "LLM đọc hồ sơ và tự quyết định"
+    },
+    {
+     "key": "B",
+     "text": "Mô hình gradient boosting học từ quyết định cũ"
+    },
+    {
+     "key": "C",
+     "text": "Rule engine cho các điều kiện rõ ràng; ML (nếu có) chỉ dùng để xếp thứ tự ưu tiên thẩm định"
+    },
+    {
+     "key": "D",
+     "text": "Mạng nơ-ron sâu cho độ chính xác cao nhất"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Điều kiện đã tường minh và cần giải trình → quy tắc tất định là chính xác, rẻ và kiểm toán được.",
+   "dang": "C-chon-cong-cu",
+   "trap": "Đề có chữ 'AI' và 'ML' trong bối cảnh nhưng yêu cầu thật là **tất định + giải trình**."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Nhóm thử 80 cấu hình siêu tham số bằng 5-fold CV trên **toàn bộ** dữ liệu, chọn cấu hình có AUC trung bình cao nhất (0,91) và báo 0,91 là hiệu năng dự kiến khi triển khai. Nhận xét?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Bi quan vì mỗi fold ít dữ liệu hơn"
+    },
+    {
+     "key": "B",
+     "text": "Chính xác vì CV đã dùng mọi dữ liệu"
+    },
+    {
+     "key": "C",
+     "text": "Con số lạc quan vì đã dùng chính nó để chọn cấu hình; cần tập test riêng chưa từng dùng hoặc nested CV"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ sai nếu dữ liệu mất cân bằng"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Chọn cái tốt nhất trong 80 lần thử có lợi thế may mắn → điểm chọn lọc bị thiên lệch lên.",
+   "dang": "C-cv-reg",
+   "trap": "CV dùng để **chọn** thì không còn là ước lượng không thiên lệch để **báo cáo**."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Nhóm nhân bản ngẫu nhiên lớp 'vỡ nợ' (từ 3% lên 50%) trên **toàn bộ** dữ liệu rồi mới chia train/test. Recall trên test 0,95, chạy thật chỉ 0,55. Giải thích?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Do ngưỡng quyết định quá thấp"
+    },
+    {
+     "key": "B",
+     "text": "Bản sao của cùng một hồ sơ vỡ nợ nằm ở cả train và test; phải chia trước, chỉ oversample trên tập train"
+    },
+    {
+     "key": "C",
+     "text": "Do concept drift"
+    },
+    {
+     "key": "D",
+     "text": "Oversample làm mô hình underfit"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Mô hình chỉ cần 'nhớ' hồ sơ đã thấy là đoán đúng bản sao trong test → điểm test cao giả.",
+   "dang": "C-leak",
+   "trap": "Mọi bước 'nhìn' dữ liệu (scale, chọn đặc trưng, oversample) đều phải làm **sau** khi chia."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Tăng dữ liệu huấn luyện từ 10.000 lên 100.000 hồ sơ: loss train tăng nhẹ, loss validation giảm mạnh, khoảng cách giữa hai đường thu hẹp. Điều này cho thấy:",
+   "options": [
+    {
+     "key": "A",
+     "text": "Cần giảm kích thước mô hình ngay"
+    },
+    {
+     "key": "B",
+     "text": "Dữ liệu mới bị lỗi vì loss train tăng"
+    },
+    {
+     "key": "C",
+     "text": "Mô hình trước đó variance cao (overfitting); thêm dữ liệu là hướng đúng"
+    },
+    {
+     "key": "D",
+     "text": "Mô hình bị underfitting nặng"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Thêm dữ liệu khó 'học thuộc' hơn (train loss tăng nhẹ) nhưng tổng quát tốt hơn (val giảm) → đặc trưng của high variance.",
+   "dang": "C-fit",
+   "trap": "Loss train tăng nghe như xấu, nhưng điều cần nhìn là **khoảng cách** train–validation."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Mô hình phát hiện giao dịch đáng ngờ có precision 0,75 và recall 0,6. F1 xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,72"
+    },
+    {
+     "key": "B",
+     "text": "0,667"
+    },
+    {
+     "key": "C",
+     "text": "0,45"
+    },
+    {
+     "key": "D",
+     "text": "0,675"
+    }
+   ],
+   "answer": "B",
+   "explanation": "F1 = 2PR/(P + R) = 2·0,75·0,6/1,35 = 0,9/1,35 ≈ 0,667.",
+   "dang": "C-pr",
+   "trap": "0,675 là trung bình cộng; F1 là trung bình **điều hoà**, luôn ≤ trung bình cộng."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Chính sách: chỉ tự động khoá thẻ khi precision ≥ 0,90; trong các ngưỡng đạt yêu cầu, muốn recall cao nhất.\n\n| Ngưỡng | Precision | Recall |\n|---|---|---|\n| 0,3 | 0,70 | 0,92 |\n| 0,5 | 0,84 | 0,80 |\n| 0,7 | 0,91 | 0,66 |\n| 0,9 | 0,97 | 0,40 |\n\nChọn ngưỡng nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,5"
+    },
+    {
+     "key": "B",
+     "text": "0,9"
+    },
+    {
+     "key": "C",
+     "text": "0,7"
+    },
+    {
+     "key": "D",
+     "text": "0,3"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Ngưỡng đạt precision ≥ 0,90: 0,7 và 0,9. Recall cao hơn ở 0,7 (0,66 > 0,40).",
+   "dang": "C-nguong-auc",
+   "trap": "0,9 có precision cao nhất nhưng đề yêu cầu **tối đa recall** trong các ngưỡng đạt ràng buộc."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Pipeline dùng LLM trích 12 trường từ sao kê thành JSON để nạp vào hệ thống. Với few-shot prompt, 8% đầu ra sai schema (thiếu trường, sai kiểu). Cách sửa bền vững nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Nhờ nhân viên sửa tay 8% lỗi"
+    },
+    {
+     "key": "B",
+     "text": "Đầu ra có cấu trúc (JSON schema/constrained decoding) + validate, sai thì retry kèm thông báo lỗi"
+    },
+    {
+     "key": "C",
+     "text": "Tăng temperature"
+    },
+    {
+     "key": "D",
+     "text": "Thêm 10 ví dụ few-shot nữa"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Ràng buộc định dạng ở tầng giải mã và kiểm tra tự động là cách tất định.",
+   "dang": "C-llm-param",
+   "trap": "Thêm ví dụ có thể giảm lỗi nhưng không **đảm bảo** schema."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Lượng tử hoá model phân loại giao dịch xuống INT4: bộ nhớ giảm 75%, accuracy tổng giảm 0,5 điểm %, nhưng recall lớp 'gian lận' (chỉ 0,3% dữ liệu) giảm từ 0,90 xuống 0,70. Quyết định?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Triển khai và hạ ngưỡng để bù recall"
+    },
+    {
+     "key": "B",
+     "text": "Bỏ hẳn lớp gian lận khỏi mô hình"
+    },
+    {
+     "key": "C",
+     "text": "Chưa triển khai INT4: đánh giá theo từng lớp, thử INT8 hoặc lượng tử hoá có hiệu chuẩn (calibration/QAT) rồi đo lại"
+    },
+    {
+     "key": "D",
+     "text": "Triển khai vì accuracy chỉ giảm 0,5%"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Lớp hiếm nhưng quan trọng nhất bị ảnh hưởng nặng; accuracy tổng che giấu điều đó.",
+   "dang": "C-llm-hieu-nang",
+   "trap": "Con số tổng 'chỉ giảm 0,5%' là mồi nhử — luôn xem chỉ số **của lớp quan trọng**."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Semantic cache trả câu trả lời đã lưu khi cosine ≥ 0,90. Khách hỏi 'Làm sao **khoá** thẻ?' nhận câu trả lời của 'Làm sao **mở khoá** thẻ?' (cosine 0,93). Xử lý đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng TTL của cache"
+    },
+    {
+     "key": "B",
+     "text": "Hạ ngưỡng xuống 0,8 để tăng hit rate"
+    },
+    {
+     "key": "C",
+     "text": "Trúng sai do embedding gần nhau dù ý định ngược: nâng ngưỡng, kiểm tra ý định, không cache nhóm thao tác rủi ro cao"
+    },
+    {
+     "key": "D",
+     "text": "Đổi sang exact-match cho mọi câu nhưng giữ ngưỡng"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Embedding đo độ giống về chữ/chủ đề, không đảm bảo cùng ý định, nhất là thao tác đảo nghĩa.",
+   "dang": "C-cache",
+   "trap": "Hai câu chỉ khác một từ nhưng hành động ngược nhau — semantic cache không phân biệt được."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Gộp hai bộ truy xuất bằng RRF, điểm(d) = Σ 1/(60 + hạng). BM25 trả: D1, D2, D3. Vector trả: D3, D1, D4. Hai tài liệu đứng đầu sau khi gộp là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "D1 rồi D2"
+    },
+    {
+     "key": "B",
+     "text": "D1 rồi D3"
+    },
+    {
+     "key": "C",
+     "text": "D3 rồi D4"
+    },
+    {
+     "key": "D",
+     "text": "D3 rồi D1"
+    }
+   ],
+   "answer": "B",
+   "explanation": "D1 = 1/61 + 1/62 ≈ 0.03252; D3 = 1/63 + 1/61 ≈ 0.03227; D2 = 1/62; D4 = 1/63. D1 > D3 > D2 > D4.",
+   "dang": "C-rag-pipeline",
+   "trap": "D1 và D3 đều xuất hiện ở cả hai bộ; so phần còn lại 1/62 với 1/63 để phân thắng thua."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Câu trả lời của trợ lý về biểu phí được tách thành 8 nhận định; 6 nhận định suy ra được từ ngữ cảnh truy xuất, 2 nhận định về phí là tự thêm. Faithfulness bằng:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,25"
+    },
+    {
+     "key": "B",
+     "text": "1,33"
+    },
+    {
+     "key": "C",
+     "text": "0,75"
+    },
+    {
+     "key": "D",
+     "text": "0,8"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Faithfulness = 6/8 = 0,75.",
+   "dang": "C-rag-eval",
+   "trap": "0,25 là tỉ lệ nhận định **không** có căn cứ."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-agent",
+   "points": 1.25,
+   "prompt": "Tool `tao_hoa_don` có schema: `so_tien` kiểu number > 0, `tien_te` ∈ {VND, USD}. Model sinh `{\"so_tien\": \"1.500.000đ\", \"tien_te\": \"vnd\"}` và ứng dụng chạy luôn. Cách làm đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng temperature cho model linh hoạt"
+    },
+    {
+     "key": "B",
+     "text": "Để ứng dụng tự đoán và chuyển đổi"
+    },
+    {
+     "key": "C",
+     "text": "Validate tham số theo JSON Schema phía server; sai thì không chạy, trả lỗi có cấu trúc để model sửa"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ cần ghi log để kiểm tra sau"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Tham số do model sinh là dữ liệu không tin cậy; schema validation chặn sai kiểu/giá trị trước khi gây tác dụng phụ.",
+   "dang": "C-agent",
+   "trap": "'Tự đoán và chuyển đổi' nghe thân thiện nhưng có thể đọc sai 1.500.000 thành 1,5."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-agent",
+   "points": 1.25,
+   "prompt": "Agent chuyển tiền hiển thị cho nhân viên câu do chính LLM viết: 'Chuyển 500.000đ cho khách A'. Nhân viên bấm Duyệt, nhưng tham số thật của lời gọi tool là 5.000.000đ. Sửa thế nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Màn hình duyệt phải do code hiển thị đúng tham số thật của lời gọi tool, gắn với lời gọi (mã băm/nonce) để không bị tráo"
+    },
+    {
+     "key": "B",
+     "text": "Giới hạn chỉ chuyển dưới 10 triệu"
+    },
+    {
+     "key": "C",
+     "text": "Yêu cầu LLM viết mô tả cẩn thận hơn"
+    },
+    {
+     "key": "D",
+     "text": "Thêm bước LLM thứ hai kiểm tra mô tả"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Người duyệt phải thấy đúng cái sẽ được thực thi, không phải lời mô tả của chính model.",
+   "dang": "C-hitl",
+   "trap": "Hạn mức giúp giảm thiệt hại nhưng không sửa được lỗ hổng 'duyệt một đằng, chạy một nẻo'."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Canary model chấm điểm mới nhận 300 request trong 1 giờ, **không lỗi nào**. Model cũ có tỉ lệ lỗi 0,5%. Kết luận?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Model mới chắc chắn tệ hơn"
+    },
+    {
+     "key": "B",
+     "text": "Model mới tốt hơn vì 0% < 0,5%"
+    },
+    {
+     "key": "C",
+     "text": "Đủ để chuyển 100% lưu lượng"
+    },
+    {
+     "key": "D",
+     "text": "Chưa đủ: cận trên 95% của tỉ lệ lỗi ≈ 3/300 = 1%, vẫn có thể tệ hơn 0,5%"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Quy tắc số 3: 0 sự kiện trong n lần → cận trên 95% ≈ 3/n.",
+   "dang": "C-trien-khai",
+   "trap": "'0 lỗi' rất dễ bị hiểu là 'tốt hơn'; với 300 mẫu, 0,5% chỉ tương ứng 1–2 lỗi kỳ vọng."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Đặc trưng 'số tiền giao dịch' chia 3 khoảng. Tỉ lệ lúc huấn luyện: [0,4; 0,4; 0,2]. Tuần này: [0,2; 0,4; 0,4]. Với PSI = Σ (a − e)·ln(a/e) và ln 2 ≈ 0,69, PSI và kết luận là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "≈ 0.28: thay đổi lớn (> 0,25), cần điều tra"
+    },
+    {
+     "key": "B",
+     "text": "≈ −0,28: phân phối đang 'tốt lên'"
+    },
+    {
+     "key": "C",
+     "text": "≈ 0,14: thay đổi vừa"
+    },
+    {
+     "key": "D",
+     "text": "0: không đổi vì tổng tỉ lệ vẫn bằng 1"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Khoảng 1: (0,2 − 0,4)·ln(0,5) = (−0,2)(−0,69) = 0,138. Khoảng 2: 0. Khoảng 3: (0,4 − 0,2)·ln 2 = 0,138. Tổng ≈ 0,28.",
+   "dang": "C-drift",
+   "trap": "Mỗi số hạng PSI luôn ≥ 0 (âm nhân âm); PSI không bao giờ âm. 0,14 là chỉ tính một khoảng."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "So prompt mới và cũ trên cùng 50 ca: 44 ca hai bản giống nhau, 4 ca chỉ bản cũ đúng, 2 ca chỉ bản mới đúng. Kết luận hợp lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chưa đủ bằng chứng bản cũ tốt hơn: chỉ 6 ca khác nhau, chia 4–2 nằm trong dao động ngẫu nhiên; cần thêm dữ liệu"
+    },
+    {
+     "key": "B",
+     "text": "Bản cũ tốt hơn rõ rệt (4 > 2)"
+    },
+    {
+     "key": "C",
+     "text": "Bản mới tốt hơn vì ít lỗi hơn"
+    },
+    {
+     "key": "D",
+     "text": "Hai bản giống hệt nhau"
+    }
+   ],
+   "answer": "A",
+   "explanation": "So sánh cặp chỉ dựa trên các ca khác nhau (6 ca); 4–2 có xác suất xảy ra ngẫu nhiên khá cao (kiểm định dấu p ≈ 0,69).",
+   "dang": "C-eval-gate",
+   "trap": "Nhìn tổng 44 + 4 so với 44 + 2 dễ tưởng có khác biệt; đừng quên bản chất **cỡ mẫu nhỏ**."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "GPU thuê 3 USD/giờ. Batch size 1: 10 request/giây; batch size 8: 40 request/giây (p95 vẫn trong SLO). Chi phí GPU cho 1.000 request ở hai cấu hình xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "3 USD → 0,75 USD"
+    },
+    {
+     "key": "B",
+     "text": "Không đổi vì giá thuê theo giờ"
+    },
+    {
+     "key": "C",
+     "text": "0,083 USD → 0,010 USD"
+    },
+    {
+     "key": "D",
+     "text": "0,083 USD → 0,021 USD"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Batch 1: 36.000 request/giờ → 3/36 ≈ 0,083 USD/1.000. Batch 8: 144.000/giờ → 3/144 ≈ 0,021 USD/1.000 (giảm 4 lần theo throughput).",
+   "dang": "C-van-hanh-dinh-luong",
+   "trap": "Chi phí mỗi request tỉ lệ nghịch với **throughput**, không phải với batch size (8 lần)."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Mô hình gợi ý sản phẩm tài chính mới tăng NDCG@10 offline 5% trên log của hệ thống cũ, nhưng A/B 2 tuần cho tỉ lệ mở sản phẩm không đổi (khoảng tin cậy chứa 0). Giải thích hợp lý nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "NDCG không phù hợp với gợi ý"
+    },
+    {
+     "key": "B",
+     "text": "Do novelty effect làm A/B thấp đi"
+    },
+    {
+     "key": "C",
+     "text": "A/B sai vì 2 tuần là quá ngắn, offline đáng tin hơn"
+    },
+    {
+     "key": "D",
+     "text": "Log do hệ cũ tạo ra (thiên lệch chọn lọc): offline chỉ đo được trên những gì hệ cũ đã hiển thị; A/B mới là thước đo tác động"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Người dùng chỉ phản hồi trên item được hiển thị bởi hệ cũ → đánh giá offline lệch về hệ cũ.",
+   "dang": "C-san-pham",
+   "trap": "Khi offline và online mâu thuẫn, ưu tiên kết quả **thử nghiệm ngẫu nhiên**."
+  },
+  {
+   "module": "C",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 9.5,
+   "prompt": "Ngân hàng muốn hệ thống phát hiện gian lận giao dịch thẻ **thời gian thực** (quyết định trong 200 ms). Tỉ lệ gian lận khoảng 0,2%; nhãn gian lận chỉ xác nhận được sau 30–60 ngày (khiếu nại). Đề xuất: dữ liệu và nhãn, chỉ số đánh giá, cách chọn ngưỡng và hành động, triển khai, giám sát, rủi ro với khách hàng.",
+   "modelAnswer": "Dữ liệu: đặc trưng giao dịch, lịch sử thẻ, thiết bị, vị trí — chỉ dùng thông tin có tại thời điểm giao dịch; chia train/test theo thời gian; xử lý nhãn trễ (chỉ dùng giao dịch đủ 60 ngày làm nhãn).\nChỉ số: lớp hiếm nên dùng PR-AUC, precision/recall tại ngưỡng, chi phí kỳ vọng (FP: phiền khách, FN: mất tiền); không dùng accuracy.\nNgưỡng và hành động phân tầng: rủi ro thấp cho qua; vừa yêu cầu OTP/xác thực thêm; rất cao tạm chặn + gọi xác nhận. Ngưỡng chọn theo chi phí và năng lực đội xử lý.\nTriển khai: shadow so với hệ luật hiện tại → canary theo % giao dịch → mở rộng; đo tổn thất gian lận và tỉ lệ giao dịch bị chặn nhầm.\nGiám sát: drift đặc trưng/điểm (PSI) vì nhãn về chậm, tỉ lệ khiếu nại chặn nhầm, độ trễ p99; huấn luyện lại định kỳ; rollback.\nRủi ro khách hàng: chặn nhầm theo nhóm (vùng, độ tuổi), minh bạch lý do và kênh mở khoá nhanh; dữ liệu cá nhân chỉ dùng cho chống gian lận.",
+   "rubric": [
+    "Đặc trưng không rò rỉ, chia theo thời gian, xử lý nhãn trễ",
+    "Chỉ số phù hợp lớp hiếm và chi phí lỗi (không dùng accuracy)",
+    "Hành động phân tầng theo điểm rủi ro, ngưỡng theo chi phí/năng lực",
+    "Triển khai shadow → canary, đo tác động thật",
+    "Giám sát drift khi nhãn về chậm, độ trễ, rollback",
+    "Công bằng giữa nhóm khách, minh bạch và kênh khiếu nại"
+   ],
+   "dang": "E-thiet-ke",
+   "trap": "Đề cài chi tiết 'nhãn về sau 30–60 ngày' để kiểm tra bạn có nghĩ tới giám sát **không cần nhãn** (drift) và nhãn chưa chín."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "'Có lịch sử trả lương qua tài khoản 6 tháng là **điều kiện cần** để được vay tín chấp.' Ông Bình có lịch sử trả lương 6 tháng. Kết luận nào đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Ông Bình chắc chắn được vay"
+    },
+    {
+     "key": "B",
+     "text": "Không kết luận được ông Bình có được vay hay không"
+    },
+    {
+     "key": "C",
+     "text": "Ông Bình không được vay"
+    },
+    {
+     "key": "D",
+     "text": "Mọi người được vay đều có lịch sử lương ít hơn 6 tháng"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Điều kiện cần: được vay → có lịch sử 6 tháng. Biết vế sau đúng không suy ra vế trước.",
+   "dang": "D-keo-theo",
+   "trap": "'Điều kiện cần' khác 'điều kiện đủ'. Biến thể của lỗi khẳng định hậu kiện."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Phủ định đúng của: '**Mọi** giao dịch trên 100 triệu đều được **ít nhất một** nhân viên kiểm tra' là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "Mọi giao dịch trên 100 triệu đều không được kiểm tra"
+    },
+    {
+     "key": "B",
+     "text": "Có một giao dịch dưới 100 triệu được kiểm tra"
+    },
+    {
+     "key": "C",
+     "text": "Có một giao dịch trên 100 triệu không được nhân viên nào kiểm tra"
+    },
+    {
+     "key": "D",
+     "text": "Có một nhân viên không kiểm tra giao dịch nào"
+    }
+   ],
+   "answer": "C",
+   "explanation": "¬(∀ giao dịch ∃ nhân viên kiểm tra) = ∃ giao dịch ∀ nhân viên không kiểm tra = có giao dịch không ai kiểm tra.",
+   "dang": "D-phu-dinh",
+   "trap": "Điều kiện 'trên 100 triệu' được **giữ nguyên** khi phủ định; chỉ đổi lượng từ và vị từ."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Quy định: '**Mọi** tài khoản bị khoá đều đã nhận SMS thông báo.' Bốn bản ghi, mỗi bản ghi chỉ lộ một thông tin: (1) bị khoá; (2) không bị khoá; (3) đã nhận SMS; (4) chưa nhận SMS. Cần kiểm tra bản ghi nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "(1) và (3)"
+    },
+    {
+     "key": "B",
+     "text": "(2) và (4)"
+    },
+    {
+     "key": "C",
+     "text": "(1) và (4)"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ (1)"
+    }
+   ],
+   "answer": "C",
+   "explanation": "'Mọi tài khoản bị khoá đều nhận SMS' ⇔ 'nếu bị khoá thì đã nhận SMS'. Kiểm tra P (bị khoá) và không-Q (chưa nhận SMS).",
+   "dang": "D-wason",
+   "trap": "Câu 'Mọi … đều …' là một mệnh đề 'nếu… thì…' trá hình."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "A/B tính năng mới của app ngân hàng: chỉ số chính không đổi (p = 0,48). Nhóm xem thêm 16 phân khúc và thấy 'nữ 25–34 tuổi dùng Android' có p = 0,03, rồi báo cáo 'tính năng hiệu quả với nhóm này'. Đánh giá đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Nên triển khai riêng cho nhóm này ngay"
+    },
+    {
+     "key": "B",
+     "text": "P-hacking: soi 16 phân khúc thì xác suất có ít nhất một kết quả 'có ý nghĩa' do ngẫu nhiên khoảng 56%; chỉ coi là giả thuyết cần kiểm chứng"
+    },
+    {
+     "key": "C",
+     "text": "Kết luận đúng vì p = 0,03 < 0,05"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ cần hiệu chỉnh bằng cách nhân p với 2"
+    }
+   ],
+   "answer": "B",
+   "explanation": "1 − 0,95¹⁶ ≈ 0,56. Bonferroni cho 16 phép kiểm định cần p < 0,05/16 ≈ 0,003.",
+   "dang": "D-nguy-bien",
+   "trap": "Đề trình bày như một 'phát hiện thú vị' — dấu hiệu là **nhiều phân khúc được soi sau khi kết quả chính thất bại**."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Dữ liệu giao dịch được thu để **chống gian lận**. Bộ phận marketing muốn dùng chính dữ liệu này để chạy quảng cáo khoản vay cá nhân hoá. Cách làm đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Được dùng vì quảng cáo cũng có lợi cho khách"
+    },
+    {
+     "key": "B",
+     "text": "Đây là mục đích mới ngoài phạm vi đã thông báo; cần đồng ý riêng của khách (mặc định tắt) trước khi dùng"
+    },
+    {
+     "key": "C",
+     "text": "Được dùng vì dữ liệu thuộc sở hữu ngân hàng"
+    },
+    {
+     "key": "D",
+     "text": "Được dùng nếu đã ẩn tên khách"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Nguyên tắc giới hạn mục đích: dữ liệu thu cho mục đích A không tự động dùng cho mục đích B.",
+   "dang": "D-rieng-tu",
+   "trap": "'Đã ẩn tên' vẫn là dùng dữ liệu cho mục đích khác; quảng cáo cá nhân hoá cần định danh để hoạt động."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Để tránh phân biệt vùng miền, nhóm bỏ biến 'tỉnh/thành' khỏi mô hình duyệt vay nhưng giữ 'mã bưu chính 3 số đầu'. Tỉ lệ từ chối ở vùng X vẫn cao gấp đôi vùng khác. Nhận định đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Do vùng X thật sự rủi ro hơn, không cần làm gì"
+    },
+    {
+     "key": "B",
+     "text": "Mã bưu chính là biến proxy cho vùng; cần đo tương quan, đánh giá theo nhóm và xem xét bỏ/giảm ảnh hưởng của nó"
+    },
+    {
+     "key": "C",
+     "text": "Đã công bằng vì không còn dùng biến vùng"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ cần thêm lại biến tỉnh/thành để minh bạch"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Bỏ biến nhạy cảm không đủ khi biến khác mã hoá gần như cùng thông tin.",
+   "dang": "D-cong-bang",
+   "trap": "'Không dùng biến nhạy cảm' (fairness through unawareness) là cảm giác an toàn giả."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-sec",
+   "points": 1.5,
+   "prompt": "System prompt của chatbot ngân hàng có câu: 'Hạn mức duyệt nội bộ là 200 triệu, tuyệt đối không tiết lộ.' Một khách hỏi khéo và bot tiết lộ con số. Rủi ro và cách làm đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "System prompt leakage (LLM07): không đặt bí mật hay logic phân quyền trong prompt; thực thi ở tầng hệ thống"
+    },
+    {
+     "key": "B",
+     "text": "Prompt injection: chỉ cần viết cảnh báo mạnh hơn"
+    },
+    {
+     "key": "C",
+     "text": "Không có rủi ro vì đây chỉ là con số"
+    },
+    {
+     "key": "D",
+     "text": "Data poisoning: huấn luyện lại model"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Mọi thứ trong prompt có thể bị trích xuất; bí mật và quy tắc phân quyền phải nằm ở hệ thống.",
+   "dang": "D-owasp",
+   "trap": "Viết 'tuyệt đối không tiết lộ' mạnh hơn không biến prompt thành nơi lưu bí mật."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Theo EU AI Act, hệ thống nào dưới đây thuộc nhóm **rủi ro cao** (Phụ lục III)?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chatbot trả lời câu hỏi thường gặp về biểu phí"
+    },
+    {
+     "key": "B",
+     "text": "Bộ lọc thư rác của ngân hàng"
+    },
+    {
+     "key": "C",
+     "text": "AI phát hiện gian lận giao dịch tài chính"
+    },
+    {
+     "key": "D",
+     "text": "AI chấm điểm tín dụng để quyết định cho cá nhân vay"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Đánh giá khả năng tín dụng cá nhân là rủi ro cao; Phụ lục III **loại trừ** riêng trường hợp dùng để phát hiện gian lận tài chính. Chatbot là rủi ro hạn chế; lọc spam là tối thiểu.",
+   "dang": "D-ai-act",
+   "trap": "Phát hiện gian lận 'nghe' rủi ro cao vì liên quan tiền, nhưng được luật loại trừ khỏi mục chấm điểm tín dụng."
+  },
+  {
+   "module": "D",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "Một công ty cho vay tiêu dùng muốn dùng AI cá nhân hoá tin nhắn nhắc nợ: chọn giờ gửi và lời lẽ 'gây áp lực tâm lý tối đa' để tăng tỉ lệ trả nợ, đồng thời nhắn tin cho người trong danh bạ điện thoại của khách. Bạn là kỹ sư AI trong dự án. Nêu các vấn đề và đề xuất thay thế.",
+   "modelAnswer": "Vấn đề: thao túng tâm lý (dark pattern), nhắm vào người yếu thế đang gặp khó khăn tài chính; dùng danh bạ là thu thập và sử dụng dữ liệu của bên thứ ba không có sự đồng ý, vi phạm nguyên tắc tối thiểu hoá và có thể vi phạm quy định về đòi nợ; rủi ro uy tín và pháp lý.\nĐề xuất: tối ưu nhắc nợ minh bạch, tôn trọng (giờ hợp lý, nội dung rõ khoản nợ, quyền lợi, kênh hỗ trợ giãn nợ); không dùng danh bạ; cho khách chọn kênh và tần suất; đo thêm chỉ số phàn nàn/khiếu nại, không chỉ tỉ lệ trả nợ.\nQuy trình: báo lên người có thẩm quyền/pháp chế, đánh giá tác động, có con người duyệt mẫu tin nhắn và giám sát nhóm yếu thế.",
+   "rubric": [
+    "Nhận diện thao túng tâm lý/dark pattern và người yếu thế",
+    "Nêu vi phạm dữ liệu cá nhân khi dùng danh bạ (bên thứ ba, tối thiểu hoá)",
+    "Đề xuất phương án nhắc nợ minh bạch, tôn trọng, có hỗ trợ",
+    "Đề xuất chỉ số giám sát ngoài tỉ lệ trả nợ và kênh khiếu nại",
+    "Đưa lên pháp chế/người có thẩm quyền, không im lặng thực hiện"
+   ],
+   "dang": "E-dao-duc",
+   "trap": "Đề đóng khung bằng mục tiêu kinh doanh chính đáng (thu hồi nợ) — phải tách được phần mục tiêu hợp lệ và phần phương tiện vi phạm."
+  }
+ ]
+}

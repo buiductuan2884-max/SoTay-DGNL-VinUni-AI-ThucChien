@@ -176,6 +176,7 @@ mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}
 .fc-actions{display:flex;gap:10px;flex-wrap:wrap}
 .fc-actions .btn{font-size:16px;padding:12px 18px}
 #fcDecks .prac-bar{margin:8px 0}
+.trapline{border-left:3px solid var(--bad);padding-left:8px}
 input.num:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (max-width:600px){.topbar{position:static}.runbar{top:env(safe-area-inset-top,0px)}.qcard{scroll-margin-top:110px}}
 </style>
@@ -193,6 +194,7 @@ input.num:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <nav class="toc" aria-label="Mục lục">
   <b>Mục lục</b>
   <a href="#cap-toc">Lộ trình cấp tốc 6 ngày</a>
+  <a href="#nhan-dien">Nhận diện dạng đề</a>
   <a href="#de-thi">Đề thi gồm gì</a>
   <a href="#lo-trinh">Lộ trình cho người mất gốc</a>
   <a href="#phan-a">A · Toán</a>
@@ -254,11 +256,18 @@ input.num:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <tr><td>21:00–22:00</td><td>Chữa đề: lọc "Sai" và "Bỏ trống", đọc "Cách giải" và mở link "Ôn lại" của từng câu.</td><td>Hiểu hết câu sai</td></tr>
 <tr><td><b>Tối thứ 4</b></td><td><b>Đề sát thật 02</b> có hẹn giờ + chữa. Làm thêm <b>CĐ-01 → CĐ-04</b> phần A–B (câu nhận biết, thông hiểu).</td><td>≥ 60 điểm</td></tr>
 <tr><td><b>Tối thứ 5</b></td><td><b>ĐGNL-01</b> (bộ anh Hiếu) có hẹn giờ + chữa. Làm lại bài Code viết tay lần hai.</td><td></td></tr>
-<tr><td><b>Tối thứ 6</b></td><td><b>ĐGNL-02</b> hoặc <b>ĐGNL-03</b> + chữa. Đọc lại mục <a href="#d-sec">An toàn LLM</a> và <a href="#d-eth">dữ liệu, công bằng</a>.</td><td></td></tr>
-<tr><td><b>Thứ 7</b></td><td>Không làm đề mới. Làm lại các câu đã sai (lọc "Sai" ở kết quả cũ), đọc lại công thức tô vàng trong sổ tay, ngủ sớm.</td><td></td></tr>
+<tr><td><b>Tối thứ 6</b></td><td><b>Đề sát thật 03</b> và <b>04</b> có hẹn giờ (có thể làm một đề rồi chữa ngay). Sau mỗi đề, đọc mục "Dạng bài bạn hay sai" và bảng <a href="#nhan-dien">Nhận diện dạng đề</a>.</td><td>Mỗi đề ≥ 60 điểm</td></tr>
+<tr><td><b>Thứ 7</b></td><td>Sáng: <b>Đề sát thật 06</b> và <b>07</b> (nhiều câu nhận biết, lấy lại tự tin). Chiều: <b>05</b> hoặc <b>08</b>. Tối: <b>Đề 09</b> nếu còn sức (khó nhất), còn không thì chỉ làm lại câu sai và lướt Flashcard "Chưa thuộc". Ngủ sớm.</td><td>Hiểu hết các bẫy đã gặp</td></tr>
 <tr><td><b>Sáng CN</b></td><td>30 phút đọc lại công thức tô vàng Phần A và khung tự luận. Mang theo bút, không cần ôn thêm.</td><td></td></tr>
 </tbody></table></div>
 <p><b>Mẹo làm bài:</b> làm Phần D và các câu nhận biết trước để chắc điểm; câu tự luận và code <b>không bỏ trống</b>, viết đủ ý theo khung là có điểm thành phần; câu tính toán thì ghi từng bước.</p>
+</section>
+
+<section id="nhan-dien">
+<h2>Nhận diện dạng đề</h2>
+<p class="sec-intro">78 dạng bài rút ra từ 6 đề ĐGNL của anh Hiếu và 9 đề sát thật. Đề thật hay "gói" một dạng quen trong bối cảnh lạ (ngân hàng, bệnh viện, nhà máy) hoặc đảo câu hỏi — đọc cột <b>dấu hiệu</b> để nhận ra dạng rồi áp công thức ở mục ôn tập. Mỗi câu trong 7 đề sát thật 03–09 đều ghi dạng và bẫy sau khi nộp bài.</p>
+<div id="dangTable"></div>
+<p><b>5 kiểu đánh tráo hay gặp:</b> (1) đảo điều kiện — hỏi P(B|A) thay vì P(A|B), NPV thay vì PPV, giá gốc thay vì giá sau giảm; (2) con số "mồi" đẹp — accuracy tổng, 0 lỗi trên mẫu nhỏ, p = 0,03 ở một phân khúc; (3) đáp án "đúng một nửa" — sửa được một triệu chứng nhưng bỏ sót triệu chứng thứ hai mà đề cài; (4) chi tiết đánh lạc hướng — "cùng số chiều", "đã có backoff", "dict tra O(1)"; (5) đổi vỏ logic — "chỉ… mới…", "điều kiện cần", "mọi… đều…" đều là "nếu… thì…" trá hình.</p>
 </section>
 
 <section id="de-thi">
@@ -786,6 +795,7 @@ s.mean(), s.fillna(0).mean(), s.isna().sum()</code></pre>
 <script>
 const LEVELS={"A":[11,20,30,15],"B":[17,30,37,15],"C":[26,42,39,24],"D":[9,16,19,10]};
 const EXAMS=/*EXAMS*/;
+const DANG=/*DANG*/;
 const NAMES={A:'Toán',B:'Code',C:'AI',D:'Logic'};
 const TYPES={mcq:'Trắc nghiệm',numeric:'Điền số',output:'Đoán output',code:'Code viết tay',essay:'Tự luận'};
 const LEVELS_VI={'nhan-biet':'Nhận biết','thong-hieu':'Thông hiểu','van-dung':'Vận dụng','van-dung-cao':'Vận dụng cao'};
@@ -882,6 +892,13 @@ document.addEventListener('click',e=>{
   if(go(id,true)){e.preventDefault();try{history.replaceState(null,'','#'+id);}catch(_){}}
 });
 
+/* ---------- bảng nhận diện dạng đề ---------- */
+(function(){
+  const parts={A:'A · Toán',B:'B · Code',C:'C · AI',D:'D · Logic'};
+  $('dangTable').innerHTML=Object.keys(parts).map(p=>'<h3>'+parts[p]+'</h3><div class="tbl"><table><thead><tr><th>Dạng bài</th><th>Dấu hiệu trong đề</th><th>Ôn ở mục</th></tr></thead><tbody>'+
+    Object.entries(DANG).filter(([k,d])=>d.phan===p).map(([k,d])=>'<tr><td>'+esc(d.ten)+'</td><td>'+esc(d.dau_hieu)+'</td><td><a href="#'+d.sec+'">'+esc(secTitle(d.sec)||d.sec)+'</a></td></tr>').join('')+'</tbody></table></div>').join('');
+})();
+
 /* ---------- level bars (sổ tay) ---------- */
 (function(){
   const box=$('levelBars'), cols=['var(--nb)','var(--th)','var(--vd)','var(--vdc)'];
@@ -968,13 +985,13 @@ function start(id,timed){
   saveAtt(); filter='all'; renderRun(); window.scrollTo(0,0);
 }
 function grade(ex,a){
-  const r={auto:0,autoMax:0,self:0,selfMax:0,per:{},weak:{},right:0,wrong:0,blank:0};
+  const r={auto:0,autoMax:0,self:0,selfMax:0,per:{},weak:{},weakD:{},right:0,wrong:0,blank:0};
   ex.questions.forEach((q,i)=>{
     const p=r.per[q.module]||(r.per[q.module]=[0,0]); p[1]+=q.points;
     if(autoGraded(q)){
       r.autoMax+=q.points; const v=a.ans[i];
       if(isRight(q,v)){r.auto+=q.points;p[0]+=q.points;r.right++;}
-      else{ blank(v)?r.blank++:r.wrong++; const s=secOf(q); r.weak[s]=(r.weak[s]||0)+1; }
+      else{ blank(v)?r.blank++:r.wrong++; const s=secOf(q); r.weak[s]=(r.weak[s]||0)+1; if(DANG[q.dang]) r.weakD[q.dang]=(r.weakD[q.dang]||0)+1; }
     } else { r.selfMax+=q.points; const got=selfScore(q,a.self[i]); r.self+=got; p[0]+=got; }
   });
   r.total=r.auto+r.self; r.max=r.autoMax+r.selfMax; return r;
@@ -1064,11 +1081,13 @@ function renderScore(ex){
   const g=grade(ex,att), mins=Math.round((att.end-att.start)/60000);
   const parts=Object.keys(g.per).sort().map(m=>{const [a,b]=g.per[m];return '<div class="bar-row"><span>'+m+' · '+esc(partName(m))+'</span><div class="bar"><i style="width:'+(b?a/b*100:0)+'%;background:var(--accent)"></i></div><span class="note">'+fmt(a)+'/'+fmt(b)+'</span></div>';}).join('');
   const weak=Object.entries(g.weak).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const weakD=Object.entries(g.weakD).sort((a,b)=>b[1]-a[1]).slice(0,6);
   $('scorePanel').innerHTML='<div class="big">'+fmt(g.total)+' / '+fmt(g.max)+'</div>'+
     '<p class="note">Chấm tự động '+fmt(g.auto)+'/'+fmt(g.autoMax)+' ('+g.right+' đúng, '+g.wrong+' sai, '+g.blank+' bỏ trống) · Code và tự luận tự chấm '+fmt(g.self)+'/'+fmt(g.selfMax)+' · Làm trong '+mins+' phút</p>'+
     (g.selfMax?'<p class="note">Điểm code và tự luận tính khi bạn tick rubric ở từng câu bên dưới.</p>':'')+
     '<div class="bars">'+parts+'</div>'+
-    (weak.length?'<h4>Nên ôn lại</h4><ul class="fl">'+weak.map(([s,n])=>'<li><a href="#'+s+'">'+esc(secTitle(s))+'</a> · '+n+' câu sai hoặc bỏ trống</li>').join('')+'</ul>':'<p>Không sai câu chấm tự động nào.</p>');
+    (weak.length?'<h4>Nên ôn lại</h4><ul class="fl">'+weak.map(([s,n])=>'<li><a href="#'+s+'">'+esc(secTitle(s))+'</a> · '+n+' câu sai hoặc bỏ trống</li>').join('')+'</ul>':'<p>Không sai câu chấm tự động nào.</p>')+
+    (weakD.length?'<h4>Dạng bài bạn hay sai</h4><ul class="fl">'+weakD.map(([k,n])=>'<li><b>'+esc(DANG[k].ten)+'</b> · '+n+' câu · <a href="#'+DANG[k].sec+'">ôn lại</a> · <a href="#nhan-dien">dấu hiệu nhận ra</a></li>').join('')+'</ul>':'');
 }
 function renderList(ex){
   const done=att.submitted, nav=[], cards=[]; let cur='';
@@ -1098,7 +1117,8 @@ function qcard(q,i,st){
   const done=att.submitted, v=att.ans[i];
   const pill=done?(autoGraded(q)?(st==='r'?'<span class="status r">Đúng</span>':st==='w'?'<span class="status w">Sai</span>':'<span class="status w">Bỏ trống</span>'):'<span class="status s">Tự chấm</span>'):'';
   let h='<div class="qcard" id="q-'+i+'"><div class="qmeta"><span>Câu '+(i+1)+'</span><span>'+TYPES[q.type]+'</span>'+(LEVELS_VI[q.level]?'<span>'+LEVELS_VI[q.level]+'</span>':'')+'<span>'+fmt(q.points)+' điểm</span>'+pill+'</div><div class="qtext">'+md(q.prompt)+'</div>';
-  const sec=secOf(q), review='<p><b>Ôn lại trong sổ tay:</b> <a href="#'+sec+'">'+esc(secTitle(sec))+'</a></p>';
+  const dg=DANG[q.dang], dangBox=(dg?'<p><b>Dạng bài:</b> '+esc(dg.ten)+' · <i>dấu hiệu nhận ra:</i> '+esc(dg.dau_hieu)+'</p>':'')+(q.trap?'<p class="trapline"><b>Bẫy trong câu:</b> '+inline(q.trap)+'</p>':'');
+  const sec=secOf(q), review=dangBox+'<p><b>Ôn lại trong sổ tay:</b> <a href="#'+sec+'">'+esc(secTitle(sec))+'</a></p>';
   const longBox=q.long?'<details class="long" data-i="'+i+'"><summary>Giải thích chi tiết</summary><div class="mdx"></div></details>':'';
   const why=q.explanation?'<div><b>Cách giải:</b> '+md(q.explanation)+'</div>':'';
   const mist=()=>{const m=(q.mistakes||[]).find(x=>q.type==='numeric'?Math.abs(parseNum(v)-Number(x.value))<=tolOf(q)+1e-9:normOut(x.value,q.ignoreCase)===normOut(v,q.ignoreCase));

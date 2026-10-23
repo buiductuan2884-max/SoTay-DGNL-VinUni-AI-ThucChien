@@ -1,0 +1,1595 @@
+{
+ "title": "Đề sát thật 08 · Sản xuất",
+ "description": "Ngữ cảnh nhà máy, kiểm lỗi, bảo trì. Nhiều câu kiểm tra 'đúng một nửa': đạt độ trễ mà hỏng lỗi hiếm, chỉ số tổng tăng mà lát cắt quan trọng tụt.",
+ "durationMinutes": 90,
+ "questions": [
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "a-tile",
+   "points": 1.5,
+   "prompt": "Mỗi máy đóng gói xử lý 1.200 sản phẩm/giờ. Ca làm việc 5 giờ phải đóng gói 9.000 sản phẩm. Cần tối thiểu bao nhiêu máy?",
+   "options": [
+    {
+     "key": "A",
+     "text": "1"
+    },
+    {
+     "key": "B",
+     "text": "1,5"
+    },
+    {
+     "key": "C",
+     "text": "3"
+    },
+    {
+     "key": "D",
+     "text": "2"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Một máy làm 1.200 × 5 = 6.000 sản phẩm/ca. 9.000/6.000 = 1,5 → làm tròn **lên** 2 máy.",
+   "dang": "A-tile-dai-so",
+   "trap": "Số máy phải là số nguyên và làm tròn lên; 1,5 máy không chạy được."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-dstt",
+   "points": 1.5,
+   "prompt": "Nhóm hiệu chuẩn cảm biến giải hồi quy tuyến tính bằng phương trình chuẩn w = (XᵀX)⁻¹Xᵀy trên dữ liệu float32. Phân tích SVD cho σ_max/σ_min của X là 10⁴. Kết quả hệ số rất không ổn định. Cách xử lý đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Nghịch đảo XᵀX hai lần để kiểm tra"
+    },
+    {
+     "key": "B",
+     "text": "Dùng float16 cho nhanh"
+    },
+    {
+     "key": "C",
+     "text": "Tăng số vòng lặp gradient descent"
+    },
+    {
+     "key": "D",
+     "text": "Giải bằng QR/SVD (lstsq) trên float64 thay vì nghịch đảo XᵀX, vì điều kiện số của XᵀX là (10⁴)² = 10⁸"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Tạo XᵀX bình phương điều kiện số; với float32 (~7 chữ số chính xác) thì 10⁸ làm mất hết độ chính xác.",
+   "dang": "A-hoi-quy",
+   "trap": "Điều kiện số của XᵀX là **bình phương** của X — chi tiết hay bị bỏ qua."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "a-gt",
+   "points": 1.5,
+   "prompt": "Loss của mô hình (đặc trưng chưa chuẩn hoá) xấp xỉ bậc hai với Hessian có trị riêng 2 và 40. Chạy gradient descent với η = 0,1 thì loss dao động mạnh và tăng dần. Giải thích và cách sửa?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Phân kỳ theo hướng có trị riêng 2"
+    },
+    {
+     "key": "B",
+     "text": "η quá nhỏ nên hội tụ chậm"
+    },
+    {
+     "key": "C",
+     "text": "Giới hạn là η < 2/2 = 1 nên η = 0,1 là an toàn"
+    },
+    {
+     "key": "D",
+     "text": "Phân kỳ theo hướng có trị riêng 40 vì η > 2/40 = 0,05; giảm η dưới 0,05 và chuẩn hoá đặc trưng"
+    }
+   ],
+   "answer": "D",
+   "explanation": "GD trên hàm bậc hai hội tụ khi η < 2/λ_max. λ_max = 40 → η < 0,05. Chuẩn hoá đặc trưng làm các trị riêng gần nhau hơn.",
+   "dang": "A-gd",
+   "trap": "Lấy trị riêng **nhỏ** nhất để tính giới hạn là sai; hướng dốc nhất quyết định."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-xs",
+   "points": 1.5,
+   "prompt": "2% sản phẩm bị lỗi. Camera AI phát hiện 95% sản phẩm lỗi và loại nhầm 3% sản phẩm tốt. Một sản phẩm vừa bị loại, xác suất nó thật sự lỗi xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "95%"
+    },
+    {
+     "key": "B",
+     "text": "66%"
+    },
+    {
+     "key": "C",
+     "text": "39%"
+    },
+    {
+     "key": "D",
+     "text": "2%"
+    }
+   ],
+   "answer": "C",
+   "explanation": "10.000 sản phẩm: 200 lỗi → 190 bị loại; 9.800 tốt → 294 bị loại nhầm. 190/484 ≈ 0.39.",
+   "dang": "A-bayes",
+   "trap": "Hơn một nửa số sản phẩm bị loại thực ra là hàng tốt — hệ quả của tỉ lệ lỗi thấp."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-dstt",
+   "points": 1.5,
+   "prompt": "PCA trên 6 chỉ số rung/nhiệt **đã chuẩn hoá** cho các trị riêng 2,4; 1,8; 0,9; 0,5; 0,3; 0,1. Cần giữ ít nhất 90% phương sai. Giữ mấy thành phần?",
+   "options": [
+    {
+     "key": "A",
+     "text": "4 thành phần (≈ 93%)"
+    },
+    {
+     "key": "B",
+     "text": "5 thành phần (98%)"
+    },
+    {
+     "key": "C",
+     "text": "2 thành phần (70%)"
+    },
+    {
+     "key": "D",
+     "text": "3 thành phần (85%)"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Tổng = 6. Cộng dồn: 2,4 (40%), 4,2 (70%), 5,1 (85%), 5,6 (≈ 93%) → 4 thành phần là số nhỏ nhất đạt ≥ 90%.",
+   "dang": "A-tri-rieng",
+   "trap": "3 thành phần đạt 85% — gần nhưng **chưa** đạt ngưỡng."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "a-dstt",
+   "points": 1.5,
+   "prompt": "Vector trọng số w = (−3, 4, 0, 12). Chuẩn L1 và chuẩn L2 của w là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "L1 = 19; L2 = 169"
+    },
+    {
+     "key": "B",
+     "text": "L1 = 13; L2 = 13"
+    },
+    {
+     "key": "C",
+     "text": "L1 = 19; L2 = 13"
+    },
+    {
+     "key": "D",
+     "text": "L1 = 13; L2 = 19"
+    }
+   ],
+   "answer": "C",
+   "explanation": "L1 = |−3| + 4 + 0 + 12 = 19. L2 = √(9 + 16 + 0 + 144) = √169 = 13.",
+   "dang": "A-dot-cosine",
+   "trap": "L1 lấy **trị tuyệt đối** (−3 thành 3); 169 là quên lấy căn."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-tile",
+   "points": 1.5,
+   "prompt": "Hệ thống camera AI tốn cố định 30 triệu/tháng; xử lý mỗi sản phẩm tốn thêm 200đ. Mỗi tháng kiểm 100.000 sản phẩm. Mỗi sản phẩm lỗi được phát hiện sớm tiết kiệm 50.000đ. Cần phát hiện ít nhất bao nhiêu sản phẩm lỗi mỗi tháng để hoà vốn?",
+   "options": [
+    {
+     "key": "A",
+     "text": "400"
+    },
+    {
+     "key": "B",
+     "text": "1.000"
+    },
+    {
+     "key": "C",
+     "text": "2.000"
+    },
+    {
+     "key": "D",
+     "text": "600"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Chi phí tháng = 30 triệu + 100.000 × 200 = 50 triệu. 50.000.000/50.000 = 1.000 sản phẩm.",
+   "dang": "A-kinh-te",
+   "trap": "600 là quên chi phí biến đổi (30 triệu/50.000)."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-xs",
+   "points": 1.5,
+   "prompt": "Số lần dừng máy X mỗi ca có phân phối P(0) = 0,5; P(1) = 0,3; P(2) = 0,2. Mỗi lần dừng mất 20 phút. Kỳ vọng và phương sai của **thời gian dừng** (phút) mỗi ca là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "14 phút; 244 phút²"
+    },
+    {
+     "key": "B",
+     "text": "14 phút; 12,2 phút²"
+    },
+    {
+     "key": "C",
+     "text": "14 phút; 61 phút²"
+    },
+    {
+     "key": "D",
+     "text": "0,7 phút; 0,61 phút²"
+    }
+   ],
+   "answer": "A",
+   "explanation": "E[X] = 0,3 + 0,4 = 0,7; E[X²] = 0,3 + 0,8 = 1,1; Var(X) = 1,1 − 0,49 = 0,61. T = 20X: E = 14; Var = 20²·0,61 = 244.",
+   "dang": "A-kyvong",
+   "trap": "Phương sai nhân với **bình phương** hệ số (400), không nhân 20 (12,2)."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-xs",
+   "points": 1.5,
+   "prompt": "Đường kính trục ~ N(50; 0,2²) mm. Dung sai cho phép 49,6–50,4 mm. Tỉ lệ trục nằm **ngoài** dung sai xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "5%"
+    },
+    {
+     "key": "B",
+     "text": "0,3%"
+    },
+    {
+     "key": "C",
+     "text": "2,5%"
+    },
+    {
+     "key": "D",
+     "text": "32%"
+    }
+   ],
+   "answer": "A",
+   "explanation": "49,6 và 50,4 cách trung bình 0,4 = 2σ. Trong ±2σ có ~95% → ngoài ~5% (cả hai phía).",
+   "dang": "A-phan-phoi",
+   "trap": "2,5% chỉ tính một phía; 32% là ngoài ±1σ."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "12 giá trị nhiệt độ (°C) đã sắp xếp: 10, 12, 12, 13, 14, 15, 15, 16, 17, 18, 30, 45. Dùng quy tắc Tukey (Q1, Q3 là trung vị của nửa dưới và nửa trên; ngoại lai nếu > Q3 + 1,5·IQR). Có bao nhiêu điểm ngoại lai phía trên?",
+   "options": [
+    {
+     "key": "A",
+     "text": "2 điểm: 30 và 45 (ngưỡng trên 25)"
+    },
+    {
+     "key": "B",
+     "text": "3 điểm: 18, 30 và 45"
+    },
+    {
+     "key": "C",
+     "text": "0 điểm"
+    },
+    {
+     "key": "D",
+     "text": "1 điểm: 45"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Nửa dưới 10…15 → Q1 = (12 + 13)/2 = 12,5. Nửa trên 15…45 → Q3 = (17 + 18)/2 = 17,5. IQR = 5. Ngưỡng = 17,5 + 7,5 = 25.",
+   "dang": "A-trungvi-p95",
+   "trap": "Ngoại lai lớn (45) kéo trung bình nhưng không ảnh hưởng tứ phân vị — 30 cũng vượt ngưỡng."
+  },
+  {
+   "module": "A",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 5,
+   "prompt": "Kỹ sư hiệu chuẩn cảm biến có 4 cặp (x = giá trị cảm biến, y = giá trị chuẩn): (1, 2), (2, 3), (3, 5), (4, 6).\n\n(a) Tính hệ số góc và hệ số chặn của đường hồi quy tuyến tính bình phương nhỏ nhất y = a + bx.\n(b) Dự đoán y khi x = 5.\n(c) Tính MSE trên 4 điểm này.",
+   "modelAnswer": "(a) x̄ = 2,5; ȳ = 4. Σ(x − x̄)(y − ȳ) = (−1,5)(−2) + (−0,5)(−1) + (0,5)(1) + (1,5)(2) = 7. Σ(x − x̄)² = 5. b = 7/5 = 1,4; a = 4 − 1,4·2,5 = 0,5.\n(b) ŷ(5) = 0,5 + 1,4·5 = 7,5.\n(c) Dự đoán: 1,9; 3,3; 4,7; 6,1. Phần dư: 0,1; −0,3; 0,3; −0,1. SSE = 0,01 + 0,09 + 0,09 + 0,01 = 0,2. MSE = 0,05.",
+   "rubric": [
+    "Tính đúng trung bình và Σ(x − x̄)(y − ȳ) = 7, Σ(x − x̄)² = 5",
+    "Ra b = 1,4 và a = 0,5",
+    "Dự đoán đúng 7,5",
+    "Tính đúng phần dư và MSE = 0,05"
+   ],
+   "dang": "E-toan",
+   "trap": "Hay quên trừ trung bình trước khi nhân (dùng Σxy thay cho Σ(x − x̄)(y − ȳ))."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "```python\na = np.array([1, 2, 3])[:, None]\nb = np.array([10, 20])\nc = a + b\nprint(c.shape, c[2, 1])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`(3,) 23`"
+    },
+    {
+     "key": "B",
+     "text": "`(2, 3) 23`"
+    },
+    {
+     "key": "C",
+     "text": "Báo lỗi broadcasting"
+    },
+    {
+     "key": "D",
+     "text": "`(3, 2) 23`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "a có shape (3, 1), b có (2,) → broadcast thành (3, 2). c[2, 1] = a[2] + b[1] = 3 + 20 = 23.",
+   "dang": "B-numpy",
+   "trap": "`[:, None]` thêm một trục, biến vector thành cột (3, 1)."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "Nhà máy ghi 50 triệu dòng log mỗi giờ, mỗi dòng có `severity`. Cần 10 dòng nghiêm trọng nhất, bộ nhớ hạn chế. Cách hiệu quả nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Dùng set để khử trùng rồi lấy 10 phần tử đầu"
+    },
+    {
+     "key": "B",
+     "text": "Duyệt luồng một lần, giữ min-heap kích thước 10: thời gian O(N log 10), bộ nhớ O(10)"
+    },
+    {
+     "key": "C",
+     "text": "Đọc hết vào list rồi sort: O(N log N), bộ nhớ O(N)"
+    },
+    {
+     "key": "D",
+     "text": "Hai vòng lặp so từng cặp: O(N²)"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Heap nhỏ chỉ giữ top-k hiện tại; mỗi phần tử mới so với đỉnh heap.",
+   "dang": "B-bigo",
+   "trap": "Sort toàn bộ đúng nhưng tốn bộ nhớ O(N) — vi phạm ràng buộc đề cho."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "```python\ns = pd.Series([1, 2, 3, 4, 5])\nprint(s.rolling(3).mean().tolist())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[nan, nan, 2.0, 3.0, 4.0]`"
+    },
+    {
+     "key": "B",
+     "text": "`[2.0, 3.0, 4.0]`"
+    },
+    {
+     "key": "C",
+     "text": "`[1.0, 1.5, 2.0, 3.0, 4.0]`"
+    },
+    {
+     "key": "D",
+     "text": "`[2.0, 3.0, 4.0, nan, nan]`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Cửa sổ 3 chỉ đủ từ vị trí thứ 3; hai vị trí đầu là NaN. Kết quả giữ đúng độ dài và căn theo cuối cửa sổ.",
+   "dang": "B-pd-time",
+   "trap": "[1,0; 1,5; …] chỉ đúng khi đặt min_periods=1; cửa sổ mặc định nhìn về **quá khứ**."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "```python\ndf = pd.DataFrame({\"may\": [\"M1\", \"M1\", \"M2\", \"M1\"], \"ca\": [1, 1, 2, 2]})\nprint(df.groupby(\"may\")[\"ca\"].agg([\"count\", \"nunique\"]).loc[\"M1\"].tolist())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[2, 3]`"
+    },
+    {
+     "key": "B",
+     "text": "`[3, 3]`"
+    },
+    {
+     "key": "C",
+     "text": "`[2, 2]`"
+    },
+    {
+     "key": "D",
+     "text": "`[3, 2]`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "M1 có 3 dòng (count = 3) thuộc 2 ca khác nhau (nunique = 2).",
+   "dang": "B-pd-groupby",
+   "trap": "count đếm số dòng không thiếu; nunique đếm số **giá trị khác nhau**."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "Bảng `don` có `ma_may` kiểu số nguyên (đọc từ CSDL); bảng `may` có `ma_may` kiểu chuỗi (đọc từ JSON). Lệnh `don.merge(may, on=\"ma_may\")` sẽ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chạy được và nhân đôi số dòng"
+    },
+    {
+     "key": "B",
+     "text": "Chạy được nhưng trả về 0 dòng"
+    },
+    {
+     "key": "C",
+     "text": "Tự chuyển kiểu và ghép đúng"
+    },
+    {
+     "key": "D",
+     "text": "Báo lỗi vì hai cột khoá khác kiểu; cần ép cùng kiểu trước khi merge"
+    }
+   ],
+   "answer": "D",
+   "explanation": "pandas từ chối merge cột số với cột chuỗi (ValueError) để tránh ghép sai âm thầm.",
+   "dang": "B-pd-merge",
+   "trap": "Lỗi này thường gặp khi dữ liệu đến từ hai nguồn khác nhau — kiểm tra dtype trước khi ghép."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "b-sql",
+   "points": 1.25,
+   "prompt": "Bảng `ca(id)` có 3 dòng (sáng, chiều, đêm), bảng `may(id)` có 5 dòng. `SELECT COUNT(*) FROM ca CROSS JOIN may;` trả về:",
+   "options": [
+    {
+     "key": "A",
+     "text": "15"
+    },
+    {
+     "key": "B",
+     "text": "3"
+    },
+    {
+     "key": "C",
+     "text": "8"
+    },
+    {
+     "key": "D",
+     "text": "5"
+    }
+   ],
+   "answer": "A",
+   "explanation": "CROSS JOIN ghép mọi dòng bảng này với mọi dòng bảng kia: 3 × 5 = 15.",
+   "dang": "B-sql",
+   "trap": "8 là cộng thay vì nhân."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nfrom collections import defaultdict\ng = defaultdict(list)\nfor may, loi in [(\"M1\", \"nhiet\"), (\"M2\", \"rung\"), (\"M1\", \"rung\")]:\n    g[may].append(loi)\nprint(dict(g), g[\"M3\"])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "Báo lỗi KeyError: 'M3'"
+    },
+    {
+     "key": "B",
+     "text": "`{'M1': ['rung'], 'M2': ['rung']} []`"
+    },
+    {
+     "key": "C",
+     "text": "`{'M1': ['nhiet', 'rung'], 'M2': ['rung'], 'M3': []} []`"
+    },
+    {
+     "key": "D",
+     "text": "`{'M1': ['nhiet', 'rung'], 'M2': ['rung']} []`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "defaultdict tự tạo list rỗng khi truy cập khoá mới nên g['M3'] không lỗi. dict(g) được tính **trước** g['M3'] nên chưa có M3.",
+   "dang": "B-dict-str",
+   "trap": "Truy cập khoá thiếu trên defaultdict **tạo** khoá đó — tác dụng phụ dễ gây bug khi chỉ muốn kiểm tra."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\na = list(range(10))\nprint(a[::-1][::3])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[9, 6, 3]`"
+    },
+    {
+     "key": "B",
+     "text": "`[7, 4, 1]`"
+    },
+    {
+     "key": "C",
+     "text": "`[0, 3, 6, 9]`"
+    },
+    {
+     "key": "D",
+     "text": "`[9, 6, 3, 0]`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Đảo: [9, 8, …, 0]; lấy bước 3 từ đầu: 9, 6, 3, 0.",
+   "dang": "B-slicing",
+   "trap": "Đảo trước rồi mới cắt bước — thứ tự thao tác quan trọng."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nimport re\nprint(re.findall(r\"(M\\d+):(\\d+)C\", \"M1:85C M2:90C M10:70F\"))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[('M1', '85'), ('M2', '90')]`"
+    },
+    {
+     "key": "B",
+     "text": "`[('M1', '85'), ('M2', '90'), ('M10', '70')]`"
+    },
+    {
+     "key": "C",
+     "text": "`['M1:85C', 'M2:90C']`"
+    },
+    {
+     "key": "D",
+     "text": "`['M1', '85', 'M2', '90']`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Có hai nhóm nên mỗi lần khớp trả một tuple. 'M10:70F' kết thúc bằng F nên không khớp.",
+   "dang": "B-regex",
+   "trap": "findall với nhiều nhóm trả list **tuple**, không trả chuỗi khớp đầy đủ."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\ndef f():\n    try:\n        return 1\n    finally:\n        return 2\n\nprint(f())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`1` rồi `2`"
+    },
+    {
+     "key": "B",
+     "text": "Báo lỗi SyntaxError"
+    },
+    {
+     "key": "C",
+     "text": "`2`"
+    },
+    {
+     "key": "D",
+     "text": "`1`"
+    }
+   ],
+   "answer": "C",
+   "explanation": "finally luôn chạy; `return` trong finally **ghi đè** giá trị trả về của try.",
+   "dang": "B-py-nangcao",
+   "trap": "Đây là lý do không nên đặt return trong finally — nó nuốt cả ngoại lệ."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nimport copy\ncfg = {\"may\": [\"M1\"], \"nguong\": 80}\na = copy.copy(cfg)\nb = copy.deepcopy(cfg)\ncfg[\"may\"].append(\"M2\")\ncfg[\"nguong\"] = 90\nprint(a[\"may\"], a[\"nguong\"], b[\"may\"])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`['M1'] 80 ['M1']`"
+    },
+    {
+     "key": "B",
+     "text": "`['M1', 'M2'] 80 ['M1']`"
+    },
+    {
+     "key": "C",
+     "text": "`['M1', 'M2'] 90 ['M1']`"
+    },
+    {
+     "key": "D",
+     "text": "`['M1', 'M2'] 90 ['M1', 'M2']`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Bản sao nông a dùng chung list 'may' (thấy M2) nhưng giá trị số 'nguong' đã tách. Bản sao sâu b tách hẳn.",
+   "dang": "B-mutable",
+   "trap": "Gán lại khoá ở bản gốc không ảnh hưởng bản sao nông; **sửa** đối tượng lồng thì có."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nx = [3, 1, 2]\ny = x.sort()\nprint(y, x)\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`None [3, 1, 2]`"
+    },
+    {
+     "key": "B",
+     "text": "`None [1, 2, 3]`"
+    },
+    {
+     "key": "C",
+     "text": "`[1, 2, 3] [1, 2, 3]`"
+    },
+    {
+     "key": "D",
+     "text": "`[1, 2, 3] [3, 1, 2]`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "list.sort() sắp tại chỗ và trả về None; sorted(x) mới trả list mới.",
+   "dang": "B-sorted",
+   "trap": "Gán `y = x.sort()` rồi dùng y là bug kinh điển."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Phần mềm điều hành sản xuất có 400 kiểm thử E2E qua trình duyệt (chạy 45 phút, thường đỏ vì lỗi môi trường) và chỉ 30 unit test. Lỗi tính định mức nguyên liệu vẫn lọt ra production. Cải tiến đúng hướng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Bỏ toàn bộ kiểm thử tự động, kiểm tay"
+    },
+    {
+     "key": "B",
+     "text": "Thêm 200 E2E test nữa"
+    },
+    {
+     "key": "C",
+     "text": "Chạy lại E2E đến khi xanh"
+    },
+    {
+     "key": "D",
+     "text": "Dịch xuống đáy kim tự tháp: thêm nhiều unit/integration test cho logic nghiệp vụ, giữ ít E2E cho luồng quan trọng"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Logic tính toán nên được kiểm bằng unit test nhanh, ổn định; E2E chậm và dễ chập chờn.",
+   "dang": "B-review-test",
+   "trap": "Thêm E2E làm vấn đề tệ hơn: chậm hơn và chập chờn hơn."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Máy đo gửi kết quả qua API ghi thẳng vào CSDL: bình thường 8 kết quả/giây, cao điểm 40/giây, CSDL chỉ ghi được 15/giây nên mất dữ liệu. Thiết kế phù hợp?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng timeout của API"
+    },
+    {
+     "key": "B",
+     "text": "Bỏ qua kết quả khi CSDL bận"
+    },
+    {
+     "key": "C",
+     "text": "Hàng đợi bền giữa API và worker ghi CSDL; API xác nhận sau khi đưa vào hàng đợi; theo dõi độ dài tồn đọng và co giãn worker"
+    },
+    {
+     "key": "D",
+     "text": "Cho máy đo gửi lại vô hạn lần"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Hàng đợi hấp thụ đỉnh tải; tồn đọng được xử lý khi tải giảm, không mất dữ liệu.",
+   "dang": "B-he-thong",
+   "trap": "Retry vô hạn từ phía máy đo dồn thêm tải lúc cao điểm."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "Viết hàm `chuoi_vuot(xs, nguong, k)` trả về list **chỉ số bắt đầu** của mỗi đoạn có **ít nhất k** giá trị **liên tiếp** lớn hơn `nguong` (mỗi đoạn chỉ ghi một lần). Yêu cầu O(n).\n\nVí dụ: `chuoi_vuot([1, 5, 6, 7, 2, 8, 9, 1, 5, 5, 5, 5], 4, 3)` → `[1, 8]`.",
+   "modelAnswer": "def chuoi_vuot(xs, nguong, k):\n    kq, dem = [], 0\n    for i, x in enumerate(xs):\n        if x > nguong:\n            dem += 1\n            if dem == k:\n                kq.append(i - k + 1)\n        else:\n            dem = 0\n    return kq",
+   "rubric": [
+    "Đếm độ dài đoạn liên tiếp, đặt lại 0 khi gặp giá trị không vượt",
+    "Ghi chỉ số bắt đầu đúng (i − k + 1) đúng **một lần** mỗi đoạn",
+    "So sánh lớn hơn hẳn (>) đúng đề",
+    "Một lượt duyệt O(n), xử lý list rỗng"
+   ],
+   "dang": "B-code-tay",
+   "trap": "Điều kiện `dem >= k` thay vì `dem == k` sẽ ghi một đoạn nhiều lần."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "tu-luan",
+   "points": 6.5,
+   "prompt": "DataFrame `do` có cột `may`, `ts` (thời điểm, có thể chưa sắp xếp) và `nhiet`. Viết hàm `canh_bao(do, nguong)` trả về list mã máy (sắp tăng dần) có **trung bình 3 lần đo gần nhất** lớn hơn `nguong`. Máy có ít hơn 3 lần đo thì lấy trung bình các lần có.",
+   "modelAnswer": "def canh_bao(do, nguong):\n    tb = (do.sort_values(\"ts\")\n            .groupby(\"may\")\n            .tail(3)\n            .groupby(\"may\")[\"nhiet\"].mean())\n    return sorted(tb[tb > nguong].index.tolist())",
+   "rubric": [
+    "Sắp theo thời gian trước khi lấy các lần gần nhất",
+    "Lấy 3 dòng cuối mỗi máy (groupby().tail(3))",
+    "Tính trung bình theo máy và lọc > ngưỡng",
+    "Trả list mã máy đã sắp xếp"
+   ],
+   "dang": "B-code-tay",
+   "trap": "Quên sắp theo ts thì 'tail(3)' lấy 3 dòng cuối theo thứ tự ghi file, không phải 3 lần đo mới nhất."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Nhà máy muốn phát hiện sớm tiếng kêu bất thường của máy nén, nhưng **chưa có** dữ liệu nào được gán nhãn 'hỏng'. Cách tiếp cận phù hợp?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Học tăng cường"
+    },
+    {
+     "key": "B",
+     "text": "Phân loại có giám sát với nhãn hỏng/không hỏng"
+    },
+    {
+     "key": "C",
+     "text": "Hồi quy số giờ còn lại đến khi hỏng"
+    },
+    {
+     "key": "D",
+     "text": "Học không giám sát/phát hiện bất thường: học trạng thái bình thường rồi cảnh báo khi lệch xa"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Không có nhãn → không thể học có giám sát; phát hiện bất thường chỉ cần dữ liệu bình thường.",
+   "dang": "C-loai-bai",
+   "trap": "Hồi quy thời gian hỏng cũng cần nhãn (thời điểm hỏng thật)."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Mô hình dự đoán hỏng ổ trục trong 24 giờ tới dùng đặc trưng 'rung trung bình trượt 6 giờ' tính bằng cửa sổ **căn giữa** (lấy 3 giờ trước và 3 giờ sau mỗi thời điểm). Offline rất tốt, chạy thật kém. Vấn đề?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Mô hình bị underfitting"
+    },
+    {
+     "key": "B",
+     "text": "Cửa sổ 6 giờ quá ngắn"
+    },
+    {
+     "key": "C",
+     "text": "Rò rỉ thời gian: cửa sổ căn giữa dùng dữ liệu tương lai; phải dùng cửa sổ chỉ nhìn về quá khứ"
+    },
+    {
+     "key": "D",
+     "text": "Thiếu dữ liệu nhiệt độ"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Khi dự đoán thật, 3 giờ tới chưa xảy ra nên đặc trưng không tính được như lúc huấn luyện.",
+   "dang": "C-leak",
+   "trap": "Rò rỉ thời gian có thể nằm trong **cách tính đặc trưng**, không chỉ trong cách chia dữ liệu."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Dữ liệu cảm biến của 20 máy được chia ngẫu nhiên theo bản ghi; điểm test rất cao, nhưng triển khai cho **máy mới** thì kém. Cách đánh giá đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chia theo thời gian trong từng máy là đủ"
+    },
+    {
+     "key": "B",
+     "text": "Chia theo máy (GroupKFold): máy trong tập test không xuất hiện trong tập train"
+    },
+    {
+     "key": "C",
+     "text": "Oversample các máy ít dữ liệu"
+    },
+    {
+     "key": "D",
+     "text": "Tăng số fold lên 20"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Mô hình học 'đặc điểm riêng từng máy'; đánh giá phải mô phỏng việc gặp máy chưa thấy.",
+   "dang": "C-cv-reg",
+   "trap": "Chia theo thời gian vẫn để cùng máy ở cả hai tập."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Sản phẩm lỗi lọt tới khách gây thu hồi tốn kém; loại nhầm sản phẩm tốt chỉ tốn 1 phút kiểm lại bằng tay. Khi chọn ngưỡng nên ưu tiên chỉ số nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Recall của lớp 'lỗi'"
+    },
+    {
+     "key": "B",
+     "text": "Precision của lớp 'lỗi'"
+    },
+    {
+     "key": "C",
+     "text": "Specificity"
+    },
+    {
+     "key": "D",
+     "text": "Accuracy"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Bỏ sót (FN) đắt hơn nhiều so với báo nhầm (FP) → tối đa recall.",
+   "dang": "C-pr",
+   "trap": "Đề nói về chi phí chứ không nói tên chỉ số — tự quy đổi."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Mô hình trả xác suất lỗi đã hiệu chỉnh. Kiểm lại tay một sản phẩm bị gắn cờ tốn 5.000đ; một sản phẩm lỗi lọt ra ngoài gây thiệt hại 495.000đ. Ngưỡng tối ưu lý thuyết để gắn cờ là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,5"
+    },
+    {
+     "key": "B",
+     "text": "0,99"
+    },
+    {
+     "key": "C",
+     "text": "0,01"
+    },
+    {
+     "key": "D",
+     "text": "0,0101"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Gắn cờ khi p > c_FP/(c_FP + c_FN) = 5.000/500.000 = 0,01.",
+   "dang": "C-nguong-auc",
+   "trap": "0,0101 là 5.000/495.000 — quên cộng c_FP vào mẫu số."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Chuyên gia phân loại lỗi đúng 99%. Mô hình có lỗi train 12% và lỗi validation 13%. Hướng xử lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Mô hình đã tốt vì train ≈ validation"
+    },
+    {
+     "key": "B",
+     "text": "Overfitting: thêm regularization"
+    },
+    {
+     "key": "C",
+     "text": "Giảm dữ liệu train"
+    },
+    {
+     "key": "D",
+     "text": "Underfitting: tăng năng lực mô hình (mô hình mạnh hơn, thêm đặc trưng, huấn luyện lâu hơn)"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Cả hai lỗi xa mức chuyên gia (1%) và gần nhau → bias cao.",
+   "dang": "C-fit",
+   "trap": "So với **mức chuẩn** (1%), không chỉ so train với validation."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Băng chuyền đã có cảm biến quang cho tín hiệu rõ ràng mỗi khi sản phẩm đi qua. Cần đếm số sản phẩm theo ca. Cách làm phù hợp nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Dùng LLM đọc log cảm biến"
+    },
+    {
+     "key": "B",
+     "text": "Phân cụm tín hiệu cảm biến"
+    },
+    {
+     "key": "C",
+     "text": "Huấn luyện mô hình thị giác đếm sản phẩm"
+    },
+    {
+     "key": "D",
+     "text": "Đếm trực tiếp bằng logic đơn giản trên tín hiệu cảm biến"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Tín hiệu đã tất định và rõ ràng — không cần mô hình học máy.",
+   "dang": "C-chon-cong-cu",
+   "trap": "Không phải bài toán nào trong bối cảnh 'AI' cũng cần AI."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Model kiểm lỗi trên camera biên: FP32 85 MB, 120 ms/ảnh; nhịp dây chuyền đòi ≤ 60 ms. Lượng tử hoá INT8: 22 MB, 45 ms, accuracy tổng giảm 0,3 điểm %, nhưng recall lỗi hiếm 'nứt chân' giảm từ 0,92 xuống 0,71. Quyết định?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Triển khai vì đã đạt 45 ms và accuracy chỉ giảm 0,3%"
+    },
+    {
+     "key": "B",
+     "text": "Giữ FP32 và chấp nhận 120 ms"
+    },
+    {
+     "key": "C",
+     "text": "Chưa triển khai: hiệu chuẩn lượng tử hoá với đủ mẫu lỗi hiếm hoặc dùng QAT, rồi đo lại recall theo từng loại lỗi"
+    },
+    {
+     "key": "D",
+     "text": "Bỏ loại lỗi 'nứt chân' khỏi danh sách kiểm"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Lỗi hiếm nhưng nghiêm trọng bị suy giảm mạnh; accuracy tổng che giấu.",
+   "dang": "C-llm-hieu-nang",
+   "trap": "Giữ FP32 vi phạm yêu cầu nhịp; đáp án phải thoả **cả** độ trễ lẫn chất lượng."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Kỹ thuật viên hỏi trợ lý: 'mã lỗi E-217 trên máy ép X5 xử lý thế nào?'. Kho có tài liệu cho nhiều dòng máy, nhiều dòng dùng chung mã E-217 với ý nghĩa khác nhau. Thiết kế truy xuất phù hợp?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Fine-tune LLM trên toàn bộ tài liệu"
+    },
+    {
+     "key": "B",
+     "text": "Tăng top-k lên 50"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ dùng vector search"
+    },
+    {
+     "key": "D",
+     "text": "Hybrid BM25 + vector để khớp chính xác mã lỗi, kèm lọc metadata theo dòng máy X5"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Mã lỗi là token hiếm → BM25; cùng mã khác nghĩa theo dòng máy → lọc metadata.",
+   "dang": "C-rag-pipeline",
+   "trap": "Hai chi tiết trong đề (mã lỗi + nhiều dòng máy) cần **hai** biện pháp."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Hai hệ truy xuất đều trả 2 đoạn liên quan trong top-5 (recall@5 bằng nhau). Hệ A đặt chúng ở vị trí 1 và 2; hệ B đặt ở vị trí 4 và 5. Chỉ số nào phân biệt được A tốt hơn B?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Số đoạn trả về"
+    },
+    {
+     "key": "B",
+     "text": "Recall@5"
+    },
+    {
+     "key": "C",
+     "text": "MRR/nDCG (hoặc context precision có trọng số vị trí)"
+    },
+    {
+     "key": "D",
+     "text": "Precision@5"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Recall@5 và precision@5 không quan tâm thứ tự trong top-5; MRR/nDCG thưởng cho việc xếp đoạn đúng lên đầu.",
+   "dang": "C-rag-eval",
+   "trap": "Cả recall@5 lẫn precision@5 đều bằng nhau ở hai hệ — đề kiểm tra bạn biết chỉ số nào **nhạy với vị trí**."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-agent",
+   "points": 1.25,
+   "prompt": "Agent bảo trì gọi tool `tao_phieu_sua(may, mo_ta)`. Khi mạng chập chờn, cùng yêu cầu bị gửi lại 3 lần và tạo 3 phiếu sửa cho cùng một sự cố. Cách xử lý đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Giảm temperature"
+    },
+    {
+     "key": "B",
+     "text": "Thêm câu 'chỉ tạo một phiếu' vào prompt"
+    },
+    {
+     "key": "C",
+     "text": "Tắt retry hoàn toàn"
+    },
+    {
+     "key": "D",
+     "text": "Idempotency key cho mỗi yêu cầu (hoặc kiểm tra phiếu đang mở cho cùng máy và sự cố) ở phía server"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Retry là cần thiết khi mạng lỗi; phía server phải nhận diện yêu cầu trùng.",
+   "dang": "C-agent",
+   "trap": "Tắt retry đổi lỗi trùng lấy lỗi mất yêu cầu."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-agent",
+   "points": 1.25,
+   "prompt": "Agent giám sát dây chuyền có tool `dung_day_chuyen()`. Dừng nhầm gây thiệt hại lớn; nhưng có tình huống nguy hiểm cần dừng ngay. Thiết kế hợp lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tình huống an toàn khẩn cấp do hệ thống khoá liên động/quy tắc tất định xử lý; các trường hợp còn lại agent chỉ đề xuất, người phụ trách ca xác nhận"
+    },
+    {
+     "key": "B",
+     "text": "Cho agent toàn quyền dừng để phản ứng nhanh"
+    },
+    {
+     "key": "C",
+     "text": "Không bao giờ cho agent liên quan việc dừng máy"
+    },
+    {
+     "key": "D",
+     "text": "Agent dừng máy nếu độ tin cậy trên 90%"
+    }
+   ],
+   "answer": "A",
+   "explanation": "An toàn khẩn cấp không nên phụ thuộc LLM; quyết định có chi phí lớn cần người xác nhận.",
+   "dang": "C-hitl",
+   "trap": "Ngưỡng độ tin cậy của LLM không phải cơ chế an toàn đáng tin."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Canary 5% cho model kiểm lỗi mới: recall tăng từ 0,90 lên 0,94, nhưng tỉ lệ loại nhầm sản phẩm tốt tăng từ 2% lên 6%, vượt guardrail đã khai báo 4%. Quyết định?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Nâng guardrail lên 7% cho phù hợp"
+    },
+    {
+     "key": "B",
+     "text": "Dừng mở rộng (hoặc rollback canary), phân tích nguyên nhân; không đánh đổi guardrail đã cam kết"
+    },
+    {
+     "key": "C",
+     "text": "Giữ 5% mãi mãi"
+    },
+    {
+     "key": "D",
+     "text": "Mở rộng 100% vì recall tăng"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Guardrail khai báo trước để tránh 'đổi luật giữa chừng' khi thấy chỉ số chính đẹp.",
+   "dang": "C-trien-khai",
+   "trap": "Sửa guardrail sau khi thấy kết quả là lỗi quy trình nghiêm trọng."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Sau khi bảo trì định kỳ, cảm biến nhiệt được hiệu chuẩn lại và mọi giá trị đọc cao hơn trước khoảng 2°C; quy luật hỏng hóc không đổi. Mô hình bắt đầu cảnh báo nhầm nhiều. Đây là gì và xử lý thế nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Overfitting"
+    },
+    {
+     "key": "B",
+     "text": "Data drift do thay đổi cách đo: P(X) dịch chuyển; cần hiệu chỉnh đầu vào hoặc cập nhật pipeline/huấn luyện lại, và theo dõi thay đổi thiết bị"
+    },
+    {
+     "key": "C",
+     "text": "Lỗi do learning rate"
+    },
+    {
+     "key": "D",
+     "text": "Concept drift vì quy luật hỏng hóc thay đổi"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Quy luật P(Y|X thật) không đổi, nhưng giá trị đo bị lệch hệ thống → phân phối đầu vào đổi.",
+   "dang": "C-drift",
+   "trap": "Thay đổi phía **thiết bị đo** là nguồn drift hay bị quên."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Muốn build lại Docker image sau 6 tháng vẫn ra đúng cùng base image. Dòng FROM nào phù hợp nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "`FROM python:3`"
+    },
+    {
+     "key": "B",
+     "text": "`FROM python:3.11-slim@sha256:<digest>`"
+    },
+    {
+     "key": "C",
+     "text": "`FROM python:3.11-slim`"
+    },
+    {
+     "key": "D",
+     "text": "`FROM python:latest`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Tag có thể bị cập nhật; ghim theo digest bảo đảm đúng bản image.",
+   "dang": "C-tai-lap",
+   "trap": "`3.11-slim` trông đã cụ thể nhưng vẫn là tag có thể thay đổi nội dung."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "PR mới cho model kiểm lỗi: recall tổng tăng 0,90 → 0,91, nhưng recall của loại lỗi 'nứt vỏ' (lỗi an toàn) giảm 0,88 → 0,75. Cổng đánh giá nên xử lý thế nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Cho qua và theo dõi sau"
+    },
+    {
+     "key": "B",
+     "text": "Bỏ loại 'nứt vỏ' khỏi bộ đánh giá"
+    },
+    {
+     "key": "C",
+     "text": "Chặn PR: đặt ngưỡng không-được-tụt riêng cho các lát cắt quan trọng, không chỉ nhìn chỉ số tổng"
+    },
+    {
+     "key": "D",
+     "text": "Cho qua vì chỉ số tổng tăng"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Chỉ số tổng có thể tăng trong khi lát cắt quan trọng nhất tụt.",
+   "dang": "C-eval-gate",
+   "trap": "'Theo dõi sau' với lỗi an toàn là chấp nhận rủi ro đã biết trước."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Nhịp băng chuyền: cứ 200 ms có một sản phẩm. Xử lý mỗi sản phẩm gồm: chụp ảnh 30 ms, tiền xử lý 20 ms, model 120 ms, gửi kết quả 40 ms. Phát biểu nào đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Kịp vì trung bình mỗi bước chỉ 52,5 ms"
+    },
+    {
+     "key": "B",
+     "text": "Kịp vì model chỉ 120 ms < 200 ms"
+    },
+    {
+     "key": "C",
+     "text": "Xử lý tuần tự từng sản phẩm thì không kịp (210 ms > 200 ms); chạy pipeline song song các bước thì thông lượng do bước chậm nhất (120 ms) quyết định nên kịp, dù độ trễ mỗi sản phẩm vẫn 210 ms"
+    },
+    {
+     "key": "D",
+     "text": "Không thể kịp dù tổ chức thế nào"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Tổng 30 + 20 + 120 + 40 = 210 ms. Pipeline cho phép bước chụp sản phẩm sau chạy song song với model của sản phẩm trước.",
+   "dang": "C-van-hanh-dinh-luong",
+   "trap": "Phân biệt **độ trễ** (một sản phẩm đi hết pipeline) và **thông lượng** (bao lâu ra một sản phẩm)."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Kỹ sư bảo trì muốn biết vì sao **máy M7 lúc 10:05** bị cảnh báo sắp hỏng. Loại giải thích nào phù hợp?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Biểu đồ mức quan trọng đặc trưng toàn cục"
+    },
+    {
+     "key": "B",
+     "text": "Độ chính xác tổng của mô hình"
+    },
+    {
+     "key": "C",
+     "text": "Giải thích cục bộ cho dự đoán đó (đóng góp của từng đặc trưng như SHAP local)"
+    },
+    {
+     "key": "D",
+     "text": "Đưa trọng số của toàn mô hình"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Câu hỏi về **một** dự đoán cụ thể → giải thích cục bộ; toàn cục chỉ nói xu hướng chung.",
+   "dang": "C-giai-thich",
+   "trap": "Feature importance toàn cục không trả lời 'vì sao **lần này**'."
+  },
+  {
+   "module": "C",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 9.5,
+   "prompt": "Nhà máy muốn hệ thống camera AI kiểm lỗi ngoại quan trên dây chuyền (nhịp 200 ms/sản phẩm), thay cho kiểm tra bằng mắt. Có 6 loại lỗi, trong đó 'nứt vỏ' hiếm (0,1%) nhưng là lỗi an toàn. Đề xuất: dữ liệu và gán nhãn, mô hình và tối ưu cho thiết bị biên, chỉ số đánh giá (theo loại lỗi), triển khai, giám sát và an toàn.",
+   "modelAnswer": "Dữ liệu: thu ảnh từ nhiều ca, ánh sáng, lô nguyên liệu; gán nhãn bởi QC có hướng dẫn và đo đồng thuận; chủ động thu thêm mẫu lỗi hiếm (kể cả tạo lỗi có kiểm soát, augmentation); chia theo lô/thời gian để tránh rò rỉ.\nMô hình: phát hiện/phân loại; tối ưu cho biên (lượng tử hoá có hiệu chuẩn bằng mẫu lỗi hiếm, đo độ trễ thật), pipeline song song để đạt nhịp.\nĐánh giá: recall và precision **theo từng loại lỗi**, đặc biệt recall 'nứt vỏ' ≥ ngưỡng an toàn (ví dụ ≥ 0,98); tỉ lệ loại nhầm; ngưỡng theo chi phí (kiểm lại tay rẻ, lọt lỗi an toàn rất đắt).\nTriển khai: shadow song song với QC → canary một dây chuyền với guardrail (loại nhầm ≤ x%) → mở rộng; sản phẩm bị gắn cờ được QC xem lại; lỗi an toàn luôn có lớp kiểm tra thứ hai.\nGiám sát: drift ánh sáng/camera, lô nguyên liệu mới; tỉ lệ QC đảo quyết định; lấy mẫu ngẫu nhiên hàng đã qua để đo recall thật; rollback.\nAn toàn/con người: không camera quay mặt công nhân; quy trình báo cáo khi phát hiện bỏ sót lỗi an toàn.",
+   "rubric": [
+    "Thu và gán nhãn dữ liệu đa dạng, xử lý lỗi hiếm, chia dữ liệu không rò rỉ",
+    "Tối ưu biên có đo độ trễ thật và kiểm tra ảnh hưởng tới lỗi hiếm",
+    "Chỉ số theo từng loại lỗi, ngưỡng an toàn cho 'nứt vỏ', ngưỡng theo chi phí",
+    "Triển khai shadow → canary với guardrail và QC xem lại",
+    "Giám sát drift và đo recall thật trên mẫu ngẫu nhiên",
+    "Lớp an toàn bổ sung và quy trình báo cáo"
+   ],
+   "dang": "E-thiet-ke",
+   "trap": "Bài chỉ nói 'accuracy cao' sẽ mất phần lớn điểm: đề cài sẵn lỗi hiếm 0,1% là lỗi an toàn."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Quy định an toàn: 'Máy ép **chỉ** khởi động **khi** cửa bảo vệ đã đóng.' Biết máy M3 đang khởi động. Kết luận nào đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Cửa bảo vệ của M3 đã đóng"
+    },
+    {
+     "key": "B",
+     "text": "Cửa bảo vệ của M3 đang mở"
+    },
+    {
+     "key": "C",
+     "text": "Mọi máy có cửa đóng đều đang khởi động"
+    },
+    {
+     "key": "D",
+     "text": "Không kết luận được"
+    }
+   ],
+   "answer": "A",
+   "explanation": "'P chỉ khi Q' nghĩa là P → Q: khởi động → cửa đã đóng.",
+   "dang": "D-keo-theo",
+   "trap": "'Chỉ khi' là điều kiện **cần**; phương án cuối là đảo mệnh đề."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Phủ định của mệnh đề 'Tất cả cảm biến đều hoạt động bình thường' là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "Có ít nhất một cảm biến hoạt động không bình thường"
+    },
+    {
+     "key": "B",
+     "text": "Tất cả cảm biến đều hỏng"
+    },
+    {
+     "key": "C",
+     "text": "Có ít nhất một cảm biến hoạt động bình thường"
+    },
+    {
+     "key": "D",
+     "text": "Không cảm biến nào hoạt động bình thường"
+    }
+   ],
+   "answer": "A",
+   "explanation": "¬(∀x P) = ∃x ¬P.",
+   "dang": "D-phu-dinh",
+   "trap": "'Tất cả đều hỏng' là phủ định quá mạnh."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Quy định: '**Chỉ** kỹ sư có chứng chỉ điện **mới** được mở tủ điện.' Bốn bản ghi, mỗi bản ghi chỉ lộ một thông tin: (1) đã mở tủ điện; (2) chưa mở tủ; (3) có chứng chỉ; (4) không có chứng chỉ. Cần kiểm tra những bản ghi nào để phát hiện vi phạm?",
+   "options": [
+    {
+     "key": "A",
+     "text": "(3) và (4)"
+    },
+    {
+     "key": "B",
+     "text": "(1) và (3)"
+    },
+    {
+     "key": "C",
+     "text": "(2) và (3)"
+    },
+    {
+     "key": "D",
+     "text": "(1) và (4)"
+    }
+   ],
+   "answer": "D",
+   "explanation": "'Chỉ A mới B' ⇔ B → A: mở tủ → có chứng chỉ. Kiểm tra bản ghi có P (đã mở tủ) và có không-Q (không chứng chỉ).",
+   "dang": "D-wason",
+   "trap": "Cấu trúc 'chỉ… mới…' đảo vai: chứng chỉ là vế **sau**, không phải vế trước."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Dây chuyền dừng khẩn cấp khi: (nhiệt vượt ngưỡng **và** áp suất vượt ngưỡng) **hoặc** (nút dừng được bấm **và** **không** ở chế độ bảo trì). Bốn điều kiện đúng/sai độc lập (16 tổ hợp). Có bao nhiêu tổ hợp làm dây chuyền dừng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "7"
+    },
+    {
+     "key": "B",
+     "text": "8"
+    },
+    {
+     "key": "C",
+     "text": "6"
+    },
+    {
+     "key": "D",
+     "text": "9"
+    }
+   ],
+   "answer": "A",
+   "explanation": "A = (nhiệt ∧ áp suất): 4 tổ hợp. B = (nút ∧ ¬bảo trì): 4 tổ hợp. A ∧ B: 1 tổ hợp. |A ∨ B| = 4 + 4 − 1 = 7.",
+   "dang": "D-suy-luan",
+   "trap": "Cộng 4 + 4 = 8 là đếm trùng tổ hợp thoả cả hai vế."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Sau khi lắp camera AI kiểm lỗi, tỉ lệ khiếu nại về lỗi sản phẩm tháng đó giảm 30%. Cùng tháng, nhà máy đổi sang nhà cung cấp nguyên liệu mới. Kết luận nào hợp lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Camera AI làm giảm 30% khiếu nại"
+    },
+    {
+     "key": "B",
+     "text": "Camera AI không có tác dụng"
+    },
+    {
+     "key": "C",
+     "text": "Nhà cung cấp mới làm giảm 30% khiếu nại"
+    },
+    {
+     "key": "D",
+     "text": "Chưa thể quy toàn bộ mức giảm cho camera AI vì có yếu tố khác thay đổi cùng lúc; cần so sánh có đối chứng"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Hai thay đổi cùng lúc → không tách được đóng góp; cần dây chuyền đối chứng hoặc triển khai so le.",
+   "dang": "D-nguy-bien",
+   "trap": "Mọi phương án quy kết chắc chắn về một phía đều vượt quá dữ liệu."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Camera kiểm lỗi đặt trên dây chuyền vô tình quay rõ khuôn mặt công nhân, và video được lưu 1 năm 'để huấn luyện thêm'. Cách xử lý phù hợp nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chỉ cần dán thông báo có camera"
+    },
+    {
+     "key": "B",
+     "text": "Giữ nguyên vì camera đặt trong nhà máy của công ty"
+    },
+    {
+     "key": "C",
+     "text": "Điều chỉnh khung hình/che mờ để chỉ thu sản phẩm, không lưu dữ liệu không cần cho mục đích kiểm lỗi, đặt thời hạn lưu hợp lý và thông báo cho người lao động"
+    },
+    {
+     "key": "D",
+     "text": "Xoá toàn bộ dữ liệu và bỏ dự án"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Tối thiểu hoá dữ liệu: mục đích là kiểm sản phẩm, không phải giám sát người.",
+   "dang": "D-rieng-tu",
+   "trap": "'Dán thông báo' là cần nhưng chưa đủ khi dữ liệu thu vượt mục đích."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Hai ngày trước đợt giao hàng lớn, bạn phát hiện model kiểm lỗi bỏ sót lỗi 'nứt vỏ' (lỗi an toàn) ở một lô. Quản lý trực tiếp bảo 'cứ giao, sau tính'. Bạn nên làm gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Ghi lại bằng chứng, báo ngay QC/bộ phận an toàn và cấp có thẩm quyền theo kênh nội bộ, đề xuất kiểm tra tay bổ sung lô đó trước khi giao"
+    },
+    {
+     "key": "B",
+     "text": "Làm theo quản lý vì đó là quyết định của cấp trên"
+    },
+    {
+     "key": "C",
+     "text": "Đăng ngay lên mạng xã hội để cảnh báo khách hàng"
+    },
+    {
+     "key": "D",
+     "text": "Lặng lẽ sửa model, không báo ai"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Rủi ro an toàn cần được đưa đến người có thẩm quyền quyết định, có bằng chứng; ưu tiên kênh nội bộ phù hợp trước.",
+   "dang": "D-minh-bach",
+   "trap": "Hai cực sai: im lặng tuân theo, và công khai ra ngoài trước khi qua kênh nội bộ."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-sec",
+   "points": 1.5,
+   "prompt": "Đội ML tải một model phát hiện lỗi từ kho cộng đồng: định dạng pickle, 120 lượt tải, không có chữ ký, và định nạp thẳng vào hệ thống sản xuất. Rủi ro và cách làm đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Không rủi ro vì đã có 120 lượt tải"
+    },
+    {
+     "key": "B",
+     "text": "Rủi ro chuỗi cung ứng (LLM03): pickle có thể chạy mã khi nạp; xác minh nguồn/chữ ký, dùng định dạng không thực thi mã (safetensors/ONNX), nạp trong sandbox và quét trước"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ cần kiểm tra accuracy trên tập test"
+    },
+    {
+     "key": "D",
+     "text": "Đổi tên file để tránh bị nhận diện"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Nạp pickle tương đương chạy mã của người khác.",
+   "dang": "D-owasp",
+   "trap": "Số lượt tải không phải bằng chứng an toàn."
+  },
+  {
+   "module": "D",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "Nhà máy 2.000 công nhân muốn thay thẻ chấm công bằng camera **nhận diện khuôn mặt** ở cổng, đồng thời dùng chính camera đó đo thời gian công nhân rời vị trí để trừ lương. Bạn là kỹ sư AI tư vấn. Trình bày rủi ro và đề xuất.",
+   "modelAnswer": "Dữ liệu: khuôn mặt là dữ liệu sinh trắc (nhạy cảm) → cần cơ sở pháp lý rõ, sự đồng ý thực chất, phương án thay thế không sinh trắc (thẻ, mã) cho người không đồng ý; bảo mật, mã hoá, thời hạn lưu, không dùng cho mục đích khác.\nMở rộng mục đích: dùng camera để đo thời gian rời vị trí và trừ lương là giám sát người lao động vượt mục đích chấm công; quyết định tự động ảnh hưởng thu nhập cần con người xem xét và quyền khiếu nại.\nĐộ chính xác/công bằng: nhận diện sai theo điều kiện ánh sáng, khẩu trang, nhóm nhân khẩu → đo tỉ lệ lỗi theo nhóm, có quy trình xử lý khi nhận diện sai.\nĐề xuất: chỉ giữ chấm công (nếu cần) với phương án thay thế; không tự động trừ lương; minh bạch với người lao động/công đoàn; đánh giá tác động trước triển khai; xác định người chịu trách nhiệm.",
+   "rubric": [
+    "Nhận diện khuôn mặt là dữ liệu sinh trắc nhạy cảm: đồng ý thực chất và phương án thay thế",
+    "Chỉ ra việc dùng cho trừ lương là mở rộng mục đích/giám sát quá mức",
+    "Không để quyết định ảnh hưởng thu nhập hoàn toàn tự động; có khiếu nại",
+    "Đánh giá độ chính xác theo nhóm và xử lý nhận diện sai",
+    "Bảo mật, thời hạn lưu, minh bạch với người lao động"
+   ],
+   "dang": "E-dao-duc",
+   "trap": "Đề gộp hai mục đích (chấm công + trừ lương) để kiểm tra bạn có tách được phần vượt mục đích hay không."
+  }
+ ]
+}

@@ -1,0 +1,1596 @@
+{
+ "title": "Đề sát thật 07 · Giáo dục",
+ "description": "Ngữ cảnh trung tâm đào tạo, edtech. Bẫy thứ tự phép logic, MDE tương đối, peeking, RANGE trong window function, Simpson.",
+ "durationMinutes": 90,
+ "questions": [
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "a-tile",
+   "points": 1.5,
+   "prompt": "Lớp A có 40 học viên, điểm trung bình 7,0; lớp B có 60 học viên, điểm trung bình 8,0. Điểm trung bình chung của hai lớp là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "8,0"
+    },
+    {
+     "key": "B",
+     "text": "7,6"
+    },
+    {
+     "key": "C",
+     "text": "7,5"
+    },
+    {
+     "key": "D",
+     "text": "7,4"
+    }
+   ],
+   "answer": "B",
+   "explanation": "(40·7 + 60·8)/100 = (280 + 480)/100 = 7,6.",
+   "dang": "A-tb-trongso",
+   "trap": "Lấy (7 + 8)/2 = 7,5 là bỏ qua sĩ số khác nhau."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "a-xs",
+   "points": 1.5,
+   "prompt": "30% học viên trượt Toán, 20% trượt Code, 10% trượt cả hai môn. Xác suất một học viên trượt **ít nhất một** môn là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,06"
+    },
+    {
+     "key": "B",
+     "text": "0,4"
+    },
+    {
+     "key": "C",
+     "text": "0,5"
+    },
+    {
+     "key": "D",
+     "text": "0,6"
+    }
+   ],
+   "answer": "B",
+   "explanation": "P(A ∪ B) = P(A) + P(B) − P(A ∩ B) = 0,3 + 0,2 − 0,1 = 0,4.",
+   "dang": "A-doc-lap",
+   "trap": "0,5 là quên trừ phần trượt cả hai (đếm hai lần). 0,06 là nhân như thể độc lập."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-dstt",
+   "points": 1.5,
+   "prompt": "Ma trận A cỡ 2×2 có det A = −3. Giá trị det(2Aᵀ) là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "−24"
+    },
+    {
+     "key": "B",
+     "text": "−12"
+    },
+    {
+     "key": "C",
+     "text": "12"
+    },
+    {
+     "key": "D",
+     "text": "−6"
+    }
+   ],
+   "answer": "B",
+   "explanation": "det(Aᵀ) = det A. det(kA) = kⁿ·det A với n = 2: 2²·(−3) = −12.",
+   "dang": "A-dinh-thuc",
+   "trap": "−6 là nhân k thay vì kⁿ; −24 là dùng n = 3. Chuyển vị không đổi định thức (kể cả dấu)."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-gt",
+   "points": 1.5,
+   "prompt": "Với một ảnh, mô hình dự đoán xác suất của lớp đúng là 0,25. Loss cross-entropy của mẫu này (ln 2 ≈ 0,69) xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,25"
+    },
+    {
+     "key": "B",
+     "text": "0,75"
+    },
+    {
+     "key": "C",
+     "text": "1,39"
+    },
+    {
+     "key": "D",
+     "text": "0,69"
+    }
+   ],
+   "answer": "C",
+   "explanation": "CE = −ln(0,25) = ln 4 = 2·ln 2 ≈ 1,39.",
+   "dang": "A-softmax",
+   "trap": "0,75 là 1 − p (không phải cross-entropy); 0,69 là −ln 0,5."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "Thực tế phương pháp dạy mới **không** cải thiện điểm, nhưng thử nghiệm cho p = 0,02 và nhóm kết luận 'phương pháp mới hiệu quả'. Đây là loại sai lầm nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Không sai vì p < 0,05"
+    },
+    {
+     "key": "B",
+     "text": "Sai lầm do power thấp"
+    },
+    {
+     "key": "C",
+     "text": "Sai lầm loại II (âm tính giả)"
+    },
+    {
+     "key": "D",
+     "text": "Sai lầm loại I (dương tính giả), khống chế bởi mức ý nghĩa α"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Bác bỏ H₀ khi H₀ đúng là loại I; xác suất xảy ra tối đa là α.",
+   "dang": "A-pvalue",
+   "trap": "Loại II là **bỏ sót** hiệu ứng có thật — chiều ngược lại."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "Tỉ lệ hoàn thành khoá hiện là 20%. Muốn phát hiện mức tăng **tương đối** 10% (α = 5%, power 80%), dùng n ≈ 16·p(1 − p)/δ². Cần khoảng bao nhiêu học viên mỗi nhóm?",
+   "options": [
+    {
+     "key": "A",
+     "text": "6.400"
+    },
+    {
+     "key": "B",
+     "text": "64"
+    },
+    {
+     "key": "C",
+     "text": "640"
+    },
+    {
+     "key": "D",
+     "text": "1.600"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Tăng tương đối 10% của 20% → δ = 2 điểm % = 0,02. n ≈ 16·0,2·0,8/0,0004 = 2,56/0,0004 = 6.400.",
+   "dang": "A-co-mau",
+   "trap": "Phải đổi MDE tương đối sang **tuyệt đối** (0,02), không dùng 0,1. Dùng δ = 0,1 ra ≈ 256."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "PM mở dashboard mỗi sáng trong 14 ngày và dừng thử nghiệm ngay lần đầu thấy p < 0,05. Mô phỏng với hai nhóm giống hệt nhau (A/A) cho thấy khoảng 25% số lần chạy bị kết luận 'có ý nghĩa'. Điều này cho thấy:",
+   "options": [
+    {
+     "key": "A",
+     "text": "Mức 25% là bình thường với α = 0,05"
+    },
+    {
+     "key": "B",
+     "text": "Xem liên tục rồi dừng sớm làm dương tính giả tăng vượt xa 5%; cần chốt cỡ mẫu trước hoặc dùng kiểm định tuần tự"
+    },
+    {
+     "key": "C",
+     "text": "Nên xem dashboard nhiều lần hơn để chắc chắn"
+    },
+    {
+     "key": "D",
+     "text": "Thử nghiệm A/A bị lỗi chia nhóm"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Mỗi lần xem là một cơ hội 'trúng' ngẫu nhiên; dừng ở lần đầu trúng tích luỹ sai lầm loại I.",
+   "dang": "A-da-kiem-dinh",
+   "trap": "A/A lẽ ra chỉ cho ~5% kết quả 'có ý nghĩa' — 25% là dấu hiệu của **peeking**, không phải SRM."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-llm",
+   "points": 1.5,
+   "prompt": "Trợ lý học tập nhận 100.000 câu hỏi/ngày, 70% là câu dễ. Model lớn tốn 0,01 USD/câu, model nhỏ 0,001 USD/câu. Bộ định tuyến tốn 0,0005 USD **cho mọi câu**. Định tuyến câu dễ sang model nhỏ thì chi phí mỗi ngày còn khoảng:",
+   "options": [
+    {
+     "key": "A",
+     "text": "1.000 USD (không đổi)"
+    },
+    {
+     "key": "B",
+     "text": "700 USD (giảm 30%)"
+    },
+    {
+     "key": "C",
+     "text": "370 USD (giảm 63%)"
+    },
+    {
+     "key": "D",
+     "text": "420 USD (giảm 58%)"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Cũ: 100.000 × 0,01 = 1.000 USD. Mới: 70.000 × 0,001 + 30.000 × 0,01 + 100.000 × 0,0005 = 70 + 300 + 50 = 420 USD.",
+   "dang": "A-chi-phi-token",
+   "trap": "370 USD là quên chi phí bộ định tuyến chạy trên **mọi** câu."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-llm",
+   "points": 1.5,
+   "prompt": "Pipeline trả lời của trợ lý: Bước 1 chạy **song song** hai nhánh — nhánh vector (embedding 50 ms rồi tìm kiếm 30 ms) và nhánh BM25 (70 ms). Bước 2 rerank 120 ms. Bước 3 LLM có TTFT 400 ms. Thời gian tới token đầu tiên là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "670 ms"
+    },
+    {
+     "key": "B",
+     "text": "600 ms"
+    },
+    {
+     "key": "C",
+     "text": "550 ms"
+    },
+    {
+     "key": "D",
+     "text": "590 ms"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Bước 1 = max(50 + 30, 70) = 80 ms. Tổng = 80 + 120 + 400 = 600 ms.",
+   "dang": "A-do-tre",
+   "trap": "670 ms là cộng hết như tuần tự; 590 ms là lấy nhánh ngắn hơn; trong nhánh vector hai bước là **nối tiếp**."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.5,
+   "prompt": "Golden set 400 câu lấy ngẫu nhiên từ log; nhóm 'khiếu nại điểm thi' — quan trọng nhất — chỉ có 12 câu (3%). Muốn ước lượng tỉ lệ trả lời đúng của nhóm này với sai số chuẩn ≤ 5 điểm % (giả sử p ≈ 0,8). Cách làm phù hợp?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Lấy thêm 400 câu ngẫu nhiên nữa"
+    },
+    {
+     "key": "B",
+     "text": "Khoảng 16 câu là đủ"
+    },
+    {
+     "key": "C",
+     "text": "12 câu là đủ vì đúng tỉ lệ thực tế"
+    },
+    {
+     "key": "D",
+     "text": "Lấy mẫu phân tầng: ít nhất khoảng 64 câu nhóm khiếu nại, dùng trọng số khi tính chỉ số tổng"
+    }
+   ],
+   "answer": "D",
+   "explanation": "SE = √(p(1 − p)/n) ≤ 0,05 ⇒ n ≥ 0,16/0,0025 = 64. Lấy ngẫu nhiên thêm vẫn chỉ được 3% thuộc nhóm này.",
+   "dang": "A-kappa-mau",
+   "trap": "Giữ đúng tỉ lệ thực tế không đồng nghĩa với đủ mẫu để **đo riêng** nhóm hiếm."
+  },
+  {
+   "module": "A",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 5,
+   "prompt": "Mô hình cảnh báo bỏ học cho mỗi học viên xác suất bỏ học p (đã hiệu chỉnh). Một cuộc gọi tư vấn tốn 50.000đ. Mỗi học viên bỏ học làm mất 2.000.000đ doanh thu. Nếu được gọi kịp, 30% học viên định bỏ học sẽ ở lại.\n\n(a) Viết lợi ích kỳ vọng (đồng) khi gọi một học viên có xác suất bỏ học p.\n(b) Tìm ngưỡng p tối thiểu để cuộc gọi có lời.\n(c) Có 1.000 học viên cùng p = 0,2: có nên gọi không? Lợi ích kỳ vọng tổng là bao nhiêu?",
+   "modelAnswer": "(a) Lợi ích = p · 30% · 2.000.000 − 50.000 = 600.000p − 50.000.\n(b) 600.000p > 50.000 ⇔ p > 1/12 ≈ 0,083.\n(c) p = 0,2 > 0,083 → nên gọi. Mỗi người: 120.000 − 50.000 = 70.000đ; 1.000 người: 70 triệu đồng.",
+   "rubric": [
+    "Lập đúng biểu thức có cả xác suất bỏ học, tỉ lệ giữ chân 30% và chi phí gọi",
+    "Giải đúng ngưỡng p > 1/12",
+    "Kết luận nên gọi và tính đúng 70.000đ/người",
+    "Tính đúng tổng 70 triệu, trình bày rõ đơn vị"
+   ],
+   "dang": "E-toan",
+   "trap": "Bẫy hay gặp: quên nhân 30% (coi gọi là giữ được 100%), ra ngưỡng 0,025 quá thấp."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\na = [1, 2]\nb = a\nb += [3]\nc = a\nc = c + [4]\nprint(a)\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[1, 2, 3, 4]`"
+    },
+    {
+     "key": "B",
+     "text": "`[1, 2]`"
+    },
+    {
+     "key": "C",
+     "text": "`[1, 2, 3]`"
+    },
+    {
+     "key": "D",
+     "text": "`[1, 2, 4]`"
+    }
+   ],
+   "answer": "C",
+   "explanation": "b là cùng list với a; `+=` sửa tại chỗ → a = [1, 2, 3]. `c = c + [4]` tạo list **mới** gán cho c, a không đổi.",
+   "dang": "B-mutable",
+   "trap": "`+=` và `x = x + …` trông giống nhau nhưng một cái sửa tại chỗ, một cái tạo mới."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nfrom collections import Counter\nc = Counter(\"abracadabra\")\nprint(c.most_common(2))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[('a', 5), ('r', 2)]`"
+    },
+    {
+     "key": "B",
+     "text": "`[('a', 5), ('b', 2)]`"
+    },
+    {
+     "key": "C",
+     "text": "`[('a', 5), ('b', 2), ('r', 2)]`"
+    },
+    {
+     "key": "D",
+     "text": "`{'a': 5, 'b': 2}`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "a xuất hiện 5 lần; b và r cùng 2 lần, hoà thì giữ thứ tự xuất hiện đầu tiên (b trước r). most_common(2) trả list 2 tuple.",
+   "dang": "B-dict-str",
+   "trap": "Kết quả là list tuple, không phải dict; và chỉ đúng 2 phần tử dù có hoà."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nfrom dataclasses import dataclass, field\n\n@dataclass\nclass HocVien:\n    ten: str\n    diem: list = field(default_factory=list)\n\na = HocVien(\"An\")\nb = HocVien(\"Binh\")\na.diem.append(9)\nprint(b.diem, a == HocVien(\"An\", [9]))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[] False`"
+    },
+    {
+     "key": "B",
+     "text": "`[9] False`"
+    },
+    {
+     "key": "C",
+     "text": "`[9] True`"
+    },
+    {
+     "key": "D",
+     "text": "`[] True`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "default_factory tạo list mới cho từng đối tượng → b.diem rỗng. @dataclass tự sinh __eq__ so sánh theo giá trị các trường → True.",
+   "dang": "B-py-nangcao",
+   "trap": "Đây là cách **đúng** để có mặc định là list; viết `diem: list = []` mới báo lỗi."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nimport re\ns = \"/bai?id=12 /bai?id=7 /baiid=3\"\nprint(re.findall(r\"/bai\\?id=(\\d+)\", s), re.findall(r\"/bai?id=(\\d+)\", s))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`['12', '7'] ['3']`"
+    },
+    {
+     "key": "B",
+     "text": "`['12', '7'] ['12', '7']`"
+    },
+    {
+     "key": "C",
+     "text": "`['12', '7', '3'] []`"
+    },
+    {
+     "key": "D",
+     "text": "`[] ['12', '7', '3']`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Mẫu 1 khớp đúng dấu '?' (đã escape). Mẫu 2: 'i?' nghĩa là chữ i tuỳ chọn, nên khớp '/ba' + 'i' + 'id=' trong '/baiid=3', không khớp chỗ có dấu '?'.",
+   "dang": "B-regex",
+   "trap": "Quên escape ký tự đặc biệt không báo lỗi — chỉ âm thầm khớp sai."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\ns = \"ABCDEFG\"\nprint(s[1:-1], s[-1], s[10:])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`BCDEF F `"
+    },
+    {
+     "key": "B",
+     "text": "`BCDEF G ` (chuỗi rỗng ở cuối)"
+    },
+    {
+     "key": "C",
+     "text": "`BCDEF G` rồi báo lỗi IndexError"
+    },
+    {
+     "key": "D",
+     "text": "`BCDEFG G` rồi báo lỗi IndexError"
+    }
+   ],
+   "answer": "B",
+   "explanation": "s[1:-1] bỏ ký tự đầu và cuối. s[-1] là 'G'. Cắt vượt độ dài không lỗi, trả chuỗi rỗng.",
+   "dang": "B-slicing",
+   "trap": "Truy cập một phần tử ngoài phạm vi (s[10]) mới lỗi; **cắt** ngoài phạm vi thì không."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nma = [\"10\", \"9\", \"100\"]\nprint(sorted(ma), sorted(ma, key=int))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "Báo lỗi vì key=int"
+    },
+    {
+     "key": "B",
+     "text": "`['10', '100', '9'] [9, 10, 100]`"
+    },
+    {
+     "key": "C",
+     "text": "`['9', '10', '100'] ['9', '10', '100']`"
+    },
+    {
+     "key": "D",
+     "text": "`['10', '100', '9'] ['9', '10', '100']`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Không có key: so sánh chuỗi. key=int chỉ dùng để **so sánh**, kết quả vẫn là các chuỗi gốc.",
+   "dang": "B-sorted",
+   "trap": "key không biến đổi phần tử trong kết quả — vẫn là '9' chứ không phải 9."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "Độ phức tạp thời gian của hàm sau theo n là gì?\n```python\ndef dem(n):\n    c = 0\n    for i in range(1, n + 1):\n        for j in range(0, n, i):\n            c += 1\n    return c\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "O(n²)"
+    },
+    {
+     "key": "B",
+     "text": "O(n)"
+    },
+    {
+     "key": "C",
+     "text": "O(n log n)"
+    },
+    {
+     "key": "D",
+     "text": "O(log n)"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Vòng trong chạy n/i lần. Tổng n/1 + n/2 + … + n/n = n·(1 + 1/2 + … + 1/n) ≈ n·ln n.",
+   "dang": "B-bigo",
+   "trap": "Hai vòng lồng nhau không phải lúc nào cũng O(n²) — bước nhảy i làm vòng trong ngắn dần."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "Ma trận cosine giữa 2 câu hỏi (hàng) và 3 đoạn văn (cột):\n```python\nS = np.array([[0.2, 0.9, 0.4],\n              [0.7, 0.1, 0.8]])\nprint(S.argmax(axis=1).tolist(), S.max(axis=0).tolist())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[1, 2] [0.7, 0.9, 0.8]`"
+    },
+    {
+     "key": "B",
+     "text": "`[0, 1, 1] [0.9, 0.8]`"
+    },
+    {
+     "key": "C",
+     "text": "`[1, 2] [0.9, 0.8]`"
+    },
+    {
+     "key": "D",
+     "text": "`[1, 0] [0.9, 0.8]`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "argmax(axis=1): với mỗi hàng, chỉ số cột lớn nhất → [1, 2]. max(axis=0): với mỗi cột, giá trị lớn nhất qua các hàng → [0,7; 0,9; 0,8].",
+   "dang": "B-numpy",
+   "trap": "axis=1 cho kết quả mỗi **hàng** một giá trị; axis=0 cho mỗi **cột** một giá trị."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "DataFrame `df` có các cột theo thứ tự `a, b, c, d, e`. Phát biểu nào đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Cả hai đều có 2 cột"
+    },
+    {
+     "key": "B",
+     "text": "`df.loc[:, \"b\":\"d\"]` báo lỗi vì cột là chuỗi"
+    },
+    {
+     "key": "C",
+     "text": "`df.loc[:, \"b\":\"d\"]` có 3 cột; `df.iloc[:, 1:3]` có 2 cột"
+    },
+    {
+     "key": "D",
+     "text": "Cả hai đều có 3 cột"
+    }
+   ],
+   "answer": "C",
+   "explanation": "loc cắt theo nhãn và lấy cả điểm cuối (b, c, d). iloc cắt theo vị trí, không lấy điểm cuối (vị trí 1, 2 → b, c).",
+   "dang": "B-pd-loc",
+   "trap": "Quy tắc 'lấy cả điểm cuối' của loc áp dụng cho cả cột."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "```python\nbk = pd.DataFrame({\"lop\": [\"A\", \"B\", \"A\", \"B\"],\n                   \"ten\": [\"An\", \"Binh\", \"Chi\", \"Dung\"],\n                   \"diem\": [8, 9, 10, 7]})\nprint(bk.loc[bk.groupby(\"lop\")[\"diem\"].idxmax(), \"ten\"].tolist())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`['Chi', 'Binh']`"
+    },
+    {
+     "key": "B",
+     "text": "`[10, 9]`"
+    },
+    {
+     "key": "C",
+     "text": "`['An', 'Binh']`"
+    },
+    {
+     "key": "D",
+     "text": "`[2, 1]`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "idxmax trả **nhãn index** của dòng điểm cao nhất mỗi lớp: A → 2 (Chi), B → 1 (Binh). loc lấy tên tương ứng.",
+   "dang": "B-pd-groupby",
+   "trap": "idxmax trả index, không trả giá trị max; dùng nó với loc để lấy cả dòng."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "```python\nd = pd.to_datetime(\"2026-10-05\") - pd.to_datetime(\"2026-09-28\")\nprint(d.days)\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`7`"
+    },
+    {
+     "key": "B",
+     "text": "Báo lỗi vì khác tháng"
+    },
+    {
+     "key": "C",
+     "text": "`8`"
+    },
+    {
+     "key": "D",
+     "text": "`6`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Từ 28/9 đến 5/10: tháng 9 có 30 ngày → 2 ngày còn lại của tháng 9 + 5 ngày = 7 ngày.",
+   "dang": "B-pd-time",
+   "trap": "Khoảng cách 7 ngày; nếu đếm 'cả hai đầu' (số ngày học) mới ra 8."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-sql",
+   "points": 1.25,
+   "prompt": "Bảng `nop(ngay, so_bai)` có các dòng (1, 10), (2, 20), (2, 5), (3, 1). Truy vấn `SELECT ngay, SUM(so_bai) OVER (ORDER BY ngay) FROM nop` trả cột tổng lũy kế là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "10, 20, 5, 1"
+    },
+    {
+     "key": "B",
+     "text": "10, 35, 35, 36"
+    },
+    {
+     "key": "C",
+     "text": "10, 30, 35, 36"
+    },
+    {
+     "key": "D",
+     "text": "10, 25, 35, 36"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Mặc định khung cửa sổ là RANGE: các dòng cùng giá trị ORDER BY (ngày 2) được tính **chung** → cả hai cùng 35.",
+   "dang": "B-sql",
+   "trap": "Muốn lũy kế từng dòng thì thêm tiêu chí phá hoà vào ORDER BY (ví dụ id) hoặc dùng ROWS."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Học viên nộp bài xong, trang 'Bài đã nộp' đọc từ read replica (trễ sao chép 1–3 giây) nên báo 'chưa nộp', học viên hoảng và nộp lại. Cách xử lý hợp lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Thêm sleep(3) trước khi hiển thị"
+    },
+    {
+     "key": "B",
+     "text": "Đọc ngay sau khi ghi của chính người đó thì lấy từ DB chính (read-your-writes); báo cáo thống kê vẫn dùng replica"
+    },
+    {
+     "key": "C",
+     "text": "Tăng số replica"
+    },
+    {
+     "key": "D",
+     "text": "Bỏ read replica, mọi thứ đọc từ DB chính"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Chỉ những lượt đọc cần dữ liệu vừa ghi mới cần DB chính; giữ replica cho tải đọc lớn.",
+   "dang": "B-he-thong",
+   "trap": "sleep là giả định trễ cố định — vừa chậm vừa không đảm bảo."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Một integration test fail khoảng 1/15 lần trên CI và pass khi chạy lại. Test gọi `nop_bai()`, `sleep(2)` rồi kiểm tra bản ghi đã có. Cách xử lý đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Thay sleep cố định bằng chờ có điều kiện (poll đến khi có bản ghi, có timeout); tìm nguyên nhân gốc"
+    },
+    {
+     "key": "B",
+     "text": "Đánh dấu test 'tự chạy lại 3 lần'"
+    },
+    {
+     "key": "C",
+     "text": "Tăng sleep lên 10 giây"
+    },
+    {
+     "key": "D",
+     "text": "Xoá test"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Test chập chờn do giả định thời gian; chờ theo điều kiện vừa nhanh vừa ổn định.",
+   "dang": "B-review-test",
+   "trap": "Retry tự động che giấu vấn đề; sleep dài làm CI chậm mà vẫn có thể fail."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "thong-hieu",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "Viết hàm `diem_tb(diem)` trả về điểm trung bình sau khi **bỏ một điểm thấp nhất**, làm tròn 2 chữ số. Nếu có ít hơn 2 bài thì không bỏ bài nào; list rỗng trả 0.\n\nVí dụ: `[6, 8, 10]` → `9.0`; `[7]` → `7.0`; `[]` → `0`.",
+   "modelAnswer": "def diem_tb(diem):\n    if not diem:\n        return 0\n    if len(diem) >= 2:\n        diem = sorted(diem)[1:]\n    return round(sum(diem) / len(diem), 2)",
+   "rubric": [
+    "Xử lý list rỗng trước khi chia",
+    "Chỉ bỏ điểm thấp nhất khi có từ 2 bài",
+    "Bỏ đúng **một** điểm thấp nhất (kể cả khi có điểm trùng)",
+    "Không sửa list đầu vào (dùng sorted, không dùng sort/remove trên list gốc)",
+    "Làm tròn 2 chữ số"
+   ],
+   "dang": "B-code-tay",
+   "trap": "Dùng `[d for d in diem if d != min(diem)]` sẽ bỏ **mọi** điểm thấp nhất bị trùng — sai với [5, 5, 8]."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "tu-luan",
+   "points": 6.5,
+   "prompt": "Hai DataFrame: `hv(ma, ten)` danh sách học viên và `nop(ma, bai)` các lần nộp bài (một học viên có thể nộp nhiều lần; có thể có mã lạ không thuộc `hv`). Viết hàm `chua_nop(hv, nop)` trả list **tên** học viên chưa nộp bài nào, sắp tăng dần.",
+   "modelAnswer": "def chua_nop(hv, nop):\n    return sorted(hv.loc[~hv[\"ma\"].isin(nop[\"ma\"]), \"ten\"].tolist())",
+   "rubric": [
+    "Dùng isin (hoặc merge với indicator) để tìm học viên không có trong bảng nộp",
+    "Đảo điều kiện bằng ~ đúng chỗ",
+    "Không bị ảnh hưởng bởi học viên nộp nhiều lần hay mã lạ",
+    "Trả list tên đã sắp xếp"
+   ],
+   "dang": "B-code-tay",
+   "trap": "inner merge rồi lấy phần **không** khớp là cách vòng vo; isin là anti-join gọn nhất."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Trung tâm muốn dự đoán **điểm thi cuối kỳ** (thang 10, có thể lẻ như 7,25) của từng học viên từ dữ liệu học tập. Đây là bài toán:",
+   "options": [
+    {
+     "key": "A",
+     "text": "Phân cụm"
+    },
+    {
+     "key": "B",
+     "text": "Học tăng cường"
+    },
+    {
+     "key": "C",
+     "text": "Phân loại nhị phân"
+    },
+    {
+     "key": "D",
+     "text": "Hồi quy"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Đầu ra là số thực liên tục → hồi quy.",
+   "dang": "C-loai-bai",
+   "trap": "Nếu đề hỏi 'đỗ hay trượt' thì mới là phân loại."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Mô hình dự đoán **tại tuần thứ 3** học viên có bỏ học hay không dùng đặc trưng 'tổng số bài đã nộp trong cả khoá'. AUC offline 0,97, chạy thật 0,62. Nguyên nhân?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Dữ liệu tuần 3 bị nhiễu"
+    },
+    {
+     "key": "B",
+     "text": "Rò rỉ dữ liệu: đặc trưng dùng thông tin sau tuần 3; phải dùng số bài nộp tính **đến** tuần 3"
+    },
+    {
+     "key": "C",
+     "text": "Mô hình quá đơn giản"
+    },
+    {
+     "key": "D",
+     "text": "Thiếu đặc trưng nhân khẩu học"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Người bỏ học đương nhiên nộp ít bài cả khoá — đặc trưng 'nhìn thấy tương lai'.",
+   "dang": "C-leak",
+   "trap": "Tên đặc trưng không có chữ 'tương lai' — phải tự hỏi: **tại thời điểm dự đoán** đã biết giá trị này chưa?"
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Mô hình dự đoán điểm cuối kỳ có MAE = 0,5. Diễn giải đúng là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "Mô hình đúng 50% số học viên"
+    },
+    {
+     "key": "B",
+     "text": "Dự đoán luôn cao hơn điểm thật 0,5"
+    },
+    {
+     "key": "C",
+     "text": "Trung bình, dự đoán lệch khỏi điểm thật khoảng 0,5 điểm (không tính chiều lệch)"
+    },
+    {
+     "key": "D",
+     "text": "Sai số lớn nhất là 0,5 điểm"
+    }
+   ],
+   "answer": "C",
+   "explanation": "MAE là trung bình của |thực tế − dự đoán|.",
+   "dang": "C-hoi-quy-metric",
+   "trap": "MAE không phải tỉ lệ đúng, không phải sai số lớn nhất, và không có dấu."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Mô hình cảnh báo bỏ học có ba nhóm người nhận: giáo viên chủ nhiệm, học viên, và kiểm toán viên của nhà trường. Đội muốn dùng **một** biểu đồ SHAP cho cả ba. Nhận xét?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Không phù hợp: giải thích nên theo người nhận — giáo viên cần yếu tố chính và mức chắc chắn, học viên cần điều thay đổi được, kiểm toán cần tài liệu mô hình và đánh giá theo nhóm"
+    },
+    {
+     "key": "B",
+     "text": "Chỉ cần cho giáo viên xem"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ cần công bố mã nguồn"
+    },
+    {
+     "key": "D",
+     "text": "Phù hợp vì SHAP là chuẩn chung"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Giải thích tốt là giải thích người nhận dùng được để hành động.",
+   "dang": "C-giai-thich",
+   "trap": "'Một giải thích chuẩn cho tất cả' nghe tiết kiệm nhưng không phục vụ ai trọn vẹn."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Huấn luyện lại mô hình với cùng code, cùng dữ liệu, cùng seed trên GPU nhưng accuracy hai lần lệch nhau 0,3 điểm. Cách xử lý đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Đổi sang CPU vĩnh viễn"
+    },
+    {
+     "key": "B",
+     "text": "Bỏ qua vì 0,3 điểm là nhỏ"
+    },
+    {
+     "key": "C",
+     "text": "Bật chế độ thuật toán tất định, đặt seed cho mọi nguồn ngẫu nhiên (Python, NumPy, framework, dataloader); khi so sánh mô hình thì báo trung bình nhiều seed"
+    },
+    {
+     "key": "D",
+     "text": "Chọn lần chạy có điểm cao hơn để báo cáo"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Một số phép toán GPU không tất định theo mặc định; một seed không phủ hết nguồn ngẫu nhiên.",
+   "dang": "C-tai-lap",
+   "trap": "Chọn lần chạy đẹp hơn để báo cáo là cherry-picking."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Trung tâm muốn tự động nhận xét bài luận tiếng Anh theo rubric 4 tiêu chí (ngữ pháp, từ vựng, mạch lạc, đúng đề) và gợi ý điểm. Cách tiếp cận phù hợp nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "LLM chấm theo rubric có ví dụ chuẩn, hiệu chuẩn với điểm giáo viên, giáo viên duyệt ca độ tin cậy thấp"
+    },
+    {
+     "key": "B",
+     "text": "Mô hình hồi quy trên số từ của bài"
+    },
+    {
+     "key": "C",
+     "text": "Regex đếm lỗi chính tả"
+    },
+    {
+     "key": "D",
+     "text": "Phân cụm bài luận rồi gán điểm theo cụm"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Nhận xét văn bản tự do cần hiểu ngôn ngữ → LLM, nhưng phải đo đồng thuận với giáo viên và có người duyệt.",
+   "dang": "C-chon-cong-cu",
+   "trap": "Số từ tương quan với điểm nhưng là đặc trưng dễ 'lách' (viết dài mà sai)."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Tham số temperature trong sinh văn bản của LLM điều khiển chủ yếu điều gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tốc độ sinh token"
+    },
+    {
+     "key": "B",
+     "text": "Số token tối đa của câu trả lời"
+    },
+    {
+     "key": "C",
+     "text": "Độ ngẫu nhiên/đa dạng khi chọn token tiếp theo"
+    },
+    {
+     "key": "D",
+     "text": "Độ dài ngữ cảnh đầu vào"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Temperature làm phân phối xác suất phẳng (cao) hoặc nhọn (thấp).",
+   "dang": "C-llm-param",
+   "trap": "Số token tối đa là max_tokens — tham số khác."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Model decoder có 32 lớp, d_model = 4096, attention chuẩn (mỗi lớp lưu K và V, mỗi cái d_model giá trị cho mỗi token), FP16 (2 byte). Một request dài 4.000 token cần KV cache khoảng:",
+   "options": [
+    {
+     "key": "A",
+     "text": "≈ 1.0 GB"
+    },
+    {
+     "key": "B",
+     "text": "≈ 4.2 GB"
+    },
+    {
+     "key": "C",
+     "text": "≈ 0,26 GB"
+    },
+    {
+     "key": "D",
+     "text": "≈ 2.1 GB"
+    }
+   ],
+   "answer": "D",
+   "explanation": "KV = 2 (K và V) × 32 lớp × 4096 × 2 byte × 4.000 token ≈ 2.10·10⁹ byte.",
+   "dang": "C-llm-hieu-nang",
+   "trap": "Hay quên hệ số 2 cho cả K và V; nhớ KV cache tăng tuyến tính theo số token và số request đồng thời."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Đội đổi prompt chấm điểm (thêm tiêu chí 'đúng đề'), nhưng nhiều bài vẫn nhận nhận xét theo prompt cũ vì được trả từ cache. Sửa thế nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Đưa phiên bản prompt và model vào khoá cache (hoặc xoá cache khi đổi phiên bản)"
+    },
+    {
+     "key": "B",
+     "text": "Giảm temperature"
+    },
+    {
+     "key": "C",
+     "text": "Tắt cache vĩnh viễn"
+    },
+    {
+     "key": "D",
+     "text": "Tăng ngưỡng semantic cache"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Khoá cache thiếu thành phần quyết định đầu ra (phiên bản prompt/model) thì trả kết quả cũ.",
+   "dang": "C-cache",
+   "trap": "Tắt cache giải quyết được nhưng mất lợi ích chi phí — không phải cách tối ưu."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Học viên hỏi bằng khẩu ngữ: 'cái deadline bài 3 lùi chưa ạ'. Kho thông báo dùng từ 'hạn nộp Bài tập 3 được gia hạn'. Truy xuất vector trả kết quả kém. Cải tiến thuộc giai đoạn trước truy xuất (PreRAG) phù hợp?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng max_tokens khi sinh"
+    },
+    {
+     "key": "B",
+     "text": "Fine-tune LLM trả lời"
+    },
+    {
+     "key": "C",
+     "text": "Tăng số chiều embedding"
+    },
+    {
+     "key": "D",
+     "text": "Viết lại/mở rộng truy vấn (deadline → hạn nộp, lùi → gia hạn) và trích bộ lọc metadata (bài số 3) trước khi tìm"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Khoảng cách từ vựng giữa câu hỏi và tài liệu được thu hẹp bằng xử lý truy vấn trước khi truy xuất.",
+   "dang": "C-rag-pipeline",
+   "trap": "Lỗi nằm ở **đầu vào truy xuất**, không ở tầng sinh."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Ba kết quả đầu có độ liên quan lần lượt (3, 0, 2) trên thang 0–3. Dùng DCG@3 = Σ rel_i / log₂(i + 1), biết log₂3 ≈ 1,585. nDCG@3 (so với thứ tự lý tưởng 3, 2, 0) xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "1,00"
+    },
+    {
+     "key": "B",
+     "text": "0,80"
+    },
+    {
+     "key": "C",
+     "text": "0,70"
+    },
+    {
+     "key": "D",
+     "text": "0.94"
+    }
+   ],
+   "answer": "D",
+   "explanation": "DCG = 3/1 + 0/1,585 + 2/2 = 4. IDCG = 3/1 + 2/1,585 + 0 ≈ 4,26. nDCG ≈ 4/4,26 ≈ 0.94.",
+   "dang": "C-rag-eval",
+   "trap": "Vị trí 3 chia log₂4 = 2, không phải 3. Thứ tự lý tưởng phải sắp lại độ liên quan giảm dần."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-agent",
+   "points": 1.25,
+   "prompt": "Trợ lý học vụ có một agent với 30 tool (lịch học, điểm, học phí, phúc khảo, ...). Agent hay chọn nhầm tool và prompt rất dài. Hướng cải tiến và đánh đổi?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Thêm 10 tool nữa cho đủ"
+    },
+    {
+     "key": "B",
+     "text": "Gộp mọi tool thành một tool 'lam_moi_viec'"
+    },
+    {
+     "key": "C",
+     "text": "Tăng temperature"
+    },
+    {
+     "key": "D",
+     "text": "Chia thành các agent chuyên trách ít tool hơn với một bộ định tuyến: ít chọn nhầm, dễ kiểm thử; đổi lại thêm một bước định tuyến (độ trễ, lỗi định tuyến)"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Không gian lựa chọn nhỏ hơn giúp model chọn đúng; cái giá là thêm tầng định tuyến cần đánh giá riêng.",
+   "dang": "C-agent",
+   "trap": "Câu hỏi đòi cả **đánh đổi**; phương án chỉ nêu lợi ích là chưa đủ."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-agent",
+   "points": 1.25,
+   "prompt": "AI chấm điểm bài cuối khoá; điểm quyết định việc cấp chứng chỉ. Đặt con người duyệt ở đâu là hợp lý nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chỉ duyệt khi học viên khiếu nại"
+    },
+    {
+     "key": "B",
+     "text": "Không cần duyệt nếu AI đạt 95% đồng thuận"
+    },
+    {
+     "key": "C",
+     "text": "Giáo viên duyệt lại 100% bài nên không cần AI"
+    },
+    {
+     "key": "D",
+     "text": "Giáo viên duyệt các bài có điểm sát ngưỡng đỗ hoặc độ tin cậy thấp, cộng kiểm tra ngẫu nhiên; học viên có quyền phúc khảo"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Tập trung người duyệt vào nơi quyết định dễ sai và hậu quả lớn; giữ kênh phúc khảo.",
+   "dang": "C-hitl",
+   "trap": "'Chỉ duyệt khi khiếu nại' đẩy gánh nặng phát hiện lỗi sang người bị ảnh hưởng."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Triển khai kiểu **shadow** cho một mô hình mới nghĩa là gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Một phần nhỏ người dùng nhận kết quả của mô hình mới"
+    },
+    {
+     "key": "B",
+     "text": "Mô hình mới nhận bản sao request thật và chỉ ghi log; người dùng vẫn nhận kết quả của mô hình cũ"
+    },
+    {
+     "key": "C",
+     "text": "Chạy mô hình mới trên dữ liệu giả lập"
+    },
+    {
+     "key": "D",
+     "text": "Hai mô hình bỏ phiếu cho kết quả cuối"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Shadow đo hành vi trên dữ liệu thật mà không ảnh hưởng người dùng. Phương án đầu là canary.",
+   "dang": "C-trien-khai",
+   "trap": "Shadow và canary hay bị tráo cho nhau."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Giám sát hằng tuần cho thấy PSI của đặc trưng 'số giờ học mỗi tuần' là 0,18. Hành động hợp lý nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Bỏ qua vì dưới 0,25"
+    },
+    {
+     "key": "B",
+     "text": "Dừng mô hình vì PSI > 0,1"
+    },
+    {
+     "key": "C",
+     "text": "Huấn luyện lại ngay lập tức"
+    },
+    {
+     "key": "D",
+     "text": "Mức thay đổi vừa: điều tra nguyên nhân (đợt tuyển sinh mới, thay đổi giao diện), theo dõi chất lượng mô hình; chưa cần huấn luyện lại ngay"
+    }
+   ],
+   "answer": "D",
+   "explanation": "PSI 0,1–0,25 là thay đổi vừa: cần chú ý và điều tra, không phải báo động khẩn cấp.",
+   "dang": "C-drift",
+   "trap": "Hai cực sai: phản ứng quá mạnh và bỏ qua hoàn toàn."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Nhóm sửa prompt qua 35 vòng, mỗi vòng chạy cùng một golden set 150 mẫu và giữ bản điểm cao nhất (91%, ngưỡng CI là 90%). Sau triển khai, điểm trên mẫu mới chỉ 84%. Nguyên nhân và cách sửa?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Golden set bị dùng lặp để chọn prompt nên bị 'quá khớp'; cần tập holdout riêng chỉ dùng để xác nhận cuối"
+    },
+    {
+     "key": "B",
+     "text": "Ngưỡng 90% quá thấp"
+    },
+    {
+     "key": "C",
+     "text": "Cần tăng temperature"
+    },
+    {
+     "key": "D",
+     "text": "Model bị drift ngay sau triển khai"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Chọn tốt nhất qua nhiều vòng trên cùng tập đánh giá làm điểm lạc quan.",
+   "dang": "C-eval-gate",
+   "trap": "Giống hệt lỗi 'dùng test set để chọn siêu tham số', chỉ khác là với prompt."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Mỗi GPU phục vụ 25 request/giây ở tải đầy. Giờ cao điểm có 120 request/giây và cần dự phòng 30%. Cần tối thiểu bao nhiêu GPU?",
+   "options": [
+    {
+     "key": "A",
+     "text": "8"
+    },
+    {
+     "key": "B",
+     "text": "6"
+    },
+    {
+     "key": "C",
+     "text": "5"
+    },
+    {
+     "key": "D",
+     "text": "7"
+    }
+   ],
+   "answer": "D",
+   "explanation": "120/25 = 4,8 GPU. Thêm 30%: 4,8 × 1,3 = 6,24 → làm tròn lên 7.",
+   "dang": "C-van-hanh-dinh-luong",
+   "trap": "Làm tròn 4,8 lên 5 rồi mới cộng dự phòng (5 × 1,3 = 6,5 → 7) cũng ra 7, nhưng làm tròn **xuống** 6,24 thành 6 là thiếu."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Chấm điểm RICE = Reach × Impact × Confidence / Effort cho ba sáng kiến:\n\n| | Reach | Impact | Confidence | Effort |\n|---|---|---|---|---|\n| A | 2.000 | 2 | 0,5 | 4 |\n| B | 500 | 3 | 1,0 | 1 |\n| C | 4.000 | 1 | 0,8 | 8 |\n\nSáng kiến nên làm trước là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "A, điểm 2.000"
+    },
+    {
+     "key": "B",
+     "text": "A, điểm 500"
+    },
+    {
+     "key": "C",
+     "text": "B, điểm 1.500"
+    },
+    {
+     "key": "D",
+     "text": "C, vì Reach lớn nhất"
+    }
+   ],
+   "answer": "C",
+   "explanation": "A = 2.000·2·0,5/4 = 500. B = 500·3·1/1 = 1.500. C = 4.000·1·0,8/8 = 400.",
+   "dang": "C-san-pham",
+   "trap": "Reach lớn nhất không thắng nếu effort cao; A = 2.000 là quên chia effort."
+  },
+  {
+   "module": "C",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 9.5,
+   "prompt": "Trung tâm tiếng Anh trực tuyến (20.000 học viên) muốn ra mắt 'Chấm bài viết bằng AI': học viên nộp đoạn văn 150–250 từ, hệ thống cho điểm theo 4 tiêu chí và nhận xét trong 1 phút. Điểm này chiếm 30% điểm tổng kết khoá. Đề xuất cách đánh giá trước ra mắt, rủi ro cần kiểm thử, cách triển khai, cách đo tác động thật và điều kiện dừng.",
+   "modelAnswer": "Đánh giá offline: bộ 500 bài được ≥ 2 giáo viên chấm độc lập; đo đồng thuận AI–giáo viên (QWK hoặc % lệch ≤ 1 điểm) so với đồng thuận giữa giáo viên, theo từng tiêu chí; ngưỡng chấp nhận định lượng (ví dụ QWK ≥ 0,7 và không thấp hơn giáo viên–giáo viên quá 0,05).\nRủi ro cần kiểm thử: lệch theo nhóm (trình độ, độ dài, chủ đề, người viết không bản ngữ), tính nhất quán khi chấm lại, ca biên (lạc đề, sao chép, prompt injection trong bài nộp), chất lượng nhận xét.\nTriển khai: shadow (AI chấm song song, giáo viên vẫn chấm) → pilot một nhóm lớp với giáo viên duyệt ca tin cậy thấp và điểm sát ngưỡng → mở rộng; minh bạch với học viên, có quyền yêu cầu chấm lại.\nĐo tác động: A/B hoặc triển khai so le theo lớp; chỉ số chính: thời gian nhận phản hồi, tiến bộ điểm ở bài sau; phụ: hài lòng, tỉ lệ phúc khảo.\nĐiều kiện dừng/giám sát: tỉ lệ giáo viên sửa điểm > 20%, tỉ lệ phúc khảo tăng gấp đôi, lệch theo nhóm vượt ngưỡng, drift khi đổi đề → quay về chấm tay.",
+   "rubric": [
+    "Đánh giá offline với nhiều giáo viên, so đồng thuận AI với đồng thuận giữa người, có ngưỡng số",
+    "Kiểm thử rủi ro: lệch theo nhóm, nhất quán, ca biên kể cả prompt injection",
+    "Triển khai theo giai đoạn với giáo viên duyệt và quyền phúc khảo",
+    "Đo tác động thật bằng A/B/so le trên chỉ số học tập, không chỉ mức sử dụng",
+    "Điều kiện dừng có ngưỡng cụ thể và kế hoạch quay về chấm tay",
+    "Minh bạch với học viên vì điểm ảnh hưởng kết quả khoá"
+   ],
+   "dang": "E-thiet-ke",
+   "trap": "Chi tiết '30% điểm tổng kết' biến đây thành quyết định ảnh hưởng quyền lợi — bài thiếu phúc khảo và minh bạch sẽ mất điểm."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "'Mọi học viên đạt chứng chỉ đều đã nộp đủ 10 bài tập.' Biết Lan đã nộp đủ 10 bài. Kết luận nào đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Không kết luận được Lan có đạt chứng chỉ hay không"
+    },
+    {
+     "key": "B",
+     "text": "Mọi học viên nộp đủ 10 bài đều đạt"
+    },
+    {
+     "key": "C",
+     "text": "Lan không đạt chứng chỉ"
+    },
+    {
+     "key": "D",
+     "text": "Lan đạt chứng chỉ"
+    }
+   ],
+   "answer": "A",
+   "explanation": "'Đạt → nộp đủ'. Biết 'nộp đủ' không suy ra 'đạt' (còn điều kiện khác như điểm thi).",
+   "dang": "D-keo-theo",
+   "trap": "'Mọi A đều B' bị đọc ngược thành 'mọi B đều A'."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Phủ định của: '**Không có** học viên nào vừa vắng quá 3 buổi vừa được xét đạt' là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "Có học viên vắng quá 3 buổi mà không được xét đạt"
+    },
+    {
+     "key": "B",
+     "text": "Không có học viên nào vắng quá 3 buổi"
+    },
+    {
+     "key": "C",
+     "text": "Mọi học viên vắng quá 3 buổi đều được xét đạt"
+    },
+    {
+     "key": "D",
+     "text": "Có ít nhất một học viên vừa vắng quá 3 buổi vừa được xét đạt"
+    }
+   ],
+   "answer": "D",
+   "explanation": "'Không có x thoả P' = ∀x ¬P; phủ định là ∃x P.",
+   "dang": "D-phu-dinh",
+   "trap": "Phương án 'mọi…' quá mạnh; phủ định chỉ cần **tồn tại một** trường hợp."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Học viên được thi lại khi: (điểm dưới 5 **và** đã nộp đơn) **hoặc** có giấy xác nhận y tế. Ba điều kiện đúng/sai độc lập. Có bao nhiêu tổ hợp được thi lại?",
+   "options": [
+    {
+     "key": "A",
+     "text": "3"
+    },
+    {
+     "key": "B",
+     "text": "5"
+    },
+    {
+     "key": "C",
+     "text": "6"
+    },
+    {
+     "key": "D",
+     "text": "4"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Có giấy y tế: 4 tổ hợp (hai biến còn lại tuỳ ý). Không có giấy: chỉ 1 tổ hợp (điểm dưới 5 và đã nộp đơn). Tổng 4 + 1 = 5.",
+   "dang": "D-suy-luan",
+   "trap": "Chú ý thứ tự ưu tiên: (A ∧ B) ∨ C, không phải A ∧ (B ∨ C) (cái này ra 3)."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Khoá online có tỉ lệ đỗ chung thấp hơn khoá trực tiếp, nhưng khi tách theo 'đã có nền tảng' và 'chưa có nền tảng' thì khoá online lại đỗ cao hơn ở **cả hai** nhóm. Giải thích?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Ngụy biện người rơm"
+    },
+    {
+     "key": "B",
+     "text": "Khoá trực tiếp tốt hơn vì số gộp mới đúng"
+    },
+    {
+     "key": "C",
+     "text": "Nghịch lý Simpson: khoá online nhận tỉ lệ học viên chưa có nền tảng cao hơn nhiều, kéo tỉ lệ chung xuống"
+    },
+    {
+     "key": "D",
+     "text": "Số liệu chắc chắn sai"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Tỉ lệ chung phụ thuộc cơ cấu học viên; so sánh trong từng nhóm công bằng hơn.",
+   "dang": "D-nguy-bien",
+   "trap": "Số gộp 'trông' khách quan nhưng lẫn ảnh hưởng của cơ cấu nhóm."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Ứng dụng luyện đọc cho học sinh tiểu học muốn ghi âm giọng đọc để huấn luyện mô hình chấm phát âm. Điều kiện quan trọng nhất trước khi thu?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Không cần đồng ý vì dữ liệu dùng để cải thiện sản phẩm"
+    },
+    {
+     "key": "B",
+     "text": "Học sinh bấm 'Đồng ý' trên ứng dụng là đủ"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ cần ẩn tên học sinh"
+    },
+    {
+     "key": "D",
+     "text": "Có sự đồng ý của cha mẹ/người giám hộ cho đúng mục đích, thông báo rõ ràng, chỉ thu dữ liệu cần thiết và có thời hạn lưu"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Dữ liệu của trẻ em được bảo vệ đặc biệt; trẻ nhỏ không tự đồng ý thay người giám hộ.",
+   "dang": "D-rieng-tu",
+   "trap": "'Cải thiện sản phẩm' là mục đích chung chung, không thay được sự đồng ý."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Mô hình cảnh báo bỏ học: học viên thành thị có TPR 0,8 và FPR 0,10; học viên nông thôn có TPR 0,8 và FPR 0,25. Đánh giá đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Công bằng hoàn toàn vì TPR bằng nhau"
+    },
+    {
+     "key": "B",
+     "text": "Vi phạm equal opportunity"
+    },
+    {
+     "key": "C",
+     "text": "Đạt demographic parity"
+    },
+    {
+     "key": "D",
+     "text": "Đạt equal opportunity (TPR bằng nhau) nhưng vi phạm equalized odds: học viên nông thôn bị gắn cờ nhầm nhiều hơn hẳn"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Equalized odds cần cả TPR và FPR bằng nhau; FPR 0,25 so với 0,10.",
+   "dang": "D-cong-bang",
+   "trap": "Nhìn mỗi TPR thấy 'công bằng' — đề cố ý để FPR lệch."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Theo EU AI Act, tính năng nào dưới đây thuộc nhóm **bị cấm** khi dùng trong cơ sở giáo dục?",
+   "options": [
+    {
+     "key": "A",
+     "text": "AI suy luận cảm xúc của học sinh qua camera trong lớp học"
+    },
+    {
+     "key": "B",
+     "text": "AI chấm bài thi dùng cho xét tuyển"
+    },
+    {
+     "key": "C",
+     "text": "Chatbot hỏi đáp lịch học"
+    },
+    {
+     "key": "D",
+     "text": "Bộ lọc thư rác của nhà trường"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Nhận diện cảm xúc tại nơi làm việc và cơ sở giáo dục bị cấm (trừ lý do y tế/an toàn). Chấm thi xét tuyển là rủi ro cao; chatbot là rủi ro hạn chế; lọc spam là tối thiểu.",
+   "dang": "D-ai-act",
+   "trap": "Chấm thi xét tuyển 'nghe' nghiêm trọng hơn nhưng là rủi ro cao (được phép có điều kiện), không bị cấm."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-sec",
+   "points": 1.5,
+   "prompt": "Trợ lý học tập chỉ cần **đọc lịch học** của học viên nhưng được cấp plugin có cả quyền sửa điểm và gửi email cho phụ huynh. Theo OWASP Top 10 cho LLM, đây là rủi ro nào và xử lý thế nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "LLM10 Unbounded Consumption: giới hạn số request"
+    },
+    {
+     "key": "B",
+     "text": "LLM06 Excessive Agency: gỡ các quyền thừa, chỉ cấp tool đọc lịch học theo đúng học viên đăng nhập"
+    },
+    {
+     "key": "C",
+     "text": "Không có rủi ro vì trợ lý không tự gọi tool sửa điểm"
+    },
+    {
+     "key": "D",
+     "text": "LLM04 Data Poisoning: kiểm tra dữ liệu huấn luyện"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Chức năng/quyền vượt quá nhu cầu tạo bề mặt tấn công (ví dụ khi bị prompt injection).",
+   "dang": "D-owasp",
+   "trap": "'Model sẽ không tự gọi' là giả định — quyền đã cấp thì có thể bị lợi dụng."
+  },
+  {
+   "module": "D",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "Trường muốn dùng AI giám sát thi trực tuyến: bật camera và micro suốt bài thi, AI phân tích ánh mắt, cử động và **cảm xúc** để tự động gắn cờ gian lận; thí sinh bị gắn cờ bị huỷ bài. Bạn được giao đánh giá đề xuất. Nêu rủi ro và đề xuất thiết kế thay thế.",
+   "modelAnswer": "Rủi ro pháp lý: suy luận cảm xúc trong giáo dục bị cấm theo EU AI Act (nếu áp dụng); hình ảnh/giọng nói là dữ liệu cá nhân, khuôn mặt có thể là dữ liệu sinh trắc → cần cơ sở pháp lý, tối thiểu hoá.\nĐộ chính xác và công bằng: phân tích ánh mắt/cử động dễ gắn cờ nhầm người khuyết tật, người có tật, điều kiện ánh sáng/thiết bị kém, khác biệt văn hoá → bất lợi cho nhóm yếu thế.\nHậu quả: tự động huỷ bài là quyết định ảnh hưởng lớn không có con người xem xét.\nThiết kế thay thế: không suy luận cảm xúc; chỉ gắn cờ sự kiện khách quan (rời khỏi khung hình lâu, có người khác) để giám thị xem lại; người quyết định cuối cùng; thông báo trước, giải thích tiêu chí, kênh khiếu nại; điều chỉnh hợp lý cho người khuyết tật; lưu trữ tối thiểu và xoá sau thời hạn; đánh giá tỉ lệ gắn cờ nhầm theo nhóm; cân nhắc hình thức đánh giá ít phụ thuộc giám sát.",
+   "rubric": [
+    "Nhận ra vấn đề pháp lý của suy luận cảm xúc và dữ liệu sinh trắc/hình ảnh",
+    "Nêu rủi ro gắn cờ nhầm và bất lợi cho nhóm yếu thế",
+    "Không để AI tự động huỷ bài; con người quyết định",
+    "Minh bạch, quyền khiếu nại, điều chỉnh hợp lý",
+    "Tối thiểu hoá và thời hạn lưu dữ liệu"
+   ],
+   "dang": "E-dao-duc",
+   "trap": "Mục tiêu chống gian lận là chính đáng — điểm nằm ở việc tách phần hợp lệ (gắn cờ sự kiện khách quan + người xem) khỏi phần vi phạm (cảm xúc, tự động huỷ bài)."
+  }
+ ]
+}

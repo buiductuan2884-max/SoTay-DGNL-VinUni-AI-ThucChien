@@ -1,0 +1,1594 @@
+{
+ "title": "Đề sát thật 09 · Tổng hợp nâng cao",
+ "description": "Đề khó nhất: nhiều câu vận dụng cao ghép 2–3 dạng (Bayes hai tầng, Holm, CI chênh lệch, join đếm trùng, CoW pandas, bộ ba nguy hiểm). Làm sau cùng.",
+ "durationMinutes": 90,
+ "questions": [
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "a-xs",
+   "points": 1.5,
+   "prompt": "Hệ thống chống gian lận hồ sơ trợ cấp có hai tầng. Tỉ lệ gian lận 0,2%. Tầng 1 (luật) gắn cờ 99% hồ sơ gian lận và 1% hồ sơ hợp lệ. Tầng 2 (mô hình ML) chỉ xét các hồ sơ bị tầng 1 gắn cờ: giữ lại 90% hồ sơ gian lận và 5% hồ sơ hợp lệ. Trong số hồ sơ bị **cả hai tầng** gắn cờ, tỉ lệ gian lận thật xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "17%"
+    },
+    {
+     "key": "B",
+     "text": "78%"
+    },
+    {
+     "key": "C",
+     "text": "90%"
+    },
+    {
+     "key": "D",
+     "text": "99%"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Xét 1.000.000 hồ sơ: 2.000 gian lận → tầng 1: 1.980 → tầng 2: 1.782. 998.000 hợp lệ → tầng 1: 9.980 → tầng 2: 499. Tỉ lệ = 1.782/(1.782 + 499) ≈ 0.78.",
+   "dang": "A-bayes",
+   "trap": "17% là precision **sau tầng 1** (1.980/11.960). Mỗi tầng lọc làm 'tỉ lệ nền' của tầng sau cao lên."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "Thử nghiệm cần 20.000 người mỗi nhóm để đạt power 80%. Áp dụng CUPED (dùng hành vi trước thử nghiệm làm biến kiểm soát) làm phương sai của chỉ số giảm 36%. Cỡ mẫu cần thiết còn khoảng:",
+   "options": [
+    {
+     "key": "A",
+     "text": "7.200 người mỗi nhóm"
+    },
+    {
+     "key": "B",
+     "text": "20.000 người mỗi nhóm"
+    },
+    {
+     "key": "C",
+     "text": "16.000 người mỗi nhóm"
+    },
+    {
+     "key": "D",
+     "text": "12.800 người mỗi nhóm"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Cỡ mẫu tỉ lệ thuận với phương sai: 20.000 × (1 − 0,36) = 12.800.",
+   "dang": "A-co-mau",
+   "trap": "16.000 là nhân với √0,64 = 0,8 (nhầm với độ lệch chuẩn); 7.200 là lấy phần giảm."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "Thử 4 phiên bản giao diện (V1–V4), mỗi bản so với bản gốc, p-value hai phía: V1 = 0,004; V2 = 0,015; V3 = 0,03; V4 = 0,30. Dùng thủ tục Holm với α = 0,05 tổng. Những phiên bản nào có ý nghĩa?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Cả bốn phiên bản trừ V4 không cần xét"
+    },
+    {
+     "key": "B",
+     "text": "V1 và V2"
+    },
+    {
+     "key": "C",
+     "text": "V1, V2 và V3"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ V1"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Sắp tăng: 0,004 ≤ 0,05/4 = 0,0125 ✓; 0,015 ≤ 0,05/3 ≈ 0,0167 ✓; 0,03 > 0,05/2 = 0,025 ✗ → dừng.",
+   "dang": "A-da-kiem-dinh",
+   "trap": "'Chỉ V1' là dùng Bonferroni cho mọi bản (0,0125). V3 có p < 0,05 nhưng không qua ngưỡng Holm ở bước của nó."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "Báo cáo: tỉ lệ hoàn tất thủ tục online của giao diện A = 10,0%, khoảng tin cậy 95% [9,4; 10,6]; giao diện B = 11,0%, khoảng tin cậy 95% [10,4; 11,6] (hai nhóm độc lập, √2 ≈ 1,41). Khoảng tin cậy 95% cho chênh lệch B − A xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "[+0,15; +1,85] điểm %: không chứa 0 nên có ý nghĩa"
+    },
+    {
+     "key": "B",
+     "text": "[+0,4; +1,6] điểm %"
+    },
+    {
+     "key": "C",
+     "text": "Hai khoảng chồng lên nhau nên chênh lệch không có ý nghĩa"
+    },
+    {
+     "key": "D",
+     "text": "[−0,2; +2,2] điểm %"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Mỗi biên rộng 0,6 = 1,96·SE. Biên của chênh lệch = 0,6·√2 ≈ 0,85 → 1,0 ± 0,85 = [0,15; 1,85].",
+   "dang": "A-se-ci",
+   "trap": "Hai khoảng tin cậy **chồng nhau** không có nghĩa là chênh lệch không có ý nghĩa; cộng hai biên (±1,2) là quá rộng."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-gt",
+   "points": 1.5,
+   "prompt": "Ba token ứng viên có logits (2, 1, 0). Khi temperature T → 0 (rất nhỏ) và khi T rất lớn, phân phối xác suất tiến tới:",
+   "options": [
+    {
+     "key": "A",
+     "text": "T → 0: bằng (2, 1, 0)/3"
+    },
+    {
+     "key": "B",
+     "text": "T → 0: đều nhau; T lớn: dồn vào token logit 2"
+    },
+    {
+     "key": "C",
+     "text": "T → 0: dồn gần hết vào token logit 2 (giống chọn tham lam); T lớn: gần đều (≈ 1/3 mỗi token)"
+    },
+    {
+     "key": "D",
+     "text": "Không đổi vì softmax không phụ thuộc T"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Chia logits cho T nhỏ khuếch đại chênh lệch; chia cho T lớn làm mọi logit về gần 0 → phân phối đều.",
+   "dang": "A-softmax",
+   "trap": "Hướng của T hay bị đảo; nhớ 'T thấp = ổn định, T cao = ngẫu nhiên'."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "c-llm",
+   "points": 1.5,
+   "prompt": "Trong một phiên, agent gọi tool trả về 20.000 token log thô và nối nguyên văn vào ngữ cảnh. Sau đó còn 5 lần gọi LLM nữa, mỗi lần gửi lại toàn bộ ngữ cảnh. Giá 3 USD/1 triệu token đầu vào, 10.000 phiên/ngày. Chi phí phát sinh thêm do lần nối này là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "120.000 token/phiên; khoảng 3.600 USD/ngày"
+    },
+    {
+     "key": "B",
+     "text": "20.000 token/phiên; khoảng 600 USD/ngày"
+    },
+    {
+     "key": "C",
+     "text": "100.000 token/phiên; khoảng 3.000 USD/ngày"
+    },
+    {
+     "key": "D",
+     "text": "100.000 token/phiên; khoảng 300 USD/ngày"
+    }
+   ],
+   "answer": "C",
+   "explanation": "20.000 token bị gửi lại ở 5 lần gọi sau: 100.000 token/phiên. × 10.000 phiên = 10⁹ token = 1.000 triệu × 3 USD = 3.000 USD/ngày.",
+   "dang": "A-chi-phi-token",
+   "trap": "Chi phí của kết quả tool lớn bị **nhân lên** theo số lần gửi lại ngữ cảnh — lý do phải tóm tắt/phân trang kết quả tool."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-llm",
+   "points": 1.5,
+   "prompt": "Gọi model lớn: 90% request xong trong 2 giây; 10% bị timeout ở giây thứ 5 rồi chuyển sang model nhỏ mất thêm 1 giây. Thời gian phản hồi trung bình là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "2,3 giây"
+    },
+    {
+     "key": "B",
+     "text": "2,7 giây"
+    },
+    {
+     "key": "C",
+     "text": "2,4 giây"
+    },
+    {
+     "key": "D",
+     "text": "2,0 giây"
+    }
+   ],
+   "answer": "C",
+   "explanation": "0,9·2 + 0,1·(5 + 1) = 1,8 + 0,6 = 2,4 giây.",
+   "dang": "A-do-tre",
+   "trap": "2,3 giây là quên thời gian chờ đến khi timeout (chỉ cộng 0,1·5); timeout cũng là thời gian người dùng phải chờ."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-dstt",
+   "points": 1.5,
+   "prompt": "Mỗi tháng 10% người dùng đang hoạt động chuyển sang 'ngủ đông', và 30% người dùng ngủ đông quay lại hoạt động. Về dài hạn, tỉ lệ người dùng hoạt động tiến tới:",
+   "options": [
+    {
+     "key": "A",
+     "text": "70%"
+    },
+    {
+     "key": "B",
+     "text": "75%"
+    },
+    {
+     "key": "C",
+     "text": "25%"
+    },
+    {
+     "key": "D",
+     "text": "90%"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Cân bằng: 0,1·H = 0,3·N và H + N = 1 → H = 3N → H = 0,75.",
+   "dang": "A-ma-tran",
+   "trap": "90% chỉ là tỉ lệ ở lại của một tháng, không phải trạng thái dừng."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "a-tile",
+   "points": 1.5,
+   "prompt": "Gửi voucher 50.000đ cho 1.000 khách được mô hình dự đoán sắp rời đi (xác suất rời trung bình 40%). Voucher làm xác suất rời giảm còn 30%; mọi khách nhận đều dùng voucher. Mỗi khách giữ được mang lại 1.000.000đ. Lợi nhuận ròng của chiến dịch là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "+100 triệu đồng"
+    },
+    {
+     "key": "B",
+     "text": "−50 triệu đồng"
+    },
+    {
+     "key": "C",
+     "text": "+350 triệu đồng"
+    },
+    {
+     "key": "D",
+     "text": "+50 triệu đồng"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Số khách giữ thêm = 1.000 × (40% − 30%) = 100 → +100 triệu. Chi phí voucher 1.000 × 50.000 = 50 triệu. Ròng +50 triệu.",
+   "dang": "A-kinh-te",
+   "trap": "+100 triệu là quên chi phí voucher; +350 triệu là tính trên 70% khách ở lại thay vì phần **tăng thêm** 10%."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "Khoảng tin cậy 95% của chênh lệch tỉ lệ hoàn tất (B − A) là [−0,2; +1,8] điểm %. Về p-value của kiểm định hai phía tương ứng có thể nói gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "p > 0,05 vì khoảng tin cậy 95% chứa 0"
+    },
+    {
+     "key": "B",
+     "text": "p = 0,05"
+    },
+    {
+     "key": "C",
+     "text": "Không suy ra được gì về p"
+    },
+    {
+     "key": "D",
+     "text": "p < 0,05 vì phần lớn khoảng nằm bên dương"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Khoảng tin cậy 95% chứa 0 ⇔ kiểm định hai phía ở α = 0,05 không bác bỏ H₀.",
+   "dang": "A-pvalue",
+   "trap": "'Phần lớn khoảng dương' gợi cảm giác có hiệu ứng nhưng không đủ bằng chứng."
+  },
+  {
+   "module": "A",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 5,
+   "prompt": "Bộ lọc bot của cổng dịch vụ công xử lý 1.000.000 phiên/ngày, trong đó 5.000 phiên là bot. Ba ngưỡng cho kết quả:\n\n| Ngưỡng | Bot bị chặn (TP) | Người thật bị chặn (FP) |\n|---|---|---|\n| 0,5 | 4.700 | 30.000 |\n| 0,7 | 4.500 | 10.000 |\n| 0,9 | 3.500 | 2.000 |\n\nChặn nhầm một người thật tốn 20.000đ; bỏ lọt một bot tốn 3.000đ.\n\n(a) Tính tổng chi phí mỗi ngày ở từng ngưỡng và chọn ngưỡng.\n(b) Nếu chi phí bỏ lọt một bot tăng lên 200.000đ (bot đăng ký hồ sơ ảo), ngưỡng tối ưu đổi thành gì?\n(c) Tính precision ở ngưỡng được chọn trong câu (a).",
+   "modelAnswer": "(a) FN = 5.000 − TP. Ngưỡng 0,5: 30.000·20.000 + 300·3.000 = 600 + 0,9 = 600,9 triệu. 0,7: 200 + 1,5 = 201,5 triệu. 0,9: 40 + 4,5 = 44,5 triệu → chọn 0,9.\n(b) 0,5: 600 + 300·0,2 = 660 triệu; 0,7: 200 + 500·0,2 = 300 triệu; 0,9: 40 + 1.500·0,2 = 340 triệu → chọn 0,7.\n(c) Ở 0,9: precision = 3.500/(3.500 + 2.000) ≈ 64%.",
+   "rubric": [
+    "Tính đúng FN = 5.000 − TP ở mỗi ngưỡng",
+    "Tính đúng ba tổng chi phí phần (a) và chọn 0,9",
+    "Tính lại với chi phí mới và chọn 0,7",
+    "Tính đúng precision ≈ 64%"
+   ],
+   "dang": "E-toan",
+   "trap": "Ngưỡng tối ưu phụ thuộc **tỉ lệ chi phí** FP/FN; cùng một mô hình, đổi chi phí là đổi ngưỡng."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\ndef doc(ds):\n    for x in ds:\n        print(\"doc\", x, end=\"; \")\n        yield x\n\ndef loc(it):\n    for x in it:\n        if x % 2:\n            yield x\n\ng = loc(doc([1, 2, 3]))\nprint(next(g))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`doc 1; doc 2; doc 3; 1`"
+    },
+    {
+     "key": "B",
+     "text": "`doc 1; doc 2; 1`"
+    },
+    {
+     "key": "C",
+     "text": "`1`"
+    },
+    {
+     "key": "D",
+     "text": "`doc 1; 1`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Generator chạy lười: next(g) chỉ kéo đủ phần tử để có kết quả đầu tiên. doc in 'doc 1; ' rồi trả 1; 1 lẻ nên loc trả 1 ngay.",
+   "dang": "B-py-nangcao",
+   "trap": "Tưởng pipeline đọc hết dữ liệu trước rồi mới lọc — generator chỉ xử lý **từng phần tử khi được yêu cầu**."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "```python\ndf = pd.DataFrame({\"ngay\": [\"T2\", \"T2\", \"T3\"], \"kenh\": [\"web\", \"web\", \"app\"], \"tien\": [100, 300, 200]})\np = df.pivot_table(index=\"ngay\", columns=\"kenh\", values=\"tien\", aggfunc=\"sum\")\nprint(p.loc[\"T2\", \"web\"], p.loc[\"T3\", \"web\"])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`300.0 nan`"
+    },
+    {
+     "key": "B",
+     "text": "`400.0 nan`"
+    },
+    {
+     "key": "C",
+     "text": "Báo lỗi ValueError vì (T2, web) trùng"
+    },
+    {
+     "key": "D",
+     "text": "`400 0`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "pivot_table gộp các dòng trùng khoá bằng aggfunc (sum = 400). Ô không có dữ liệu là NaN (cột thành float).",
+   "dang": "B-pd-groupby",
+   "trap": "`pivot` (không có _table) mới báo lỗi khi trùng khoá; ô thiếu là NaN chứ không phải 0."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "Với pandas ≥ 3.0 (Copy-on-Write mặc định):\n```python\ndf = pd.DataFrame({\"gia\": [100, 200, 300]})\ndf[df[\"gia\"] > 150][\"gia\"] = 0\nprint(df[\"gia\"].tolist())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[100, 200, 300]` — phép gán rơi vào bản sao tạm, df không đổi"
+    },
+    {
+     "key": "B",
+     "text": "`[0, 0, 0]`"
+    },
+    {
+     "key": "C",
+     "text": "Báo lỗi KeyError"
+    },
+    {
+     "key": "D",
+     "text": "`[100, 0, 0]`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Chỉ mục liên tiếp (chained) tạo một đối tượng tạm; gán vào đó không ảnh hưởng df. Dùng `df.loc[df[\"gia\"] > 150, \"gia\"] = 0`.",
+   "dang": "B-pd-loc",
+   "trap": "Code 'trông như' sửa dữ liệu và không báo lỗi (chỉ cảnh báo) — lỗi im lặng nguy hiểm."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "Tính khoảng cách Euclid bình phương giữa Q shape (2000, 128) và K shape (5000, 128), float32, bằng `((Q[:, None, :] - K[None, :, :]) ** 2).sum(-1)`. Mảng trung gian lớn nhất chiếm khoảng bao nhiêu và cách tốt hơn là gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "≈ 640 MB; chuyển sang float64"
+    },
+    {
+     "key": "B",
+     "text": "≈ 40 MB; không cần đổi"
+    },
+    {
+     "key": "C",
+     "text": "≈ 5,1 GB; dùng ‖q‖² + ‖k‖² − 2·Q·Kᵀ (mảng kết quả chỉ (2000, 5000) ≈ 40 MB)"
+    },
+    {
+     "key": "D",
+     "text": "≈ 5,1 GB; dùng vòng for hai lớp cho tiết kiệm"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Mảng trung gian (2000, 5000, 128) × 4 byte = 5,12·10⁹ byte. Khai triển ‖q − k‖² = ‖q‖² + ‖k‖² − 2q·k chỉ cần phép nhân ma trận.",
+   "dang": "B-numpy",
+   "trap": "Broadcasting tiện nhưng có thể tạo mảng trung gian khổng lồ; vòng for thì đúng nhưng chậm hàng trăm lần."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "Dịch vụ giám sát nhận n bản ghi liên tục và cần danh sách `recent` với bản ghi mới nhất ở đầu. Code hiện tại: `recent.insert(0, r)` cho mỗi bản ghi. Độ phức tạp và cách sửa?",
+   "options": [
+    {
+     "key": "A",
+     "text": "O(n²) tổng cộng; dùng `collections.deque` với `appendleft` (O(1) mỗi lần)"
+    },
+    {
+     "key": "B",
+     "text": "O(1); insert(0) là thao tác hằng số"
+    },
+    {
+     "key": "C",
+     "text": "O(n log n); dùng heapq"
+    },
+    {
+     "key": "D",
+     "text": "O(n), không cần sửa"
+    }
+   ],
+   "answer": "A",
+   "explanation": "insert(0) phải dời toàn bộ phần tử phía sau → O(n) mỗi lần, n lần → O(n²).",
+   "dang": "B-bigo",
+   "trap": "list nhanh khi thêm/bớt ở **cuối**; ở **đầu** thì chậm."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "b-sql",
+   "points": 1.25,
+   "prompt": "Đơn 101 (amount 200) được khách trả **hai lần** 100 + 100; đơn 102 (amount 150) trả một lần 150. Kế toán chạy:\n```sql\nSELECT SUM(o.amount), SUM(p.paid)\nFROM orders o JOIN payments p ON p.order_id = o.id;\n```\nKết quả và vấn đề là gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "550 và 350: tổng giá trị đơn bị đếm hai lần cho đơn 101 do join một-nhiều"
+    },
+    {
+     "key": "B",
+     "text": "350 và 350: khớp, không có vấn đề"
+    },
+    {
+     "key": "C",
+     "text": "550 và 550"
+    },
+    {
+     "key": "D",
+     "text": "200 và 350"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Đơn 101 xuất hiện 2 dòng sau join → amount 200 bị cộng hai lần: 200 + 200 + 150 = 550; paid = 100 + 100 + 150 = 350.",
+   "dang": "B-sql",
+   "trap": "Join với bảng 'nhiều' rồi SUM cột của bảng 'một' là lỗi đối soát kinh điển; gộp payments theo đơn trước khi join."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-sql",
+   "points": 1.25,
+   "prompt": "Bảng `orders` 5 triệu dòng có duy nhất index B-tree `(customer_id, order_date)`. Điều kiện WHERE nào **khó** tận dụng index này nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "`WHERE customer_id = 42`"
+    },
+    {
+     "key": "B",
+     "text": "`WHERE customer_id IN (1, 2, 3)`"
+    },
+    {
+     "key": "C",
+     "text": "`WHERE order_date >= '2026-01-01'`"
+    },
+    {
+     "key": "D",
+     "text": "`WHERE customer_id = 42 AND order_date >= '2026-01-01'`"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Index ghép sắp theo cột đầu (customer_id) trước; điều kiện chỉ trên cột thứ hai không dùng được thứ tự đó hiệu quả.",
+   "dang": "B-sql",
+   "trap": "Thứ tự cột trong index ghép quyết định câu nào dùng được (quy tắc cột đầu trái)."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nd = {\"a\": 1, \"b\": 3, \"c\": 2}\nlon = {k: v for k, v in d.items() if v >= 2}\nprint(lon, sorted(d, key=d.get))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`{'b': 3, 'c': 2} [1, 2, 3]`"
+    },
+    {
+     "key": "B",
+     "text": "`{'b': 3, 'c': 2} ['a', 'c', 'b']`"
+    },
+    {
+     "key": "C",
+     "text": "`{'b': 3} ['a', 'c', 'b']`"
+    },
+    {
+     "key": "D",
+     "text": "`{'b': 3, 'c': 2} ['b', 'c', 'a']`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Comprehension giữ các khoá có giá trị ≥ 2. sorted(d, key=d.get) sắp **khoá** theo giá trị tăng dần.",
+   "dang": "B-dict-str",
+   "trap": "sorted trên dict duyệt **khoá**; key=d.get chỉ quyết định thứ tự."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nt = ([1, 2], 3)\nt[0].append(4)\nprint(t)\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`([1, 2], 3)`"
+    },
+    {
+     "key": "B",
+     "text": "`([1, 2], 3, 4)`"
+    },
+    {
+     "key": "C",
+     "text": "Báo lỗi TypeError vì tuple bất biến"
+    },
+    {
+     "key": "D",
+     "text": "`([1, 2, 4], 3)`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Tuple bất biến nghĩa là không gán lại phần tử; nhưng list bên trong vẫn sửa được tại chỗ.",
+   "dang": "B-mutable",
+   "trap": "So với `t[0] += [4]` (có gán lại → lỗi), append không gán lại nên không lỗi."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nsp = [(\"ao\", \"B\", 300), (\"giay\", \"A\", 300), (\"mu\", \"B\", 200), (\"tui\", \"A\", 500)]\nsp.sort(key=lambda x: x[2], reverse=True)\nsp.sort(key=lambda x: x[1])\nprint([t[0] for t in sp])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`['giay', 'tui', 'ao', 'mu']`"
+    },
+    {
+     "key": "B",
+     "text": "`['tui', 'giay', 'ao', 'mu']`"
+    },
+    {
+     "key": "C",
+     "text": "`['ao', 'mu', 'giay', 'tui']`"
+    },
+    {
+     "key": "D",
+     "text": "`['tui', 'ao', 'giay', 'mu']`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Lần 1 (giá giảm, ổn định): tui, ao, giay, mu. Lần 2 theo danh mục, ổn định nên giữ thứ tự giá trong cùng danh mục: A: tui, giay; B: ao, mu.",
+   "dang": "B-sorted",
+   "trap": "Sắp nhiều lần: tiêu chí **phụ** sắp trước, tiêu chí **chính** sắp sau — nhờ tính ổn định."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Hệ thống y tế vùng chạy ở hai trung tâm dữ liệu, ghi được ở cả hai nơi. Khi đường truyền giữa hai nơi bị đứt, mỗi bên vẫn nhận thao tác. Thiết kế đúng cho hai loại dữ liệu: (1) y lệnh và thông tin dị ứng thuốc; (2) lượt xem bài viết sức khoẻ?",
+   "options": [
+    {
+     "key": "A",
+     "text": "(1) ưu tiên nhất quán (chặn ghi ở phía thiểu số khi mất kết nối); (2) ưu tiên sẵn sàng, đồng bộ lại sau"
+    },
+    {
+     "key": "B",
+     "text": "Cả hai ưu tiên sẵn sàng"
+    },
+    {
+     "key": "C",
+     "text": "Cả hai ưu tiên nhất quán"
+    },
+    {
+     "key": "D",
+     "text": "(1) ưu tiên sẵn sàng; (2) ưu tiên nhất quán"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Khi phân mảnh mạng phải chọn giữa nhất quán và sẵn sàng (CAP). Dữ liệu an toàn bệnh nhân không chấp nhận xung đột; số lượt xem thì chấp nhận lệch tạm thời.",
+   "dang": "B-he-thong",
+   "trap": "Không có lựa chọn 'đúng cho mọi dữ liệu' — đề kiểm tra việc chọn **theo loại dữ liệu**."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Review PR 220 dòng của cổng tra cứu hồ sơ, bạn thấy: (a) truy vấn SQL ghép chuỗi trực tiếp từ mã hồ sơ người dùng nhập; (b) không có test cho nhánh xử lý lỗi; (c) tên hàm `xuLy2` chưa rõ nghĩa. Bạn nên:",
+   "options": [
+    {
+     "key": "A",
+     "text": "Request changes cho (a) SQL injection và (b) thiếu test; ghi (c) là Nit"
+    },
+    {
+     "key": "B",
+     "text": "Tự sửa cả ba rồi merge"
+    },
+    {
+     "key": "C",
+     "text": "Request changes chỉ vì (c)"
+    },
+    {
+     "key": "D",
+     "text": "Approve, ghi chú cả ba để sửa sau"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Lỗi bảo mật và thiếu test phải chặn; đặt tên là góp ý không chặn.",
+   "dang": "B-review-test",
+   "trap": "Mức độ của từng phát hiện khác nhau — phân loại đúng là kỹ năng review được chấm."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Review code gán nhóm A/B cho người dùng:\n```python\ndef chia_nhom(user_id: str) -> str:\n    return \"B\" if hash(user_id) % 2 else \"A\"\n```\nVấn đề chính là gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chỉ cần đổi % 2 thành % 100"
+    },
+    {
+     "key": "B",
+     "text": "Không có vấn đề gì"
+    },
+    {
+     "key": "C",
+     "text": "user_id phải là số nguyên"
+    },
+    {
+     "key": "D",
+     "text": "`hash()` của chuỗi bị ngẫu nhiên hoá theo từng tiến trình nên cùng người dùng có thể đổi nhóm giữa các lần chạy/máy chủ; dùng hàm băm ổn định như hashlib"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Python bật hash randomization cho str; kết quả khác nhau giữa các tiến trình → người dùng nhảy nhóm, làm hỏng thử nghiệm.",
+   "dang": "B-review-test",
+   "trap": "Code chạy đúng trên một máy khi test — lỗi chỉ lộ khi nhiều tiến trình."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nimport re\nprint(re.sub(r\"\\d(?=\\d{3})\", \"*\", \"0912345678\"))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`**********`"
+    },
+    {
+     "key": "B",
+     "text": "`0912345***`"
+    },
+    {
+     "key": "C",
+     "text": "`*******678`"
+    },
+    {
+     "key": "D",
+     "text": "`*********8`"
+    }
+   ],
+   "answer": "C",
+   "explanation": "`(?=\\d{3})` là lookahead: chỉ thay chữ số nào **còn ít nhất 3 chữ số phía sau**. 7 chữ số đầu thoả, 3 chữ số cuối giữ nguyên.",
+   "dang": "B-regex",
+   "trap": "Lookahead không 'ăn' ký tự nên các chữ số phía sau vẫn được xét tiếp."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "Danh sách khung giờ đặt lịch là list tuple `(bat_dau, ket_thuc)` (số nguyên, chưa sắp xếp). Viết hàm `gop_khoang(ds)` gộp các khung **chồng nhau hoặc chạm nhau** (ví dụ (8, 9) và (9, 11)), trả về list tuple đã sắp xếp.\n\nVí dụ: `[(9, 11), (1, 3), (2, 6), (8, 9)]` → `[(1, 6), (8, 11)]`.",
+   "modelAnswer": "def gop_khoang(ds):\n    kq = []\n    for s, e in sorted(ds):\n        if kq and s <= kq[-1][1]:\n            kq[-1][1] = max(kq[-1][1], e)\n        else:\n            kq.append([s, e])\n    return [tuple(x) for x in kq]",
+   "rubric": [
+    "Sắp xếp theo điểm bắt đầu trước khi gộp",
+    "Gộp khi bắt đầu ≤ kết thúc của khung trước (gồm cả chạm nhau)",
+    "Cập nhật kết thúc bằng max (khung bị chứa trọn bên trong)",
+    "Trả list tuple, xử lý list rỗng"
+   ],
+   "dang": "B-code-tay",
+   "trap": "Quên max khi gộp: (1, 10) với (2, 3) sẽ bị thu hẹp thành (1, 3)."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "tu-luan",
+   "points": 6.5,
+   "prompt": "DataFrame `don` có cột `ma`, `kh`, `tien`. Viết hàm `don_bat_thuong(don)` trả list `ma` các đơn có `tien` **lớn hơn trung bình của chính khách đó**, theo thứ tự xuất hiện trong bảng. Không lặp từng dòng.",
+   "modelAnswer": "def don_bat_thuong(don):\n    tb = don.groupby(\"kh\")[\"tien\"].transform(\"mean\")\n    return don.loc[don[\"tien\"] > tb, \"ma\"].tolist()",
+   "rubric": [
+    "Tính trung bình theo khách bằng transform (Series cùng độ dài)",
+    "So sánh từng đơn với trung bình của khách mình",
+    "Giữ thứ tự gốc, trả list mã đơn"
+   ],
+   "dang": "B-code-tay",
+   "trap": "So với trung bình **toàn bảng** (102) sẽ ra [2] trong ví dụ nhỏ này nhưng sai trên dữ liệu thật — đọc kỹ 'của chính khách đó'."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Người dân hỏi 'Cấp lại CCCD cần giấy tờ gì?'. Trợ lý trả lời: 'CCCD gắn chip được cấp từ năm 2021 và có thời hạn theo độ tuổi' — đúng nguyên văn tài liệu truy xuất. Đánh giá đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Context recall bằng 0"
+    },
+    {
+     "key": "B",
+     "text": "Cả faithfulness và answer relevance đều cao"
+    },
+    {
+     "key": "C",
+     "text": "Faithfulness cao (mọi ý đều có trong ngữ cảnh) nhưng answer relevance thấp (không trả lời câu hỏi)"
+    },
+    {
+     "key": "D",
+     "text": "Faithfulness thấp vì sai thông tin"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Câu trả lời trung thành với ngữ cảnh nhưng lạc đề.",
+   "dang": "C-rag-eval",
+   "trap": "'Đúng nguyên văn tài liệu' khiến dễ chấm cao — nhưng hai chỉ số đo hai điều khác nhau."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Trợ lý nội bộ cho cán bộ một cơ quan dùng semantic cache **chung** cho mọi người dùng. Cán bộ A hỏi về hồ sơ của công dân X; cán bộ B (không có quyền với hồ sơ X) hỏi câu tương tự và nhận được câu trả lời đã lưu chứa thông tin của X. Sửa thế nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Giảm TTL xuống 1 phút"
+    },
+    {
+     "key": "B",
+     "text": "Tắt prompt caching"
+    },
+    {
+     "key": "C",
+     "text": "Khoá cache phải gồm phạm vi quyền (người dùng/nhóm quyền); không cache câu trả lời chứa dữ liệu cá nhân, hoặc kiểm tra quyền trước khi trả từ cache"
+    },
+    {
+     "key": "D",
+     "text": "Tăng ngưỡng cosine lên 0,99"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Cache là một đường truy xuất dữ liệu; nó phải tuân thủ kiểm soát truy cập như nguồn gốc.",
+   "dang": "C-cache",
+   "trap": "Nâng ngưỡng giảm số lần trúng nhưng không xử lý gốc: cache bỏ qua phân quyền."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Trợ lý hỏi đáp quy định có tài liệu dài 60.000 token. Phương án 1: đưa toàn bộ tài liệu vào mỗi câu hỏi. Phương án 2: RAG lấy khoảng 2.500 token liên quan. Giá 1 USD/1 triệu token đầu vào, 2.000 câu hỏi/ngày. Chi phí đầu vào mỗi ngày và nhận xét:",
+   "options": [
+    {
+     "key": "A",
+     "text": "120 USD so với 5 USD (giảm 24 lần), TTFT cũng giảm; nhưng cần đánh giá chất lượng truy xuất"
+    },
+    {
+     "key": "B",
+     "text": "12 USD so với 0,5 USD"
+    },
+    {
+     "key": "C",
+     "text": "Như nhau vì cùng model"
+    },
+    {
+     "key": "D",
+     "text": "120 USD so với 50 USD"
+    }
+   ],
+   "answer": "A",
+   "explanation": "PA1: 60.000 × 2.000 = 120 triệu token → 120 USD. PA2: 2.500 × 2.000 = 5 triệu → 5 USD.",
+   "dang": "C-llm-hieu-nang",
+   "trap": "Rẻ hơn chưa chắc tốt hơn: RAG đổi chi phí lấy rủi ro **truy xuất thiếu**."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Cấu hình canary 5% lưu lượng cho model mới. Log cho thấy thực tế chỉ 3% request đến model mới và phần lớn đến từ một tỉnh. Kết quả canary cho thấy model mới tốt hơn. Nên làm gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng canary lên 50% cho nhanh"
+    },
+    {
+     "key": "B",
+     "text": "Tin kết quả vì 3% vẫn là mẫu lớn"
+    },
+    {
+     "key": "C",
+     "text": "Chưa tin kết quả: lỗi định tuyến làm mẫu canary lệch (giống SRM); sửa phân bổ ngẫu nhiên rồi chạy lại"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ triển khai model mới cho tỉnh đó"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Mẫu không ngẫu nhiên → khác biệt có thể do đặc điểm tỉnh, không do model.",
+   "dang": "C-trien-khai",
+   "trap": "Đây là sample ratio mismatch trong bối cảnh triển khai, không phải A/B."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Mô hình xét duyệt hồ sơ vay chính sách: nhãn 'vỡ nợ' chỉ biết sau 90 ngày. Trong 90 ngày đầu sau triển khai, nên giám sát gì để phát hiện sớm vấn đề?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Huấn luyện lại mỗi ngày cho chắc"
+    },
+    {
+     "key": "B",
+     "text": "Chỉ theo dõi độ trễ API"
+    },
+    {
+     "key": "C",
+     "text": "Drift của đặc trưng đầu vào và phân phối điểm dự đoán (PSI), kiểm tra chất lượng dữ liệu, chỉ số sớm như tỉ lệ trễ hạn kỳ đầu"
+    },
+    {
+     "key": "D",
+     "text": "Chờ đủ 90 ngày rồi đo AUC"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Khi nhãn đến chậm, giám sát những gì có ngay: đầu vào, đầu ra, chỉ số proxy.",
+   "dang": "C-drift",
+   "trap": "'Chờ đủ nhãn' nghĩa là để mô hình hỏng 3 tháng mới biết."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Biến thể mới của trang đặt phòng tăng chuyển đổi +3% (có ý nghĩa), nhưng p95 độ trễ tăng 40% (vượt SLO 2 giây) và số ticket khiếu nại trên 1.000 đơn tăng gấp đôi. Guardrail đã khai báo trước. Quyết định đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Triển khai cho 50% người dùng"
+    },
+    {
+     "key": "B",
+     "text": "Không triển khai bản hiện tại vì vi phạm guardrail đã cam kết; tối ưu độ trễ và tìm nguyên nhân khiếu nại rồi thử lại"
+    },
+    {
+     "key": "C",
+     "text": "Triển khai vì chỉ số chính tăng có ý nghĩa"
+    },
+    {
+     "key": "D",
+     "text": "Triển khai và nâng SLO lên 3 giây"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Guardrail tồn tại để chỉ số chính đẹp không che hậu quả xấu.",
+   "dang": "C-san-pham",
+   "trap": "Đổi SLO sau khi thấy kết quả là 'dời cột gôn'."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Người dân bị từ chối hỗ trợ hỏi: 'Tôi cần làm gì để đủ điều kiện?'. Cách giải thích phù hợp nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Liệt kê yếu tố không thay đổi được như năm sinh"
+    },
+    {
+     "key": "B",
+     "text": "Đưa toàn bộ trọng số mô hình"
+    },
+    {
+     "key": "C",
+     "text": "Nói 'hệ thống AI đã quyết định'"
+    },
+    {
+     "key": "D",
+     "text": "Giải thích phản thực trên yếu tố người dân thay đổi/bổ sung được (giấy tờ còn thiếu, thông tin cần cập nhật), kèm kênh khiếu nại"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Giải thích phải giúp người nhận hành động và có đường khiếu nại.",
+   "dang": "C-giai-thich",
+   "trap": "'AI quyết định' là né tránh trách nhiệm giải trình."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Đặc trưng `ma_dai_ly` (3.000 giá trị, nhiều đại lý chỉ có 1–3 hồ sơ) được thay bằng **tỉ lệ huỷ trung bình của đại lý**, tính trên toàn bộ tập train (gồm cả hồ sơ đang được dự đoán). Mô hình học tốt bất thường trên train. Cách làm đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Bỏ hết hồ sơ của đại lý nhỏ"
+    },
+    {
+     "key": "B",
+     "text": "Giữ nguyên vì target encoding luôn tốt"
+    },
+    {
+     "key": "C",
+     "text": "Target encoding out-of-fold (tính tỉ lệ từ các fold khác) và làm trơn về tỉ lệ chung cho đại lý ít mẫu"
+    },
+    {
+     "key": "D",
+     "text": "Thay bằng one-hot 3.000 cột là xong"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Đại lý có 1 hồ sơ: tỉ lệ huỷ chính là nhãn của hồ sơ đó → rò rỉ nhãn.",
+   "dang": "C-leak",
+   "trap": "Rò rỉ ở đây nằm trong **mã hoá đặc trưng**, không nằm trong cách chia dữ liệu."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "200 hồ sơ, 5.000 đặc trưng. Nhóm (1) chọn 30 đặc trưng tương quan mạnh nhất với nhãn trên **cả 200 mẫu**, rồi (2) chạy 5-fold CV trên 30 đặc trưng đó, AUC = 0,90. Thực tế nhãn gần như ngẫu nhiên. Nhận xét?",
+   "options": [
+    {
+     "key": "A",
+     "text": "AUC 0,90 là đáng tin vì đã dùng CV"
+    },
+    {
+     "key": "B",
+     "text": "Chỉ cần tăng lên 10-fold"
+    },
+    {
+     "key": "C",
+     "text": "Do mô hình quá đơn giản"
+    },
+    {
+     "key": "D",
+     "text": "AUC thật khoảng 0,5; bước chọn đặc trưng đã nhìn nhãn của các fold kiểm tra, phải đặt bước chọn **bên trong** từng fold"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Với 5.000 đặc trưng nhiễu, chắc chắn có vài đặc trưng tình cờ tương quan với nhãn trên 200 mẫu.",
+   "dang": "C-cv-reg",
+   "trap": "'Đã dùng cross-validation' không cứu được nếu bước tiền xử lý dùng nhãn **trước** khi chia."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Đội thẩm định chỉ xử lý được 300 hồ sơ mỗi ngày. Mô hình trả điểm rủi ro cho khoảng 5.000 hồ sơ/ngày, số hồ sơ có điểm cao dao động mạnh theo ngày. Cách chọn hồ sơ chuyển thẩm định hợp lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chuyển tất cả hồ sơ trên 0,5 dù vượt năng lực"
+    },
+    {
+     "key": "B",
+     "text": "Cố định ngưỡng 0,5 mọi ngày"
+    },
+    {
+     "key": "C",
+     "text": "Mỗi ngày chọn 300 hồ sơ điểm cao nhất (top-k theo năng lực), đồng thời theo dõi ngưỡng ngầm định và tỉ lệ phát hiện"
+    },
+    {
+     "key": "D",
+     "text": "Chọn ngẫu nhiên 300 hồ sơ"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Khi ràng buộc là năng lực xử lý, chọn top-k theo điểm sử dụng tối đa nguồn lực.",
+   "dang": "C-nguong-auc",
+   "trap": "Ngưỡng cố định làm ngày cao điểm quá tải, ngày thấp điểm thì bỏ phí năng lực."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Mỗi ngày có 300 hồ sơ gian lận trong tổng số hồ sơ. Đội thẩm định xem 200 hồ sơ điểm cao nhất, trong đó 120 hồ sơ là gian lận thật. Precision@200 và recall@200 lần lượt là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,6 và 0,6"
+    },
+    {
+     "key": "B",
+     "text": "0,4 và 0,6"
+    },
+    {
+     "key": "C",
+     "text": "0,6 và 0,4"
+    },
+    {
+     "key": "D",
+     "text": "0,4 và 0,4"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Precision@200 = 120/200 = 0,6. Recall@200 = 120/300 = 0,4.",
+   "dang": "C-pr",
+   "trap": "Mẫu số của recall là **tổng gian lận** (300), không phải số hồ sơ được xem."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Document AI trích 'thu nhập tháng' từ bảng lương trong hồ sơ, kèm điểm tin cậy. Sai trường này ảnh hưởng trực tiếp tới quyết định cho vay; các trường như 'địa chỉ' ít quan trọng hơn. Cách dùng điểm tin cậy hợp lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Bỏ điểm tin cậy, kiểm tra tay 100%"
+    },
+    {
+     "key": "B",
+     "text": "Đặt ngưỡng tin cậy riêng cho từng trường dựa trên dữ liệu validation; trường quan trọng dưới ngưỡng thì chuyển người kiểm tra"
+    },
+    {
+     "key": "C",
+     "text": "Một ngưỡng chung 0,5 cho mọi trường"
+    },
+    {
+     "key": "D",
+     "text": "Tin hoàn toàn kết quả vì model đã được huấn luyện"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Mỗi trường có rủi ro và độ chính xác khác nhau → ngưỡng khác nhau.",
+   "dang": "C-chon-cong-cu",
+   "trap": "Kiểm tra tay 100% an toàn nhưng làm mất toàn bộ lợi ích tự động hoá."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-agent",
+   "points": 1.25,
+   "prompt": "Mỗi ngày 2.000 hồ sơ. Với ngưỡng tin cậy τ = 0,9: 80% hồ sơ vượt ngưỡng được xử lý tự động với độ chính xác 99,5%; 20% còn lại chuyển người duyệt. Mỗi ngày có bao nhiêu hồ sơ duyệt tay và khoảng bao nhiêu hồ sơ sai lọt qua phần tự động?",
+   "options": [
+    {
+     "key": "A",
+     "text": "400 duyệt tay; khoảng 2 hồ sơ sai lọt"
+    },
+    {
+     "key": "B",
+     "text": "400 duyệt tay; khoảng 80 hồ sơ sai lọt"
+    },
+    {
+     "key": "C",
+     "text": "1.600 duyệt tay; khoảng 8 hồ sơ sai lọt"
+    },
+    {
+     "key": "D",
+     "text": "400 hồ sơ duyệt tay; khoảng 8 hồ sơ sai lọt"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Duyệt tay: 20% × 2.000 = 400. Tự động: 1.600 × (1 − 99,5%) = 1.600 × 0,005 = 8.",
+   "dang": "C-hitl",
+   "trap": "Lấy 0,5% của **cả** 2.000 ra 10, của 400 ra 2 — phải nhân với phần tự động 1.600."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Mỗi phút có 120 hồ sơ đến hàng đợi; mỗi worker xử lý một hồ sơ mất 30 giây. Cần tối thiểu bao nhiêu worker để hàng đợi không tồn đọng dài hạn?",
+   "options": [
+    {
+     "key": "A",
+     "text": "4"
+    },
+    {
+     "key": "B",
+     "text": "120"
+    },
+    {
+     "key": "C",
+     "text": "30"
+    },
+    {
+     "key": "D",
+     "text": "60"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Tốc độ đến 2 hồ sơ/giây × 30 giây/hồ sơ = 60 hồ sơ đang được xử lý đồng thời → cần ≥ 60 worker.",
+   "dang": "C-van-hanh-dinh-luong",
+   "trap": "4 là lấy 120/30 với đơn vị lệch nhau (phút và giây)."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Khi ra model v5, nhóm đổi định nghĩa đặc trưng `so_giao_dich` **tại chỗ** từ '30 ngày' thành '7 ngày' nhưng giữ nguyên tên cột. Model v4 vẫn đang phục vụ một phần lưu lượng. Hậu quả và cách làm đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chỉ ảnh hưởng v5"
+    },
+    {
+     "key": "B",
+     "text": "v4 nhận đặc trưng theo định nghĩa mới, lệch với lúc huấn luyện (skew); phải version hoá đặc trưng (tên/phiên bản mới) và giữ bản cũ đến khi v4 ngừng"
+    },
+    {
+     "key": "C",
+     "text": "Không ảnh hưởng vì v4 đã huấn luyện xong"
+    },
+    {
+     "key": "D",
+     "text": "Chỉ cần huấn luyện lại v4 mỗi tuần"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Cùng tên nhưng khác nghĩa là nguồn training-serving skew khó phát hiện.",
+   "dang": "C-tai-lap",
+   "trap": "'Model đã huấn luyện xong thì không bị ảnh hưởng' bỏ qua việc model vẫn **nhận đặc trưng mới** khi chạy."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Learning curve: khi tăng dữ liệu từ 10.000 lên 100.000 mẫu, độ chính xác train và validation đều dừng ở khoảng 80%, sát nhau; mục tiêu là 92%. Hướng đi hợp lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Giảm kích thước mô hình"
+    },
+    {
+     "key": "B",
+     "text": "Tăng regularization"
+    },
+    {
+     "key": "C",
+     "text": "Bias cao: thêm dữ liệu không giúp; cần mô hình mạnh hơn hoặc đặc trưng tốt hơn"
+    },
+    {
+     "key": "D",
+     "text": "Thu thêm 1 triệu mẫu"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Hai đường hội tụ ở mức thấp → mô hình không đủ năng lực, không phải thiếu dữ liệu.",
+   "dang": "C-fit",
+   "trap": "Thêm dữ liệu là thuốc cho **variance**, không cho bias."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Trợ lý trả lời quy định phí lệ phí: hỏi cùng một câu hai lần ra hai mức phí khác nhau, một mức không có trong văn bản. Cách khắc phục đúng nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng max_tokens"
+    },
+    {
+     "key": "B",
+     "text": "Chỉ cần đặt temperature = 0"
+    },
+    {
+     "key": "C",
+     "text": "Trả lời dựa trên văn bản truy xuất kèm trích dẫn, temperature thấp, và được phép trả lời 'không tìm thấy quy định'"
+    },
+    {
+     "key": "D",
+     "text": "Fine-tune model trên văn bản phí một lần"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Temperature thấp giảm dao động nhưng không ngăn bịa; cần căn cứ (RAG + trích dẫn) và cho phép từ chối.",
+   "dang": "C-llm-param",
+   "trap": "'Temperature = 0' sửa triệu chứng 'khác nhau mỗi lần' nhưng không sửa 'bịa ra con số'."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Hồ sơ dài khoảng 90.000 token được đưa trọn vào model có cửa sổ 128k để tóm tắt. Đánh giá thấy model thường bỏ sót chi tiết nằm ở giữa hồ sơ. Cải tiến phù hợp?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chuyển sang model 1 triệu token"
+    },
+    {
+     "key": "B",
+     "text": "Lặp lại hồ sơ hai lần trong prompt"
+    },
+    {
+     "key": "C",
+     "text": "Tăng temperature để model 'đọc kỹ' hơn"
+    },
+    {
+     "key": "D",
+     "text": "Truy xuất các đoạn liên quan (hoặc map-reduce theo từng phần), đưa ngữ cảnh ngắn và có trích dẫn vào model; đo lại recall các chi tiết quan trọng"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Model dài ngữ cảnh vẫn bị suy giảm chú ý ở giữa (lost in the middle); thu gọn ngữ cảnh liên quan giúp ổn định hơn.",
+   "dang": "C-rag-pipeline",
+   "trap": "'Cửa sổ lớn hơn' là giải pháp nghe hiển nhiên nhưng không xử lý gốc."
+  },
+  {
+   "module": "C",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 9.5,
+   "prompt": "Cổng dịch vụ công của tỉnh muốn trợ lý AI giúp người dân: (1) hỏi đáp thủ tục (khoảng 2.000 văn bản, cập nhật hằng tháng); (2) điền sẵn tờ khai từ thông tin người dân cung cấp; (3) tra cứu tình trạng hồ sơ cá nhân sau khi đăng nhập. Đề xuất kiến trúc, kiểm soát dữ liệu và quyền, chống thông tin sai, cách đánh giá có ngưỡng, triển khai và trách nhiệm khi trợ lý trả lời sai.",
+   "modelAnswer": "Kiến trúc: RAG có trích dẫn cho thủ tục (lọc theo ngày hiệu lực, xoá bản cũ khi cập nhật), được phép trả lời 'không tìm thấy'; điền tờ khai bằng trích xuất có cấu trúc + validate, người dân xác nhận trước khi nộp; tra cứu hồ sơ qua API có xác thực, chỉ đọc đúng hồ sơ của người đăng nhập.\nDữ liệu và quyền: phân quyền ở tầng truy xuất/API (không trong prompt), không cache câu trả lời chứa dữ liệu cá nhân, tối thiểu hoá và thời hạn lưu hội thoại; nội dung người dân nhập là dữ liệu không tin cậy (chống prompt injection), không có tool gửi dữ liệu ra ngoài.\nChống sai: trích dẫn bắt buộc, kiểm tra con số (phí, thời hạn) với nguồn, cảnh báo 'thông tin tham khảo', đường chuyển cán bộ.\nĐánh giá: golden set ≥ 300 câu do cán bộ chuyên môn gán, phân tầng theo lĩnh vực và câu khó; faithfulness ≥ 0,95, đúng thủ tục ≥ 90%, 0 rò rỉ dữ liệu chéo trong bộ thử tấn công.\nTriển khai: pilot một lĩnh vực → canary → mở rộng; minh bạch là AI; theo dõi tỉ lệ chuyển cán bộ, khiếu nại, câu 'không tìm thấy'.\nTrách nhiệm: cơ quan chịu trách nhiệm nội dung; khi sai có quy trình ghi nhận, sửa nguồn, thông báo và hỗ trợ người bị ảnh hưởng; nhật ký để truy vết.",
+   "rubric": [
+    "RAG có trích dẫn, xử lý văn bản cập nhật và cho phép từ chối",
+    "Phân quyền dữ liệu cá nhân ở tầng hệ thống, không cache dữ liệu cá nhân",
+    "Nhận diện prompt injection và giới hạn tool",
+    "Đánh giá offline có ngưỡng số và bộ thử tấn công",
+    "Triển khai theo giai đoạn, minh bạch, kênh chuyển cán bộ",
+    "Trách nhiệm giải trình và quy trình xử lý khi trả lời sai"
+   ],
+   "dang": "E-thiet-ke",
+   "trap": "Ba chức năng có ba mức rủi ro khác nhau — bài đạt điểm cao phân biệt rõ từng chức năng thay vì một thiết kế chung chung."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Lập luận nào dưới đây **hợp lệ** (tiền đề đúng thì kết luận chắc chắn đúng)?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Nếu mô hình bị rò rỉ dữ liệu thì AUC offline rất cao. AUC offline của Y rất cao. Vậy Y bị rò rỉ dữ liệu."
+    },
+    {
+     "key": "B",
+     "text": "Nếu agent đọc email bên ngoài thì nó gặp nội dung không tin cậy. Nếu gặp nội dung không tin cậy thì phải có người duyệt trước khi gửi email. Agent X đọc email bên ngoài. Vậy X phải có người duyệt trước khi gửi email."
+    },
+    {
+     "key": "C",
+     "text": "Nếu hồ sơ đủ giấy tờ thì được tiếp nhận. Hồ sơ Z không đủ giấy tờ. Vậy Z không được tiếp nhận."
+    },
+    {
+     "key": "D",
+     "text": "Mọi hệ thống rủi ro cao đều cần nhật ký. Hệ thống W có nhật ký. Vậy W là hệ thống rủi ro cao."
+    }
+   ],
+   "answer": "B",
+   "explanation": "Phương án đúng nối hai mệnh đề kéo theo (bắc cầu) rồi khẳng định tiền kiện. Các phương án còn lại lần lượt là khẳng định hậu kiện, phủ định tiền kiện, và đảo mệnh đề 'mọi'.",
+   "dang": "D-keo-theo",
+   "trap": "Ba lập luận sai đều có kết luận 'nghe hợp lý' trong thực tế — đánh giá **hình thức** lập luận, không đánh giá nội dung."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Quy định: 'Mọi hồ sơ được duyệt tự động đều có điểm tin cậy từ 0,9 trở lên.' Bốn bản ghi, mỗi bản ghi chỉ lộ một thông tin: (1) duyệt tự động; (2) duyệt tay; (3) điểm 0,95; (4) điểm 0,7. Cần kiểm tra bản ghi nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "(3) và (4)"
+    },
+    {
+     "key": "B",
+     "text": "(2) và (4)"
+    },
+    {
+     "key": "C",
+     "text": "(1) và (4)"
+    },
+    {
+     "key": "D",
+     "text": "(1) và (3)"
+    }
+   ],
+   "answer": "C",
+   "explanation": "'Duyệt tự động → điểm ≥ 0,9'. Kiểm tra bản ghi có P (1) và có không-Q (điểm 0,7 < 0,9).",
+   "dang": "D-wason",
+   "trap": "Bản ghi (3) điểm 0,95 không thể vi phạm dù được duyệt kiểu gì."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Bảng phân quyền: An có vai trò analyst; Bình có analyst và admin; Chi có viewer. Xét P1: 'Có người vừa là analyst vừa là admin'. P2: 'Mọi analyst đều là admin'. Phát biểu đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "P1 đúng, P2 sai; nói chung P2 kéo theo P1 chỉ khi có ít nhất một analyst"
+    },
+    {
+     "key": "B",
+     "text": "P1 đúng kéo theo P2 đúng"
+    },
+    {
+     "key": "C",
+     "text": "P1 sai, P2 đúng"
+    },
+    {
+     "key": "D",
+     "text": "Cả hai đều đúng"
+    }
+   ],
+   "answer": "A",
+   "explanation": "P1 đúng nhờ Bình. P2 sai vì An là analyst nhưng không là admin. 'Mọi A là B' cộng 'tồn tại A' mới suy ra 'có A là B'.",
+   "dang": "D-suy-luan",
+   "trap": "Từ 'có một' không suy ra 'tất cả'; còn 'tất cả' chỉ suy ra 'có một' khi tập không rỗng."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Nhà cung cấp quảng cáo camera nhận diện khuôn mặt 'chính xác 99%' (độ nhạy 99%, báo nhầm 1%) để tìm 10 người trong danh sách truy nã giữa 50.000 khán giả. Trong số người bị hệ thống báo trùng khớp, tỉ lệ đúng là người cần tìm xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "2%"
+    },
+    {
+     "key": "B",
+     "text": "20%"
+    },
+    {
+     "key": "C",
+     "text": "50%"
+    },
+    {
+     "key": "D",
+     "text": "99%"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Người cần tìm: 10 → khoảng 10 bị báo. Người vô tội: 49.990 × 1% ≈ 500 bị báo nhầm. 10/510 ≈ 2%.",
+   "dang": "D-nguy-bien",
+   "trap": "Ngụy biện bỏ qua tỉ lệ nền: '99% chính xác' nghe như 99% người bị báo là đúng."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Bảng chia sẻ cho nghiên cứu có (tuổi chính xác, mã bưu chính 5 số, giới tính) — hầu hết tổ hợp chỉ có 1 người. Cách giảm rủi ro định danh lại mà vẫn giữ giá trị phân tích?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Bỏ cột họ tên là đủ"
+    },
+    {
+     "key": "B",
+     "text": "Thêm cột số thứ tự ngẫu nhiên"
+    },
+    {
+     "key": "C",
+     "text": "Khái quát hoá: nhóm tuổi 10 năm, mã bưu chính 3 số; ẩn các bản ghi hiếm còn lại; kiểm tra lại k (ví dụ k ≥ 5)"
+    },
+    {
+     "key": "D",
+     "text": "Băm toàn bộ các cột bằng SHA-256"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Thuộc tính định danh gián tiếp kết hợp nhau vẫn định danh được; khái quát hoá làm các nhóm đủ lớn.",
+   "dang": "D-rieng-tu",
+   "trap": "Băm giá trị có miền nhỏ (tuổi, mã bưu chính) dễ dò ngược; vẫn giữ nguyên độ hiếm của tổ hợp."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Hai nhóm người nộp hồ sơ có tỉ lệ vỡ nợ thật khác nhau (10% và 30%). Mô hình được hiệu chỉnh tốt trong cả hai nhóm. Có thể đồng thời đạt FPR bằng nhau **và** FNR bằng nhau giữa hai nhóm không?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Nói chung không thể khi tỉ lệ nền khác nhau (trừ mô hình hoàn hảo); phải chọn tiêu chí công bằng phù hợp bối cảnh và giải trình đánh đổi"
+    },
+    {
+     "key": "B",
+     "text": "Chỉ cần dùng chung một ngưỡng"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ cần bỏ biến nhóm khỏi mô hình"
+    },
+    {
+     "key": "D",
+     "text": "Luôn đạt được nếu mô hình hiệu chỉnh tốt"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Định lý bất khả: hiệu chỉnh tốt + tỉ lệ nền khác nhau + sai số cân bằng không thể cùng đạt (trừ trường hợp suy biến).",
+   "dang": "D-cong-bang",
+   "trap": "Các tiêu chí công bằng có thể **mâu thuẫn nhau** — đề kiểm tra bạn có biết không thể thoả tất cả."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Theo EU AI Act, hệ thống AI do cơ quan nhà nước dùng để **đánh giá điều kiện hưởng trợ cấp xã hội** thuộc nhóm nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Bị cấm hoàn toàn"
+    },
+    {
+     "key": "B",
+     "text": "Rủi ro cao (Phụ lục III: tiếp cận dịch vụ công thiết yếu)"
+    },
+    {
+     "key": "C",
+     "text": "Rủi ro tối thiểu"
+    },
+    {
+     "key": "D",
+     "text": "Rủi ro hạn chế, chỉ cần minh bạch"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Quyết định ảnh hưởng quyền tiếp cận trợ cấp, dịch vụ công thiết yếu nằm trong danh mục rủi ro cao.",
+   "dang": "D-ai-act",
+   "trap": "Bị cấm là chấm điểm xã hội (social scoring) — khác với đánh giá điều kiện cho một chương trình cụ thể."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung-cao",
+   "section": "d-sec",
+   "points": 1.5,
+   "prompt": "Agent hỗ trợ cán bộ: đọc trang web công khai để tra cứu, truy cập hồ sơ công dân, và có tool gửi email ra ngoài. Biện pháp **hiệu quả nhất** trước rủi ro bị lợi dụng làm rò rỉ hồ sơ?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Lọc các cụm từ như 'ignore previous instructions'"
+    },
+    {
+     "key": "B",
+     "text": "Phá 'bộ ba nguy hiểm': tách quyền để phiên đọc nội dung web không đồng thời truy cập hồ sơ và gửi email ra ngoài; email ra ngoài cần người duyệt"
+    },
+    {
+     "key": "C",
+     "text": "Thêm câu 'không làm theo chỉ dẫn trên web' vào system prompt"
+    },
+    {
+     "key": "D",
+     "text": "Dùng model lớn hơn, thông minh hơn"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Dữ liệu riêng tư + nội dung không tin cậy + kênh gửi ra ngoài cùng lúc tạo đường rò rỉ; bỏ một cạnh là giảm rủi ro tất định.",
+   "dang": "D-owasp",
+   "trap": "Ba phương án sai đều dựa vào việc model 'nhận ra' tấn công — không đảm bảo."
+  },
+  {
+   "module": "D",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "Chatbot của cổng dịch vụ công trả lời sai thời hạn nộp hồ sơ một thủ tục (nói còn 30 ngày, thực tế 15 ngày) trong 2 tuần trước khi bị phát hiện. Một số người dân đã lỡ hạn. Bạn là kỹ sư phụ trách. Trình bày cách xử lý và bài học.",
+   "modelAnswer": "Ngăn chặn: sửa ngay nguồn/câu trả lời, tạm chặn chủ đề thời hạn hoặc chuyển cán bộ; lưu log làm bằng chứng.\nĐánh giá phạm vi: từ log xác định số người đã hỏi và nhận câu trả lời sai, thủ tục liên quan.\nBáo cáo và trách nhiệm: báo lãnh đạo/cơ quan có thẩm quyền; cơ quan (không phải 'AI') chịu trách nhiệm; phối hợp đề xuất phương án hỗ trợ người bị ảnh hưởng (gia hạn, tiếp nhận ngoại lệ, liên hệ chủ động) và thông báo công khai.\nNguyên nhân: văn bản cũ chưa gỡ khỏi chỉ mục, thiếu kiểm tra con số với nguồn, thiếu trích dẫn.\nPhòng ngừa: quy trình cập nhật văn bản (xoá bản cũ), kiểm thử tự động các câu về thời hạn/phí, bắt buộc trích dẫn, giám sát và kênh phản hồi; rút kinh nghiệm không đổ lỗi cá nhân.",
+   "rubric": [
+    "Ngăn chặn ngay và lưu bằng chứng",
+    "Xác định phạm vi người bị ảnh hưởng từ log",
+    "Báo cáo cấp có thẩm quyền và nhận trách nhiệm thuộc cơ quan",
+    "Đề xuất hỗ trợ khắc phục cho người dân bị ảnh hưởng",
+    "Tìm nguyên nhân gốc và biện pháp phòng ngừa cụ thể"
+   ],
+   "dang": "E-dao-duc",
+   "trap": "Bài chỉ nêu 'sửa model' sẽ thiếu phần quan trọng nhất: **người dân đã bị thiệt hại** cần được khắc phục."
+  }
+ ]
+}

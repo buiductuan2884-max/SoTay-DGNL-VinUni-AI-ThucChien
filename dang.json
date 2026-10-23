@@ -1,0 +1,470 @@
+{
+ "A-phantram": {
+  "phan": "A",
+  "ten": "Phần trăm, giảm liên tiếp, điểm % vs %",
+  "dau_hieu": "giá tăng/giảm, khuyến mãi hai đợt, 'giảm từ x% xuống y%'",
+  "sec": "a-tile"
+ },
+ "A-tile-dai-so": {
+  "phan": "A",
+  "ten": "Tỉ lệ, năng suất, bài toán lập phương trình",
+  "dau_hieu": "chia theo tỉ lệ a : b, công nhân/máy làm việc, tổng hai loại",
+  "sec": "a-tile"
+ },
+ "A-tb-trongso": {
+  "phan": "A",
+  "ten": "Trung bình có trọng số",
+  "dau_hieu": "điểm có trọng số, giá bán theo số lượng, tỉ lệ gộp nhiều nhóm",
+  "sec": "a-tile"
+ },
+ "A-kinh-te": {
+  "phan": "A",
+  "ten": "ROI, hoàn vốn, hoà vốn, giá trị kỳ vọng của quyết định",
+  "dau_hieu": "chi phí một lần + vận hành hằng tháng, voucher, lợi nhuận kỳ vọng",
+  "sec": "a-tile"
+ },
+ "A-chi-phi-token": {
+  "phan": "A",
+  "ten": "Chi phí token, agent nhiều bước, cache",
+  "dau_hieu": "giá USD/1 triệu token, số request/ngày, ngữ cảnh dài thêm mỗi bước",
+  "sec": "c-llm"
+ },
+ "A-do-tre": {
+  "phan": "A",
+  "ten": "Độ trễ tuần tự/song song, TTFT, throughput",
+  "dau_hieu": "các bước chạy song song hay nối tiếp, token/giây, TTFT",
+  "sec": "c-llm"
+ },
+ "A-toi-uu": {
+  "phan": "A",
+  "ten": "Tối ưu: đỉnh parabol, chọn phương án theo ngân sách",
+  "dau_hieu": "hàm lợi nhuận bậc hai, ngân sách người-tháng, chọn tổ hợp",
+  "sec": "a-tile"
+ },
+ "A-dot-cosine": {
+  "phan": "A",
+  "ten": "Tích vô hướng, chuẩn, cosine, điểm gợi ý E·q",
+  "dau_hieu": "vector sở thích, embedding, 'độ dài', điểm phù hợp",
+  "sec": "a-dstt"
+ },
+ "A-ma-tran": {
+  "phan": "A",
+  "ten": "Nhân ma trận, shape, Markov",
+  "dau_hieu": "phần tử hàng i cột j, ma trận chuyển trạng thái, nn.Linear",
+  "sec": "a-dstt"
+ },
+ "A-dinh-thuc": {
+  "phan": "A",
+  "ten": "Định thức, khả nghịch, hệ phương trình, nghịch đảo",
+  "dau_hieu": "'không khả nghịch khi k bằng', det(kA), combo giá giải hệ",
+  "sec": "a-dstt"
+ },
+ "A-tri-rieng": {
+  "phan": "A",
+  "ten": "Trị riêng, vector riêng, PCA, SVD",
+  "dau_hieu": "trị riêng/vector riêng, phương sai tích luỹ, giá trị kỳ dị, hạng thấp",
+  "sec": "a-dstt"
+ },
+ "A-dao-ham": {
+  "phan": "A",
+  "ten": "Đạo hàm, quy tắc chuỗi, gradient",
+  "dau_hieu": "f'(x), ∇f tại điểm, sigmoid'",
+  "sec": "a-gt"
+ },
+ "A-gd": {
+  "phan": "A",
+  "ten": "Gradient descent, learning rate, momentum/Adam",
+  "dau_hieu": "một bước GD, loss tăng vọt/NaN, zig-zag, η < 2/λ",
+  "sec": "a-gt"
+ },
+ "A-softmax": {
+  "phan": "A",
+  "ten": "Softmax, temperature, cross-entropy",
+  "dau_hieu": "logits dạng ln, chia cho T, −ln p",
+  "sec": "a-gt"
+ },
+ "A-xs-bang": {
+  "phan": "A",
+  "ten": "Xác suất có điều kiện từ bảng/tỉ lệ",
+  "dau_hieu": "bảng 2 chiều, 'biết rằng', P(A|B), funnel xem → bấm → tải",
+  "sec": "a-xs"
+ },
+ "A-bayes": {
+  "phan": "A",
+  "ten": "Bayes với tỉ lệ nền thấp",
+  "dau_hieu": "tỉ lệ mắc/gian lận/bot nhỏ + độ nhạy + báo nhầm, hỏi 'bị gắn cờ thì xác suất thật'",
+  "sec": "a-xs"
+ },
+ "A-doc-lap": {
+  "phan": "A",
+  "ten": "Độc lập, ít nhất một lần, chuỗi bước pⁿ",
+  "dau_hieu": "mỗi lần độc lập, 'ít nhất một', nhiều bước tuần tự cùng xác suất",
+  "sec": "a-xs"
+ },
+ "A-kyvong": {
+  "phan": "A",
+  "ten": "Kỳ vọng, phương sai, biến đổi aX + b",
+  "dau_hieu": "bảng phân phối P(X = k), Y = 2X + 3, cộng phương sai",
+  "sec": "a-xs"
+ },
+ "A-phan-phoi": {
+  "phan": "A",
+  "ten": "Poisson, nhị thức, chuẩn",
+  "dau_hieu": "trung bình λ mỗi giờ, 'đúng k người', N(μ, σ²)",
+  "sec": "a-xs"
+ },
+ "A-trungvi-p95": {
+  "phan": "A",
+  "ten": "Trung vị, phân vị p95, ngoại lai, SLO",
+  "dau_hieu": "dãy độ trễ có một giá trị rất lớn, SLO p95",
+  "sec": "a-tk"
+ },
+ "A-se-ci": {
+  "phan": "A",
+  "ten": "Sai số chuẩn, √n, khoảng tin cậy",
+  "dau_hieu": "tăng mẫu gấp k lần, khoảng tin cậy 95% cho tỉ lệ",
+  "sec": "a-tk"
+ },
+ "A-pvalue": {
+  "phan": "A",
+  "ten": "Diễn giải p-value, sai lầm loại I/II, power",
+  "dau_hieu": "'p = 0,03 nghĩa là', 'power 80% nghĩa là'",
+  "sec": "a-tk"
+ },
+ "A-co-mau": {
+  "phan": "A",
+  "ten": "Cỡ mẫu, MDE",
+  "dau_hieu": "MDE giảm một nửa, cần bao nhiêu người mỗi nhóm",
+  "sec": "a-tk"
+ },
+ "A-da-kiem-dinh": {
+  "phan": "A",
+  "ten": "Đa kiểm định, peeking, SRM",
+  "dau_hieu": "20 chỉ số, xem p-value mỗi ngày, chia 50/50 mà lệch",
+  "sec": "a-tk"
+ },
+ "A-hoi-quy": {
+  "phan": "A",
+  "ten": "Hồi quy: đa cộng tuyến, phương trình chuẩn, điều kiện số",
+  "dau_hieu": "hệ số đổi dấu, VIF, (XᵀX)⁻¹ trên float32",
+  "sec": "a-dstt"
+ },
+ "A-kappa-mau": {
+  "phan": "A",
+  "ten": "Đồng thuận kappa, lấy mẫu phân tầng",
+  "dau_hieu": "bảng judge vs người, nhóm hiếm trong golden set",
+  "sec": "c-ops"
+ },
+ "B-slicing": {
+  "phan": "B",
+  "ten": "Slicing, chỉ số âm, bước",
+  "dau_hieu": "a[1:5:2], a[::-3], gán slice",
+  "sec": "b-py"
+ },
+ "B-mutable": {
+  "phan": "B",
+  "ten": "Giá trị mặc định là list/dict, aliasing, copy nông",
+  "dau_hieu": "def f(x, ds=[]), [[0]*3]*2, b = a, .copy()",
+  "sec": "b-py"
+ },
+ "B-dict-str": {
+  "phan": "B",
+  "ten": "dict.get, đếm, comprehension, split/strip, f-string",
+  "dau_hieu": "d.get(k, 0) + 1, split(','), f'{x:.1%}'",
+  "sec": "b-py"
+ },
+ "B-sorted": {
+  "phan": "B",
+  "ten": "sorted/key/reverse, ổn định, chữ hoa thường",
+  "dau_hieu": "sorted(ds, key=len), hoà thì theo chữ cái",
+  "sec": "b-py"
+ },
+ "B-py-nangcao": {
+  "phan": "B",
+  "ten": "Generator, lambda trễ, closure, finally, thuộc tính lớp, dataclass",
+  "dau_hieu": "dùng generator hai lần, lambda trong vòng lặp, try/finally",
+  "sec": "b-py"
+ },
+ "B-regex": {
+  "phan": "B",
+  "ten": "Regex: match/search/findall, tham lam, ký tự đặc biệt",
+  "dau_hieu": "re.findall với nhóm, '?' trong mẫu",
+  "sec": "b-py"
+ },
+ "B-bigo": {
+  "phan": "B",
+  "ten": "Độ phức tạp: vòng lồng, chia đôi, set vs list, heap",
+  "dau_hieu": "đếm phép toán, 'job chạy 40 phút', in list",
+  "sec": "b-np"
+ },
+ "B-numpy": {
+  "phan": "B",
+  "ten": "NumPy: shape, axis, broadcasting, view/copy, chuẩn hoá",
+  "dau_hieu": "sum(axis=...), (3,1)+(4,), norm theo axis",
+  "sec": "b-np"
+ },
+ "B-pd-loc": {
+  "phan": "B",
+  "ten": "pandas: lọc, loc/iloc, isin, query",
+  "dau_hieu": "index không bắt đầu từ 0, & và ngoặc",
+  "sec": "b-pd"
+ },
+ "B-pd-groupby": {
+  "phan": "B",
+  "ten": "pandas: groupby, agg/transform/size/count, value_counts",
+  "dau_hieu": "đếm theo nhóm có NaN, tỉ trọng trong nhóm",
+  "sec": "b-pd"
+ },
+ "B-pd-nan": {
+  "phan": "B",
+  "ten": "pandas: NaN, fillna, kiểu dữ liệu, chuỗi số",
+  "dau_hieu": "điền 0 rồi tính trung bình, astype(int) với NaN, sort chuỗi",
+  "sec": "b-pd"
+ },
+ "B-pd-merge": {
+  "phan": "B",
+  "ten": "pandas: merge/concat (khoá trùng, how, hậu tố)",
+  "dau_hieu": "bảng khách bị trùng khoá, inner làm mất mẫu số",
+  "sec": "b-pd"
+ },
+ "B-pd-time": {
+  "phan": "B",
+  "ten": "pandas: thời gian, resample, drop_duplicates mới nhất",
+  "dau_hieu": "log có ts, đếm theo phút, giữ bản ghi mới nhất",
+  "sec": "b-pd"
+ },
+ "B-sql": {
+  "phan": "B",
+  "ten": "SQL: NULL, WHERE/HAVING, JOIN, window",
+  "dau_hieu": "COUNT(*) vs COUNT(col), LEFT JOIN + WHERE, RANK",
+  "sec": "b-sql"
+ },
+ "B-review-test": {
+  "phan": "B",
+  "ten": "Code review và kiểm thử",
+  "dau_hieu": "Nit vs chặn, CL lớn, test chập chờn, kiểm thử biên",
+  "sec": "b-se"
+ },
+ "B-he-thong": {
+  "phan": "B",
+  "ten": "Hệ thống: idempotency, retry, cache, hàng đợi, rate limit",
+  "dau_hieu": "gửi lại 3 lần bị trừ tiền 3 lần, 3.000 request khi cache hết hạn",
+  "sec": "b-se"
+ },
+ "B-code-tay": {
+  "phan": "B",
+  "ten": "Code viết tay (Python/pandas/SQL)",
+  "dau_hieu": "'Viết hàm ...' có ví dụ đầu vào/đầu ra",
+  "sec": "tu-luan"
+ },
+ "C-loai-bai": {
+  "phan": "C",
+  "ten": "Nhận loại bài toán ML",
+  "dau_hieu": "số thực / có-không / gom nhóm không nhãn / phần thưởng",
+  "sec": "c-ml"
+ },
+ "C-fit": {
+  "phan": "C",
+  "ten": "Overfitting/underfitting, bias-variance",
+  "dau_hieu": "train cao validation thấp, cả hai đều kém so với người",
+  "sec": "c-ml"
+ },
+ "C-leak": {
+  "phan": "C",
+  "ten": "Rò rỉ dữ liệu",
+  "dau_hieu": "AUC offline cao bất thường, scaler fit toàn bộ, shuffle chuỗi thời gian, cột cập nhật sau",
+  "sec": "c-ml"
+ },
+ "C-cv-reg": {
+  "phan": "C",
+  "ten": "Cross-validation, chia dữ liệu, regularization",
+  "dau_hieu": "k-fold, stratified, chia theo thời gian, L1 vs L2",
+  "sec": "c-ml"
+ },
+ "C-pr": {
+  "phan": "C",
+  "ten": "Precision/recall/F1 tính và chọn theo chi phí lỗi",
+  "dau_hieu": "bỏ sót nguy hiểm hay báo nhầm tốn kém, ma trận nhầm lẫn",
+  "sec": "c-metric"
+ },
+ "C-nguong-auc": {
+  "phan": "C",
+  "ten": "Ngưỡng, chi phí lỗi, AUC và tỉ lệ nền",
+  "dau_hieu": "hạ ngưỡng, chi phí FP/FN, AUC cao mà precision thấp",
+  "sec": "c-metric"
+ },
+ "C-hoi-quy-metric": {
+  "phan": "C",
+  "ten": "MAE/RMSE và chỉ số hồi quy",
+  "dau_hieu": "dự đoán số thực, so sai số",
+  "sec": "c-metric"
+ },
+ "C-chon-cong-cu": {
+  "phan": "C",
+  "ten": "Chọn rule / ML / LLM / RAG / fine-tune",
+  "dau_hieu": "mẫu cố định, cần giải trình, văn bản tự do, kiến thức hay đổi",
+  "sec": "c-pm"
+ },
+ "C-llm-param": {
+  "phan": "C",
+  "ten": "Tham số LLM: temperature, max_tokens, đầu ra JSON",
+  "dau_hieu": "trích xuất JSON lỗi parse, kết quả không ổn định",
+  "sec": "c-llm"
+ },
+ "C-llm-hieu-nang": {
+  "phan": "C",
+  "ten": "LLM: độ trễ, bộ nhớ, lượng tử hoá, attention n²",
+  "dau_hieu": "GPU 8 GB, INT4, ngữ cảnh dài gấp k lần",
+  "sec": "c-llm"
+ },
+ "C-cache": {
+  "phan": "C",
+  "ten": "Cache: exact, semantic (trúng sai), prompt caching, khoá cache",
+  "dau_hieu": "câu gần nghĩa nhưng ý ngược, chính sách đổi mà vẫn trả cũ",
+  "sec": "c-llm"
+ },
+ "C-rag-pipeline": {
+  "phan": "C",
+  "ten": "RAG pipeline: chunk, hybrid, RRF, rerank, metadata, index lại",
+  "dau_hieu": "mã lỗi hiếm, chunk quá to, đổi embedding model, tài liệu nhiều phiên bản",
+  "sec": "c-rag"
+ },
+ "C-rag-eval": {
+  "phan": "C",
+  "ten": "Đánh giá RAG: recall@k, MRR, nDCG, faithfulness",
+  "dau_hieu": "danh sách ✓ ✗, nhận định có căn cứ, context recall/precision",
+  "sec": "c-rag"
+ },
+ "C-agent": {
+  "phan": "C",
+  "ten": "Agent: tool calling, vòng lặp, giới hạn, validate tham số",
+  "dau_hieu": "agent gọi lặp, ai chạy hàm, LLM điền tham số sai",
+  "sec": "c-agent"
+ },
+ "C-hitl": {
+  "phan": "C",
+  "ten": "Đặt con người duyệt, quyền tối thiểu",
+  "dau_hieu": "hoàn tiền, xoá hồ sơ, tài khoản quản trị chung",
+  "sec": "c-agent"
+ },
+ "C-trien-khai": {
+  "phan": "C",
+  "ten": "Triển khai: shadow, canary, rollback, quy tắc số 3",
+  "dau_hieu": "canary 0 lỗi trên n request, chuyển 100% rồi lỗi",
+  "sec": "c-ops"
+ },
+ "C-drift": {
+  "phan": "C",
+  "ten": "Drift, PSI, training-serving skew",
+  "dau_hieu": "phân phối đầu vào đổi, quy luật đổi, offline tốt online tệ",
+  "sec": "c-ops"
+ },
+ "C-tai-lap": {
+  "phan": "C",
+  "ten": "Tái lập, version hoá, Docker",
+  "dau_hieu": "tái lập model cũ, alias latest, build Docker chậm",
+  "sec": "c-ops"
+ },
+ "C-eval-gate": {
+  "phan": "C",
+  "ten": "Golden set, eval gate, LLM-as-judge",
+  "dau_hieu": "golden set dùng lặp, judge chọn câu dài/vị trí, chênh vài câu",
+  "sec": "c-ops"
+ },
+ "C-van-hanh-dinh-luong": {
+  "phan": "C",
+  "ten": "Vận hành định lượng: Little, chi phí GPU, autoscale",
+  "dau_hieu": "request/giây × thời gian, giá GPU/giờ, batch",
+  "sec": "c-ops"
+ },
+ "C-san-pham": {
+  "phan": "C",
+  "ten": "Sản phẩm AI: A/B vs offline, adoption, gợi ý",
+  "dau_hieu": "AUC tăng nhưng doanh thu?, cold start, popularity bias, novelty",
+  "sec": "c-pm"
+ },
+ "C-giai-thich": {
+  "phan": "C",
+  "ten": "Giải thích mô hình (SHAP, phản thực, theo người nhận)",
+  "dau_hieu": "giải thích cho khách bị từ chối, đặc trưng tương quan",
+  "sec": "c-pm"
+ },
+ "D-keo-theo": {
+  "phan": "D",
+  "ten": "Kéo theo, phản đảo, khẳng định hậu kiện",
+  "dau_hieu": "'Nếu P thì Q', biết Q đúng/P sai rồi hỏi kết luận",
+  "sec": "d-logic"
+ },
+ "D-phu-dinh": {
+  "phan": "D",
+  "ten": "Phủ định lượng từ, De Morgan",
+  "dau_hieu": "'Mọi…', 'Có ít nhất một…', not (A or B)",
+  "sec": "d-logic"
+ },
+ "D-wason": {
+  "phan": "D",
+  "ten": "Kiểm tra quy tắc (4 thẻ Wason)",
+  "dau_hieu": "mỗi bản ghi chỉ lộ một mặt, cần kiểm tra bản ghi nào",
+  "sec": "d-logic"
+ },
+ "D-suy-luan": {
+  "phan": "D",
+  "ten": "Suy luận lời khai, bảng chân trị, đếm trường hợp",
+  "dau_hieu": "'chỉ đúng một câu', đếm tổ hợp điều kiện",
+  "sec": "d-logic"
+ },
+ "D-nguy-bien": {
+  "phan": "D",
+  "ten": "Ngụy biện, thiên lệch thống kê",
+  "dau_hieu": "sau đó nên do đó, người sống sót, biến gây nhiễu, Simpson",
+  "sec": "d-logic"
+ },
+ "D-rieng-tu": {
+  "phan": "D",
+  "ten": "Dữ liệu cá nhân: tối thiểu, mục đích, đồng ý, ẩn danh",
+  "dau_hieu": "thu thêm danh bạ/GPS, băm SĐT, dùng cho mục đích mới",
+  "sec": "d-eth"
+ },
+ "D-cong-bang": {
+  "phan": "D",
+  "ten": "Công bằng: 4/5, parity, equal opportunity/odds",
+  "dau_hieu": "tỉ lệ duyệt hai nhóm, TPR/FPR theo nhóm",
+  "sec": "d-eth"
+ },
+ "D-minh-bach": {
+  "phan": "D",
+  "ten": "Minh bạch, con người giám sát, trách nhiệm",
+  "dau_hieu": "bị chặn không rõ lý do, người duyệt đồng ý 99%, phát hiện lỗi sát ngày ra mắt",
+  "sec": "d-eth"
+ },
+ "D-ai-act": {
+  "phan": "D",
+  "ten": "EU AI Act: phân tầng rủi ro, nghĩa vụ",
+  "dau_hieu": "chatbot, chấm điểm tín dụng, cảm xúc nhân viên, lọc spam",
+  "sec": "d-eth"
+ },
+ "D-owasp": {
+  "phan": "D",
+  "ten": "An toàn LLM: injection, output handling, excessive agency",
+  "dau_hieu": "chữ trắng trên nền trắng, innerHTML, tool gửi email",
+  "sec": "d-sec"
+ },
+ "E-toan": {
+  "phan": "A",
+  "ten": "Tự luận Toán có lời giải",
+  "dau_hieu": "bài nhiều ý (a)(b)(c) cần trình bày phép tính",
+  "sec": "tu-luan"
+ },
+ "E-thiet-ke": {
+  "phan": "C",
+  "ten": "Tự luận thiết kế hệ thống AI",
+  "dau_hieu": "'Đề xuất giải pháp/kiến trúc/cách đánh giá'",
+  "sec": "tu-luan"
+ },
+ "E-dao-duc": {
+  "phan": "D",
+  "ten": "Tự luận đạo đức, xử lý sự cố",
+  "dau_hieu": "'Bạn xử lý thế nào', 'nêu các kiểm soát'",
+  "sec": "tu-luan"
+ }
+}

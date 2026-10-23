@@ -1,0 +1,1595 @@
+{
+ "title": "Đề sát thật 04 · Y tế",
+ "description": "Ngữ cảnh bệnh viện. Nhiều câu đảo điều kiện (P(A|B) vs P(B|A)), bẫy quên bias, quên chi phí vận hành, NULL trong NOT IN.",
+ "durationMinutes": 90,
+ "questions": [
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "a-tile",
+   "points": 1.5,
+   "prompt": "Khoa Nội có 100 bệnh nhân xuất viện tuần này: 50 người nằm 2 ngày, 30 người nằm 4 ngày, 20 người nằm 7 ngày. Số ngày nằm viện trung bình là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "4 ngày"
+    },
+    {
+     "key": "B",
+     "text": "4,33 ngày"
+    },
+    {
+     "key": "C",
+     "text": "3,5 ngày"
+    },
+    {
+     "key": "D",
+     "text": "3,6 ngày"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Trung bình có trọng số: (50·2 + 30·4 + 20·7)/100 = (100 + 120 + 140)/100 = 3,6.",
+   "dang": "A-tb-trongso",
+   "trap": "Lấy trung bình của ba con số 2, 4, 7 (= 4,33) là bỏ qua số người mỗi nhóm."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-xs",
+   "points": 1.5,
+   "prompt": "Theo dõi 300 bệnh nhân sau mổ:\n\n| | Tái nhập viện | Không | Tổng |\n|---|---|---|---|\n| Có bệnh nền | 30 | 70 | 100 |\n| Không bệnh nền | 20 | 180 | 200 |\n\nChọn ngẫu nhiên một bệnh nhân **đã tái nhập viện**. Xác suất người đó có bệnh nền là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,1"
+    },
+    {
+     "key": "B",
+     "text": "0,6"
+    },
+    {
+     "key": "C",
+     "text": "0,3"
+    },
+    {
+     "key": "D",
+     "text": "0,5"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Điều kiện là 'đã tái nhập viện': 30 + 20 = 50 người, trong đó 30 có bệnh nền → 30/50 = 0,6.",
+   "dang": "A-xs-bang",
+   "trap": "Đề hỏi P(bệnh nền | tái nhập), không phải P(tái nhập | bệnh nền) = 30/100 = 0,3. Xác định **hàng hay cột** là điều kiện trước khi chia."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-xs",
+   "points": 1.5,
+   "prompt": "Phòng cấp cứu nhận trung bình 12 ca mỗi giờ, mô hình hoá bằng quá trình Poisson. Xác suất trong **5 phút** tới không có ca nào xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,37"
+    },
+    {
+     "key": "B",
+     "text": "0,00001"
+    },
+    {
+     "key": "C",
+     "text": "0,08"
+    },
+    {
+     "key": "D",
+     "text": "0,61"
+    }
+   ],
+   "answer": "A",
+   "explanation": "12 ca/giờ = 1 ca/5 phút → λ = 1. P(0) = e⁻¹ ≈ 0,37.",
+   "dang": "A-phan-phoi",
+   "trap": "Phải đổi λ theo khung thời gian của câu hỏi. Dùng λ = 12 ra e⁻¹² ≈ 0; dùng λ = 0,5 ra 0,61."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "Khảo sát 400 bệnh nhân, 320 người hài lòng (80%). Khoảng tin cậy 95% cho tỉ lệ hài lòng (dùng z = 1,96) xấp xỉ:",
+   "options": [
+    {
+     "key": "A",
+     "text": "[72%; 88%]"
+    },
+    {
+     "key": "B",
+     "text": "[78%; 82%]"
+    },
+    {
+     "key": "C",
+     "text": "[76,1%; 83,9%]"
+    },
+    {
+     "key": "D",
+     "text": "[79,6%; 80,4%]"
+    }
+   ],
+   "answer": "C",
+   "explanation": "SE = √(0,8·0,2/400) = √0,0004 = 0,02. Biên = 1,96·0,02 ≈ 0,039. Khoảng ≈ [76,1%; 83,9%].",
+   "dang": "A-se-ci",
+   "trap": "[78%; 82%] chỉ cộng trừ **một** SE, quên nhân 1,96."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "Thử nghiệm thuốc mới giảm số ngày nằm viện, kiểm định cho p = 0,04. Diễn giải nào đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Hiệu quả của thuốc lớn và quan trọng về lâm sàng"
+    },
+    {
+     "key": "B",
+     "text": "Có 96% khả năng thuốc có tác dụng"
+    },
+    {
+     "key": "C",
+     "text": "Nếu thuốc thực sự không có tác dụng, xác suất thấy chênh lệch lớn như vậy hoặc hơn chỉ do ngẫu nhiên là khoảng 4%"
+    },
+    {
+     "key": "D",
+     "text": "4% bệnh nhân không đáp ứng với thuốc"
+    }
+   ],
+   "answer": "C",
+   "explanation": "p-value tính **giả sử H₀ đúng**; nó không cho xác suất H₀ hay H₁ đúng, cũng không nói gì về độ lớn hiệu ứng.",
+   "dang": "A-pvalue",
+   "trap": "'96% thuốc có tác dụng' là cách hiểu sai phổ biến nhất."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-tk",
+   "points": 1.5,
+   "prompt": "Cần khoảng 4.000 bệnh nhân mỗi nhóm để phát hiện tỉ lệ biến chứng giảm 2 điểm %. Muốn phát hiện mức giảm **1 điểm %** (cùng α, power, tỉ lệ nền gần như nhau) thì cần khoảng:",
+   "options": [
+    {
+     "key": "A",
+     "text": "5.700 người mỗi nhóm"
+    },
+    {
+     "key": "B",
+     "text": "16.000 người mỗi nhóm"
+    },
+    {
+     "key": "C",
+     "text": "2.000 người mỗi nhóm"
+    },
+    {
+     "key": "D",
+     "text": "8.000 người mỗi nhóm"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Cỡ mẫu tỉ lệ với 1/δ². δ giảm một nửa → n gấp 4: 4.000 × 4 = 16.000.",
+   "dang": "A-co-mau",
+   "trap": "Hiệu ứng nhỏ đi một nửa nhưng mẫu cần gấp **bốn**, không phải gấp đôi."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "a-gt",
+   "points": 1.5,
+   "prompt": "Cho f(x) = ln(1 + x²). Giá trị f'(1) là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "ln 2"
+    },
+    {
+     "key": "B",
+     "text": "2"
+    },
+    {
+     "key": "C",
+     "text": "0,5"
+    },
+    {
+     "key": "D",
+     "text": "1"
+    }
+   ],
+   "answer": "D",
+   "explanation": "f'(x) = 2x/(1 + x²) (quy tắc chuỗi: đạo hàm ln u là u'/u). f'(1) = 2/2 = 1.",
+   "dang": "A-dao-ham",
+   "trap": "Quên nhân u' = 2x ra 1/(1 + x²) = 0,5."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "a-gt",
+   "points": 1.5,
+   "prompt": "Model có hai token ứng viên với logits (ln 9, 0). Xác suất token thứ nhất ở temperature T = 1 và ở T = 2 là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "0,9 rồi 0,95"
+    },
+    {
+     "key": "B",
+     "text": "0,75 rồi 0,9"
+    },
+    {
+     "key": "C",
+     "text": "0,9 rồi 0,45"
+    },
+    {
+     "key": "D",
+     "text": "0,9 rồi 0,75: T tăng làm phân phối phẳng hơn"
+    }
+   ],
+   "answer": "D",
+   "explanation": "T = 1: 9/(9 + 1) = 0,9. T = 2: logits chia 2 → (ln 3, 0) → 3/(3 + 1) = 0,75.",
+   "dang": "A-softmax",
+   "trap": "Chia **logits** cho T, không chia xác suất cho T (0,45)."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "a-dstt",
+   "points": 1.5,
+   "prompt": "Lớp `nn.Linear(256, 64)` (có bias) nhận batch đầu vào shape (32, 256). Shape đầu ra và tổng số tham số của lớp là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "(64, 32) và 16.448"
+    },
+    {
+     "key": "B",
+     "text": "(32, 256) và 16.448"
+    },
+    {
+     "key": "C",
+     "text": "(32, 64) và 16.448"
+    },
+    {
+     "key": "D",
+     "text": "(32, 64) và 16.384"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Đầu ra (batch, out) = (32, 64). Tham số = 256·64 + 64 (bias) = 16.384 + 64 = 16.448.",
+   "dang": "A-ma-tran",
+   "trap": "16.384 là quên bias. Batch size không ảnh hưởng số tham số."
+  },
+  {
+   "module": "A",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "a-tile",
+   "points": 1.5,
+   "prompt": "Hệ thống AI đọc X-quang tốn 1,2 tỷ đầu tư ban đầu và 20 triệu/tháng vận hành; tiết kiệm được 120 triệu/tháng. Thời gian hoàn vốn và ROI của **năm đầu tiên** là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "10 tháng; ROI năm đầu 20%"
+    },
+    {
+     "key": "B",
+     "text": "10 tháng; ROI năm đầu 0%"
+    },
+    {
+     "key": "C",
+     "text": "12 tháng; ROI năm đầu 20%"
+    },
+    {
+     "key": "D",
+     "text": "12 tháng; ROI năm đầu 0%"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Hoàn vốn = 1.200/(120 − 20) = 12 tháng. Năm đầu: lợi ích 12·120 = 1.440; chi phí 1.200 + 12·20 = 1.440 → ROI = 0%.",
+   "dang": "A-kinh-te",
+   "trap": "1.200/120 = 10 tháng là quên chi phí vận hành; ROI phải tính **cả** chi phí vận hành."
+  },
+  {
+   "module": "A",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 5,
+   "prompt": "Hai chỉ số đã chuẩn hoá (trung bình 0) của bệnh nhân có ma trận hiệp phương sai Σ = [[3, 1], [1, 3]].\n\n(a) Tìm hai trị riêng của Σ.\n(b) Tìm vector riêng đơn vị ứng với trị riêng lớn nhất (thành phần chính PC1).\n(c) PC1 giải thích bao nhiêu phần trăm phương sai?\n(d) Toạ độ trên PC1 của bệnh nhân có (x₁, x₂) = (2, 0) là bao nhiêu?",
+   "modelAnswer": "(a) Vết = 6, det = 9 − 1 = 8 → λ² − 6λ + 8 = 0 → λ = 4 và λ = 2.\n(b) (Σ − 4I)v = 0 ⇒ −v₁ + v₂ = 0 ⇒ v = (1, 1)/√2.\n(c) 4/(4 + 2) ≈ 66,7%.\n(d) z = (2, 0)·(1, 1)/√2 = 2/√2 = √2 ≈ 1,41.",
+   "rubric": [
+    "Lập phương trình đặc trưng đúng, ra λ = 4 và 2",
+    "Tìm đúng vector riêng và chuẩn hoá về độ dài 1",
+    "Tính đúng 66,7%",
+    "Chiếu đúng ra √2 ≈ 1,41, có trình bày tích vô hướng"
+   ],
+   "dang": "E-toan",
+   "trap": "Hay quên chuẩn hoá vector riêng về độ dài 1 trước khi chiếu, nên ra 2 thay vì √2."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\na = [0, 1, 2, 3, 4, 5, 6, 7]\nprint(a[6:1:-2], a[-3::-3])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[6, 4] [5, 2]`"
+    },
+    {
+     "key": "B",
+     "text": "`[] []`"
+    },
+    {
+     "key": "C",
+     "text": "`[2, 4, 6] [2, 5]`"
+    },
+    {
+     "key": "D",
+     "text": "`[6, 4, 2] [5, 2]`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "a[6:1:-2] đi lùi từ chỉ số 6, bước 2, dừng trước chỉ số 1: 6, 4, 2. a[-3::-3] bắt đầu ở chỉ số 5, lùi 3: 5, 2 (−1 vượt đầu nên dừng).",
+   "dang": "B-slicing",
+   "trap": "Bước âm thì 'đầu' lớn hơn 'cuối'; điểm dừng vẫn không được lấy."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nca = [{\"bn\": \"A\", \"xong\": False}]\nsao = ca.copy()\nsao[0][\"xong\"] = True\nsao.append({\"bn\": \"B\"})\nprint(len(ca), ca[0][\"xong\"])\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`1 False`"
+    },
+    {
+     "key": "B",
+     "text": "`2 False`"
+    },
+    {
+     "key": "C",
+     "text": "`2 True`"
+    },
+    {
+     "key": "D",
+     "text": "`1 True`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "`.copy()` tạo list mới (append vào sao không ảnh hưởng ca) nhưng dict bên trong vẫn **dùng chung** → sửa 'xong' làm ca đổi theo.",
+   "dang": "B-mutable",
+   "trap": "Bản sao nông: lớp ngoài tách rời, lớp trong dùng chung. Cần `copy.deepcopy` để tách hẳn."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nprint(f\"{0.875:.0%}\", f\"{1234.5:,.1f}\")\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`88% 1,234.5`"
+    },
+    {
+     "key": "B",
+     "text": "`0.875% 1234.5`"
+    },
+    {
+     "key": "C",
+     "text": "`87% 1,234.5`"
+    },
+    {
+     "key": "D",
+     "text": "`88% 1.234,5`"
+    }
+   ],
+   "answer": "A",
+   "explanation": "`.0%` nhân 100 rồi làm tròn 0 chữ số: 87,5 → 88%. `,.1f` thêm dấu phẩy nghìn và 1 chữ số thập phân.",
+   "dang": "B-dict-str",
+   "trap": "Python dùng dấu phẩy phân cách nghìn và dấu chấm thập phân, khác cách viết Việt Nam."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\ng = (x for x in range(5) if x % 2)\nprint(list(g), list(g), sum(x for x in range(5) if x % 2))\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[1, 3] [] 0`"
+    },
+    {
+     "key": "B",
+     "text": "`[1, 3] [1, 3] 4`"
+    },
+    {
+     "key": "C",
+     "text": "`[0, 2, 4] [] 6`"
+    },
+    {
+     "key": "D",
+     "text": "`[1, 3] [] 4`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "x % 2 khác 0 với số lẻ → 1, 3. Generator đã dùng hết nên lần list thứ hai rỗng. Biểu thức sum tạo generator **mới** → 4.",
+   "dang": "B-py-nangcao",
+   "trap": "Phân biệt dùng lại **cùng** generator (rỗng) và tạo generator mới (chạy lại từ đầu)."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-py",
+   "points": 1.25,
+   "prompt": "```python\nimport re\nm1 = re.match(r\"[A-Z]{2}\\d{3}\", \"BN: AB123\")\nm2 = re.search(r\"[A-Z]{2}\\d{3}\", \"BN: AB123\")\nprint(m1, m2.group())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`BN AB123`"
+    },
+    {
+     "key": "B",
+     "text": "`AB123 AB123`"
+    },
+    {
+     "key": "C",
+     "text": "Báo lỗi vì m1 là None"
+    },
+    {
+     "key": "D",
+     "text": "`None AB123`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "re.match chỉ khớp **từ đầu chuỗi** ('BN: ' không theo sau bởi 3 chữ số) → None. re.search tìm ở bất kỳ đâu → 'AB123'.",
+   "dang": "B-regex",
+   "trap": "In None không gây lỗi; lỗi chỉ xảy ra nếu gọi m1.group()."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "Tìm kiếm nhị phân một mã bệnh nhân trong danh sách **đã sắp xếp** 1 triệu mã. Số lần so sánh trong trường hợp xấu nhất khoảng:",
+   "options": [
+    {
+     "key": "A",
+     "text": "1.000"
+    },
+    {
+     "key": "B",
+     "text": "500.000"
+    },
+    {
+     "key": "C",
+     "text": "20"
+    },
+    {
+     "key": "D",
+     "text": "1.000.000"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Mỗi bước loại một nửa: log₂(10⁶) ≈ 20 (2²⁰ ≈ 1,05 triệu).",
+   "dang": "B-bigo",
+   "trap": "500.000 là trung bình của tìm kiếm **tuần tự**, không phải nhị phân."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-np",
+   "points": 1.25,
+   "prompt": "```python\na = np.arange(6)\nb = a[::2]\nc = a[[1, 3]]\nb[0] = 100\nc[0] = 200\nprint(a.tolist())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[100, 200, 2, 3, 4, 5]`"
+    },
+    {
+     "key": "B",
+     "text": "`[0, 1, 2, 3, 4, 5]`"
+    },
+    {
+     "key": "C",
+     "text": "`[100, 1, 2, 3, 4, 5]`"
+    },
+    {
+     "key": "D",
+     "text": "`[0, 200, 2, 3, 4, 5]`"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Slice `a[::2]` là **view** nên sửa b[0] đổi a[0]. Fancy indexing `a[[1, 3]]` tạo **bản sao** nên sửa c không ảnh hưởng a.",
+   "dang": "B-numpy",
+   "trap": "Hai cách lấy phần tử trông giống nhau nhưng một cái là view, một cái là copy."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "Bảng `df` có cột `nhiet_do` và `khoa`; biến Python `nguong = 38`. Biểu thức nào lọc đúng bệnh nhân khoa 'Nhi' có nhiệt độ **trên ngưỡng**?",
+   "options": [
+    {
+     "key": "A",
+     "text": "`df[df.nhiet_do > nguong and df.khoa == \"Nhi\"]`"
+    },
+    {
+     "key": "B",
+     "text": "`df.query(\"nhiet_do > @nguong and khoa == 'Nhi'\")`"
+    },
+    {
+     "key": "C",
+     "text": "`df.loc[df.nhiet_do > nguong, df.khoa == \"Nhi\"]`"
+    },
+    {
+     "key": "D",
+     "text": "`df.query(\"nhiet_do > nguong and khoa == 'Nhi'\")`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Trong query, biến Python phải có tiền tố `@`; nếu không pandas tìm cột tên 'nguong' và báo lỗi. Dùng `and` giữa hai Series ở ngoài query sẽ lỗi.",
+   "dang": "B-pd-loc",
+   "trap": "Trong chuỗi query thì `and` hợp lệ, nhưng ngoài query phải dùng `&` và ngoặc."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "```python\ndf = pd.DataFrame({\"khoa\": [\"Nhi\", \"Nhi\", \"Noi\", \"Noi\"], \"ngay\": [2, None, 6, 4]})\ndf[\"ngay\"] = df[\"ngay\"].fillna(df.groupby(\"khoa\")[\"ngay\"].transform(\"mean\"))\nprint(df[\"ngay\"].tolist())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[2.0, 0.0, 6.0, 4.0]`"
+    },
+    {
+     "key": "B",
+     "text": "Báo lỗi vì độ dài khác nhau"
+    },
+    {
+     "key": "C",
+     "text": "`[2.0, 4.0, 6.0, 4.0]`"
+    },
+    {
+     "key": "D",
+     "text": "`[2.0, 2.0, 6.0, 4.0]`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "transform('mean') trả Series dài bằng bảng: Nhi → 2 (bỏ NaN), Noi → 5. Ô thiếu thuộc khoa Nhi nên được điền 2.",
+   "dang": "B-pd-groupby",
+   "trap": "4,0 là trung bình **toàn bảng** (12/3); đề điền theo trung bình **của khoa**."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-pd",
+   "points": 1.25,
+   "prompt": "```python\nts = pd.to_datetime([\"2026-10-01 08:05\", \"2026-10-01 08:40\", \"2026-10-01 10:10\"])\ns = pd.Series(1, index=ts).resample(\"h\").sum()\nprint(s.tolist())\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "`[3]`"
+    },
+    {
+     "key": "B",
+     "text": "`[2, 0, 1]`"
+    },
+    {
+     "key": "C",
+     "text": "`[1, 1, 1]`"
+    },
+    {
+     "key": "D",
+     "text": "`[2, 1]`"
+    }
+   ],
+   "answer": "B",
+   "explanation": "resample theo giờ tạo đủ các mốc 08:00, 09:00, 10:00 kể cả giờ không có dữ liệu → 2, 0, 1.",
+   "dang": "B-pd-time",
+   "trap": "resample **chèn** khoảng trống bằng 0, khác groupby theo giờ (chỉ có giờ xuất hiện → [2, 1])."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-sql",
+   "points": 1.25,
+   "prompt": "Bảng `benh_nhan` có 3 dòng (id 1, 2, 3). Bảng `lich_hen` có cột `bn_id` gồm các giá trị 1 và NULL. Truy vấn sau trả về gì?\n```sql\nSELECT COUNT(*) FROM benh_nhan\nWHERE id NOT IN (SELECT bn_id FROM lich_hen);\n```",
+   "options": [
+    {
+     "key": "A",
+     "text": "2"
+    },
+    {
+     "key": "B",
+     "text": "3"
+    },
+    {
+     "key": "C",
+     "text": "0, vì danh sách con chứa NULL; nên dùng NOT EXISTS"
+    },
+    {
+     "key": "D",
+     "text": "Báo lỗi cú pháp"
+    }
+   ],
+   "answer": "C",
+   "explanation": "`id NOT IN (1, NULL)` ⇔ id ≠ 1 AND id ≠ NULL; vế sau luôn UNKNOWN nên không dòng nào thoả.",
+   "dang": "B-sql",
+   "trap": "Ai cũng nghĩ ra 2 (bệnh nhân 2, 3 chưa có lịch hẹn); NULL trong danh sách con làm kết quả rỗng."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-sql",
+   "points": 1.25,
+   "prompt": "Bảng điểm đánh giá bác sĩ: 4,9; 4,7; 4,7; 4,5. Bác sĩ có điểm 4,5 nhận `RANK()` và `DENSE_RANK()` (sắp giảm dần) lần lượt là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "4 và 4"
+    },
+    {
+     "key": "B",
+     "text": "4 và 3"
+    },
+    {
+     "key": "C",
+     "text": "3 và 3"
+    },
+    {
+     "key": "D",
+     "text": "3 và 4"
+    }
+   ],
+   "answer": "B",
+   "explanation": "RANK nhảy hạng sau khi hoà: 1, 2, 2, 4. DENSE_RANK không nhảy: 1, 2, 2, 3.",
+   "dang": "B-sql",
+   "trap": "Nhớ: RANK có 'lỗ hổng' sau nhóm hoà, DENSE_RANK thì 'dày' liên tiếp."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Hàm tính phí khám: dưới 6 tuổi miễn phí; từ 6 đến 59 tuổi 100.000đ; từ 60 tuổi giảm 50%. Bộ test hiện chỉ có các tuổi 3, 30, 70 và đều xanh. Nhận xét khi review?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Cần thay unit test bằng test E2E trên trình duyệt"
+    },
+    {
+     "key": "B",
+     "text": "Chưa đủ: thiếu test tại biên (5, 6, 59, 60), nơi lỗi `<` và `<=` hay xảy ra"
+    },
+    {
+     "key": "C",
+     "text": "Đủ vì đã phủ cả ba nhánh"
+    },
+    {
+     "key": "D",
+     "text": "Cần thêm test tuổi 100 và 120"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Phủ nhánh chưa phủ biên: viết nhầm `< 60` thành `<= 60` vẫn qua cả ba test hiện có.",
+   "dang": "B-review-test",
+   "trap": "'Đã phủ đủ nhánh' nghe chuyên nghiệp nhưng không bắt được lỗi so sánh tại biên."
+  },
+  {
+   "module": "B",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "b-se",
+   "points": 1.25,
+   "prompt": "Bảng giá dịch vụ của bệnh viện được cache với TTL 10 phút. Cứ mỗi lần hết hạn, khoảng 5.000 request cùng lúc truy vấn CSDL làm CSDL quá tải vài giây. Cách xử lý phù hợp nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chống cache stampede: chỉ một request được làm mới (khoá/single-flight), các request khác dùng tạm giá trị cũ; thêm jitter cho TTL"
+    },
+    {
+     "key": "B",
+     "text": "Bỏ cache, đọc thẳng CSDL"
+    },
+    {
+     "key": "C",
+     "text": "Giảm TTL xuống 1 phút"
+    },
+    {
+     "key": "D",
+     "text": "Tăng TTL lên 1 ngày, không cần làm mới"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Vấn đề là nhiều request cùng 'miss' một lúc. Single-flight + stale-while-revalidate + jitter xử lý đúng gốc.",
+   "dang": "B-he-thong",
+   "trap": "Giảm TTL làm stampede xảy ra **thường xuyên hơn**."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "thong-hieu",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "Viết hàm `nhom_tuoi(ages)` nhận list tuổi (có thể chứa None hoặc số âm do nhập sai), trả về dict đếm theo ba nhóm `'0-17'`, `'18-59'`, `'60+'`; bỏ qua giá trị None hoặc âm. Dict luôn có đủ ba khoá.\n\nVí dụ: `[0, 17, 18, 59, 60, None, -3, 90]` → `{'0-17': 2, '18-59': 2, '60+': 2}`.",
+   "modelAnswer": "def nhom_tuoi(ages):\n    kq = {\"0-17\": 0, \"18-59\": 0, \"60+\": 0}\n    for a in ages:\n        if a is None or a < 0:\n            continue\n        if a < 18:\n            kq[\"0-17\"] += 1\n        elif a < 60:\n            kq[\"18-59\"] += 1\n        else:\n            kq[\"60+\"] += 1\n    return kq",
+   "rubric": [
+    "Khởi tạo đủ ba khoá với giá trị 0",
+    "Kiểm tra None **trước** khi so sánh < 0 (tránh TypeError)",
+    "Biên đúng: 17 vào '0-17', 18 vào '18-59', 60 vào '60+'",
+    "Bỏ qua giá trị âm, trả về dict"
+   ],
+   "dang": "B-code-tay",
+   "trap": "So sánh None < 0 trong Python 3 báo TypeError; thứ tự điều kiện `a is None or a < 0` là quan trọng."
+  },
+  {
+   "module": "B",
+   "type": "code",
+   "level": "van-dung",
+   "section": "tu-luan",
+   "points": 6.5,
+   "prompt": "Viết câu SQL. Bảng `khoa(id, ten)` và `luot_kham(id, khoa_id, ngay)` (ngày dạng chuỗi 'YYYY-MM-DD'). Liệt kê **mọi khoa** cùng số lượt khám trong **tháng 10/2026** (khoa không có lượt nào ghi 0), sắp số lượt giảm dần, hoà theo tên khoa tăng dần.",
+   "modelAnswer": "SELECT k.ten, COUNT(l.id) AS so_luot\nFROM khoa k\nLEFT JOIN luot_kham l\n  ON l.khoa_id = k.id\n AND l.ngay >= '2026-10-01' AND l.ngay < '2026-11-01'\nGROUP BY k.id, k.ten\nORDER BY so_luot DESC, k.ten;",
+   "rubric": [
+    "LEFT JOIN từ bảng khoa",
+    "Điều kiện tháng 10 đặt trong ON (không đặt trong WHERE)",
+    "Đếm `COUNT(l.id)` để khoa không có lượt ra 0 (không dùng COUNT(*))",
+    "GROUP BY và ORDER BY hai tiêu chí đúng chiều"
+   ],
+   "dang": "B-code-tay",
+   "trap": "COUNT(*) với LEFT JOIN đếm cả dòng NULL nên khoa không có lượt ra 1 thay vì 0."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ml",
+   "points": 1.25,
+   "prompt": "Bộ 20.000 ảnh X-quang từ 5.000 bệnh nhân (mỗi người 3–5 ảnh) được chia **ngẫu nhiên theo ảnh** 80/20. AUC trên test 0,96, nhưng tại bệnh viện khác chỉ 0,78. Nguyên nhân chính và cách sửa?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Mô hình quá nhỏ, cần mạng sâu hơn"
+    },
+    {
+     "key": "B",
+     "text": "Do mất cân bằng lớp, cần oversample"
+    },
+    {
+     "key": "C",
+     "text": "Do learning rate quá lớn"
+    },
+    {
+     "key": "D",
+     "text": "Ảnh của cùng bệnh nhân nằm ở cả train và test (rò rỉ theo nhóm); chia theo bệnh nhân và đánh giá thêm trên dữ liệu bệnh viện khác"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Mô hình 'nhận ra bệnh nhân' thay vì học bệnh → điểm test cao giả. GroupKFold theo mã bệnh nhân.",
+   "dang": "C-leak",
+   "trap": "Dấu hiệu: một thực thể có **nhiều bản ghi** + chia ngẫu nhiên theo bản ghi."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Bệnh viện dùng mô hình sàng lọc tiền đái tháo đường để **mời đi xét nghiệm máu** (rẻ, an toàn). Bỏ sót người bệnh thì bệnh tiến triển âm thầm. Khi chọn ngưỡng nên ưu tiên gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "F1 cao nhất trong mọi trường hợp"
+    },
+    {
+     "key": "B",
+     "text": "Precision cao để tránh xét nghiệm thừa"
+    },
+    {
+     "key": "C",
+     "text": "Accuracy cao nhất"
+    },
+    {
+     "key": "D",
+     "text": "Recall cao, chấp nhận precision thấp hơn"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Báo nhầm chỉ tốn một xét nghiệm rẻ; bỏ sót gây hại lớn → ưu tiên giảm FN (recall).",
+   "dang": "C-pr",
+   "trap": "Đề không nói chữ 'recall' — phải tự suy từ **giá của từng loại lỗi**."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Bệnh hiếm có tỉ lệ mắc 0,5%. Mô hình sàng lọc có độ nhạy 95% và độ đặc hiệu 95%. Trên 10.000 người, điều gì xảy ra?",
+   "options": [
+    {
+     "key": "A",
+     "text": "≈ 95% người dương tính thật sự mắc bệnh"
+    },
+    {
+     "key": "B",
+     "text": "≈ 50 người dương tính, gần như đều mắc bệnh"
+    },
+    {
+     "key": "C",
+     "text": "≈ 1.000 người dương tính, 50% mắc bệnh"
+    },
+    {
+     "key": "D",
+     "text": "≈ 545 người dương tính, chỉ ≈ 9% trong số đó thật sự mắc bệnh"
+    }
+   ],
+   "answer": "D",
+   "explanation": "50 người mắc → 47,5 dương thật. 9.950 người khoẻ → 5% = 497,5 dương giả. Precision = 47,5/545 ≈ 0.087.",
+   "dang": "C-nguong-auc",
+   "trap": "Độ nhạy và đặc hiệu 95% nghe rất tốt, nhưng tỉ lệ nền 0,5% kéo precision xuống dưới 10%."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-metric",
+   "points": 1.25,
+   "prompt": "Mô hình dự báo số giường cần mỗi ngày có sai số (dự báo − thực tế) trong 5 ngày: 2, −2, 1, −1, 10 (ngày lễ). MAE và RMSE lần lượt là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "MAE = 2; RMSE = 22"
+    },
+    {
+     "key": "B",
+     "text": "MAE = 3,2; RMSE ≈ 4,7 — RMSE nhạy hơn với ngày lệch lớn"
+    },
+    {
+     "key": "C",
+     "text": "MAE = 0 vì sai số âm dương triệt tiêu"
+    },
+    {
+     "key": "D",
+     "text": "MAE = 3,2; RMSE = 22"
+    }
+   ],
+   "answer": "B",
+   "explanation": "MAE = (2 + 2 + 1 + 1 + 10)/5 = 3,2. MSE = (4 + 4 + 1 + 1 + 100)/5 = 22 → RMSE = √22 ≈ 4,7.",
+   "dang": "C-hoi-quy-metric",
+   "trap": "22 là MSE (chưa lấy căn). Lấy trung bình sai số có dấu: (2 − 2 + 1 − 1 + 10)/5 = 2, cũng sai."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Bệnh viện cần tính điểm cảnh báo sớm (NEWS2) từ các sinh hiệu theo **bảng điểm đã quy định sẵn**, kết quả phải giải thích được cho hội đồng chuyên môn. Cách làm phù hợp nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Huấn luyện mô hình gradient boosting trên dữ liệu cũ"
+    },
+    {
+     "key": "B",
+     "text": "Dùng mạng nơ-ron để học bảng điểm"
+    },
+    {
+     "key": "C",
+     "text": "Dùng LLM đọc sinh hiệu rồi cho điểm"
+    },
+    {
+     "key": "D",
+     "text": "Cài đặt bảng điểm bằng quy tắc tất định (rule), kiểm thử với các ca mẫu"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Quy tắc đã biết, cần giải trình → rule engine: chính xác 100%, rẻ, dễ kiểm toán.",
+   "dang": "C-chon-cong-cu",
+   "trap": "Đề mô tả bài toán 'có AI' nhưng đáp án tốt nhất là **không cần ML**."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Trợ lý RAG tăng ngữ cảnh truy xuất từ 2.000 lên 16.000 token mỗi câu hỏi. Đo thấy thời gian tới token đầu (TTFT) tăng từ 0,4 s lên 2,1 s, còn tốc độ sinh sau đó gần như không đổi. Giải thích đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Giai đoạn prefill phải xử lý toàn bộ prompt trước khi sinh token đầu; giai đoạn decode ít phụ thuộc độ dài prompt"
+    },
+    {
+     "key": "B",
+     "text": "Mạng chậm hơn vì gửi nhiều dữ liệu"
+    },
+    {
+     "key": "C",
+     "text": "Model bị lượng tử hoá kém"
+    },
+    {
+     "key": "D",
+     "text": "Temperature quá cao"
+    }
+   ],
+   "answer": "A",
+   "explanation": "TTFT gồm prefill tỉ lệ với độ dài prompt; decode sinh từng token với tốc độ gần như cố định.",
+   "dang": "C-llm-hieu-nang",
+   "trap": "Hai chỉ số TTFT và token/giây đo hai giai đoạn khác nhau."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-llm",
+   "points": 1.25,
+   "prompt": "Mỗi request gồm system prompt cố định 4.000 token và câu hỏi 200 token; 100.000 request/ngày; giá 1 USD/1 triệu token đầu vào. Bật prompt caching thì phần cố định chỉ tính 10% giá. Chi phí đầu vào mỗi ngày trước và sau là:",
+   "options": [
+    {
+     "key": "A",
+     "text": "420 USD → 42 USD"
+    },
+    {
+     "key": "B",
+     "text": "420 USD → 60 USD"
+    },
+    {
+     "key": "C",
+     "text": "420 USD → 380 USD"
+    },
+    {
+     "key": "D",
+     "text": "400 USD → 40 USD"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Trước: 4.200 × 100.000 = 420 triệu token → 420 USD. Sau: 4.000 × 10% + 200 = 600 token tương đương mỗi request → 60 triệu → 60 USD.",
+   "dang": "C-cache",
+   "trap": "Chỉ phần cố định được giảm; câu hỏi 200 token vẫn tính đủ giá (42 USD là giảm cả phần câu hỏi)."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Trợ lý tra phác đồ trả lời sai liều thuốc. Kiểm tra cho thấy tài liệu có nhiều **bảng liều**, chunk cố định 200 token cắt đôi bảng nên phần liều nằm ở chunk khác với tên thuốc. Sửa thế nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tăng top-k lên 50"
+    },
+    {
+     "key": "B",
+     "text": "Chunk theo cấu trúc: giữ nguyên bảng cùng tiêu đề trong một chunk, thêm metadata tên thuốc; đo lại recall@k"
+    },
+    {
+     "key": "C",
+     "text": "Giảm temperature về 0"
+    },
+    {
+     "key": "D",
+     "text": "Đổi sang model lớn hơn"
+    }
+   ],
+   "answer": "B",
+   "explanation": "Lỗi ở tầng chia đoạn: thông tin cần nhau bị tách rời. Sửa đúng chỗ rồi đo lại.",
+   "dang": "C-rag-pipeline",
+   "trap": "Model lớn hơn không thể ghép lại thông tin không có trong ngữ cảnh."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-rag",
+   "points": 1.25,
+   "prompt": "Tăng k của bộ truy xuất từ 5 lên 20: recall@k tăng 0,60 → 0,90, nhưng precision@k giảm 0,40 → 0,15 và câu trả lời bắt đầu lan man. Cách cân bằng tốt nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Truy xuất top-20 để giữ recall rồi rerank (cross-encoder) lấy top-5 đưa vào model"
+    },
+    {
+     "key": "B",
+     "text": "Giữ k = 20 và tăng max_tokens"
+    },
+    {
+     "key": "C",
+     "text": "Quay về k = 5"
+    },
+    {
+     "key": "D",
+     "text": "Bỏ đo precision@k vì không quan trọng"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Truy xuất rộng + rerank hẹp lấy được cả recall cao lẫn ngữ cảnh gọn.",
+   "dang": "C-rag-eval",
+   "trap": "Hai chỉ số đi ngược nhau thường được giải bằng **hai tầng**, không phải chọn một."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-agent",
+   "points": 1.25,
+   "prompt": "Agent đặt lịch khám gọi `dat_lich(ngay, bac_si_id)`. Khi LLM truyền ngày dạng '15/11' thay vì '2026-11-15', hàm ném exception và agent dừng hẳn, báo 'lỗi hệ thống'. Cách xử lý tốt nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Bắt lỗi và trả về cho LLM một kết quả tool nêu rõ lỗi định dạng (kèm định dạng đúng), giới hạn số lần thử lại"
+    },
+    {
+     "key": "B",
+     "text": "Tăng temperature để model tự đoán định dạng khác"
+    },
+    {
+     "key": "C",
+     "text": "Bỏ kiểm tra định dạng ngày"
+    },
+    {
+     "key": "D",
+     "text": "Để exception làm dừng agent cho an toàn"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Lỗi có cấu trúc giúp model tự sửa tham số; giới hạn số lần tránh vòng lặp vô hạn.",
+   "dang": "C-agent",
+   "trap": "Bỏ kiểm tra định dạng là đánh đổi an toàn lấy tiện; kiểm tra vẫn phải giữ."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-agent",
+   "points": 1.25,
+   "prompt": "Trợ lý AI soạn **tóm tắt xuất viện** từ hồ sơ để gửi bệnh nhân và lưu vào bệnh án. Đặt bước con người duyệt ở đâu là hợp lý nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Bệnh nhân tự kiểm tra sau khi nhận"
+    },
+    {
+     "key": "B",
+     "text": "Kiểm tra ngẫu nhiên 5% sau khi đã gửi"
+    },
+    {
+     "key": "C",
+     "text": "Bác sĩ điều trị duyệt và ký trước khi tóm tắt được gửi cho bệnh nhân và lưu chính thức"
+    },
+    {
+     "key": "D",
+     "text": "Không cần duyệt nếu độ chính xác offline trên 95%"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Tài liệu y khoa chính thức, sai sót ảnh hưởng điều trị → người có thẩm quyền duyệt **trước** khi có hiệu lực.",
+   "dang": "C-hitl",
+   "trap": "Kiểm tra ngẫu nhiên sau khi gửi là giám sát, không thay được bước duyệt trước."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Model phân loại mức ưu tiên cấp cứu v5 được chuyển thẳng 100% lưu lượng. Sau 3 giờ, tỉ lệ ca bị xếp 'khẩn' tăng 40% so với thường lệ, chưa rõ nguyên nhân. Việc cần làm trước tiên?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Rollback ngay về v4 (artifact sẵn có), rồi điều tra; lần sau triển khai qua shadow/canary"
+    },
+    {
+     "key": "B",
+     "text": "Hạ ngưỡng 'khẩn' để tỉ lệ về như cũ"
+    },
+    {
+     "key": "C",
+     "text": "Theo dõi thêm 1 tuần cho đủ dữ liệu"
+    },
+    {
+     "key": "D",
+     "text": "Huấn luyện lại v5 ngay trên dữ liệu 3 giờ qua"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Hệ thống ảnh hưởng an toàn người bệnh: khôi phục trạng thái an toàn trước, tìm nguyên nhân sau.",
+   "dang": "C-trien-khai",
+   "trap": "Chỉnh ngưỡng cho 'đẹp số' che giấu lỗi thay vì sửa."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Sau khi Bộ Y tế đổi tiêu chuẩn chẩn đoán, cùng một bộ chỉ số xét nghiệm nhưng tỉ lệ ca được kết luận dương tính thay đổi. Mô hình cũ giảm chất lượng. Đây là loại drift nào?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Training-serving skew"
+    },
+    {
+     "key": "B",
+     "text": "Data drift: chỉ P(X) thay đổi"
+    },
+    {
+     "key": "C",
+     "text": "Label noise ngẫu nhiên"
+    },
+    {
+     "key": "D",
+     "text": "Concept drift: quan hệ P(Y|X) thay đổi"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Đầu vào giữ nguyên, cách gán nhãn đổi → quy luật đổi. Cần nhãn mới và huấn luyện lại.",
+   "dang": "C-drift",
+   "trap": "Phân biệt bằng câu hỏi: **cùng đầu vào** thì đầu ra đúng có đổi không?"
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Đội LLMOps đánh giá trợ lý tóm tắt kết quả khám bằng 200 ví dụ **do chính LLM đang dùng sinh ra**, từ 3 bệnh viện lớn ở thành phố. Điểm đạt 97%. Vấn đề và cách sửa?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Không có vấn đề vì 200 mẫu là đủ"
+    },
+    {
+     "key": "B",
+     "text": "Chỉ cần tăng lên 2.000 ví dụ cùng cách sinh"
+    },
+    {
+     "key": "C",
+     "text": "Bộ đánh giá thiên lệch (model tự chấm dữ liệu mình sinh, thiếu ca khó và tuyến dưới); xây golden set từ dữ liệu thật, phân tầng, chuyên gia gán nhãn"
+    },
+    {
+     "key": "D",
+     "text": "Đổi sang model judge khác là đủ"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Dữ liệu tự sinh dễ hơn và giống phong cách model; thiếu đa dạng thực tế → điểm cao ảo.",
+   "dang": "C-eval-gate",
+   "trap": "Tăng số lượng mà giữ nguồn lệch thì vẫn lệch."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Dịch vụ tóm tắt hồ sơ nhận trung bình 6 request/giây, mỗi request mất 5 giây từ lúc nhận đến lúc xong. Mỗi replica xử lý đồng thời tối đa 4 request. Cần tối thiểu bao nhiêu replica?",
+   "options": [
+    {
+     "key": "A",
+     "text": "2"
+    },
+    {
+     "key": "B",
+     "text": "30"
+    },
+    {
+     "key": "C",
+     "text": "8"
+    },
+    {
+     "key": "D",
+     "text": "7"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Định luật Little: số request đồng thời = 6 × 5 = 30. 30/4 = 7,5 → làm tròn **lên** 8.",
+   "dang": "C-van-hanh-dinh-luong",
+   "trap": "Làm tròn xuống 7 sẽ thiếu năng lực; 6/4 ≈ 2 là quên thời gian xử lý."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Sau 1 tháng ra mắt copilot ghi chép cho bác sĩ, dashboard cho thấy 90% bác sĩ mở tính năng mỗi ngày. Lãnh đạo muốn kết luận 'copilot giúp giảm thời gian ghi chép'. Cần thêm gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "So sánh với nhóm đối chứng (hoặc triển khai so le) về thời gian ghi chép và tỉ lệ lỗi hồ sơ"
+    },
+    {
+     "key": "B",
+     "text": "Không cần thêm, 90% là đủ chứng minh"
+    },
+    {
+     "key": "C",
+     "text": "Khảo sát mức hài lòng là đủ"
+    },
+    {
+     "key": "D",
+     "text": "Tăng tỉ lệ sử dụng lên 100% rồi kết luận"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Mức sử dụng không phải là tác động. Cần so sánh có đối chứng trên chỉ số kết quả.",
+   "dang": "C-san-pham",
+   "trap": "Chỉ số 'adoption' rất hay bị đánh tráo thành 'hiệu quả'."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "c-pm",
+   "points": 1.25,
+   "prompt": "Bệnh nhân hỏi: 'Theo mô hình, tôi cần làm gì để giảm nguy cơ tái nhập viện?' Kiểu giải thích nào phù hợp nhất?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Nói 'tuổi của bạn là yếu tố lớn nhất'"
+    },
+    {
+     "key": "B",
+     "text": "Đưa trọng số của mô hình"
+    },
+    {
+     "key": "C",
+     "text": "Đưa toàn bộ bảng SHAP của mọi đặc trưng"
+    },
+    {
+     "key": "D",
+     "text": "Giải thích phản thực trên các yếu tố **thay đổi được** (tuân thủ thuốc, tái khám đúng hẹn), không dùng tuổi hay giới tính"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Giải thích cho người nhận là bệnh nhân cần hành động được; yếu tố không đổi được không giúp gì.",
+   "dang": "C-giai-thich",
+   "trap": "Giải thích 'đúng kỹ thuật' (SHAP) chưa chắc là giải thích **phù hợp người nhận**."
+  },
+  {
+   "module": "C",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "c-ops",
+   "points": 1.25,
+   "prompt": "Thanh tra yêu cầu tái lập dự đoán của mô hình 6 tháng trước cho một bệnh nhân, nhưng bảng dữ liệu đặc trưng đã bị ghi đè hằng ngày. Thiếu điều gì trong quy trình?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Dùng Docker image mới nhất"
+    },
+    {
+     "key": "B",
+     "text": "Lưu thêm file trọng số mới nhất"
+    },
+    {
+     "key": "C",
+     "text": "Version hoá dữ liệu/đặc trưng (snapshot, DVC hoặc time-travel) và log phiên bản model, code, đặc trưng cho mỗi dự đoán"
+    },
+    {
+     "key": "D",
+     "text": "Đặt seed cố định khi huấn luyện"
+    }
+   ],
+   "answer": "C",
+   "explanation": "Tái lập cần cả dữ liệu tại thời điểm đó, không chỉ model.",
+   "dang": "C-tai-lap",
+   "trap": "Seed và Docker đều cần, nhưng không thay được dữ liệu đã mất."
+  },
+  {
+   "module": "C",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 9.5,
+   "prompt": "Bệnh viện muốn AI giúp bác sĩ đọc nhanh hồ sơ bệnh án dài (trung bình 90.000 token/bệnh nhân) để nắm **tiền sử dị ứng và thuốc đang dùng** trước khi kê đơn. Dữ liệu không được rời khỏi hạ tầng của bệnh viện. Đề xuất giải pháp: kiến trúc, cách đảm bảo không bỏ sót, cách đánh giá (có ngưỡng), vai trò bác sĩ, triển khai và giám sát.",
+   "modelAnswer": "Kiến trúc: model tự host trong bệnh viện; không nhét cả 90.000 token (dễ sót thông tin ở giữa) mà truy xuất các đoạn liên quan dị ứng/thuốc (RAG) hoặc map-reduce theo từng phần hồ sơ; trích xuất có cấu trúc (thuốc, dị ứng, ngày, nguồn).\nKhông bỏ sót: kết hợp quy tắc/từ khoá cho mục dị ứng với LLM; mỗi mục kèm trích dẫn tới vị trí trong hồ sơ; khi không chắc thì ghi 'cần kiểm tra'.\nĐánh giá: 300 hồ sơ có dược sĩ gán nhãn; recall dị ứng ≥ 98%, precision ≥ 90%, 100% mục có trích dẫn đúng; đánh giá theo khoa và theo độ dài hồ sơ.\nBác sĩ: là người quyết định, xem nguồn trích dẫn; giao diện ghi rõ AI hỗ trợ.\nTriển khai: shadow so với dược sĩ → pilot một khoa → mở rộng; đo thời gian đọc hồ sơ và sai sót kê đơn so với nhóm đối chứng.\nGiám sát: tỉ lệ bác sĩ sửa kết quả, báo cáo sự cố, drift theo khoa mới; quy trình rollback.",
+   "rubric": [
+    "Giữ dữ liệu trong hạ tầng (tự host) và lý do",
+    "Không đưa nguyên văn bản dài mà truy xuất/map-reduce, trích xuất có cấu trúc",
+    "Cơ chế chống bỏ sót: trích dẫn nguồn, đánh dấu không chắc chắn",
+    "Đánh giá offline có ngưỡng recall dị ứng rất cao, có người gán nhãn chuyên môn",
+    "Bác sĩ là người quyết định, minh bạch về AI",
+    "Triển khai theo giai đoạn và giám sát có điều kiện dừng"
+   ],
+   "dang": "E-thiet-ke",
+   "trap": "Cửa sổ ngữ cảnh 128k 'vừa đủ' là mồi nhử: nhồi cả hồ sơ dễ làm model bỏ sót thông tin nằm giữa văn bản."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "nhan-biet",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Quy định: 'Nếu bệnh nhân sốt trên 39°C thì được chỉ định xét nghiệm máu.' Biết bệnh nhân Minh **không** được chỉ định xét nghiệm máu. Kết luận nào đúng (giả sử quy định luôn được tuân thủ)?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Không kết luận được"
+    },
+    {
+     "key": "B",
+     "text": "Minh không sốt"
+    },
+    {
+     "key": "C",
+     "text": "Minh không sốt trên 39°C"
+    },
+    {
+     "key": "D",
+     "text": "Minh sốt trên 39°C"
+    }
+   ],
+   "answer": "C",
+   "explanation": "p → q tương đương ¬q → ¬p: không xét nghiệm → không sốt trên 39°C.",
+   "dang": "D-keo-theo",
+   "trap": "'Minh không sốt' là kết luận **quá mạnh**: Minh có thể sốt 38,5°C."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Trong code: `if not (tuoi >= 60 and co_bhyt): thu_phi_day_du()`. Điều kiện nào tương đương với `not (tuoi >= 60 and co_bhyt)`?",
+   "options": [
+    {
+     "key": "A",
+     "text": "`tuoi <= 60 or not co_bhyt`"
+    },
+    {
+     "key": "B",
+     "text": "`tuoi < 60 and not co_bhyt`"
+    },
+    {
+     "key": "C",
+     "text": "`not tuoi >= 60 and co_bhyt`"
+    },
+    {
+     "key": "D",
+     "text": "`tuoi < 60 or not co_bhyt`"
+    }
+   ],
+   "answer": "D",
+   "explanation": "De Morgan: ¬(A ∧ B) = ¬A ∨ ¬B; ¬(tuoi ≥ 60) = tuoi < 60.",
+   "dang": "D-phu-dinh",
+   "trap": "Hai bẫy cùng lúc: đổi 'and' thành 'or', và phủ định của ≥ là < (không phải ≤)."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Một trong ba điều dưỡng A, B, C quên ghi sổ giao ca. Biết **chỉ đúng một người nói dối**. A: 'B quên.' B: 'C quên.' C: 'B nói sai.' Ai quên ghi sổ?",
+   "options": [
+    {
+     "key": "A",
+     "text": "B"
+    },
+    {
+     "key": "B",
+     "text": "C"
+    },
+    {
+     "key": "C",
+     "text": "A"
+    },
+    {
+     "key": "D",
+     "text": "Không xác định được"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Giả sử A quên: A sai, B sai → 2 người nói dối ✗. B quên: A đúng, B sai, C đúng → 1 người nói dối ✓. C quên: A sai, B đúng, C sai → 2 ✗.",
+   "dang": "D-suy-luan",
+   "trap": "Thử lần lượt từng giả thiết và **đếm** số câu sai; đừng đoán theo cảm giác."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-logic",
+   "points": 1.5,
+   "prompt": "Nghiên cứu quan sát: bệnh nhân **tự uống** vitamin D có tỉ lệ biến chứng thấp hơn hẳn. Người tự uống vitamin D thường trẻ và khoẻ hơn. Kết luận nào hợp lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chưa thể kết luận vitamin D gây giảm biến chứng vì có biến gây nhiễu; cần thử nghiệm ngẫu nhiên"
+    },
+    {
+     "key": "B",
+     "text": "Vitamin D chắc chắn làm giảm biến chứng"
+    },
+    {
+     "key": "C",
+     "text": "Nên bắt buộc mọi bệnh nhân uống vitamin D"
+    },
+    {
+     "key": "D",
+     "text": "Vitamin D không có tác dụng"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Tuổi và thể trạng ảnh hưởng cả việc uống vitamin D lẫn biến chứng → tương quan không phải nhân quả.",
+   "dang": "D-nguy-bien",
+   "trap": "'Không có tác dụng' cũng là kết luận vượt dữ liệu, chỉ theo chiều ngược lại."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Bảng dữ liệu chia sẻ cho đối tác (đã bỏ tên) gom theo (nhóm tuổi, giới tính, quận) có các nhóm kích thước 5, 3, 2 và 1. Đánh giá và cách xử lý?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Chỉ đạt k = 1: bản ghi đơn lẻ có thể bị định danh; cần gộp nhóm (khái quát hoá tuổi, quận) hoặc loại bản ghi hiếm"
+    },
+    {
+     "key": "B",
+     "text": "Đạt k = 5, an toàn để chia sẻ"
+    },
+    {
+     "key": "C",
+     "text": "Đạt k = 11 vì tổng 11 bản ghi"
+    },
+    {
+     "key": "D",
+     "text": "Bỏ tên là đủ ẩn danh"
+    }
+   ],
+   "answer": "A",
+   "explanation": "k-anonymity = kích thước nhóm **nhỏ nhất**. Nhóm 1 người kết hợp thông tin bên ngoài là lộ danh tính.",
+   "dang": "D-rieng-tu",
+   "trap": "Lấy nhóm lớn nhất hoặc tổng số bản ghi là sai định nghĩa."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Mô hình chọn bệnh nhân vào chương trình chăm sóc đặc biệt: nhóm có bảo hiểm A được chọn 80/200, nhóm bảo hiểm B được chọn 30/100. Theo quy tắc 4/5, kết luận đúng?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Tỉ lệ 30% / 40% = 0,75 < 0,8: có dấu hiệu tác động bất lợi với nhóm B, cần điều tra"
+    },
+    {
+     "key": "B",
+     "text": "Đạt vì nhóm B có 30 người được chọn"
+    },
+    {
+     "key": "C",
+     "text": "0,75 > 0,5 nên công bằng"
+    },
+    {
+     "key": "D",
+     "text": "Không đánh giá được vì hai nhóm khác cỡ"
+    }
+   ],
+   "answer": "A",
+   "explanation": "Tỉ lệ chọn: 80/200 = 40%, 30/100 = 30%. Tỉ lệ tác động = 0,3/0,4 = 0,75.",
+   "dang": "D-cong-bang",
+   "trap": "So **tỉ lệ**, không so số người; tỉ lệ nhóm thấp chia nhóm cao."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "thong-hieu",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Log 3 tháng: bác sĩ chấp nhận 99% gợi ý chẩn đoán của AI, thời gian xem mỗi ca trung bình 4 giây. Nhận định và biện pháp phù hợp?",
+   "options": [
+    {
+     "key": "A",
+     "text": "AI rất tốt nên có thể bỏ bước bác sĩ duyệt"
+    },
+    {
+     "key": "B",
+     "text": "Giảm số ca cần duyệt để bác sĩ đỡ mệt"
+    },
+    {
+     "key": "C",
+     "text": "Bác sĩ làm việc hiệu quả, không cần thay đổi"
+    },
+    {
+     "key": "D",
+     "text": "Dấu hiệu thiên lệch tự động hoá: hiển thị bằng chứng/độ không chắc chắn, kiểm tra ngẫu nhiên, theo dõi tỉ lệ bác bỏ"
+    }
+   ],
+   "answer": "D",
+   "explanation": "Duyệt quá nhanh và gần như luôn đồng ý cho thấy bước duyệt chỉ còn hình thức.",
+   "dang": "D-minh-bach",
+   "trap": "99% đồng ý dễ bị hiểu là 'AI chính xác' — đề cho thêm '4 giây' để gợi ý vấn đề."
+  },
+  {
+   "module": "D",
+   "type": "mcq",
+   "level": "van-dung",
+   "section": "d-eth",
+   "points": 1.5,
+   "prompt": "Bệnh viện ở EU mua phần mềm AI hỗ trợ chẩn đoán (hệ thống rủi ro cao) từ nhà cung cấp và dùng nguyên trạng. Bệnh viện (bên triển khai) có nghĩa vụ gì?",
+   "options": [
+    {
+     "key": "A",
+     "text": "Dùng đúng hướng dẫn, giao người có năng lực giám sát, lưu nhật ký, báo sự cố nghiêm trọng và thông báo cho người bị ảnh hưởng khi phù hợp"
+    },
+    {
+     "key": "B",
+     "text": "Phải tự làm lại đánh giá sự phù hợp thay nhà cung cấp"
+    },
+    {
+     "key": "C",
+     "text": "Chỉ cần dán nhãn 'có dùng AI' trên website"
+    },
+    {
+     "key": "D",
+     "text": "Không có nghĩa vụ gì vì chỉ là bên mua"
+    }
+   ],
+   "answer": "A",
+   "explanation": "EU AI Act chia nghĩa vụ: nhà cung cấp lo đánh giá sự phù hợp; bên triển khai lo sử dụng, giám sát, lưu log, báo cáo.",
+   "dang": "D-ai-act",
+   "trap": "Hai phương án sai nằm ở hai cực: 'không phải làm gì' và 'làm thay nhà cung cấp'."
+  },
+  {
+   "module": "D",
+   "type": "essay",
+   "level": "van-dung-cao",
+   "section": "tu-luan",
+   "points": 6,
+   "prompt": "Chatbot RAG cho bệnh nhân của một bệnh viện ở Việt Nam (có cả bệnh nhân là công dân EU) bị phát hiện trả lời **kèm kết quả xét nghiệm của bệnh nhân khác** do lỗi cấu hình: chỉ mục không lọc theo mã bệnh nhân. Lỗi tồn tại 5 ngày. Bạn là kỹ sư phụ trách, trình bày các bước xử lý.",
+   "modelAnswer": "Ngăn chặn: tắt tính năng hoặc chặn truy xuất dữ liệu cá nhân ngay; giữ log làm bằng chứng.\nĐánh giá: xác định phạm vi (bao nhiêu phiên, bệnh nhân nào bị lộ, dữ liệu gì) từ log.\nBáo cáo: báo ngay cấp có thẩm quyền và bộ phận bảo vệ dữ liệu; thông báo cơ quan quản lý theo luật (Luật Bảo vệ dữ liệu cá nhân; với người ở EU, GDPR yêu cầu báo cơ quan giám sát trong 72 giờ); thông báo bệnh nhân bị ảnh hưởng.\nKhắc phục: lọc theo mã bệnh nhân ở tầng truy xuất (không dựa vào prompt), tách chỉ mục hoặc ACL, kiểm thử tự động chống rò rỉ chéo, review cấu hình.\nPhòng ngừa: kiểm thử bảo mật trước ra mắt, giám sát, rút kinh nghiệm không đổ lỗi cá nhân.",
+   "rubric": [
+    "Ngăn chặn ngay và lưu bằng chứng",
+    "Xác định phạm vi ảnh hưởng từ log",
+    "Báo cấp trên/bộ phận dữ liệu và cơ quan quản lý (nêu được mốc 72 giờ của GDPR)",
+    "Thông báo người bị ảnh hưởng",
+    "Sửa gốc ở tầng truy xuất và có kiểm thử chống tái diễn"
+   ],
+   "dang": "E-dao-duc",
+   "trap": "Đề nhắc 'công dân EU' để kiểm tra bạn có nhớ nghĩa vụ báo cáo 72 giờ; sửa bằng prompt là sửa sai chỗ."
+  }
+ ]
+}
